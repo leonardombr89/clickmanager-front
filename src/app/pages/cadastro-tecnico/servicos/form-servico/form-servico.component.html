@@ -1,0 +1,35 @@
+<mat-card class="cardWithShadow">
+  <div class="p-24">
+    <mat-card-title class="m-b-0">
+      {{ isEditMode ? 'Editar Serviço' : 'Novo Serviço' }}
+    </mat-card-title>
+  </div>
+
+  <mat-card-content>
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+
+      <app-input-texto-restrito [control]="nomeControl" label="Nome" placeholder="Digite o nome do serviço" />
+
+      <app-input-textarea [control]="descricaoControl" label="Descrição"
+        placeholder="Digite uma descrição do serviço" />
+
+      <app-preco-selector *ngIf="precoControl" [formGroup]="precoControl"
+        [tiposDisponiveis]="['FIXO']"></app-preco-selector>
+
+      <div class="m-t-16 m-b-16" *ngIf="isEditMode">
+        <mat-slide-toggle formControlName="ativo">
+          {{ form.get('ativo')?.value ? 'Serviço Ativo' : 'Serviço Inativo' }}
+        </mat-slide-toggle>
+      </div>
+
+      <!-- Botão de envio -->
+      <div class="m-t-24">
+        <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid">
+          {{ isEditMode ? 'Atualizar' : 'Salvar' }}
+        </button>
+      </div>
+
+    </form>
+    
+  </mat-card-content>
+</mat-card>

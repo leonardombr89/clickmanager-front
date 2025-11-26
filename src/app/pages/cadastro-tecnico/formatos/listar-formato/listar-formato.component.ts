@@ -1,0 +1,120 @@
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { Formato } from 'src/app/models/formato.model';
+import { MatCardModule } from '@angular/material/card';
+import { MatTableModule } from '@angular/material/table';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { CommonModule } from '@angular/common';
+import { MatPaginator, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { MatIconModule } from '@angular/material/icon';
+import { Router, RouterModule } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
+import { ConfirmDialogComponent } from 'src/app/components/dialog/confirm-dialog/confirm-dialog.component';
+import { ToastrService } from 'ngx-toastr';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatButtonModule } from '@angular/material/button';
+import { TablerIconsModule } from 'angular-tabler-icons';
+import { FormatoService } from '../../services/formato.service';
+import { TemPermissaoDirective } from 'src/app/diretivas/tem-permissao.directive';
+
+@Component({
+  selector: 'app-listar-formato',
+  standalone: true,
+  imports: [
+    CommonModule,
+    MatCardModule,
+    MatPaginatorModule,
+    MatTableModule,
+    MatProgressSpinnerModule,
+    MatIconModule,
+    MatChipsModule,
+    MatButtonModule,
+    TablerIconsModule,
+    RouterModule,
+    TemPermissaoDirective
+  ],
+  templateUrl: './listar-formato.component.html',
+  styleUrl: './listar-formato.component.scss'
+})
+export class ListarFormatoComponent implements OnInit {
+  formatos: Formato[] = [];
+  totalFormatos = 0;
+  carregando = false;
+  pagina = 0;
+  tamanhoPagina = 10;
+  filtroStatus: boolean | null = true;
+  colunasExibidas = ['nome', 'tamanho', 'areaUtil', 'status', 'acoes'];
+
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+
+  constructor(
+    private formatoService: FormatoService,
+    private router: Router,
+    private dialog: MatDialog,
+    private toastrService: ToastrService
+  ) {}
+
+  ngOnInit(): void {
+    this.carregarFormatos();
+  }
+
+  carregarFormatos(): void {
+    this.carregando = true;
+    this.formatoService.listar(this.pagina, this.tamanhoPagina, this.filtroStatus).subscribe({
+      next: (res) => {
+        this.formatos = res.content || [];
+        this.totalFormatos = res.totalElements;
+        this.carregando = false;
+      },
+      error: () => {
+        this.carregando = false;
+        this.toastrService.error('Erro ao carregar formatos.');
+      }
+    });
+  }
+
+  onPaginaAlterada(event: PageEvent): void {
+    this.pagina = event.pageIndex;
+    this.tamanhoPagina = event.pageSize;
+    this.carregarFormatos();
+  }
+
+  editar(formato: Formato): void {
+    this.router.navigate(['page/cadastro-tecnico/formatos/editar', formato.id]);
+  }
+
+  excluir(formato: Formato): void {
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: 'Excluir Formato',
+        message: `Tem certeza que deseja excluir o formato "${formato.nome}"?`,
+        confirmText: 'Excluir',
+        confirmColor: 'warn'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.formatoService.excluir(formato.id!).subscribe({
+          next: () => {
+            this.toastrService.success('Formato excluído com sucesso!');
+            this.carregarFormatos();
+          },
+          error: () => {
+            this.toastrService.error('Erro ao excluir o formato.');
+          }
+        });
+      }
+    });
+  }
+
+  aplicarFiltro(status: boolean): void {
+    this.filtroStatus = status;
+    this.carregarFormatos();
+  }
+
+  removerFiltro(): void {
+    this.filtroStatus = null;
+    this.carregarFormatos();
+  }
+}

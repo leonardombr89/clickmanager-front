@@ -1,0 +1,161 @@
+<div class="print-container"
+     [ngClass]="{ 'duas-vias': isDuasVias, 'pedido-completo': !isDuasVias }"
+     *ngIf="pedido as p">
+
+  <!-- Pedido Completo (uma única via) -->
+  <div *ngIf="!isDuasVias" class="pedido-via">
+    <h2 class="f-s-20 f-w-600 text-center m-b-24">
+      Pedido Completo - #{{ displayNumero(p) }}
+    </h2>
+
+    <div class="row m-b-16">
+      <div class="col-md-6">
+        <p><strong>Status:</strong> {{ p.status }}</p>
+        <p><strong>Data:</strong> {{ p.dataCriacao | date:'short' }}</p>
+      </div>
+      <div class="col-md-6 text-right">
+        <p><strong>Cliente:</strong> {{ p.cliente?.nome || '—' }}</p>
+        <p><strong>Responsável:</strong> {{ p.responsavel?.nome || '—' }}</p>
+      </div>
+    </div>
+
+    <hr>
+
+    <h4 class="f-s-16 f-w-600">Itens</h4>
+    <table class="table table-bordered w-100 f-s-14">
+      <thead>
+        <tr>
+          <th>Descrição</th>
+          <th>Qtd</th>
+          <th>Valor</th>
+          <th>Subtotal</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of (p.itens || []); trackBy: trackByItem">
+          <td>{{ item?.descricao || 'Item' }}</td>
+          <td>{{ item?.quantidade ?? 0 }}</td>
+          <td>{{ (item?.valor ?? 0) | currency:'BRL':'symbol':'1.2-2' }}</td>
+          <td>{{ (item?.subTotal ?? 0) | currency:'BRL':'symbol':'1.2-2' }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="text-right m-t-16">
+      <p><strong>Subtotal:</strong> {{ (p.subTotal ?? 0) | currency:'BRL':'symbol':'1.2-2' }}</p>
+      <p><strong>Frete:</strong> {{ (p.frete ?? 0)   | currency:'BRL':'symbol':'1.2-2' }}</p>
+      <p><strong>Acréscimo:</strong> {{ (p.acrescimo ?? 0) | currency:'BRL':'symbol':'1.2-2' }}</p>
+      <p><strong>Desconto:</strong> {{ (p.desconto ?? 0) | currency:'BRL':'symbol':'1.2-2' }}</p>
+      <h3><strong>Total:</strong> {{ (p.total ?? 0) | currency:'BRL':'symbol':'1.2-2' }}</h3>
+    </div>
+  </div>
+
+  <!-- Pedido em Duas Vias -->
+  <ng-container *ngIf="isDuasVias">
+    <!-- Via do Cliente -->
+    <div class="pedido-via">
+      <h2 class="f-s-20 f-w-600 text-center m-b-24">
+        Via do Cliente - #{{ displayNumero(p) }}
+      </h2>
+
+      <div class="row m-b-16">
+        <div class="col-md-6">
+          <p><strong>Status:</strong> {{ p.status }}</p>
+          <p><strong>Data:</strong> {{ p.dataCriacao | date:'short' }}</p>
+        </div>
+        <div class="col-md-6 text-right">
+          <p><strong>Cliente:</strong> {{ p.cliente?.nome || '—' }}</p>
+          <p><strong>Responsável:</strong> {{ p.responsavel?.nome || '—' }}</p>
+        </div>
+      </div>
+
+      <hr>
+
+      <h4 class="f-s-16 f-w-600">Itens</h4>
+      <table class="table table-bordered w-100 f-s-14">
+        <thead>
+          <tr>
+            <th>Descrição</th>
+            <th>Qtd</th>
+            <th>Valor</th>
+            <th>Subtotal</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of (p.itens || []); trackBy: trackByItem">
+            <td>{{ item?.descricao || 'Item' }}</td>
+            <td>{{ item?.quantidade ?? 0 }}</td>
+            <td>{{ (item?.valor ?? 0) | currency:'BRL':'symbol':'1.2-2' }}</td>
+            <td>{{ (item?.subTotal ?? 0) | currency:'BRL':'symbol':'1.2-2' }}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="text-right m-t-16">
+        <p><strong>Subtotal:</strong> {{ (p.subTotal ?? 0) | currency:'BRL':'symbol':'1.2-2' }}</p>
+        <p><strong>Frete:</strong> {{ (p.frete ?? 0)   | currency:'BRL':'symbol':'1.2-2' }}</p>
+        <p><strong>Acréscimo:</strong> {{ (p.acrescimo ?? 0) | currency:'BRL':'symbol':'1.2-2' }}</p>
+        <p><strong>Desconto:</strong> {{ (p.desconto ?? 0) | currency:'BRL':'symbol':'1.2-2' }}</p>
+        <h3><strong>Total:</strong> {{ (p.total ?? 0) | currency:'BRL':'symbol':'1.2-2' }}</h3>
+      </div>
+    </div>
+
+    <!-- Via da Loja -->
+    <div class="pedido-via">
+      <h2 class="f-s-20 f-w-600 text-center m-b-24">
+        Via da Loja - #{{ displayNumero(p) }}
+      </h2>
+
+      <div class="row m-b-16">
+        <div class="col-md-6">
+          <p><strong>Status:</strong> {{ p.status }}</p>
+          <p><strong>Data:</strong> {{ p.dataCriacao | date:'short' }}</p>
+        </div>
+        <div class="col-md-6 text-right">
+          <p><strong>Cliente:</strong> {{ p.cliente?.nome || '—' }}</p>
+          <p><strong>Responsável:</strong> {{ p.responsavel?.nome || '—' }}</p>
+        </div>
+      </div>
+
+      <hr>
+
+      <h4 class="f-s-16 f-w-600">Itens</h4>
+      <table class="table table-bordered w-100 f-s-14">
+        <thead>
+          <tr>
+            <th>Descrição</th>
+            <th>Qtd</th>
+            <th>Valor</th>
+            <th>Subtotal</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of (p.itens || []); trackBy: trackByItem">
+            <td>{{ item?.descricao || 'Item' }}</td>
+            <td>{{ item?.quantidade ?? 0 }}</td>
+            <td>{{ (item?.valor ?? 0) | currency:'BRL':'symbol':'1.2-2' }}</td>
+            <td>{{ (item?.subTotal ?? 0) | currency:'BRL':'symbol':'1.2-2' }}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="text-right m-t-16">
+        <p><strong>Subtotal:</strong> {{ (p.subTotal ?? 0) | currency:'BRL':'symbol':'1.2-2' }}</p>
+        <p><strong>Frete:</strong> {{ (p.frete ?? 0)   | currency:'BRL':'symbol':'1.2-2' }}</p>
+        <p><strong>Acréscimo:</strong> {{ (p.acrescimo ?? 0) | currency:'BRL':'symbol':'1.2-2' }}</p>
+        <p><strong>Desconto:</strong> {{ (p.desconto ?? 0) | currency:'BRL':'symbol':'1.2-2' }}</p>
+        <h3><strong>Total:</strong> {{ (p.total ?? 0) | currency:'BRL':'symbol':'1.2-2' }}</h3>
+      </div>
+    </div>
+  </ng-container>
+</div>
+
+<!-- Botão fora da área de impressão -->
+<div class="text-center m-t-24 no-print">
+  <button mat-stroked-button (click)="onPrint()">Imprimir</button>
+</div>
+
+<!-- Loading simples (opcional) -->
+<div *ngIf="!pedido" class="text-center m-t-24">
+  Carregando...
+</div>

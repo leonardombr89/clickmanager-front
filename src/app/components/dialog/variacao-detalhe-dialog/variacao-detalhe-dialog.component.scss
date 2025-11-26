@@ -1,0 +1,149 @@
+.head {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+}
+
+.content {
+    max-width: 840px;
+}
+
+.sep {
+    margin: 12px 0;
+}
+
+.summary {
+    display: grid;
+    gap: 12px;
+}
+
+.summary.three {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.summary .kv {
+    display: flex;
+    flex-direction: column;
+    /* label em cima, valor embaixo */
+    gap: 4px;
+    min-width: 0;
+    /* permite quebra correta dentro do grid */
+}
+
+.summary .k {
+    font-weight: 600;
+    font-size: .78rem;
+    color: #6b7280;
+    /* cinza discreto */
+    text-transform: uppercase;
+    letter-spacing: .02em;
+}
+
+.summary .v {
+    font-weight: 500;
+    word-break: break-word;
+    /* valores longos quebram certinho */
+    overflow-wrap: anywhere;
+    /* evita “grudar” no próximo bloco */
+}
+
+@media (max-width: 720px) {
+    .summary.three {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+@media (max-width: 720px) {
+    .summary {
+        grid-template-columns: 1fr;
+    }
+}
+
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    font-weight: 700;
+    font-size: 1rem;
+    margin: 4px 0 8px 0;
+}
+
+.list {
+    border: 1px solid #eee;
+    border-radius: 8px;
+}
+
+.row-line {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 12px;
+    border-bottom: 1px solid #eee;
+
+    &:last-child {
+        border-bottom: 0;
+    }
+
+    .left .title {
+        font-weight: 600;
+    }
+
+    .left .desc {
+        opacity: .8;
+        font-size: .9rem;
+    }
+
+    .right {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        white-space: nowrap;
+    }
+}
+
+.chip {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 999px;
+    border: 1px solid #e0e0e0;
+    font-size: .85rem;
+    background: #fafafa;
+}
+
+.kv-table {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 16px;
+}
+
+.kv-table .kv {
+    display: contents;
+}
+
+.kv-table .k {
+    font-weight: 600;
+}
+
+.kv-table .v {
+    text-align: right;
+}
+
+@media (max-width: 720px) {
+    .kv-table {
+        grid-template-columns: 1fr;
+    }
+
+    .kv-table .v {
+        text-align: left;
+    }
+}
+
+.policy {
+    font-weight: 500;
+}
+
+.m-t-16 {
+    margin-top: 16px;
+}

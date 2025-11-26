@@ -1,0 +1,52 @@
+.etiquetas-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1cm;
+  justify-content: center;
+  padding: 1cm;
+  color: #000;
+}
+
+.etiqueta {
+  width: 9cm;
+  height: 9cm;
+  border: 1px solid #333;
+  padding: 0.5cm;
+  box-sizing: border-box;
+  font-size: 14px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  page-break-inside: avoid;
+}
+
+.no-print {
+  display: block;
+  margin-top: 20px;
+  text-align: center;
+}
+
+@media print {
+  @page {
+    size: auto;
+    margin: 0;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .etiquetas-container {
+    gap: 0.5cm;
+    padding: 1cm;
+  }
+
+  .etiqueta {
+    page-break-inside: avoid;
+  }
+}

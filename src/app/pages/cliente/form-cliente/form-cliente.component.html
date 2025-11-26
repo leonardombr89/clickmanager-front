@@ -1,0 +1,47 @@
+<mat-card class="cardWithShadow">
+    <div class="p-24">
+        <mat-card-title class="m-b-0">
+            {{ isEditMode ? 'Editar Cliente' : 'Novo Cliente' }}
+        </mat-card-title>
+    </div>
+
+    <mat-card-content>
+        <form [formGroup]="form" (ngSubmit)="onSubmit()">
+
+            <!-- Dados Pessoais -->
+            <mat-card class="cardWithShadow m-b-16">
+                <mat-card-content>
+                    <mat-card-title>Dados Pessoais</mat-card-title>
+                    <div class="row g-3 m-t-32">
+                        <div class="col-md-6">
+                            <app-input-texto-restrito [control]="nomeControl" label="Nome"
+                                placeholder="Digite o nome do cliente" />
+                        </div>
+                        <div class="col-md-6">
+                            <app-input-email [control]="emailControl" label="E-mail" placeholder="Digite o e-mail" />
+                        </div>
+                        <div class="col-md-6">
+                            <app-input-telefone [control]="telefoneControl" label="Telefone"
+                                placeholder="Digite o telefone do cliente" />
+                        </div>
+                        <div class="col-md-6">
+                            <app-input-documento [control]="documentoControl" label="CPF ou CNPJ"
+                                placeholder="Digite o CPF ou CNPJ">
+                            </app-input-documento>
+                        </div>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+
+            <!-- Endereço -->
+            <app-endereco-form (formReady)="setEnderecoGroup($event)"></app-endereco-form>
+
+            <!-- Botão de envio -->
+            <div class="m-t-24">
+                <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid">
+                    {{ isEditMode ? 'Atualizar' : 'Salvar' }}
+                </button>
+            </div>
+        </form>
+    </mat-card-content>
+</mat-card>

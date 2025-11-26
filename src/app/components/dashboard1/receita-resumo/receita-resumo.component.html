@@ -1,0 +1,43 @@
+<mat-card class="cardWithShadow">
+  <mat-card-header>
+    <div class="d-flex align-items-center justify-content-between w-100">
+      <div>
+        <mat-card-title>Receita</mat-card-title>
+        <mat-card-subtitle>{{ selectedRangeLabel }}</mat-card-subtitle>
+      </div>
+
+      <div class="text-right">
+        <mat-card-title>{{ formatBRL(totalValor) }}</mat-card-title>
+        <span class="f-s-12">{{ totalPedidos }} pedidos</span>
+      </div>
+    </div>
+  </mat-card-header>
+
+  <mat-card-content class="p-t-8">
+    <div class="m-b-12" style="min-width:260px">
+      <mat-form-field appearance="outline" class="w-100">
+        <mat-label>Período</mat-label>
+        <mat-select [value]="selectedRange" (selectionChange)="selectedRange = $event.value; onRangeChange()">
+          <mat-option *ngFor="let r of ranges" [value]="r.id">
+            {{ r.label }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <div class="rounded-bars">
+      <apx-chart #chart [series]="chartData.series" [chart]="chartData.chart" [plotOptions]="chartData.plotOptions"
+        [legend]="chartData.legend" [stroke]="chartData.stroke" [tooltip]="chartData.tooltip"
+        [labels]="chartData.labels" [colors]="chartData.colors"></apx-chart>
+    </div>
+
+    <div class="grid grid-cols-2 md:grid-cols-3 gap-8 m-t-12">
+      <div *ngFor="let label of chartData.labels; let i = index" class="d-flex align-items-center gap-8">
+        <span class="inline-block rounded-full" [style.background]="chartData.colors[i]"
+          style="width:10px;height:10px"></span>
+        <span class="f-s-14">{{ label }}</span>
+        <span class="f-s-14 f-w-600 m-l-auto">{{ formatBRL(chartData.series[i] || 0) }}</span>
+      </div>
+    </div>
+  </mat-card-content>
+</mat-card>

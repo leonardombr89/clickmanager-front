@@ -1,0 +1,32 @@
+<h2 mat-dialog-title>Perfil</h2>
+
+<mat-dialog-content>
+    <form [formGroup]="form">
+        <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Nome do Perfil</mat-label>
+            <input matInput formControlName="nome" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Descrição</mat-label>
+            <input matInput formControlName="descricao" />
+        </mat-form-field>
+
+        <div formGroupName="permissoes">
+            <fieldset *ngFor="let grupo of grupos | keyvalue" class="permissao-fieldset">
+                <legend>{{ grupo.key }}</legend>
+                <div *ngFor="let permissao of grupo.value" class="m-b-8">
+                    <mat-slide-toggle [formControlName]="permissao.chave" color="primary">
+                        {{ permissao.titulo }}
+                    </mat-slide-toggle>
+                </div>
+            </fieldset>
+        </div>
+
+    </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+    <button mat-button (click)="cancelar()">Cancelar</button>
+    <button mat-flat-button color="primary" (click)="salvar()">Salvar</button>
+</mat-dialog-actions>

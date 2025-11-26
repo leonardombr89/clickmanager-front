@@ -1,0 +1,68 @@
+.print-container {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 2rem;
+    color: #000;
+}
+
+.pedido-via {
+    width: calc(50% - 1cm);
+    font-size: 13px;
+}
+
+@media print {
+    .print-container {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        padding: 1cm;
+        gap: 1cm;
+        max-width: 100%;
+    }
+
+    .pedido-via {
+        width: calc(50% - 1cm);
+        font-size: 13px;
+    }
+
+    .print-container h2 {
+        font-size: 18px;
+        text-align: center;
+    }
+
+    .print-container table {
+        font-size: 12px;
+    }
+
+    .no-print {
+        display: none !important;
+    }
+}
+
+.print-container.pedido-completo {
+    flex-direction: column;
+    max-width: 800px;
+    gap: 0;
+}
+
+.print-container.pedido-completo .pedido-via {
+    width: 100%;
+    margin-bottom: 2rem;
+}
+
+@media print {
+    .print-container.pedido-completo {
+        flex-direction: column;
+        padding: 1cm;
+        max-width: 100%;
+    }
+
+    .print-container.pedido-completo .pedido-via {
+        width: 100%;
+        page-break-inside: avoid;
+    }
+}

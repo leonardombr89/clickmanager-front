@@ -1,0 +1,232 @@
+<mat-card class="cardWithShadow">
+  <mat-tab-group mat-stretch-tabs="false" animationDuration="0ms">
+
+    <!-- Aba Conta -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <div class="d-flex align-items-center">
+          <mat-icon class="d-flex align-items-center">
+            <i-tabler name="user-circle" class="icon-20 m-r-8 d-flex"></i-tabler>
+          </mat-icon>
+        </div>
+        Conta
+      </ng-template>
+
+      <form [formGroup]="form" (ngSubmit)="salvar()">
+        <mat-card-content class="p-y-24">
+          <div class="row">
+            <div class="col-sm-6">
+              <mat-card class="cardWithShadow">
+                <mat-card-content class="p-y-24">
+                  <mat-card-title>Alterar Foto de Perfil</mat-card-title>
+                  <mat-card-subtitle class="f-s-14">
+                    Altere sua foto de perfil aqui
+                  </mat-card-subtitle>
+
+                  <div class="text-center m-t-24">
+                    <img [src]="imagemPreview || imagemOriginal" (error)="usarImagemPadrao($event)"
+                      class="rounded-circle" width="120" />
+
+                    <div class="m-t-24">
+
+                      <input type="file" accept="image/png,image/jpeg,image/gif" hidden #fileInput
+                        (change)="onFileSelected($event)" />
+
+                      <button mat-flat-button color="primary" class="m-r-8" type="button"
+                        (click)="fileInput.click()">Selecionar</button>
+
+                      <button mat-stroked-button color="warn" type="button"
+                        (click)="resetarImagem(fileInput)">Redefinir</button>
+
+                    </div>
+
+                    <span class="f-s-14 m-t-24 d-block">Formatos permitidos: JPG, GIF ou PNG. Tamanho será ajustado
+                      automaticamente.</span>
+                  </div>
+
+                </mat-card-content>
+              </mat-card>
+            </div>
+            <div class="col-sm-6">
+              <mat-card class="cardWithShadow">
+                <mat-card-content>
+                  <mat-card-title>Alterar Senha</mat-card-title>
+                  <mat-card-subtitle class="f-s-14">
+                    Para alterar sua senha, confirme abaixo
+                  </mat-card-subtitle>
+
+                  <mat-label class="f-s-14 f-w-600 m-b-8 d-block">Senha Atual</mat-label>
+                  <!-- Senha Atual -->
+                  <mat-form-field appearance="outline" class="w-100" color="primary">
+                    <input matInput type="password" formControlName="senhaAtual" />
+                    <mat-error *ngIf="form.get('senhaAtual')?.hasError('required') && form.get('senhaAtual')?.touched">
+                      Senha Atual é obrigatório
+                    </mat-error>
+                  </mat-form-field>
+
+                  <mat-label class="f-s-14 f-w-600 m-b-8 d-block">Nova Senha</mat-label>
+                  <mat-form-field appearance="outline" class="w-100" color="primary">
+                    <input matInput type="password" formControlName="novaSenha" />
+                  </mat-form-field>
+
+                  <mat-label class="f-s-14 f-w-600 m-b-8 d-block">Confirmar Nova Senha</mat-label>
+                  <mat-form-field appearance="outline" class="w-100" color="primary">
+                    <input matInput type="password" formControlName="confirmarNovaSenha" />
+                  </mat-form-field>
+                </mat-card-content>
+              </mat-card>
+
+            </div>
+
+            <!-- Dados Pessoais e Endereço -->
+            <div class="col-12">
+              <mat-card class="cardWithShadow">
+                <mat-card-content>
+                  <mat-card-title>Dados Pessoais</mat-card-title>
+                  <mat-card-subtitle class="f-s-14">
+                    Para alterar seus dados pessoais, edite sua senha atua clique em salve abaixo.
+                  </mat-card-subtitle>
+
+                  <div class="row m-t-24">
+                    <div class="col-sm-6">
+
+                      <mat-label class="f-s-14 f-w-600 m-b-8 d-block">Nome completo *</mat-label>
+                      <mat-form-field appearance="outline" class="w-100" color="primary">
+                        <input matInput formControlName="nome" />
+                        <mat-error *ngIf="form.get('nome')?.hasError('required') && form.get('nome')?.touched">
+                          Nome é obrigatório
+                        </mat-error>
+                      </mat-form-field>
+
+                      <mat-label class="f-s-14 f-w-600 m-b-8 d-block">Telefone *</mat-label>
+                      <mat-form-field appearance="outline" class="w-100" color="primary">
+                        <input matInput formControlName="telefone" type="text" />
+                        <mat-error *ngIf="form.get('telefone')?.hasError('required') && form.get('telefone')?.touched">
+                          Telefone é obrigatório
+                        </mat-error>
+                      </mat-form-field>
+                    </div>
+
+                    <div class="col-sm-6">
+                      <mat-label class="f-s-14 f-w-600 m-b-8 d-block">E-mail</mat-label>
+                      <mat-form-field appearance="outline" class="w-100" color="primary">
+                        <input matInput formControlName="email" type="email" [readonly]="true" />
+                      </mat-form-field>
+                    </div>
+                  </div>
+
+                  <h4 class="f-s-16 f-w-600 m-t-32 m-b-16">Endereço</h4>
+                  <div formGroupName="enderecoRequest">
+                    <div class="row">
+                      <div class="col-sm-6">
+                        <mat-label class="f-s-14 f-w-600 m-b-8 d-block">CEP *</mat-label>
+                        <mat-form-field appearance="outline" class="w-100" color="primary">
+                          <input matInput formControlName="cep" type="text" mask="00000-000"
+                            (blur)="buscarEnderecoPorCep()" />
+                          <mat-error
+                            *ngIf="form.get('enderecoRequest.cep')?.hasError('required') && form.get('enderecoRequest.cep')?.touched">
+                            CEP é obrigatório
+                          </mat-error>
+                        </mat-form-field>
+
+                        <mat-label class="f-s-14 f-w-600 m-b-8 d-block">Logradouro</mat-label>
+                        <mat-form-field appearance="outline" class="w-100" color="primary">
+                          <input matInput formControlName="logradouro" type="text" />
+                          <mat-error
+                            *ngIf="form.get('enderecoRequest.logradouro')?.hasError('required') && form.get('enderecoRequest.logradouro')?.touched">
+                            Logradouro é obrigatório
+                          </mat-error>
+                        </mat-form-field>
+
+                        <!-- Número + Complemento -->
+                        <div class="row">
+                          <div class="col-sm-6">
+                            <mat-label class="f-s-14 f-w-600 m-b-8 d-block">Número *</mat-label>
+                            <mat-form-field appearance="outline" class="w-100" color="primary">
+                              <input matInput formControlName="numero" type="text" />
+                              <mat-error
+                                *ngIf="form.get('enderecoRequest.numero')?.hasError('required') && form.get('enderecoRequest.numero')?.touched">
+                                Número é obrigatório
+                              </mat-error>
+                            </mat-form-field>
+                          </div>
+
+                          <div class="col-sm-6">
+                            <mat-label class="f-s-14 f-w-600 m-b-8 d-block">Complemento</mat-label>
+                            <mat-form-field appearance="outline" class="w-100" color="primary">
+                              <input matInput formControlName="complemento" type="text" />
+                            </mat-form-field>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="col-sm-6">
+                        <mat-label class="f-s-14 f-w-600 m-b-8 d-block">Bairro *</mat-label>
+                        <mat-form-field appearance="outline" class="w-100" color="primary">
+                          <input matInput formControlName="bairro" type="text" />
+                          <mat-error
+                            *ngIf="form.get('enderecoRequest.bairro')?.hasError('required') && form.get('enderecoRequest.bairro')?.touched">
+                            Bairro é obrigatório
+                          </mat-error>
+                        </mat-form-field>
+
+                        <mat-label class="f-s-14 f-w-600 m-b-8 d-block">Cidade * </mat-label>
+                        <mat-form-field appearance="outline" class="w-100" color="primary">
+                          <input matInput formControlName="cidade" type="text" />
+                          <mat-error
+                            *ngIf="form.get('enderecoRequest.cidade')?.hasError('required') && form.get('enderecoRequest.cidade')?.touched">
+                            Cidade é obrigatório
+                          </mat-error>
+                        </mat-form-field>
+
+                        <mat-label class="f-s-14 f-w-600 m-b-8 d-block">Estado *</mat-label>
+                        <mat-form-field appearance="outline" class="w-100" color="primary">
+                          <input matInput formControlName="estado" type="text" />
+                          <mat-error
+                            *ngIf="form.get('enderecoRequest.estado')?.hasError('required') && form.get('enderecoRequest.estado')?.touched">
+                            Estado é obrigatório
+                          </mat-error>
+                        </mat-form-field>
+                      </div>
+                    </div>
+                  </div>
+                </mat-card-content>
+              </mat-card>
+            </div>
+          </div>
+        </mat-card-content>
+        <div class="text-right p-24 p-t-0">
+          <button mat-flat-button class="m-r-8" type="submit">Salvar</button>
+          <button mat-flat-button class="bg-error text-white" type="button" (click)="cancelar()">Cancelar</button>
+        </div>
+      </form>
+    </mat-tab>
+
+
+    <!-- Aba Notificações -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <div class="d-flex align-items-center">
+          <mat-icon class="d-flex align-items-center">
+            <i-tabler name="bell" class="icon-20 m-r-8 d-flex"></i-tabler>
+          </mat-icon>
+        </div>
+        Notificações
+      </ng-template>
+      <mat-card-content class="p-y-24">
+        <mat-card class="cardWithShadow">
+          <mat-card-content class="p-y-24">
+            <mat-card-title>Notificação</mat-card-title>
+            <mat-card-subtitle class="f-s-14">
+              Aqui vc recebe as notificacoes
+            </mat-card-subtitle>
+
+            Ainda vou fazer
+
+          </mat-card-content>
+        </mat-card>
+      </mat-card-content>
+    </mat-tab>
+  </mat-tab-group>
+
+</mat-card>

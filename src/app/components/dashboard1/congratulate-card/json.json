@@ -1,0 +1,30 @@
+{
+  "empresa": {
+    "nome": "ClickArte",
+    "descricao": "Acompanhamento de pedidos"
+  },
+  "kpis": [
+    { "status": "RASCUNHO",              "quantidade": 64},
+    { "status": "PENDENTE",              "quantidade": 28},
+    { "status": "ORCAMENTO",             "quantidade": 31},
+    { "status": "AGUARDANDO_PAGAMENTO",  "quantidade": 29},
+    { "status": "EM_PRODUCAO",           "quantidade": 15},
+    { "status": "PRONTO",                "quantidade": 18},
+    { "status": "ENTREGUE",              "quantidade": 50},
+    { "status": "CANCELADO",             "quantidade": 5 }
+  ],
+  "comparativo": {
+    "ano": 2025,
+    "modo": "quantidade",
+    "mesA": { "index": 0, "label": "Jan" },
+    "mesB": { "index": 3, "label": "Abr" },
+    "series": {
+      "mesA": {
+        "dias": [2,1,0,0,3,1,0,  2,0,1,0,0,1,0,  3,2,1,0,0,4,0,  1,0,0,2,1,0,  0,1,0]
+      },
+      "mesB": {
+        "dias": [0,0,1,0,2,0,1,  0,2,0,0,1,0,0,  2,1,0,0,3,0,0,  1,0,2,0,0,1,  0,0,0]
+      }
+    }
+  }
+}

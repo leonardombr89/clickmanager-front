@@ -1,0 +1,19 @@
+<div class="w-100">
+    <mat-label class="f-s-14 f-w-600 m-b-8 d-block">
+      {{ label }} <span *ngIf="isRequired" style="color: #ff110094">*</span>
+    </mat-label>
+  
+    <mat-form-field appearance="outline" class="w-100">
+      <mat-select [formControl]="control" [placeholder]="placeholder">
+        <mat-option value="" disabled>-- Selecione --</mat-option>
+        <mat-option *ngFor="let option of options" [value]="option">
+          {{ option }}
+        </mat-option>
+      </mat-select>
+  
+      <mat-error *ngIf="control.invalid && control.touched">
+        {{ errorMessage() }}
+      </mat-error>
+    </mat-form-field>
+  </div>
+  

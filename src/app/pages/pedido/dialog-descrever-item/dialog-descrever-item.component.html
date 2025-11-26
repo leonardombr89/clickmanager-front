@@ -1,0 +1,26 @@
+<h2 mat-dialog-title>Descrever item personalizado</h2>
+
+<mat-dialog-content [formGroup]="form">
+    <app-input-texto-restrito
+      [control]="descricaoControl"
+      label="Descrição do item"
+      placeholder="Ex: Serviço de impressão"
+      [maxlength]="200"
+    />
+  
+    <app-input-numerico
+      [control]="quantidadeControl"
+      label="Quantidade"
+      placeholder="Informe a quantidade"
+    />
+  
+    <app-input-moeda
+      [control]="valorUnitarioControl"
+      label="Valor unitário"
+    />
+  </mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-stroked-button color="warn" (click)="cancelar()">Cancelar</button>
+  <button mat-flat-button color="primary" (click)="adicionar()">Adicionar</button>
+</mat-dialog-actions>

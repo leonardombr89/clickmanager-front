@@ -1,0 +1,24 @@
+/* Quebra normal nas células */
+.mat-mdc-table .mat-mdc-row .mat-mdc-cell {
+  white-space: normal;
+}
+
+/* A coluna de ações mantém alinhamento para linhas altas/baixas */
+.col-acoes {
+  width: 120px;
+  vertical-align: middle !important;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.acoes-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  min-height: 40px;
+}
+
+/* Variações compactas e tooltip amigável */
+.variacoes-cell .variacao-linha { line-height: 1.35; }
+.variacoes-tooltip { white-space: pre; max-width: 560px; }

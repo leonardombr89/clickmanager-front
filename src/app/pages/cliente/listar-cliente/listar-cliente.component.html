@@ -1,0 +1,61 @@
+<mat-card class="cardWithShadow">
+    <mat-card-title>
+      <div class="d-flex justify-content-between align-items-center flex-wrap p-16">
+        <div class="f-s-20 f-w-600 text-primary-dark">Clientes</div>
+        <button mat-raised-button color="primary" [routerLink]="['/page/cliente/criar']"
+        *temPermissao="'CLIENTE_CADASTRAR'">
+          <mat-icon class="m-r-4">add</mat-icon>
+          Novo Cliente
+        </button>
+      </div>
+    </mat-card-title>
+  
+    <mat-card-content>
+      <app-input-pesquisa placeholder="Ex: nome do cliente" (valorAlterado)="onPesquisar($event)" />
+  
+      <!-- Tabela de clientes -->
+      <div class="table-responsive">
+        <table mat-table [dataSource]="clientes" class="mat-elevation-z1 no-wrap m-t-0 v-middle w-100">
+  
+          <!-- Nome -->
+          <ng-container matColumnDef="nome">
+            <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">Nome</th>
+            <td mat-cell *matCellDef="let cliente" class="f-s-14">{{ cliente.nome }}</td>
+          </ng-container>
+  
+          <!-- Email -->
+          <ng-container matColumnDef="email">
+            <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">Email</th>
+            <td mat-cell *matCellDef="let cliente" class="f-s-14">{{ cliente.email }}</td>
+          </ng-container>
+  
+          <!-- Telefone -->
+          <ng-container matColumnDef="telefone">
+            <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">Telefone</th>
+            <td mat-cell *matCellDef="let cliente" class="f-s-14" [innerHTML]="cliente.telefone | telefone"></td>
+          </ng-container>
+  
+          <!-- Ações -->
+          <ng-container matColumnDef="acoes">
+            <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">Ações</th>
+            <td mat-cell *matCellDef="let cliente" class="action-link">
+              <a (click)="editar(cliente)" class="m-r-10 cursor-pointer">
+                <i-tabler name="edit" class="icon-18"></i-tabler>
+              </a>
+              <a (click)="excluir(cliente)" class="cursor-pointer">
+                <i-tabler name="trash" class="icon-18"></i-tabler>
+              </a>
+            </td>
+          </ng-container>
+  
+          <tr mat-header-row *matHeaderRowDef="colunasExibidas"></tr>
+          <tr mat-row *matRowDef="let row; columns: colunasExibidas"></tr>
+        </table>
+  
+        <mat-paginator [length]="totalClientes" [pageSize]="tamanhoPagina" (page)="onPaginaAlterada($event)"
+          showFirstLastButtons>
+        </mat-paginator>
+      </div>
+    </mat-card-content>
+  </mat-card>
+  

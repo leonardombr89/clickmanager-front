@@ -1,0 +1,240 @@
+<mat-card class="cardWithShadow">
+  <mat-card-content>
+    <form [formGroup]="addForm">
+      <!-- Cabeçalho -->
+      <div class="row justify-content-between m-b-24">
+        <div class="col-sm-4 d-flex align-items-center">
+          <h4 class="f-s-18 f-w-600"># Novo Pedido</h4>
+        </div>
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <!-- Cliente e Ações -->
+      <mat-card class="cardWithShadow m-t-30">
+        <mat-card-content>
+          <div class="row">
+
+            <!-- Cliente -->
+            <div class="col-md-6">
+              <app-auto-complete [control]="clienteControl" label="Selecione o cliente" [displayWith]="mostrarCliente"
+                [buscarFn]="buscarClientes" [minimoCaracteres]="3" [multiplo]="false" />
+              <button type="button" mat-stroked-button color="primary" class="m-t-12" (click)="onCriarCliente()">
+                Novo cliente
+              </button>
+            </div>
+
+            <!-- Ações: Adicionar Itens -->
+            <div class="col-md-6">
+              <mat-label class="f-s-14 f-w-600 m-b-8 d-block">
+                Adicione itens ao pedido
+              </mat-label>
+
+              <div class="row align-items-center text-center">
+                <div class="col-md-5 d-grid">
+                  <button mat-stroked-button color="primary" (click)="onBuscarProdutos()">
+                    Buscar produtos
+                  </button>
+                </div>
+                <div class="col-md-2">
+                  <span class="f-w-500">ou</span>
+                </div>
+                <div class="col-md-5 d-grid">
+                  <button mat-stroked-button color="accent" (click)="onDescreverItens()">
+                    Descrever itens
+                  </button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-divider class="m-t-30"></mat-divider>
+
+      <!-- Tabela de Itens -->
+      <div class="table-responsive m-t-24" *ngIf="pedidoItens.length">
+        <table class="table table-hover b-1 no-wrap w-100 rounded text-left">
+          <thead>
+            <tr>
+              <th class="p-16">#</th>
+              <th class="p-16">Descrição</th>
+              <th class="p-16">Quantidade</th>
+              <th class="p-16">Valor Unitário</th>
+              <th class="p-16">Subtotal</th>
+              <th class="p-16 text-right">Ação</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of pedidoItens; let i = index">
+              <td class="p-16">{{ i + 1 }}</td>
+              <td class="p-16">{{ item.descricao }}</td>
+              <td class="p-16">{{ item.quantidade }}</td>
+              <td class="p-16">{{ item.valor | currency:'BRL':'symbol':'1.2-2' }}</td>
+              <td class="p-16">
+                {{ (item.subTotal ?? (item.quantidade * item.valor)) | currency:'BRL':'symbol':'1.2-2' }}
+              </td>
+              <td class="p-16 text-right">
+                <button mat-icon-button color="warn" (click)="removerItem(i)">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="row m-t-16">
+        <!-- Card de Informações Gerais -->
+        <div class="col-md-8">
+          <mat-card class="cardWithShadow">
+            <mat-card-content>
+              <mat-card-title class="m-b-16">Informações do Pedido</mat-card-title>
+
+              <app-input-textarea [control]="observacoesControl" label="Observações"
+                placeholder="Insira observações relevantes sobre este pedido..." [rows]="4">
+              </app-input-textarea>
+
+              <div class="m-t-16" *ngIf="usuario$ | async as usuario">
+                <mat-label class="f-s-14 f-w-600 d-block">Responsável:</mat-label>
+                <p class="m-b-0">{{ usuario.nome }}</p>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card *ngIf="!orcamentoControl.value" class="cardWithShadow">
+            <mat-card-content>
+              <div class="d-flex align-items-center justify-content-between m-b-16">
+                <mat-card-title class="m-b-0 f-s-16 f-w-600 d-flex align-items-center gap-1">
+                  <mat-icon color="primary">attach_money</mat-icon>
+                  Pagamentos
+                </mat-card-title>
+              </div>
+
+              <!-- Container do FormArray -->
+              <div formArrayName="pagamentos">
+
+                <!-- Repetidor de pagamentos -->
+                <div *ngFor="let pg of pagamentosControls; let i = index" [formGroupName]="i"
+                  class="row align-items-end m-b-16">
+
+                  <!-- Forma de pagamento -->
+                  <div class="col-md-6">
+                    <app-input-options [control]="getFormaPagamentoControl(pg)" label="Forma"
+                      placeholder="Selecione a forma" [options]="formasPagamento">
+                    </app-input-options>
+                  </div>
+
+                  <!-- Valor -->
+                  <div class="col-md-5">
+                    <app-input-moeda [control]="getPagamentoValorControl(i)"></app-input-moeda>
+                  </div>
+
+                  <!-- Remover -->
+                  <div class="col-md-1 text-right m-b-16">
+                    <button mat-icon-button color="warn" (click)="removerPagamento(i)">
+                      <mat-icon>delete</mat-icon>
+                    </button>
+
+                  </div>
+                </div>
+              </div>
+
+              <!-- Botão Adicionar -->
+              <div class="m-t-16">
+                <button mat-flat-button color="primary" (click)="addPagamento()">
+                  <mat-icon fontIcon="add" class="m-r-8"></mat-icon>
+                  Adicionar
+                </button>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+
+        <!-- Card de Valores Financeiros -->
+        <div class="col-md-4">
+          <mat-card class="cardWithShadow">
+            <mat-card-content>
+
+              <app-input-moeda [control]="acrescimoControl" label="Acréscimo"
+                placeholder="Informe um valor extra (opcional)">
+              </app-input-moeda>
+
+              <app-input-moeda [control]="freteControl" label="Frete" placeholder="Valor do frete (se houver)">
+              </app-input-moeda>
+
+              <app-input-moeda [control]="descontoControl" label="Desconto" placeholder="Desconto aplicado">
+              </app-input-moeda>
+
+              <h5 class="m-b-5 f-w-600 f-s-16">Subtotal: {{ totalAjustado | currency: 'BRL' }}</h5>
+            </mat-card-content>
+          </mat-card>
+        </div>
+
+        <div class="col-md-8">
+          <mat-card class="cardWithShadow">
+            <mat-card-content>
+
+              <!-- Checkbox principal -->
+              <mat-checkbox [formControl]="orcamentoControl" class="f-w-600 f-s-16 m-b-8">
+                Salvar como orçamento
+              </mat-checkbox>
+
+              <!-- Container animado + condicional -->
+              <div *ngIf="orcamentoControl.value" [@expandCollapse]>
+
+                <!-- Alerta em vermelho -->
+                <div class="text-danger f-s-14 m-b-16">
+                  O PEDIDO SÓ SERÁ REGISTRADO APÓS A APROVAÇÃO DO ORÇAMENTO
+                </div>
+
+                <!-- Nome do orçamento -->
+                <div class="m-b-16">
+                  <app-input-texto-restrito [control]="nomeOrcamentoControl" label="Nome do orçamento"
+                    placeholder="Ex.: Cardápios do restaurante">
+                  </app-input-texto-restrito>
+                  <small class="text-muted">Utilize para facilitar a identificação</small>
+                </div>
+
+                <!-- Data de vencimento -->
+                <div>
+                  <app-input-data [control]="vencimentoOrcamentoControl" label="Data de vencimento">
+                  </app-input-data>
+                  <small class="text-muted">Após esta data o cliente não irá conseguir aprovar</small>
+                </div>
+
+              </div>
+
+            </mat-card-content>
+          </mat-card>
+        </div>
+
+
+      </div>
+
+      <!-- Totais -->
+      <div class="text-right m-t-30">
+        <h5 class="f-w-600 f-s-16 m-b-24">Resta pagar: {{ restaPagar | currency: 'BRL' }}</h5>
+        <mat-divider></mat-divider>
+        <div class="row align-items-center justify-content-between m-t-24">
+          <!-- Botões -->
+          <div class="col-md-6 d-flex gap-2 flex-wrap">
+            <a routerLink="/pedidos" mat-flat-button class="bg-error text-white">
+              Cancelar
+            </a>
+            <button mat-flat-button color="primary" (click)="saveDetail($event)" [disabled]="addForm.invalid">
+              Salvar Pedido
+            </button>
+          </div>
+
+          <!-- Total Geral alinhado à direita -->
+          <div class="col-md-6 text-md-right">
+            <h3 class="m-b-0 f-s-18">Total Geral: {{ grandTotal | currency: 'BRL' }}</h3>
+          </div>
+        </div>
+
+      </div>
+    </form>
+  </mat-card-content>
+</mat-card>

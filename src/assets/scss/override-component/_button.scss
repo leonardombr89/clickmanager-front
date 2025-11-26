@@ -1,0 +1,172 @@
+@use "sass:color";
+@use "sass:math";
+@use "sass:meta";
+
+// === Paleta base (com fallbacks) ===
+// Se você já definir estes em variables.scss, os !default não sobrescrevem.
+$primary: var(--mat-sys-primary) !default;
+$secondary: var(--mat-sys-secondary) !default;
+$success: #22c55e !default; // verde
+$warning: #f59e0b !default; // amarelo
+$error: var(--mat-sys-error) !default; // vermelho (Material)
+$danger: $error !default; // alias para quem usa "danger"
+$info: #0ea5e9 !default; // azul-ciano
+$teal: #14b8a6 !default; // verde-água
+$orange: #f97316 !default; // laranja
+$white: #fff !default;
+
+// === Helper para "light" compatível com CSS vars ===
+// Retorna cor com ~12% de opacidade. Se $c for var(...), usamos color-mix no CSS.
+@function light-bg($c, $alpha: 0.12) {
+  @if meta.type-of($c)=='color' {
+    @return color.change($c, $alpha: $alpha);
+  }
+
+  @else {
+    // $c é string (ex.: var(--mat-sys-primary))
+    $alpha-pct: math.round($alpha * 100);
+    @return unquote("color-mix(in srgb, #{$c} #{$alpha-pct}%, transparent)");
+  }
+}
+
+// === Mapa de cores e utilities ===
+$color-map: (
+  primary: $primary,
+  secondary:$secondary,
+  success: $success,
+  warning: $warning,
+  error: $error,
+  danger: $danger,
+  info: $info,
+  teal: $teal,
+  orange: $orange
+);
+
+// Utilitários globais (texto e fundo-claro)
+:root {
+  @each $name, $val in $color-map {
+    .text-#{$name} {
+      color: #{$val} !important;
+    }
+
+    .bg-light-#{$name} {
+      background-color: #{light-bg($val, 0.12)} !important;
+    }
+  }
+}
+
+// === Complementos específicos para os botões do Angular Material ===
+html {
+
+  // Hovers dos fundos "light" (todos os tons)
+  .mat-mdc-button-base.bg-light-primary:hover,
+  .mat-mdc-button-base.bg-light-secondary:hover,
+  .mat-mdc-button-base.bg-light-error:hover,
+  .mat-mdc-button-base.bg-light-warning:hover,
+  .mat-mdc-button-base.bg-light-success:hover,
+  .mat-mdc-button-base.bg-light-info:hover,
+  .mat-mdc-button-base.bg-light-teal:hover,
+  .mat-mdc-button-base.bg-light-orange:hover,
+  .mat-mdc-button-base.bg-light-danger:hover {
+    color: $white !important;
+  }
+
+  // Torna o hover sólido do mesmo tom (funciona com var(...) e hex)
+  .mat-mdc-button-base.bg-light-primary:hover {
+    background-color: $primary !important;
+  }
+
+  .mat-mdc-button-base.bg-light-secondary:hover {
+    background-color: $secondary !important;
+  }
+
+  .mat-mdc-button-base.bg-light-error:hover {
+    background-color: $error !important;
+  }
+
+  .mat-mdc-button-base.bg-light-warning:hover {
+    background-color: $warning !important;
+  }
+
+  .mat-mdc-button-base.bg-light-success:hover {
+    background-color: $success !important;
+  }
+
+  .mat-mdc-button-base.bg-light-info:hover {
+    background-color: $info !important;
+  }
+
+  .mat-mdc-button-base.bg-light-teal:hover {
+    background-color: $teal !important;
+  }
+
+  .mat-mdc-button-base.bg-light-orange:hover {
+    background-color: $orange !important;
+  }
+
+  .mat-mdc-button-base.bg-light-danger:hover {
+    background-color: $danger !important;
+  }
+
+  // Ripples para textos novos
+  .mat-mdc-button-base.text-info:hover .mat-mdc-button-persistent-ripple::before {
+    background-color: $info;
+  }
+
+  .mat-mdc-button-base.text-teal:hover .mat-mdc-button-persistent-ripple::before {
+    background-color: $teal;
+  }
+
+  .mat-mdc-button-base.text-orange:hover .mat-mdc-button-persistent-ripple::before {
+    background-color: $orange;
+  }
+
+  .mat-mdc-button-base.text-danger:hover .mat-mdc-button-persistent-ripple::before {
+    background-color: $danger;
+  }
+
+  // Outlined extras (opcional, segue o padrão dos que você já tem)
+  .mat-mdc-outlined-button:not(:disabled).mat-info {
+    color: $info;
+    border-color: $info;
+
+    &:hover {
+      .mat-mdc-button-persistent-ripple::before {
+        background-color: $info;
+      }
+    }
+  }
+
+  .mat-mdc-outlined-button:not(:disabled).mat-teal {
+    color: $teal;
+    border-color: $teal;
+
+    &:hover {
+      .mat-mdc-button-persistent-ripple::before {
+        background-color: $teal;
+      }
+    }
+  }
+
+  .mat-mdc-outlined-button:not(:disabled).mat-orange {
+    color: $orange;
+    border-color: $orange;
+
+    &:hover {
+      .mat-mdc-button-persistent-ripple::before {
+        background-color: $orange;
+      }
+    }
+  }
+
+  .mat-mdc-outlined-button:not(:disabled).mat-danger {
+    color: $danger;
+    border-color: $danger;
+
+    &:hover {
+      .mat-mdc-button-persistent-ripple::before {
+        background-color: $danger;
+      }
+    }
+  }
+}

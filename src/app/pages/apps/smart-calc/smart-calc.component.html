@@ -1,0 +1,224 @@
+<div class="p-24 smartcalc">
+
+    <!-- Banner: SmartCalc desativado -->
+    <div *ngIf="!configAtiva" class="course-header text-white p-12 bg-error d-flex justify-content-between">
+        O SmartCalc está desabilitado nas configurações.
+        <button mat-icon-button (click)="fechar()" aria-label="Fechar">
+            <mat-icon>close</mat-icon>
+        </button>
+    </div>
+
+    <!-- Cabeçalho -->
+    <div *ngIf="configAtiva" class="sc-header d-flex align-items-center justify-content-between m-b-16">
+        <div class="d-flex align-items-center">
+            <span
+                class="text-primary bg-light-primary rounded icon-40 d-flex align-items-center justify-content-center m-r-12">
+                <mat-icon>calculate</mat-icon>
+            </span>
+            <div>
+                <h3 class="m-0 f-s-18 f-w-700">SmartCalc</h3>
+                <div class="text-body f-s-12">
+                    Calculadora Inteligente — {{ produtoSelecionado?.nome || 'Produtos' }}
+                </div>
+            </div>
+        </div>
+
+        <button mat-icon-button (click)="fechar()" aria-label="Fechar">
+            <mat-icon>close</mat-icon>
+        </button>
+    </div>
+
+    <mat-dialog-content class="sc-content p-0">
+        <form class="sc-form" [formGroup]="form" (ngSubmit)="calcular()">
+
+            <!-- 1) CARTÃO DE PRODUTO – em destaque e primeiro -->
+            <mat-card class="product-card m-b-16">
+                <div class="product-card__header">
+                    <div class="title">
+                        <mat-icon>inventory_2</mat-icon>
+                        <span>Produto</span>
+                    </div>
+                    <div class="hint">Selecione o produto para habilitar os parâmetros específicos.</div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-8">
+                        <mat-form-field appearance="outline" class="w-100">
+                            <mat-label>Produto</mat-label>
+                            <mat-select formControlName="produtoId" [disabled]="carregandoProdutos || !!erroProdutos">
+                                <mat-option *ngIf="carregandoProdutos" disabled>Carregando…</mat-option>
+                                <mat-option *ngIf="erroProdutos" disabled>{{ erroProdutos }}</mat-option>
+                                @for (p of produtos; track p.id) {
+                                <mat-option [value]="p.id">{{ p.nome }}</mat-option>
+                                }
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col-md-4">
+                        <mat-form-field appearance="outline" class="w-100">
+                            <mat-label>Material</mat-label>
+                            <mat-select formControlName="materialId" [disabled]="!materiais?.length">
+                                <mat-option *ngIf="!materiais?.length" disabled>Nenhum material disponível</mat-option>
+                                @for (m of materiais; track m.id) {
+                                <mat-option [value]="m.id">{{ m.nome }}</mat-option>
+                                }
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+                </div>
+
+                <div class="product-card__meta" *ngIf="produtoSelecionado as ps">
+                    <div class="meta__name">
+                        <mat-icon>label</mat-icon>
+                        <span>{{ ps.nome }}</span>
+                    </div>
+                    <div class="meta__badges">
+                        <span class="badge" *ngIf="ps.variacoes?.length">{{ ps.variacoes.length }} variações</span>
+                        <span class="badge badge--ok" *ngIf="ps.ativo">Ativo</span>
+                        <span class="badge badge--warn" *ngIf="!ps.ativo">Inativo</span>
+                    </div>
+                </div>
+            </mat-card>
+
+            <!-- GRID: coluna principal (parâmetros) + coluna lateral (extras) -->
+            <div class="row">
+                <!-- 2) SESSÃO DE PARÂMETROS – trocaremos o conteúdo conforme produto (só layout agora) -->
+                <div class="col-lg-8">
+                    <section class="param-section">
+                        <header class="param-section__header">
+                            <div class="title">
+                                <mat-icon>tune</mat-icon>
+                                <span>Parâmetros do produto</span>
+                            </div>
+                            <div class="subtitle">
+                                Os campos abaixo podem mudar conforme o produto selecionado.
+                            </div>
+                        </header>
+
+                        <div class="param-section__body">
+                            <!-- PLACEHOLDER atual: campos genéricos (vamos trocar depois) -->
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <app-input-numerico [control]="form.controls.largura" label="Largura (cm)"
+                                        placeholder="ex: 5">
+                                    </app-input-numerico>
+
+                                    <!-- hint opcional -->
+                                    <div class="text-body f-s-12" *ngIf="isMetroLinear()">
+                                        Largura fixa: {{ getLinearLarguraMaxima() ?? '—' }} cm (cobrança por metro
+                                        <b>linear</b>)
+                                    </div>
+                                </div>
+
+                                <div class="col-sm-4">
+                                    <app-input-numerico [control]="form.controls.altura" label="Altura (cm)"
+                                        placeholder="ex: 5">
+                                    </app-input-numerico>
+                                </div>
+
+                                <div class="col-sm-4">
+                                    <app-input-numerico [control]="form.controls.quantidade" label="Quantidade"
+                                        placeholder="ex: 500">
+                                    </app-input-numerico>
+                                </div>
+                            </div>
+                            <!-- /PLACEHOLDER -->
+                        </div>
+                    </section>
+
+                    <!-- Resultado -->
+                    <section class="results m-t-16">
+                        <h4 class="f-s-16 f-w-700 m-b-8">Resultados</h4>
+
+                        @if (carregandoCalculo) {
+                        <div class="text-body">Calculando…</div>
+                        } @else if (!resultado() || itens().length === 0) {
+                        <div class="text-body">Nenhum item calculado com os parâmetros informados.</div>
+                        } @else {
+                        <div class="results-card simple">
+                            <table class="clean-table">
+                                <thead>
+                                    <tr>
+                                        <th>Item</th>
+                                        <th class="w-num text-right">Qtd</th>
+                                        <th class="w-num text-right">Valor</th>
+                                        <th class="w-num text-right">Subtotal</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @for (it of itens(); track it.id) {
+                                    <tr>
+                                        <td>
+                                            <div class="row-title">{{ it.nomeComposto }}</div>
+                                            <div class="row-subtitle">{{ it.descricao }}</div>
+                                        </td>
+                                        <td class="w-num text-right">{{ it.quantidade }}</td>
+                                        <td class="w-num text-right">{{ it.valor |
+                                            currency:'BRL':'symbol-narrow':'1.2-2' }}</td>
+                                        <td class="w-num text-right">{{ it.subTotal |
+                                            currency:'BRL':'symbol-narrow':'1.2-2' }}</td>
+                                    </tr>
+                                    }
+                                </tbody>
+                            </table>
+
+                            <div class="d-flex align-items-center justify-content-between m-t-12">
+                                <div class="muted obs-text" *ngIf="observacao()" [innerText]="observacao()"></div>
+                                <div class="f-w-700 total-text">
+                                    Total: {{ total() | currency:'BRL':'symbol-narrow':'1.2-2' }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <mat-dialog-actions align="end" class="m-t-12 p-0">
+                            <button mat-flat-button color="primary" (click)="adicionarAoPedido()"
+                                [disabled]="carregandoAdd || !melhor()">
+                                <mat-icon class="m-r-8">shopping_cart</mat-icon>
+                                {{ carregandoAdd ? 'Adicionando...' : 'Enviar para Pedido' }}
+                            </button>
+                        </mat-dialog-actions>
+                        }
+                    </section>
+                </div>
+
+                <!-- 3) COLUNA LATERAL — Extras (Acabamentos/Serviços) e Ações -->
+                <div class="col-lg-4">
+                    <mat-card class="extras-card">
+                        <div class="extras-card__header">
+                            <mat-icon>construction</mat-icon>
+                            <span>Extras</span>
+                        </div>
+
+                        <div class="extras-card__body">
+                            <app-input-multi-select class="m-b-12" [control]="form.controls.acabamentosIds"
+                                [label]="'Acabamentos (opcional)'" [options]="acabamentos" [cardMinHeight]="220"
+                                [listHeight]="180">
+                            </app-input-multi-select>
+
+                            <app-input-multi-select [control]="form.controls.servicosIds"
+                                [label]="'Serviços (opcional)'" [options]="servicos" [cardMinHeight]="220"
+                                [listHeight]="180">
+                            </app-input-multi-select>
+                        </div>
+
+                        <div class="extras-card__actions">
+                            <button mat-flat-button color="primary" type="submit"
+                                [disabled]="carregandoCalculo || form.invalid">
+                                <mat-icon class="m-r-8">refresh</mat-icon>
+                                {{ carregandoCalculo ? 'Calculando...' : 'Calcular' }}
+                            </button>
+                            <button mat-stroked-button type="button" (click)="limpar()" [disabled]="carregandoCalculo">
+                                Limpar
+                            </button>
+                            <div class="text-body f-s-12 error-text" *ngIf="erroCalculo">
+                                {{ erroCalculo }}
+                            </div>
+                        </div>
+                    </mat-card>
+                </div>
+            </div>
+            <!-- /GRID -->
+        </form>
+    </mat-dialog-content>
+</div>

@@ -1,0 +1,60 @@
+<div *ngIf="produto?.preco?.tipo === 'QUANTIDADE'">
+    <!-- Título e descrição -->
+    <h2 class="f-s-20 f-w-600 m-b-8">{{ produto.nome }}</h2>
+    <p class="f-s-14 m-b-16 text-muted">{{ produto.descricao }}</p>
+  
+    <!-- Detalhes do produto -->
+    <div class="row m-b-16">
+      <div class="col-md-3" *ngIf="produto.formato">
+        <div class="f-w-600">Formato</div>
+        <div>{{ produto.formato }}</div>
+      </div>
+      <div class="col-md-3" *ngIf="produto.material">
+        <div class="f-w-600">Material</div>
+        <div>{{ produto.material }}</div>
+      </div>
+      <div class="col-md-3" *ngIf="produto.cores">
+        <div class="f-w-600">Cores</div>
+        <div>{{ produto.cores }}</div>
+      </div>
+      <div class="col-md-3" *ngIf="produto.acabamento">
+        <div class="f-w-600">Acabamento</div>
+        <div>{{ produto.acabamento }}</div>
+      </div>
+    </div>
+  
+    <!-- Opções de faixas -->
+    <div class="row g-3 m-b-24">
+        <div class="col-auto" *ngFor="let faixa of produto.preco.faixas">
+          <mat-card
+            class="shadow-none text-center m-r-10"
+            [ngClass]="{
+              'bg-light-primary': faixa.quantidade === faixaSelecionada?.quantidade,
+              'bg-light': faixa.quantidade !== faixaSelecionada?.quantidade
+            }"
+            (click)="selecionarFaixa(faixa)"
+            style="cursor: pointer; padding: 16px; border-radius: 8px; min-width: 140px;"
+          >
+            <mat-card-content class="p-0">
+              <h4 class="f-s-14 f-w-600 m-b-8">
+                {{ faixa.quantidade }} unidades
+              </h4>
+              <h6 class="f-s-21 f-w-600 text-primary">
+                {{ faixa.valor | currency: 'BRL' }}
+              </h6>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </div>
+  
+    <!-- Valor Total -->
+    <div class="f-s-18 f-w-600 m-t-24">
+      Valor total: {{ faixaSelecionada?.valor | currency: 'BRL' }}
+    </div>
+  
+    <!-- Botão Adicionar -->
+    <button mat-flat-button color="primary" class="m-t-16" (click)="onAdicionar()" [disabled]="!faixaSelecionada">
+      Adicionar
+    </button>
+  </div>
+  

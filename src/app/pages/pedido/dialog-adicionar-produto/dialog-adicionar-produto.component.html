@@ -1,0 +1,315 @@
+<h2 mat-dialog-title>Adicionar produto</h2>
+
+<!-- BODY ROLÁVEL DO MODAL -->
+<mat-dialog-content class="wizard-body">
+    <!-- Stepper com cabeçalho fixo -->
+    <mat-horizontal-stepper [linear]="true" #stepper class="wizard-stepper">
+
+        <!-- 1) Selecionar Produto -->
+        <mat-step [stepControl]="selectForm" label="Selecionar Produto">
+            <form [formGroup]="selectForm" class="step-inner step-wide m-t-8">
+                <app-listar-produtos [showActions]="false" [showSelect]="true" [selectedId]="produtoIdSelecionado"
+                    (selectedChange)="onSelecionarProduto($event)">
+                </app-listar-produtos>
+            </form>
+        </mat-step>
+
+        <!-- 2) Escolher Variação (+ Acabamentos) -->
+        <mat-step [stepControl]="variacaoForm" label="Escolher Variação">
+            <form [formGroup]="variacaoForm" class="step-inner step-wide m-t-8">
+
+                <ng-container *ngIf="!loadingVariacoes; else loadingTpl">
+                    <div class="var-grid">
+                        <!-- Formato -->
+                        <section>
+                            <h4 class="sec-title">Formato</h4>
+                            <mat-radio-group [value]="selFormatoId" (change)="onSelectFormato($event.value)">
+                                <div class="radio-col">
+                                    <mat-radio-button *ngFor="let f of formatos; trackBy: trackById" [value]="f.id"
+                                        class="m-b-8">
+                                        {{ f.nome }}
+                                    </mat-radio-button>
+                                </div>
+                            </mat-radio-group>
+                        </section>
+
+                        <!-- Material -->
+                        <section>
+                            <h4 class="sec-title">Material</h4>
+                            <mat-radio-group [value]="selMaterialId" (change)="onSelectMaterial($event.value)">
+                                <div class="radio-col">
+                                    <mat-radio-button *ngFor="let m of materiais; trackBy: trackById" [value]="m.id"
+                                        class="m-b-8">
+                                        {{ m.nome }}
+                                    </mat-radio-button>
+                                </div>
+                            </mat-radio-group>
+                        </section>
+
+                        <!-- Cor -->
+                        <section>
+                            <h4 class="sec-title">Cor</h4>
+                            <ng-container *ngIf="cores.length; else noColor">
+                                <mat-radio-group [value]="selCorId" (change)="onSelectCor($event.value)">
+                                    <div class="radio-col">
+                                        <mat-radio-button *ngFor="let c of cores; trackBy: trackById" [value]="c.id"
+                                            class="m-b-8">
+                                            {{ c.nome }}
+                                        </mat-radio-button>
+                                    </div>
+                                </mat-radio-group>
+                            </ng-container>
+                            <ng-template #noColor>
+                                <div class="text-muted">— Sem opções de cor —</div>
+                            </ng-template>
+                        </section>
+                    </div>
+
+                    <!-- Acabamentos (quando a variação está resolvida) -->
+                    <ng-container *ngIf="selectedVariacao">
+                        <mat-divider class="m-y-12"></mat-divider>
+                        <h4 class="sec-title">Acabamentos</h4>
+
+                        <ng-container *ngIf="acabamentosDisponiveis?.length; else noAcab">
+                            <div class="opt-grid">
+                                <label class="opt-card" *ngFor="let a of acabamentosDisponiveis; trackBy: trackById"
+                                    (click)="toggle(acabamentoIdsCtrl, a.id, !isSelected(acabamentoIdsCtrl, a.id))">
+                                    <mat-checkbox class="opt-check" [checked]="isSelected(acabamentoIdsCtrl, a.id)"
+                                        (click)="$event.stopPropagation()"
+                                        (change)="toggle(acabamentoIdsCtrl, a.id, $event.checked)">
+                                    </mat-checkbox>
+
+                                    <div>
+                                        <div class="opt-name">{{ a.nome }}</div>
+                                        <div class="opt-desc">{{ a.descricao || '—' }}</div>
+                                    </div>
+
+                                    <div class="opt-price" [matTooltip]="precoResumo(a.preco)">
+                                        {{ precoResumo(a.preco) }}
+                                    </div>
+                                </label>
+                            </div>
+                        </ng-container>
+
+                        <ng-container *ngIf="selectedVariacao">
+                            <mat-divider class="m-y-12"></mat-divider>
+                            <div class="var-selected-line">
+                                <strong>Variação selecionada:</strong>
+                                <span>{{ resumoVariacaoComAcab }}</span>
+                            </div>
+                        </ng-container>
+
+                        <ng-template #noAcab>
+                            <div class="text-muted">Este produto não possui acabamentos adicionais.</div>
+                        </ng-template>
+                    </ng-container>
+                </ng-container>
+
+                <ng-template #loadingTpl>
+                    <div class="p-16">Carregando variações...</div>
+                </ng-template>
+            </form>
+        </mat-step>
+
+        <!-- 3) Configurar Preço -->
+        <mat-step [stepControl]="configForm" label="Configurar Preço">
+            <form [formGroup]="configForm" class="step-inner step-wide m-t-8">
+                <ng-container *ngIf="produtoAtual as p; else selVarFirst">
+                    <app-preco-fixo-config *ngIf="p?.preco?.tipo === 'FIXO'" [produto]="p"
+                        (adicionar)="onConfigConcluida($event)">
+                    </app-preco-fixo-config>
+
+                    <app-preco-quantidade-config *ngIf="p?.preco?.tipo === 'QUANTIDADE'" [produto]="p"
+                        (adicionar)="onConfigConcluida($event)">
+                    </app-preco-quantidade-config>
+
+                    <app-preco-demanda-config *ngIf="p?.preco?.tipo === 'DEMANDA'" [produto]="p"
+                        (adicionar)="onConfigConcluida($event)">
+                    </app-preco-demanda-config>
+
+                    <app-preco-metro-config *ngIf="p?.preco?.tipo === 'METRO'" [produto]="p"
+                        (adicionar)="onConfigConcluida($event)" (readyChange)="onPrecoReady($event)">
+                    </app-preco-metro-config>
+
+                    <div class="m-t-16" *ngIf="!p?.preco?.tipo">
+                        <em>Este produto não possui um tipo de preço definido.</em>
+                    </div>
+                </ng-container>
+
+                <ng-template #selVarFirst>
+                    <em>Selecione uma variação no passo anterior.</em>
+                </ng-template>
+            </form>
+        </mat-step>
+
+        <!-- 4) Serviços -->
+        <mat-step [stepControl]="servicosForm" label="Serviços">
+            <form [formGroup]="servicosForm" class="step-inner step-wide m-t-8">
+                <ng-container *ngIf="servicosDisponiveis?.length; else noSrv">
+                    <div class="opt-grid">
+                        <label class="opt-card" *ngFor="let s of servicosDisponiveis; trackBy: trackById"
+                            (click)="toggle(servicoIdsCtrl, s.id, !isSelected(servicoIdsCtrl, s.id))">
+                            <mat-checkbox class="opt-check" [checked]="isSelected(servicoIdsCtrl, s.id)"
+                                (click)="$event.stopPropagation()"
+                                (change)="toggle(servicoIdsCtrl, s.id, $event.checked)">
+                            </mat-checkbox>
+
+                            <div>
+                                <div class="opt-name">{{ s.nome }}</div>
+                                <div class="opt-desc">{{ s.descricao || '—' }}</div>
+                            </div>
+
+                            <div class="opt-price" [matTooltip]="precoResumo(s.preco)">
+                                {{ precoResumo(s.preco) }}
+                            </div>
+                        </label>
+                    </div>
+                </ng-container>
+
+                <ng-template #noSrv>
+                    <div class="text-muted">Este produto não possui serviços adicionais.</div>
+                </ng-template>
+            </form>
+        </mat-step>
+
+        <!-- 5) Revisão -->
+        <mat-step label="Revisão">
+            <div class="step-inner step-wide m-t-8">
+                <h3 class="f-s-16 f-w-600">Revisão</h3>
+
+                <!-- Cabeçalho -->
+                <div class="rev-header">
+                    <div>
+                        <div class="rev-title">Produto</div>
+                        <div class="rev-value">{{ produtoBase?.nome || '—' }}</div>
+                        <div class="rev-subtle" *ngIf="produtoBase?.descricao">{{ produtoBase?.descricao }}</div>
+                    </div>
+                    <div>
+                        <div class="rev-title">Variação</div>
+                        <div class="rev-chipline" *ngIf="selectedVariacao; else semVar">
+                            <span class="rev-chip">{{ selectedVariacao?.formatoNome }}</span>
+                            <span class="rev-chip">{{ selectedVariacao?.materialNome }}</span>
+                            <span class="rev-chip">{{ selectedVariacao?.corNome || '—' }}</span>
+                        </div>
+                        <ng-template #semVar>—</ng-template>
+                        <div class="rev-subtle" *ngIf="baseResumoTexto">({{ baseResumoTexto }})</div>
+                    </div>
+                </div>
+
+                <mat-divider class="m-y-12"></mat-divider>
+
+                <!-- Itens -->
+                <div class="rev-table">
+                    <!-- Template usado por todos os 'else dash' abaixo -->
+                    <ng-template #dash>—</ng-template>
+
+                    <div class="rev-row rev-head">
+                        <div>Item</div>
+                        <div class="text-center">Qtd</div>
+                        <div class="text-right">Unitário</div>
+                        <div class="text-right">Total</div>
+                    </div>
+
+                    <!-- Produto (variação) -->
+                    <div class="rev-row">
+                        <div>
+                            <div class="rev-item">Produto (variação)</div>
+                            <div class="rev-subtle" *ngIf="baseResumoTexto">{{ baseResumoTexto }}</div>
+                        </div>
+
+                        <div class="text-center">{{ baseQtd }}</div>
+
+                        <div class="text-right">
+                            <ng-container *ngIf="baseUnit !== null; else dash">{{ money(baseUnit) }}</ng-container>
+                        </div>
+
+                        <div class="text-right">
+                            <ng-container *ngIf="baseSubtotal !== null; else dash">{{ money(baseSubtotal)
+                                }}</ng-container>
+                        </div>
+                    </div>
+
+                    <!-- Acabamentos -->
+                    <div class="rev-row" *ngFor="let a of acabamentosSelecionadosDetalhe; trackBy: trackById">
+                        <div>
+                            <div class="rev-item">Acabamento: {{ a.nome }}</div>
+                            <div class="rev-subtle" *ngIf="a.descricao">{{ a.descricao }}</div>
+                        </div>
+
+                        <div class="text-center">1</div>
+
+                        <div class="text-right">
+                            <ng-container *ngIf="unitFromPreco(a.preco) as u; else dash">{{ money(u) }}</ng-container>
+                        </div>
+
+                        <div class="text-right">
+                            <ng-container *ngIf="unitFromPreco(a.preco) as u; else dash">{{ money(u) }}</ng-container>
+                        </div>
+                    </div>
+
+                    <!-- Serviços -->
+                    <div class="rev-row" *ngFor="let s of servicosSelecionadosDetalhe; trackBy: trackById">
+                        <div>
+                            <div class="rev-item">Serviço: {{ s.nome }}</div>
+                            <div class="rev-subtle" *ngIf="s.descricao">{{ s.descricao }}</div>
+                        </div>
+
+                        <div class="text-center">1</div>
+
+                        <div class="text-right">
+                            <ng-container *ngIf="unitFromPreco(s.preco) as u; else dash">{{ money(u) }}</ng-container>
+                        </div>
+
+                        <div class="text-right">
+                            <ng-container *ngIf="unitFromPreco(s.preco) as u; else dash">{{ money(u) }}</ng-container>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Resumo -->
+                <div class="rev-summary">
+                    <div class="rev-line">
+                        <span>Subtotal do produto</span>
+                        <span>{{ baseSubtotal !== null ? money(baseSubtotal) : '—' }}</span>
+                    </div>
+                    <div class="rev-line">
+                        <span>Adicionais (fixos)</span>
+                        <span>{{ money(adicionaisFixosSubtotal) }}</span>
+                    </div>
+
+                    <mat-divider></mat-divider>
+
+                    <div class="rev-total">
+                        <span>Total</span>
+                        <span>{{ totalConhecido !== null ? money(totalConhecido) : '—' }}</span>
+                    </div>
+
+                    <div class="rev-note" *ngIf="qtdeVariaveis > 0">
+                        <mat-icon class="m-r-4" inline>info</mat-icon>
+                        Existem {{ qtdeVariaveis }} item(ns) com preço variável (ex.: por hora, por metro ou por
+                        faixas).
+                        Eles não foram somados ao total e podem alterar o valor final.
+                    </div>
+                </div>
+            </div>
+        </mat-step>
+    </mat-horizontal-stepper>
+</mat-dialog-content>
+
+<!-- RODAPÉ FIXO -->
+<div class="wizard-footer">
+    <div class="left">
+        <button mat-stroked-button class="bg-error text-white" (click)="goPrev()" [disabled]="isFirstStep">
+            Voltar
+        </button>
+    </div>
+
+    <div class="right">
+        <button mat-stroked-button color="warn" mat-dialog-close *ngIf="isFirstStep">
+            Cancelar
+        </button>
+        <button mat-flat-button color="primary" (click)="goNext()" [disabled]="nextDisabled">
+            {{ nextLabel }}
+        </button>
+    </div>
+</div>

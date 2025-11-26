@@ -1,0 +1,115 @@
+<mat-card class="cardWithShadow">
+  <!-- Cabeçalho com dados do back -->
+  <mat-card-header>
+    <mat-card-title>{{ empresaNome || 'Nome da empresa' }}</mat-card-title>
+    <mat-card-subtitle>{{ empresaDescricao || 'Acompanhamento de pedidos' }}</mat-card-subtitle>
+  </mat-card-header>
+
+  <!-- PARTE 1: KPIs dinâmicos -->
+  <mat-card-content class="position-relative p-t-30">
+    <div class="row">
+      <!-- Coluna esquerda (primeiros 4 cards) -->
+      <div class="col-sm-6">
+        @let left = stats.slice(0,4);
+        @for (card of left; track card.id) {
+          <div class="d-flex align-items-center gap-16 m-t-24">
+            <span class="text-{{card.color}} bg-light-{{card.color}} rounded-circle icon-46 d-flex align-items-center justify-content-center">
+              <i-tabler [name]="card.icon" class="icon-22 d-flex"></i-tabler>
+            </span>
+            <div>
+              <h6 class="f-s-16 f-w-600">{{ card.title }}</h6>
+              <span class="f-s-14">{{ card.subtitle }}</span>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Coluna direita (demais cards) -->
+      <div class="col-sm-6">
+        @let right = stats.slice(4);
+        @for (card of right; track card.id) {
+          <div class="d-flex align-items-center gap-16 m-t-24">
+            <span class="text-{{card.color}} bg-light-{{card.color}} rounded-circle icon-46 d-flex align-items-center justify-content-center">
+              <i-tabler [name]="card.icon" class="icon-22 d-flex"></i-tabler>
+            </span>
+            <div>
+              <h6 class="f-s-16 f-w-600">{{ card.title }}</h6>
+              <span class="f-s-14">{{ card.subtitle }}</span>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </mat-card-content>
+
+  <mat-divider></mat-divider>
+
+  <!-- PARTE 2: Filtros + Gráfico -->
+  <mat-card-header>
+    <div class="d-flex w-100 justify-content-between align-items-start gap-16 flex-wrap">
+      <div>
+        <mat-card-title>Total de Pedidos</mat-card-title>
+        <mat-card-subtitle>Comparativo entre dois meses</mat-card-subtitle>
+      </div>
+
+      <div class="d-flex gap-12 flex-wrap">
+        <!-- Mês A -->
+        <mat-form-field class="theme-select" appearance="outline">
+          <mat-label>Mês A</mat-label>
+          <mat-select [(value)]="mesA" (selectionChange)="onFiltroChange()">
+            @for(month of meses; track month.value) {
+              <mat-option [value]="month.value">{{ month.viewValue }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <!-- Mês B -->
+        <mat-form-field class="theme-select" appearance="outline">
+          <mat-label>Mês B</mat-label>
+          <mat-select [(value)]="mesB" (selectionChange)="onFiltroChange()">
+            @for(month of meses; track month.value) {
+              <mat-option [value]="month.value">{{ month.viewValue }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <!-- Ano -->
+        <mat-form-field class="theme-select" appearance="outline">
+          <mat-label>Ano</mat-label>
+          <mat-select [(value)]="ano" (selectionChange)="onFiltroChange()">
+            @for(a of anos; track a) {
+              <mat-option [value]="a">{{ a }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <!-- Modo -->
+        <mat-form-field class="theme-select" appearance="outline">
+          <mat-label>Modo</mat-label>
+          <mat-select [(value)]="modo" (selectionChange)="onFiltroChange()">
+            <mat-option value="quantidade">Quantidade</mat-option>
+            <mat-option value="receita">Receita (R$)</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </div>
+  </mat-card-header>
+
+  <mat-card-content>
+    <div class="row">
+      <div class="col-sm-12">
+        <apx-chart
+          #chart
+          [series]="revenueSeries"
+          [chart]="revenueChart.chart"
+          [legend]="revenueChart.legend"
+          [stroke]="revenueChart.stroke"
+          [grid]="revenueChart.grid"
+          [xaxis]="revenueChart.xaxis"
+          [yaxis]="revenueChart.yaxis"
+          [tooltip]="revenueChart.tooltip">
+        </apx-chart>
+      </div>
+    </div>
+  </mat-card-content>
+</mat-card>

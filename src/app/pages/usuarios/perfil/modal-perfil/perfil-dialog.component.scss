@@ -1,0 +1,18 @@
+.perfil-dialog {
+    width: 80vw;
+    max-width: 90vw;
+}
+
+.permissao-fieldset {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-bottom: 16px;
+
+    legend {
+        font-weight: 600;
+        padding: 0 8px;
+        color: #007BFF;
+        font-size: 14px;
+    }
+}

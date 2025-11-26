@@ -1,0 +1,78 @@
+:host {
+    display: block;
+}
+
+/* card */
+.smart-card {
+    /* min-height controlada via [style.min-height.px] */
+}
+
+/* conteúdo com largura total + scroll vertical */
+.smart-card-content {
+    width: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 8px;
+    /* espaço pro trilho */
+}
+
+/* scrollbar (WebKit) */
+.smart-card-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.smart-card-content::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.smart-card-content::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.18);
+    border-radius: 8px;
+}
+
+.smart-card-content::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.28);
+}
+
+/* scrollbar (Firefox) */
+.smart-card-content {
+    scrollbar-color: rgba(0, 0, 0, 0.28) transparent;
+    scrollbar-width: thin;
+}
+
+/* lista preenche largura total */
+.smart-list {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+/* itens densos */
+.smart-list .mdc-list-item {
+    min-height: 36px;
+    padding: 4px 8px;
+}
+
+.smart-list .mdc-list-item__primary-text {
+    font-size: 13px;
+    line-height: 18px;
+}
+
+/* helpers opcionais */
+.px-12 {
+    padding-left: 12px;
+    padding-right: 12px;
+}
+
+.py-8 {
+    padding-top: 8px;
+    padding-bottom: 8px;
+}
+
+.mt-4 {
+    margin-top: 4px;
+}
+
+.text-error {
+    color: #d32f2f;
+}
