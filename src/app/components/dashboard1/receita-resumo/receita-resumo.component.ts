@@ -105,7 +105,7 @@ export class AppReceitaResumoComponent implements OnInit {
     await this.carregarDoBack();
   }
 
-  // ===== Backend =====
+  // ===== Backend ======
   private async carregarDoBack() {
     const periodo = this.ranges.find(r => r.id === this.selectedRange)!.periodo;
 
@@ -145,5 +145,5 @@ export class AppReceitaResumoComponent implements OnInit {
   formatBRL(v: number) {
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
   }
-  
+
 }
