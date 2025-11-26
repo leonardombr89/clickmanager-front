@@ -13,7 +13,7 @@ RUN npm ci --legacy-peer-deps
 COPY . .
 
 # build de produção
-RUN npm run build
+RUN ng build
 
 # Stage 2: Nginx servindo o build
 FROM nginx:alpine
@@ -23,6 +23,6 @@ RUN rm -rf /usr/share/nginx/html/*
 
 # ⚠️ AQUI É O PONTO IMPORTANTE:
 # copie o conteúdo de dist/Spike/browser para a raiz do html
-COPY --from=build /app/dist/Spike/browser/ /usr/share/nginx/html
+COPY --from=build /app/dist/Spike/browser /usr/share/nginx/html
 
 EXPOSE 80
