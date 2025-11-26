@@ -6,11 +6,15 @@ on:
       - main
     paths:
       - "src/**"
-      - "angular.json"
       - "package.json"
       - "package-lock.json"
+      - "angular.json"
       - "Dockerfile"
-      - "nginx.conf"
+      - "docker-compose.prod.yml"
+
+permissions:
+  contents: read
+  packages: write
 
 jobs:
   build:
