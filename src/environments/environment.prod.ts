@@ -1,5 +1,5 @@
 export const environment = {
     production: true,
-    apiUrl: 'https://crmclickarte.fly.dev'
+    apiUrl: 'http://3.226.252.166:8080'
   };
   

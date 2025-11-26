@@ -105,7 +105,7 @@ export class AppReceitaResumoComponent implements OnInit {
     await this.carregarDoBack();
   }
 
-  // ======= Backend =======
+  // ======== Backend =======
   private async carregarDoBack() {
     const periodo = this.ranges.find(r => r.id === this.selectedRange)!.periodo;
 
