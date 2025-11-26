@@ -4,7 +4,7 @@ WORKDIR /app
 
 # copiar package.json e package-lock.json
 COPY package*.json ./
-RUN npm ci
+RUN npm install --legacy-peer-deps
 
 # copiar o restante e buildar
 COPY . .
