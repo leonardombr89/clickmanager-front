@@ -109,7 +109,7 @@ export class AppReceitaResumoComponent implements OnInit {
   private async carregarDoBack() {
     const periodo = this.ranges.find(r => r.id === this.selectedRange)!.periodo;
 
-    const req: ReceitaResumoRequest = { periodo }; // por enquanto não usamos personalizado
+    const req: ReceitaResumoRequest = { periodo }; 
     const resp: ReceitaResumoResponse = await firstValueFrom(
       this.dashboard.obterReceitaResumo(req)
     );
