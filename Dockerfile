@@ -25,4 +25,7 @@ RUN rm -rf /usr/share/nginx/html/*
 # copie o conteúdo de dist/Spike/browser para a raiz do html
 COPY --from=build /app/dist/Spike/browser /usr/share/nginx/html
 
+# Copia config SPA customizada
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
 EXPOSE 80
