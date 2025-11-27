@@ -11,7 +11,8 @@ export interface Perfil {
 
 @Injectable({ providedIn: 'root' })
 export class PerfilService {
-  private readonly endpoint = '/api/perfis';
+  
+  private readonly endpoint = 'api/perfis';
 
   constructor(private api: ApiService) {}
 
