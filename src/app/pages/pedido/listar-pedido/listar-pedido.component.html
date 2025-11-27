@@ -1,14 +1,8 @@
 <mat-card class="cardWithShadow">
-    <mat-card-title>
-        <div class="d-flex justify-content-between align-items-center flex-wrap p-16">
-            <div class="f-s-20 f-w-600 text-primary-dark">Pedidos</div>
-            <button mat-raised-button color="primary" [routerLink]="['/page/pedido/criar']"
-                *temPermissao="'PEDIDOS_CADASTRAR'">
-                <mat-icon class="m-r-4">add</mat-icon>
-                Novo Pedido
-            </button>
-        </div>
-    </mat-card-title>
+
+    <app-card-header titulo="Pedidos" botaoTexto="Novo Pedido" botaoIcone="add" [botaoRota]="['/page/pedido/criar']"
+        permissao="PEDIDOS_CADASTRAR" [mostrarDivisor]="true">
+    </app-card-header>
 
     <mat-card-content>
         <app-input-pesquisa placeholder="Ex: cliente ou número do pedido" (valorAlterado)="onPesquisar($event)" />
