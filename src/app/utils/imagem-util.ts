@@ -67,7 +67,7 @@ export class ImagemUtil {
     static montarUrlImagemPerfil(nomeImagem: string | null | undefined): string {
         const baseUrl = environment.apiUrl;
         return nomeImagem
-            ? `${baseUrl}/imagens/perfil/${nomeImagem}`
+            ? `${baseUrl}/api/imagens/perfil/${nomeImagem}`
             : '/assets/images/profile/user-1.jpg';
     }
 
@@ -77,7 +77,7 @@ export class ImagemUtil {
     static montarUrlImagemLogo(nomeImagem: string | null | undefined): string {
         const baseUrl = environment.apiUrl;
         return nomeImagem
-          ? `${baseUrl}/imagens/logo/${nomeImagem}`
+          ? `${baseUrl}/api/imagens/logo/${nomeImagem}`
           : './assets/images/logos/LogoPadrao.png';
       }
       
