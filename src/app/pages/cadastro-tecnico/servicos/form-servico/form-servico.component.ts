@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ServicoService } from '../../services/servico.service';
 import { ToastrService } from 'ngx-toastr';
 import { CommonModule } from '@angular/common';
@@ -14,6 +14,7 @@ import { SharedComponentsModule } from 'src/app/components/shared-components.mod
 import { InputTextareaComponent } from "../../../../components/inputs/input-textarea/input-textarea.component";
 import { InputMultiSelectComponent } from "../../../../components/inputs/input-multi-select/input-multi-select-component";
 import { PrecoSelectorComponent } from "../../../../components/preco/preco-selector.component";
+import { CardHeaderComponent } from "src/app/components/card-header/card-header.component";
 
 @Component({
   selector: 'app-form-servico',
@@ -21,6 +22,7 @@ import { PrecoSelectorComponent } from "../../../../components/preco/preco-selec
   templateUrl: './form-servico.component.html',
   imports: [
     CommonModule,
+    RouterModule,
     ReactiveFormsModule,
     MatCardModule,
     MatButtonModule,
@@ -28,7 +30,8 @@ import { PrecoSelectorComponent } from "../../../../components/preco/preco-selec
     MatTabsModule,
     SharedComponentsModule,
     InputTextareaComponent,
-    PrecoSelectorComponent
+    PrecoSelectorComponent,
+    CardHeaderComponent
 ]
 })
 export class FormServicoComponent implements OnInit {

@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
@@ -11,19 +11,22 @@ import { AcabamentoService } from '../../services/acabamento.service';
 import { InputTextoRestritoComponent } from "../../../../components/inputs/input-texto/input-texto-restrito.component";
 import { Observable } from 'rxjs/internal/Observable';
 import { PrecoSelectorComponent } from 'src/app/components/preco/preco-selector.component';
+import { CardHeaderComponent } from "src/app/components/card-header/card-header.component";
 
 @Component({
   selector: 'app-form-acabamento',
   standalone: true,
   imports: [
     CommonModule,
+    RouterModule,
     ReactiveFormsModule,
     MatCardModule,
     MatButtonModule,
     MatSlideToggleModule,
     PrecoSelectorComponent,
-    InputTextoRestritoComponent
-  ],
+    InputTextoRestritoComponent,
+    CardHeaderComponent
+],
   templateUrl: './form-acabamento.component.html',
   styleUrl: './form-acabamento.component.scss'
 })

@@ -16,6 +16,7 @@ import { TemPermissaoDirective } from 'src/app/diretivas/tem-permissao.directive
 import { InputPesquisaComponent } from 'src/app/components/inputs/input-pesquisa/input-pesquisa.component';
 import { ClienteService } from '../cliente.service';
 import { TelefonePipe } from "../../../pipe/telefone.pipe";
+import { CardHeaderComponent } from "src/app/components/card-header/card-header.component";
 
 @Component({
   selector: 'app-listar-clientes',
@@ -32,7 +33,8 @@ import { TelefonePipe } from "../../../pipe/telefone.pipe";
     RouterModule,
     TemPermissaoDirective,
     InputPesquisaComponent,
-    TelefonePipe
+    TelefonePipe,
+    CardHeaderComponent
 ],
   templateUrl: './listar-cliente.component.html'
 })

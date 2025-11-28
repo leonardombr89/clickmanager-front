@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormControl } from '@angular/forms';
-import { Router, ActivatedRoute } from '@angular/router';
+import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -17,12 +17,14 @@ import { InputTelefoneComponent } from "../../../components/inputs/input-telefon
 import { InputEmailComponent } from "../../../components/inputs/input-email/input-custom.component";
 import { InputDocumentoComponent } from "../../../components/inputs/input-documento/input-documento.component";
 import { EnderecoFormComponent } from 'src/app/components/endereco-form/endereco-form.component';
+import { CardHeaderComponent } from "src/app/components/card-header/card-header.component";
 
 @Component({
   selector: 'app-form-cliente',
   standalone: true,
   imports: [
     CommonModule,
+    RouterModule,
     ReactiveFormsModule,
     MatCardModule,
     MatFormFieldModule,
@@ -33,7 +35,8 @@ import { EnderecoFormComponent } from 'src/app/components/endereco-form/endereco
     InputTelefoneComponent,
     InputEmailComponent,
     EnderecoFormComponent,
-    InputDocumentoComponent
+    InputDocumentoComponent,
+    CardHeaderComponent
 ],
   templateUrl: './form-cliente.component.html'
 })

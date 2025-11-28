@@ -1,16 +1,17 @@
 <mat-card class="cardWithShadow">
-    <div class="p-24">
-        <mat-card-title class="m-b-0">
-            {{ isEditMode ? 'Editar Cor' : 'Nova Cor' }}
-        </mat-card-title>
-    </div>
+
+    <!-- Cabeçalho padrão com botão voltar -->
+    <app-card-header [titulo]="isEditMode ? 'Editar Cor' : 'Nova Cor'" botaoTexto="Voltar" botaoIcone="arrow_back"
+        [botaoRota]="['/page/cadastro-tecnico/cores']" [mostrarDivisor]="true">
+    </app-card-header>
 
     <mat-card-content>
+
         <form [formGroup]="form" (ngSubmit)="onSubmit()">
 
-            <!-- Nome da Cor -->
+            <!-- Nome -->
             <mat-label class="f-s-14 f-w-600 m-b-8 d-block">Nome</mat-label>
-            <mat-form-field appearance="outline" class="w-100">
+            <mat-form-field appearance="outline" class="w-100 m-b-16">
                 <input matInput formControlName="nome" placeholder="Digite o nome da cor" (blur)="updateErrorMessage()"
                     required />
                 @if (form.get('nome')?.invalid) {
@@ -18,9 +19,9 @@
                 }
             </mat-form-field>
 
-            <!-- Descrição da Cor -->
+            <!-- Descrição -->
             <mat-label class="f-s-14 f-w-600 m-b-8 d-block">Descrição</mat-label>
-            <mat-form-field appearance="outline" class="w-100">
+            <mat-form-field appearance="outline" class="w-100 m-b-16">
                 <input matInput formControlName="descricao" placeholder="Digite uma descrição"
                     (blur)="updateErrorMessage()" required />
                 @if (form.get('descricao')?.invalid) {
@@ -28,19 +29,31 @@
                 }
             </mat-form-field>
 
-            <!-- Ativo (somente no modo edição) -->
+            <!-- Ativo (somente edição) -->
             @if (isEditMode) {
-            <div class="m-t-16 m-b-16">
+            <div class="m-t-16 m-b-24">
                 <mat-slide-toggle formControlName="ativo">
                     {{ form.get('ativo')?.value ? 'Cor Ativa' : 'Cor Inativa' }}
                 </mat-slide-toggle>
             </div>
             }
 
-            <!-- Botão -->
-            <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid">
-                {{ isEditMode ? 'Atualizar' : 'Salvar' }}
-            </button>
+            <!-- Botões -->
+            <div class="m-t-30 d-flex gap-12 flex-wrap">
+
+                <button mat-flat-button class="bg-error text-white" type="button"
+                    [routerLink]="['/page/cadastro-tecnico/cores']">
+                    Cancelar
+                </button>
+
+                <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid">
+                    {{ isEditMode ? 'Atualizar' : 'Salvar' }}
+                </button>
+
+            </div>
+
         </form>
+
     </mat-card-content>
+
 </mat-card>

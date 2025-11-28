@@ -23,16 +23,20 @@ import { CalculadoraConfigService } from '../calculadora-config.service';
 import { CalculadoraConfigResponse } from 'src/app/models/calculadora/calculadora-config-response.model';
 import { CalculadoraConfigRequest } from 'src/app/models/calculadora/calculadora-config-request.model';
 import { ProdutoService } from '../../cadastro-tecnico/services/produto.service';
+import { CardHeaderComponent } from "src/app/components/card-header/card-header.component";
+import { MatDivider } from "@angular/material/divider";
 
 @Component({
     selector: 'app-calculadora-config',
     standalone: true,
     imports: [
-        CommonModule, ReactiveFormsModule,
-        MatCardModule, MatTabsModule, MatFormFieldModule, MatInputModule,
-        MatSlideToggleModule, MatSelectModule, MatButtonModule,
-        MatProgressSpinnerModule, MatIconModule
-    ],
+    CommonModule, ReactiveFormsModule,
+    MatCardModule, MatTabsModule, MatFormFieldModule, MatInputModule,
+    MatSlideToggleModule, MatSelectModule, MatButtonModule,
+    MatProgressSpinnerModule, MatIconModule,
+    CardHeaderComponent,
+    MatDivider
+],
     templateUrl: './calculadora-config.component.html',
     styleUrls: ['./calculadora-config.component.scss']
 })

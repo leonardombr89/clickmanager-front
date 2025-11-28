@@ -120,24 +120,8 @@ export const navItems: NavItem[] = [
         displayName: 'Gerenciar Pedidos',
         iconName: 'file-text',
         bgcolor: 'primary',
-        route: '/pedidos',
-        requiredPermission: ['PEDIDOS_VER', 'PEDIDOS_CADASTRAR', 'PEDIDOS_EDITAR', 'PEDIDOS_EXCLUIR'],
-        children: [
-            {
-                displayName: 'Lista de Pedidos',
-                iconName: 'point',
-                bgcolor: 'tranparent',
-                route: '/page/pedido',
-                requiredPermission: ['PEDIDOS_VER']
-            },
-            {
-                displayName: 'Novo Pedido',
-                iconName: 'point',
-                bgcolor: 'tranparent',
-                route: '/page/pedido/criar',
-                requiredPermission: ['PEDIDOS_CADASTRAR']
-            }
-        ]
+        route: '/page/pedido',
+        requiredPermission: ['PEDIDOS_VER', 'PEDIDOS_CADASTRAR']
     },
     {
         navCap: 'Clientes',

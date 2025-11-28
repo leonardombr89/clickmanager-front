@@ -1,35 +1,50 @@
 <mat-card class="cardWithShadow">
-  <div class="p-24">
-    <mat-card-title class="m-b-0">
-      {{ isEditMode ? 'Editar Serviço' : 'Novo Serviço' }}
-    </mat-card-title>
-  </div>
+
+  <!-- Cabeçalho padrão com botão voltar -->
+  <app-card-header [titulo]="isEditMode ? 'Editar Serviço' : 'Novo Serviço'" botaoTexto="Voltar" botaoIcone="arrow_back"
+    [botaoRota]="['/page/cadastro-tecnico/servico']" [mostrarDivisor]="true">
+  </app-card-header>
 
   <mat-card-content>
+
     <form [formGroup]="form" (ngSubmit)="onSubmit()">
 
-      <app-input-texto-restrito [control]="nomeControl" label="Nome" placeholder="Digite o nome do serviço" />
+      <!-- Nome -->
+      <app-input-texto-restrito [control]="nomeControl" label="Nome" placeholder="Digite o nome do serviço">
+      </app-input-texto-restrito>
 
-      <app-input-textarea [control]="descricaoControl" label="Descrição"
-        placeholder="Digite uma descrição do serviço" />
+      <!-- Descrição -->
+      <app-input-textarea [control]="descricaoControl" label="Descrição" placeholder="Digite uma descrição do serviço">
+      </app-input-textarea>
 
-      <app-preco-selector *ngIf="precoControl" [formGroup]="precoControl"
-        [tiposDisponiveis]="['FIXO']"></app-preco-selector>
+      <!-- Preço -->
+      <app-preco-selector *ngIf="precoControl" [formGroup]="precoControl" [tiposDisponiveis]="['FIXO']">
+      </app-preco-selector>
 
-      <div class="m-t-16 m-b-16" *ngIf="isEditMode">
+      <!-- Ativo (somente no modo edição) -->
+      @if (isEditMode) {
+      <div class="m-t-16 m-b-24">
         <mat-slide-toggle formControlName="ativo">
           {{ form.get('ativo')?.value ? 'Serviço Ativo' : 'Serviço Inativo' }}
         </mat-slide-toggle>
       </div>
+      }
 
-      <!-- Botão de envio -->
-      <div class="m-t-24">
-        <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid">
+      <!-- Botões -->
+      <div class="d-flex gap-12 m-t-24">
+        <!-- Cancelar -->
+        <button mat-flat-button class="bg-error text-white" type="button"
+          [routerLink]="['/page/cadastro-tecnico/servico']">
+          Cancelar
+        </button>
+
+        <!-- Salvar -->
+        <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid">
           {{ isEditMode ? 'Atualizar' : 'Salvar' }}
         </button>
       </div>
 
     </form>
-    
+
   </mat-card-content>
 </mat-card>

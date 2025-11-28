@@ -15,6 +15,7 @@ import { ConfirmDialogComponent } from 'src/app/components/dialog/confirm-dialog
 import { MaterialService } from '../../services/material.service';
 import { Material } from 'src/app/models/material.model';
 import { TemPermissaoDirective } from 'src/app/diretivas/tem-permissao.directive';
+import { CardHeaderComponent } from "src/app/components/card-header/card-header.component";
 
 @Component({
   selector: 'app-listar-material',
@@ -30,8 +31,9 @@ import { TemPermissaoDirective } from 'src/app/diretivas/tem-permissao.directive
     MatButtonModule,
     TablerIconsModule,
     RouterModule,
-    TemPermissaoDirective
-  ],
+    TemPermissaoDirective,
+    CardHeaderComponent
+],
   templateUrl: './listar-material.component.html',
   styleUrl: './listar-material.component.scss'
 })

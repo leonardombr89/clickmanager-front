@@ -12,6 +12,7 @@ import { InputPesquisaComponent } from 'src/app/components/inputs/input-pesquisa
 import { PedidoService } from '../pedido.service';
 import { PedidoListagem } from 'src/app/models/pedido/pedido-listagem.model';
 import { TemPermissaoDirective } from 'src/app/diretivas/tem-permissao.directive';
+import { CardHeaderComponent } from "src/app/components/card-header/card-header.component";
 
 @Component({
   selector: 'app-listar-pedido',
@@ -28,8 +29,9 @@ import { TemPermissaoDirective } from 'src/app/diretivas/tem-permissao.directive
     MatPaginatorModule,
     MatChipsModule,
     InputPesquisaComponent,
-    TemPermissaoDirective
-  ],
+    TemPermissaoDirective,
+    CardHeaderComponent
+],
   animations: [
     trigger('detailExpand', [
       state('collapsed', style({ height: '0px', minHeight: '0', visibility: 'hidden' })),

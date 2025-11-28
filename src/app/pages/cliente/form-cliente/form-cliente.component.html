@@ -1,47 +1,66 @@
 <mat-card class="cardWithShadow">
-    <div class="p-24">
-        <mat-card-title class="m-b-0">
-            {{ isEditMode ? 'Editar Cliente' : 'Novo Cliente' }}
-        </mat-card-title>
-    </div>
+
+    <!-- Cabeçalho padrão com botão Voltar -->
+    <app-card-header [titulo]="isEditMode ? 'Editar Cliente' : 'Novo Cliente'" botaoTexto="Voltar"
+        botaoIcone="arrow_back" botaoCor="primary" [botaoRota]="['/page/cliente']" [mostrarDivisor]="true">
+    </app-card-header>
 
     <mat-card-content>
+
         <form [formGroup]="form" (ngSubmit)="onSubmit()">
 
             <!-- Dados Pessoais -->
-            <mat-card class="cardWithShadow m-b-16">
+            <mat-card class="cardWithShadow m-t-24 m-b-16">
                 <mat-card-content>
-                    <mat-card-title>Dados Pessoais</mat-card-title>
-                    <div class="row g-3 m-t-32">
+
+                    <mat-card-title class="f-s-16 f-w-600 m-b-16">
+                        Dados Pessoais
+                    </mat-card-title>
+
+                    <div class="row g-3">
                         <div class="col-md-6">
                             <app-input-texto-restrito [control]="nomeControl" label="Nome"
-                                placeholder="Digite o nome do cliente" />
+                                placeholder="Digite o nome do cliente">
+                            </app-input-texto-restrito>
                         </div>
+
                         <div class="col-md-6">
-                            <app-input-email [control]="emailControl" label="E-mail" placeholder="Digite o e-mail" />
+                            <app-input-email [control]="emailControl" label="E-mail" placeholder="Digite o e-mail">
+                            </app-input-email>
                         </div>
+
                         <div class="col-md-6">
                             <app-input-telefone [control]="telefoneControl" label="Telefone"
-                                placeholder="Digite o telefone do cliente" />
+                                placeholder="Digite o telefone do cliente">
+                            </app-input-telefone>
                         </div>
+
                         <div class="col-md-6">
                             <app-input-documento [control]="documentoControl" label="CPF ou CNPJ"
                                 placeholder="Digite o CPF ou CNPJ">
                             </app-input-documento>
                         </div>
                     </div>
+
                 </mat-card-content>
             </mat-card>
 
             <!-- Endereço -->
             <app-endereco-form (formReady)="setEnderecoGroup($event)"></app-endereco-form>
 
-            <!-- Botão de envio -->
-            <div class="m-t-24">
-                <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid">
+            <!-- Botões -->
+            <div class="m-t-24 d-flex gap-2 flex-wrap">
+                <a mat-flat-button class="bg-error text-white" [routerLink]="['/page/cliente']">
+                    Cancelar
+                </a>
+
+                <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid">
                     {{ isEditMode ? 'Atualizar' : 'Salvar' }}
                 </button>
             </div>
+
         </form>
+
     </mat-card-content>
+
 </mat-card>

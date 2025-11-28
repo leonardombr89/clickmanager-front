@@ -34,6 +34,7 @@ import {
   animate
 } from '@angular/animations';
 import { ItemTipo } from 'src/app/models/pedido/item-tipo.enum';
+import { CardHeaderComponent } from "src/app/components/card-header/card-header.component";
 
 @Component({
   selector: 'app-form-pedido',
@@ -48,8 +49,9 @@ import { ItemTipo } from 'src/app/models/pedido/item-tipo.enum';
     SharedComponentsModule,
     InputTextareaComponent,
     InputOptionsComponent,
-    InputDataComponent
-  ],
+    InputDataComponent,
+    CardHeaderComponent
+],
   templateUrl: './form-pedido.component.html',
   animations: [
     trigger('expandCollapse', [

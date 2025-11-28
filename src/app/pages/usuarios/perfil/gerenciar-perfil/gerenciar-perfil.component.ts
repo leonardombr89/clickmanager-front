@@ -20,6 +20,7 @@ import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { ImagemUtil } from 'src/app/utils/imagem-util';
 import { TrocarPerfilDialogComponent } from '../modal-trocar-perfil/trocar-perfil-dialog.component';
 import { ConfirmDialogComponent } from 'src/app/components/dialog/confirm-dialog/confirm-dialog.component';
+import { CardHeaderComponent } from "src/app/components/card-header/card-header.component";
 
 interface Perfil {
   id?: number;
@@ -44,8 +45,9 @@ interface Perfil {
     MatListModule,
     MatDividerModule,
     TablerIconsModule,
-    MatTableModule
-  ]
+    MatTableModule,
+    CardHeaderComponent
+]
 })
 export class GerenciarPerfilComponent implements OnInit {
   form!: FormGroup;

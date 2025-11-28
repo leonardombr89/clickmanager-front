@@ -1,89 +1,92 @@
 <mat-card class="cardWithShadow">
-    <mat-card-title>
-      <div class="d-flex justify-content-between align-items-center flex-wrap p-16">
-        <div class="f-s-20 f-w-600 text-primary-dark">Formatos</div>
-        <button mat-raised-button color="primary" [routerLink]="['/page/cadastro-tecnico/formatos/criar']"
-          *temPermissao="'GERENCIAR_PRODUTOS'">
-          <mat-icon class="m-r-4">add</mat-icon>
-          Novo Formato
-        </button>
-      </div>
-    </mat-card-title>
-  
-    <mat-card-content>
-      <!-- Filtros de status -->
-      <div class="m-b-16">
-        <label class="f-s-14 f-w-600 d-block m-b-8">Status</label>
-        <mat-chip-listbox aria-label="Filtro de status" class="m-b-16">
-          <mat-chip-option [selected]="filtroStatus === true" (click)="aplicarFiltro(true)" color="primary">
-            Ativos
-          </mat-chip-option>
-          <mat-chip-option [selected]="filtroStatus === false" (click)="aplicarFiltro(false)" color="warn">
-            Inativos
-          </mat-chip-option>
-          <mat-chip-option [selected]="filtroStatus === null" (click)="removerFiltro()">
-            Todos
-          </mat-chip-option>
-        </mat-chip-listbox>
-      </div>
-  
-      <!-- Tabela de formatos -->
-      <div class="table-responsive">
-        <table mat-table [dataSource]="formatos" class="mat-elevation-z1 no-wrap m-t-0 v-middle w-100">
-  
-          <!-- Nome -->
-          <ng-container matColumnDef="nome">
-            <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">Nome</th>
-            <td mat-cell *matCellDef="let f" class="f-s-14">{{ f.nome }}</td>
-          </ng-container>
-  
-          <!-- Largura x Altura -->
-          <ng-container matColumnDef="tamanho">
-            <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">Tamanho</th>
-            <td mat-cell *matCellDef="let f" class="f-s-14">
-              {{ f.larguraCm }}cm x {{ f.alturaCm }}cm
-            </td>
-          </ng-container>
-  
-          <!-- Largura Útil x Altura Útil -->
-          <ng-container matColumnDef="areaUtil">
-            <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">Área Útil</th>
-            <td mat-cell *matCellDef="let f" class="f-s-14">
-              {{ f.larguraUtilCm }}cm x {{ f.alturaUtilCm }}cm
-            </td>
-          </ng-container>
-  
-          <!-- Status -->
-          <ng-container matColumnDef="status">
-            <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">Status</th>
-            <td mat-cell *matCellDef="let f" class="f-s-14">
-              <span [ngClass]="f.ativo ? 'text-success' : 'text-danger'">
-                {{ f.ativo ? 'Ativo' : 'Inativo' }}
-              </span>
-            </td>
-          </ng-container>
-  
-          <!-- Ações -->
-          <ng-container matColumnDef="acoes">
-            <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">Ações</th>
-            <td mat-cell *matCellDef="let f" class="action-link">
-              <a (click)="editar(f)" class="m-r-10 cursor-pointer">
-                <i-tabler name="edit" class="icon-18"></i-tabler>
-              </a>
-              <a (click)="excluir(f)" class="cursor-pointer">
-                <i-tabler name="trash" class="icon-18"></i-tabler>
-              </a>
-            </td>
-          </ng-container>
-  
-          <tr mat-header-row *matHeaderRowDef="colunasExibidas"></tr>
-          <tr mat-row *matRowDef="let row; columns: colunasExibidas"></tr>
-        </table>
-  
-        <mat-paginator [length]="totalFormatos" [pageSize]="tamanhoPagina" (page)="onPaginaAlterada($event)"
-          showFirstLastButtons>
-        </mat-paginator>
-      </div>
-    </mat-card-content>
-  </mat-card>
-  
+
+  <!-- Cabeçalho padrão -->
+  <app-card-header titulo="Formatos" botaoTexto="Novo Formato" botaoIcone="add"
+    [botaoRota]="['/page/cadastro-tecnico/formatos/criar']" botaoCor="primary" permissao="GERENCIAR_PRODUTOS"
+    [mostrarDivisor]="true">
+  </app-card-header>
+
+  <mat-card-content>
+
+    <!-- Filtros de status -->
+    <div class="m-b-16">
+      <label class="f-s-14 f-w-600 d-block m-b-8">Status</label>
+
+      <mat-chip-listbox aria-label="Filtro de status" class="m-b-16">
+        <mat-chip-option [selected]="filtroStatus === true" (click)="aplicarFiltro(true)" color="primary">
+          Ativos
+        </mat-chip-option>
+
+        <mat-chip-option [selected]="filtroStatus === false" (click)="aplicarFiltro(false)" color="warn">
+          Inativos
+        </mat-chip-option>
+
+        <mat-chip-option [selected]="filtroStatus === null" (click)="removerFiltro()">
+          Todos
+        </mat-chip-option>
+      </mat-chip-listbox>
+    </div>
+
+    <!-- Tabela de formatos -->
+    <div class="table-responsive">
+      <table mat-table [dataSource]="formatos" class="mat-elevation-z1 no-wrap m-t-0 v-middle w-100">
+
+        <!-- Nome -->
+        <ng-container matColumnDef="nome">
+          <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">Nome</th>
+          <td mat-cell *matCellDef="let f" class="f-s-14">
+            {{ f.nome }}
+          </td>
+        </ng-container>
+
+        <!-- Tamanho -->
+        <ng-container matColumnDef="tamanho">
+          <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">Tamanho</th>
+          <td mat-cell *matCellDef="let f" class="f-s-14">
+            {{ f.larguraCm }}cm x {{ f.alturaCm }}cm
+          </td>
+        </ng-container>
+
+        <!-- Área útil -->
+        <ng-container matColumnDef="areaUtil">
+          <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">Área Útil</th>
+          <td mat-cell *matCellDef="let f" class="f-s-14">
+            {{ f.larguraUtilCm }}cm x {{ f.alturaUtilCm }}cm
+          </td>
+        </ng-container>
+
+        <!-- Status -->
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">Status</th>
+          <td mat-cell *matCellDef="let f" class="f-s-14">
+            <span [ngClass]="f.ativo ? 'text-success' : 'text-danger'">
+              {{ f.ativo ? 'Ativo' : 'Inativo' }}
+            </span>
+          </td>
+        </ng-container>
+
+        <!-- Ações -->
+        <ng-container matColumnDef="acoes">
+          <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">Ações</th>
+          <td mat-cell *matCellDef="let f" class="action-link">
+            <a (click)="editar(f)" class="m-r-10 cursor-pointer">
+              <i-tabler name="edit" class="icon-18"></i-tabler>
+            </a>
+            <a (click)="excluir(f)" class="cursor-pointer">
+              <i-tabler name="trash" class="icon-18"></i-tabler>
+            </a>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="colunasExibidas"></tr>
+        <tr mat-row *matRowDef="let row; columns: colunasExibidas"></tr>
+      </table>
+
+      <mat-paginator [length]="totalFormatos" [pageSize]="tamanhoPagina" (page)="onPaginaAlterada($event)"
+        showFirstLastButtons>
+      </mat-paginator>
+    </div>
+
+  </mat-card-content>
+
+</mat-card>

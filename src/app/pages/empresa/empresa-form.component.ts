@@ -21,6 +21,7 @@ import { EmpresaFormService } from './empresa-form.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { filter, take } from 'rxjs';
 import { Empresa } from 'src/app/models/empresa.model';
+import { CardHeaderComponent } from "src/app/components/card-header/card-header.component";
 
 
 @Component({
@@ -40,8 +41,9 @@ import { Empresa } from 'src/app/models/empresa.model';
     MatCheckboxModule,
     MatRadioModule,
     TablerIconsModule,
-    NgxMaskDirective
-  ],
+    NgxMaskDirective,
+    CardHeaderComponent
+],
   providers: [provideNgxMask()]
 })
 export class EmpresaFormComponent implements OnInit {
