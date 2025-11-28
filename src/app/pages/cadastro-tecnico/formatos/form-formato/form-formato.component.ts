@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
@@ -10,19 +10,22 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { Formato } from 'src/app/models/formato.model';
 import { FormatoService } from '../../services/formato.service';
+import { CardHeaderComponent } from "src/app/components/card-header/card-header.component";
 
 @Component({
   selector: 'app-form-formato',
   standalone: true,
   imports: [
     CommonModule,
+    RouterModule,
     ReactiveFormsModule,
     MatCardModule,
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
-    MatSlideToggleModule
-  ],
+    MatSlideToggleModule,
+    CardHeaderComponent
+],
   templateUrl: './form-formato.component.html',
   styleUrl: './form-formato.component.scss'
 })

@@ -16,6 +16,7 @@ import { InputPesquisaComponent } from 'src/app/components/inputs/input-pesquisa
 import { ServicoService } from '../../services/servico.service';
 import { ServicoListagem } from 'src/app/models/servico/servico-listagem.model';
 import { ConfirmDialogComponent } from 'src/app/components/dialog/confirm-dialog/confirm-dialog.component';
+import { CardHeaderComponent } from "src/app/components/card-header/card-header.component";
 
 @Component({
   selector: 'app-listar-servicos',
@@ -32,8 +33,9 @@ import { ConfirmDialogComponent } from 'src/app/components/dialog/confirm-dialog
     TablerIconsModule,
     RouterModule,
     TemPermissaoDirective,
-    InputPesquisaComponent
-  ],
+    InputPesquisaComponent,
+    CardHeaderComponent
+],
   templateUrl: './listar-servicos.component.html'
 })
 export class ListarServicoComponent implements OnInit {

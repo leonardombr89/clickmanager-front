@@ -1,60 +1,87 @@
 <mat-card class="cardWithShadow">
-  <mat-tab-group mat-stretch-tabs="false" animationDuration="0ms">
-    <!-- Única aba por enquanto -->
-    <mat-tab label="SmartCalc">
-      <form [formGroup]="form" (ngSubmit)="onSubmit()">
-        <mat-card-content class="p-y-24">
-          <div class="row">
-            <div class="col-sm-12">
-              <mat-card class="cardWithShadow">
-                <mat-card-content>
-                  <mat-card-title>Configurações do SmartCalc</mat-card-title>
-                  <mat-card-subtitle class="f-s-14">Selecione os produtos e ative/desative o SmartCalc</mat-card-subtitle>
 
-                  <div class="row m-t-16">
-                    <div class="col-lg-6">
-                      <mat-label class="f-s-14 f-w-600 m-b-8 d-block">Ativo</mat-label>
-                      <mat-slide-toggle formControlName="ativo">
-                        SmartCalc Ativo
-                      </mat-slide-toggle>
-                    </div>
+  <!-- Cabeçalho padrão sem botão -->
+  <app-card-header titulo="Configurações do SmartCalc" [mostrarDivisor]="true">
+  </app-card-header>
 
-                    <div class="col-lg-6" *ngIf="carregando(); else produtosTpl">
-                      <div class="d-flex align-items-center" style="height: 48px;">
-                        <mat-progress-spinner mode="indeterminate" diameter="28"></mat-progress-spinner>
-                        <span class="m-l-12">Carregando produtos...</span>
-                      </div>
-                    </div>
+  <mat-card-content>
 
-                    <ng-template #produtosTpl>
-                      <div class="col-lg-6">
-                        <mat-label class="f-s-14 f-w-600 m-b-8 d-block">Produtos habilitados *</mat-label>
-                        <mat-form-field appearance="outline" class="w-100">
-                          <mat-select formControlName="produtoIds" multiple>
-                            <mat-option *ngFor="let p of produtoOptions; trackBy: trackById" [value]="p.id">
-                              {{ p.nome }}
-                            </mat-option>
-                          </mat-select>
-                        </mat-form-field>
-                      </div>
-                    </ng-template>
-                  </div>
-                </mat-card-content>
-              </mat-card>
-            </div>
-          </div>
-        </mat-card-content>
+    <!-- Texto explicativo em uma linha só -->
+    <div class="row">
+      <div class="col-12">
+        <p class="f-s-18 f-w-600 text-muted m-t-8 m-b-16">
+          Use as opções abaixo para ativar o SmartCalc e definir quais produtos poderão
+          utilizar o cálculo automático no momento do orçamento/pedido.
+        </p>
+      </div>
+    </div>
 
-        <div class="text-right p-24 p-t-0">
-          <button mat-flat-button class="m-r-8" type="submit" [disabled]="salvando()">
-            <mat-icon>save</mat-icon>
-            Salvar
-          </button>
-          <button mat-flat-button class="bg-error text-white" type="button">
-            Cancelar
-          </button>
+    <mat-divider class="m-b-24"></mat-divider>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+
+      <div class="row">
+
+        <!-- Coluna: Ativação -->
+        <div class="col-xl-4 col-lg-5 col-md-6 col-sm-12 m-b-24">
+          <mat-label class="f-s-14 f-w-600 m-b-8 d-block">
+            Ativação do SmartCalc
+          </mat-label>
+
+          <mat-slide-toggle formControlName="ativo">
+            SmartCalc ativo para esta empresa
+          </mat-slide-toggle>
+
+          <small class="text-muted f-s-12 d-block m-t-4">
+            Quando desativado, o SmartCalc não será exibido nem utilizado nos fluxos de cálculo.
+          </small>
         </div>
-      </form>
-    </mat-tab>
-  </mat-tab-group>
+
+        <!-- Coluna: Produtos (spinner ou select) -->
+        <div class="col-xl-8 col-lg-7 col-md-6 col-sm-12 m-b-24">
+          <ng-container *ngIf="carregando(); else produtosTpl">
+            <div class="d-flex align-items-center" style="height: 48px;">
+              <mat-progress-spinner mode="indeterminate" diameter="28"></mat-progress-spinner>
+              <span class="m-l-12">Carregando produtos...</span>
+            </div>
+          </ng-container>
+
+          <ng-template #produtosTpl>
+            <mat-label class="f-s-14 f-w-600 m-b-8 d-block">
+              Produtos com SmartCalc habilitado *
+            </mat-label>
+
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-select formControlName="produtoIds" multiple>
+                <mat-option *ngFor="let p of produtoOptions; trackBy: trackById" [value]="p.id">
+                  {{ p.nome }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <small class="text-muted f-s-12 d-block">
+              Somente os produtos selecionados aqui aparecerão como opção no SmartCalc.
+            </small>
+            
+          </ng-template>
+        </div>
+
+      </div>
+
+      <!-- Botões -->
+      <div class="text-right m-t-8">
+        <button mat-flat-button color="primary" class="m-r-8" type="submit" [disabled]="salvando()">
+          <mat-icon class="m-r-4">save</mat-icon>
+          Salvar
+        </button>
+
+        <button mat-flat-button class="bg-error text-white" type="button" routerLink="/page/configuracoes">
+          Cancelar
+        </button>
+      </div>
+
+    </form>
+
+  </mat-card-content>
+
 </mat-card>

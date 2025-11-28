@@ -1,84 +1,114 @@
-<mat-card class="cardWithShadow">
-    <mat-tab-group mat-stretch-tabs="false" animationDuration="0ms">
-        <!-- Aba Empresa -->
-        <mat-tab label="Empresa">
-            <form [formGroup]="form" (ngSubmit)="onSubmit()">
-                <mat-card-content class="p-y-24">
-                    <div class="row">
+<mat-card class="cardWithShadow empresa-config-card">
+
+    <app-card-header titulo="Configurações da Empresa" [mostrarDivisor]="true">
+    </app-card-header>
+
+    <mat-card-content>
+
+        <mat-tab-group mat-stretch-tabs="false" animationDuration="0ms" dynamicHeight>
+            <!-- Aba Empresa -->
+            <mat-tab label="Empresa">
+                <form [formGroup]="form" (ngSubmit)="onSubmit()">
+
+                    <!-- Dados da Empresa -->
+                    <div class="row m-t-24">
                         <div class="col-sm-12">
                             <mat-card class="cardWithShadow">
                                 <mat-card-content>
                                     <mat-card-title>Dados da Empresa</mat-card-title>
-                                    <mat-card-subtitle class="f-s-14">Preencha as informações abaixo</mat-card-subtitle>
+                                    <mat-card-subtitle class="f-s-14">
+                                        Preencha as informações gerais da sua empresa.
+                                    </mat-card-subtitle>
 
                                     <div class="row m-t-16">
                                         <div class="col-lg-6">
-                                            <mat-label class="f-s-14 f-w-600 m-b-8 d-block">Nome da Empresa
-                                                *</mat-label>
+
+                                            <mat-label class="f-s-14 f-w-600 m-b-8 d-block">
+                                                Nome da Empresa *
+                                            </mat-label>
                                             <mat-form-field appearance="outline" class="w-100">
                                                 <input matInput formControlName="nome" required />
                                             </mat-form-field>
 
-                                            <mat-label class="f-s-14 f-w-600 m-b-8 d-block">Telefone *</mat-label>
+                                            <mat-label class="f-s-14 f-w-600 m-b-8 d-block">
+                                                Telefone *
+                                            </mat-label>
                                             <mat-form-field appearance="outline" class="w-100">
-                                                <input matInput formControlName="telefone"  mask="(00) 00000-0000" required />
+                                                <input matInput formControlName="telefone" mask="(00) 00000-0000"
+                                                    required />
                                             </mat-form-field>
 
-                                            <mat-label class="f-s-14 f-w-600 m-b-8 d-block">Email *</mat-label>
+                                            <mat-label class="f-s-14 f-w-600 m-b-8 d-block">
+                                                Email *
+                                            </mat-label>
                                             <mat-form-field appearance="outline" class="w-100">
                                                 <input matInput formControlName="email" required />
                                             </mat-form-field>
 
-                                            <mat-label class="f-s-14 f-w-600 m-b-8 d-block">CNPJ *</mat-label>
+                                            <mat-label class="f-s-14 f-w-600 m-b-8 d-block">
+                                                CNPJ *
+                                            </mat-label>
                                             <mat-form-field appearance="outline" class="w-100">
-                                                <input matInput formControlName="cnpj" mask="00.000.000/0000-00" required />
+                                                <input matInput formControlName="cnpj" mask="00.000.000/0000-00"
+                                                    required />
                                             </mat-form-field>
 
-                                            <mat-label class="f-s-14 f-w-600 m-b-8 d-block">Inscrição
-                                                Estadual</mat-label>
+                                            <mat-label class="f-s-14 f-w-600 m-b-8 d-block">
+                                                Inscrição Estadual
+                                            </mat-label>
                                             <mat-form-field appearance="outline" class="w-100">
                                                 <input matInput formControlName="inscricaoEstadual" />
                                             </mat-form-field>
 
-                                            <mat-label class="f-s-14 f-w-600 m-b-8 d-block">Horário de
-                                                Funcionamento</mat-label>
+                                            <mat-label class="f-s-14 f-w-600 m-b-8 d-block">
+                                                Horário de Funcionamento
+                                            </mat-label>
                                             <mat-form-field appearance="outline" class="w-100">
                                                 <input matInput formControlName="horario" />
                                             </mat-form-field>
+
                                         </div>
 
+                                        <!-- Logo -->
                                         <div class="col-lg-6">
-                                            <mat-card-title class="m-t-16">Logo da Empresa</mat-card-title>
-                                            <mat-card-subtitle class="f-s-14">Envie a logomarca da empresa
-                                                aqui</mat-card-subtitle>
+                                            <mat-card-title class="m-t-16">
+                                                Logo da Empresa
+                                            </mat-card-title>
+                                            <mat-card-subtitle class="f-s-14">
+                                                Envie a logomarca da empresa para personalizar o sistema.
+                                            </mat-card-subtitle>
 
                                             <div class="text-center m-t-24">
                                                 <div class="d-inline-block text-center p-2 bg-light rounded border"
                                                     style="width: 340px; height: 216px;">
 
-                                                    <img [src]="imagemPreview || IMAGEM_PADRAO"
-                                                        [style.width.px]="340" [style.height.px]="216"
-                                                        class="img-fluid object-fit-contain" alt="Logo da empresa" />
-                                                        
+                                                    <img [src]="imagemPreview || IMAGEM_PADRAO" [style.width.px]="340"
+                                                        [style.height.px]="216" class="img-fluid object-fit-contain"
+                                                        alt="Logo da empresa" />
                                                 </div>
 
                                                 <div class="m-t-16">
-                                                    <input type="file" accept="image/png,image/jpeg,image/gif" hidden
-                                                        #fileInput (change)="onFileSelected($event)" />
+                                                    <input #fileInput type="file"
+                                                        accept="image/png,image/jpeg,image/gif" hidden
+                                                        (change)="onFileSelected($event)" />
 
                                                     <button type="button" mat-flat-button color="primary" class="m-r-8"
-                                                        (click)="fileInput.click()">Selecionar</button>
+                                                        (click)="fileInput.click()">
+                                                        Selecionar
+                                                    </button>
 
                                                     <button type="button" mat-stroked-button color="warn"
-                                                        (click)="resetarImagem(fileInput)">Redefinir</button>
+                                                        (click)="resetarImagem(fileInput)">
+                                                        Redefinir
+                                                    </button>
                                                 </div>
 
                                                 <span class="f-s-14 m-t-16 d-block">
-                                                    Dimensões ideais: <strong>340x216px</strong>. Formatos permitidos:
-                                                    JPG, GIF ou PNG.
+                                                    Dimensões ideais:
+                                                    <strong>340x216px</strong>.
+                                                    Formatos permitidos: JPG, GIF ou PNG.
                                                 </span>
                                             </div>
-
                                         </div>
                                     </div>
                                 </mat-card-content>
@@ -86,91 +116,115 @@
                         </div>
                     </div>
 
+                    <!-- Endereço -->
                     <div class="row m-t-24">
                         <div class="col-sm-12">
                             <mat-card class="cardWithShadow">
                                 <mat-card-content>
                                     <mat-card-title>Endereço</mat-card-title>
-                                    <mat-card-subtitle class="f-s-14">Informe o endereço da empresa</mat-card-subtitle>
-                                  
+                                    <mat-card-subtitle class="f-s-14">
+                                        Informe o endereço completo da empresa.
+                                    </mat-card-subtitle>
+
                                     <div formGroupName="enderecoRequest">
-                                      <div class="row m-t-16">
-                                        <div class="col-lg-6">
-                                          <mat-label class="f-s-14 f-w-600 m-b-8 d-block">CEP *</mat-label>
-                                          <mat-form-field appearance="outline" class="w-100">
-                                            <input matInput formControlName="cep" mask="00000-000" (blur)="buscarEnderecoPorCep()" />
-                                          </mat-form-field>
-                                  
-                                          <mat-label class="f-s-14 f-w-600 m-b-8 d-block">Complemento</mat-label>
-                                          <mat-form-field appearance="outline" class="w-100">
-                                            <input matInput formControlName="complemento" />
-                                          </mat-form-field>
-                                  
-                                          <mat-label class="f-s-14 f-w-600 m-b-8 d-block">Cidade *</mat-label>
-                                          <mat-form-field appearance="outline" class="w-100">
-                                            <input matInput formControlName="cidade" />
-                                          </mat-form-field>
-                                        </div>
-                                  
-                                        <div class="col-lg-6">
-                                          <div class="row">
-                                            <!-- Logradouro -->
-                                            <div class="col-sm-8">
-                                              <mat-label class="f-s-14 f-w-600 m-b-8 d-block">Logradouro *</mat-label>
-                                              <mat-form-field appearance="outline" class="w-100">
-                                                <input matInput formControlName="logradouro" />
-                                              </mat-form-field>
+                                        <div class="row m-t-16">
+                                            <div class="col-lg-6">
+
+                                                <mat-label class="f-s-14 f-w-600 m-b-8 d-block">
+                                                    CEP *
+                                                </mat-label>
+                                                <mat-form-field appearance="outline" class="w-100">
+                                                    <input matInput formControlName="cep" mask="00000-000"
+                                                        (blur)="buscarEnderecoPorCep()" />
+                                                </mat-form-field>
+
+                                                <mat-label class="f-s-14 f-w-600 m-b-8 d-block">
+                                                    Complemento
+                                                </mat-label>
+                                                <mat-form-field appearance="outline" class="w-100">
+                                                    <input matInput formControlName="complemento" />
+                                                </mat-form-field>
+
+                                                <mat-label class="f-s-14 f-w-600 m-b-8 d-block">
+                                                    Cidade *
+                                                </mat-label>
+                                                <mat-form-field appearance="outline" class="w-100">
+                                                    <input matInput formControlName="cidade" />
+                                                </mat-form-field>
+
                                             </div>
-                                  
-                                            <!-- Número -->
-                                            <div class="col-sm-4">
-                                              <mat-label class="f-s-14 f-w-600 m-b-8 d-block">Número *</mat-label>
-                                              <mat-form-field appearance="outline" class="w-100">
-                                                <input matInput formControlName="numero" />
-                                              </mat-form-field>
+
+                                            <div class="col-lg-6">
+                                                <div class="row">
+                                                    <div class="col-sm-8">
+                                                        <mat-label class="f-s-14 f-w-600 m-b-8 d-block">
+                                                            Logradouro *
+                                                        </mat-label>
+                                                        <mat-form-field appearance="outline" class="w-100">
+                                                            <input matInput formControlName="logradouro" />
+                                                        </mat-form-field>
+                                                    </div>
+
+                                                    <div class="col-sm-4">
+                                                        <mat-label class="f-s-14 f-w-600 m-b-8 d-block">
+                                                            Número *
+                                                        </mat-label>
+                                                        <mat-form-field appearance="outline" class="w-100">
+                                                            <input matInput formControlName="numero" />
+                                                        </mat-form-field>
+                                                    </div>
+                                                </div>
+
+                                                <mat-label class="f-s-14 f-w-600 m-b-8 d-block">
+                                                    Bairro *
+                                                </mat-label>
+                                                <mat-form-field appearance="outline" class="w-100">
+                                                    <input matInput formControlName="bairro" />
+                                                </mat-form-field>
+
+                                                <mat-label class="f-s-14 f-w-600 m-b-8 d-block">
+                                                    Estado *
+                                                </mat-label>
+                                                <mat-form-field appearance="outline" class="w-100">
+                                                    <input matInput formControlName="estado" />
+                                                </mat-form-field>
                                             </div>
-                                          </div>
-                                  
-                                          <!-- Bairro -->
-                                          <mat-label class="f-s-14 f-w-600 m-b-8 d-block">Bairro *</mat-label>
-                                          <mat-form-field appearance="outline" class="w-100">
-                                            <input matInput formControlName="bairro" />
-                                          </mat-form-field>
-                                  
-                                          <!-- Estado -->
-                                          <mat-label class="f-s-14 f-w-600 m-b-8 d-block">Estado *</mat-label>
-                                          <mat-form-field appearance="outline" class="w-100">
-                                            <input matInput formControlName="estado" />
-                                          </mat-form-field>
                                         </div>
-                                      </div>
                                     </div>
-                                  </mat-card-content>
-                                  
+                                </mat-card-content>
                             </mat-card>
                         </div>
                     </div>
-                </mat-card-content>
 
-                <div class="text-right p-24 p-t-0">
-                    <button mat-flat-button class="m-r-8" type="submit">Salvar</button>
-                    <button mat-flat-button class="bg-error text-white" type="button">Cancelar</button>
+                    <!-- Botões -->
+                    <div class="m-t-24 d-flex gap-2 flex-wrap">
+                        <button mat-flat-button class="bg-error text-white" type="button">
+                            Cancelar
+                        </button>
+
+                        <button mat-flat-button color="primary" type="submit">
+                            Salvar
+                        </button>
+                    </div>
+
+                </form>
+            </mat-tab>
+
+            <!-- Aba Redes Sociais -->
+            <mat-tab label="Redes Sociais">
+                <div class="m-t-24">
+                    <mat-card class="cardWithShadow">
+                        <mat-card-content class="p-y-24">
+                            <mat-card-title>Redes Sociais</mat-card-title>
+                            <mat-card-subtitle class="f-s-14">
+                                Aqui você poderá adicionar os links das redes sociais da empresa.
+                            </mat-card-subtitle>
+                            Ainda vou fazer
+                        </mat-card-content>
+                    </mat-card>
                 </div>
-            </form>
-        </mat-tab>
+            </mat-tab>
+        </mat-tab-group>
 
-        <!-- Aba Redes Sociais -->
-        <mat-tab label="Redes Sociais">
-            <mat-card-content class="p-y-24">
-                <mat-card class="cardWithShadow">
-                    <mat-card-content class="p-y-24">
-                        <mat-card-title>Redes Sociais</mat-card-title>
-                        <mat-card-subtitle class="f-s-14">Aqui você poderá adicionar os links das redes sociais da
-                            empresa</mat-card-subtitle>
-                        Ainda vou fazer
-                    </mat-card-content>
-                </mat-card>
-            </mat-card-content>
-        </mat-tab>
-    </mat-tab-group>
+    </mat-card-content>
 </mat-card>

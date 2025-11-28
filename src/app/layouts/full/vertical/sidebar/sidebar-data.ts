@@ -28,31 +28,15 @@ export const navItems: NavItem[] = [
         displayName: 'Usuários',
         iconName: 'user-circle',
         bgcolor: 'primary',
-        route: '/menu-level',
-        requiredPermission: ['USUARIOS_VER', 'USUARIO_CADASTRAR', 'USUARIO_EDITAR', 'USUARIO_EXCLUIR'],
-        children: [
-            {
-                displayName: 'Lista de Usuários',
-                iconName: 'point',
-                bgcolor: 'tranparent',
-                route: '/page/usuarios/listar',
-                requiredPermission: ['USUARIOS_VER', 'USUARIO_CADASTRAR', 'USUARIO_EDITAR', 'USUARIO_EXCLUIR']
-            },
-            {
-                displayName: 'Novo Usuário',
-                iconName: 'point',
-                bgcolor: 'tranparent',
-                route: '/page/usuarios/novo',
-                requiredPermission: ['USUARIO_CADASTRAR']
-            },
-            {
-                displayName: 'Perfis e Permissões',
-                iconName: 'point',
-                bgcolor: 'tranparent',
-                route: '/page/perfil',
-                requiredPermission: ['PERFIS_PERMISSOES_VER', 'PERFIS_PERMISSOES_CADASTRAR', 'PERFIS_PERMISSOES_EDITAR', 'PERFIS_PERMISSOES_EXCLUIR'],
-            }
-        ],
+        route: '/page/usuarios/listar',
+        requiredPermission: ['USUARIOS_VER', 'USUARIO_CADASTRAR', 'USUARIO_EDITAR', 'USUARIO_EXCLUIR']
+    },
+    {
+        displayName: 'Perfis e Permissões',
+        iconName: 'users-group',
+        bgcolor: 'primary',
+        route: '/page/perfil',
+        requiredPermission: ['PERFIS_PERMISSOES_VER', 'PERFIS_PERMISSOES_CADASTRAR', 'PERFIS_PERMISSOES_EDITAR', 'PERFIS_PERMISSOES_EXCLUIR'],
     },
     {
         displayName: 'Gerenciar Produtos',
@@ -111,24 +95,8 @@ export const navItems: NavItem[] = [
         displayName: 'Gerenciar Clientes',
         iconName: 'users',
         bgcolor: 'primary',
-        route: '/clientes',
-        requiredPermission: ['CLIENTE_VER', 'CLIENTE_CADASTRAR', 'CLIENTE_EDITAR', 'CLIENTE_EXCLUIR'],
-        children: [
-            {
-                displayName: 'Lista de Clientes',
-                iconName: 'point',
-                bgcolor: 'tranparent',
-                route: '/page/cliente',
-                requiredPermission: ['CLIENTE_VER']
-            },
-            {
-                displayName: 'Novo Cliente',
-                iconName: 'point',
-                bgcolor: 'tranparent',
-                route: '/page/cliente/criar',
-                requiredPermission: ['CLIENTE_CADASTRAR']
-            }
-        ]
+        route: '/page/cliente',
+        requiredPermission: ['CLIENTE_VER', 'CLIENTE_CADASTRAR', 'CLIENTE_EDITAR', 'CLIENTE_EXCLUIR']
     },
     {
         displayName: 'Dados da empresa',

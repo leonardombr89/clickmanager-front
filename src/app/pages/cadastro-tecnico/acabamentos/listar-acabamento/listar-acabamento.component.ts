@@ -15,6 +15,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { TablerIconsModule } from 'angular-tabler-icons';
 import { AcabamentoService } from '../../services/acabamento.service';
 import { TemPermissaoDirective } from 'src/app/diretivas/tem-permissao.directive';
+import { CardHeaderComponent } from "src/app/components/card-header/card-header.component";
 
 @Component({
   selector: 'app-listar-acabamento',
@@ -30,8 +31,9 @@ import { TemPermissaoDirective } from 'src/app/diretivas/tem-permissao.directive
     MatButtonModule,
     TablerIconsModule,
     RouterModule,
-    TemPermissaoDirective
-  ],
+    TemPermissaoDirective,
+    CardHeaderComponent
+],
   templateUrl: './listar-acabamento.component.html',
   styleUrl: './listar-acabamento.component.scss'
 })

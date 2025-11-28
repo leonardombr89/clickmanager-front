@@ -1,26 +1,25 @@
 <mat-card class="cardWithShadow">
-    <mat-card-title>
-        <div class="d-flex justify-content-between align-items-center flex-wrap p-16">
-            <div class="f-s-20 f-w-600 text-primary-dark">Cores</div>
-            <button mat-raised-button color="primary" [routerLink]="['/page/cadastro-tecnico/cores/nova']"
-                *temPermissao="'GERENCIAR_PRODUTOS'">
-                <mat-icon class="m-r-4">add</mat-icon>
-                Nova Cor
-            </button>
-        </div>
-    </mat-card-title>
+
+    <!-- Cabeçalho padrão -->
+    <app-card-header titulo="Cores" botaoTexto="Nova Cor" botaoIcone="add" botaoCor="primary"
+        [botaoRota]="['/page/cadastro-tecnico/cores/nova']" permissao="GERENCIAR_PRODUTOS" [mostrarDivisor]="true">
+    </app-card-header>
 
     <mat-card-content>
+
         <!-- Filtros de status -->
         <div class="m-b-16">
             <label class="f-s-14 f-w-600 d-block m-b-8">Status</label>
+
             <mat-chip-listbox aria-label="Filtro de status" class="m-b-16">
                 <mat-chip-option [selected]="filtroStatus === true" (click)="aplicarFiltro(true)" color="primary">
                     Ativos
                 </mat-chip-option>
+
                 <mat-chip-option [selected]="filtroStatus === false" (click)="aplicarFiltro(false)" color="warn">
                     Inativos
                 </mat-chip-option>
+
                 <mat-chip-option [selected]="filtroStatus === null" (click)="removerFiltro()">
                     Todos
                 </mat-chip-option>
@@ -60,6 +59,7 @@
                         <a (click)="editar(cor)" class="m-r-10 cursor-pointer">
                             <i-tabler name="edit" class="icon-18"></i-tabler>
                         </a>
+
                         <a (click)="excluir(cor)" class="cursor-pointer">
                             <i-tabler name="trash" class="icon-18"></i-tabler>
                         </a>
@@ -68,11 +68,14 @@
 
                 <tr mat-header-row *matHeaderRowDef="colunasExibidas"></tr>
                 <tr mat-row *matRowDef="let row; columns: colunasExibidas"></tr>
+
             </table>
 
             <mat-paginator [length]="totalCores" [pageSize]="tamanhoPagina" (page)="onPaginaAlterada($event)"
                 showFirstLastButtons>
             </mat-paginator>
+
         </div>
+
     </mat-card-content>
 </mat-card>

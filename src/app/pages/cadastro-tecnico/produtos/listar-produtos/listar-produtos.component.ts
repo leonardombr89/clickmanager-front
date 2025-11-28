@@ -18,6 +18,7 @@ import { InputPesquisaComponent } from 'src/app/components/inputs/input-pesquisa
 import { ProdutoListagem } from 'src/app/models/produto/produto-listagem.model';
 import { Produto } from 'src/app/models/produto/produto.model';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { CardHeaderComponent } from "src/app/components/card-header/card-header.component";
 
 @Component({
   selector: 'app-listar-produtos',
@@ -35,8 +36,9 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     RouterModule,
     TemPermissaoDirective,
     InputPesquisaComponent,
-    MatTooltipModule
-  ],
+    MatTooltipModule,
+    CardHeaderComponent
+],
   templateUrl: './listar-produtos.component.html',
   styleUrl: './listar-produtos.component.scss'
 })

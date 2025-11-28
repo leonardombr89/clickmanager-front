@@ -5,7 +5,7 @@ import {
 import {
   ReactiveFormsModule, FormsModule, FormGroup, FormBuilder, Validators, FormControl
 } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 
 import { MatButtonModule } from '@angular/material/button';
@@ -30,6 +30,7 @@ import { VariacaoProdutoRequest } from 'src/app/models/produto/variacao-produto-
 import { PoliticaRevenda } from 'src/app/models/politica-revenda.model';
 import { PoliticaRevendaComponent } from './politica-revenda/politica-revenda.component';
 import { ProdutoResponse } from 'src/app/models/produto/produto-response.model';
+import { CardHeaderComponent } from "src/app/components/card-header/card-header.component";
 
 @Component({
   selector: 'app-form-produto',
@@ -37,6 +38,7 @@ import { ProdutoResponse } from 'src/app/models/produto/produto-response.model';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
+    RouterModule,
     ReactiveFormsModule,
     FormsModule,
     MatCardModule,
@@ -50,8 +52,9 @@ import { ProdutoResponse } from 'src/app/models/produto/produto-response.model';
     TablerIconsModule,
     SharedComponentsModule,
     VariacoesProdutoComponent,
-    PoliticaRevendaComponent
-  ],
+    PoliticaRevendaComponent,
+    CardHeaderComponent
+],
   templateUrl: './form-produto.component.html',
   styleUrls: ['./form-produto.component.scss'],
 })

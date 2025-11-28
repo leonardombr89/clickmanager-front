@@ -15,12 +15,14 @@ import { TemPermissaoDirective } from 'src/app/diretivas/tem-permissao.directive
 import { MatButtonModule } from '@angular/material/button';
 import { TablerIconsModule } from 'angular-tabler-icons';
 import { CorService } from '../../services/cor.service';
+import { CardHeaderComponent } from "src/app/components/card-header/card-header.component";
 
 @Component({
   selector: 'app-listar-cores',
   standalone: true,
   imports: [
     CommonModule,
+    RouterModule,
     MatCardModule,
     MatPaginatorModule,
     MatTableModule,
@@ -30,8 +32,9 @@ import { CorService } from '../../services/cor.service';
     MatButtonModule,
     TablerIconsModule,
     RouterModule,
-    TemPermissaoDirective
-  ],
+    TemPermissaoDirective,
+    CardHeaderComponent
+],
   templateUrl: './listar-cores.component.html',
   styleUrl: './listar-cores.component.scss'
 })

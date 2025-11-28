@@ -19,6 +19,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { TemPermissaoDirective } from 'src/app/diretivas/tem-permissao.directive';
+import { CardHeaderComponent } from "src/app/components/card-header/card-header.component";
 
 @Component({
   selector: 'app-listar-usuarios',
@@ -39,8 +40,9 @@ import { TemPermissaoDirective } from 'src/app/diretivas/tem-permissao.directive
     MatFormFieldModule,
     MatInputModule,
     RouterModule,
-    TemPermissaoDirective
-  ]
+    TemPermissaoDirective,
+    CardHeaderComponent
+]
 })
 export class ListarUsuariosComponent implements OnInit {
   usuarios: Usuario[] = [];

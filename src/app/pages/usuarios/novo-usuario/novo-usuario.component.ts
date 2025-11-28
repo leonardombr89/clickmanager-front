@@ -11,6 +11,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { ToastrService } from 'ngx-toastr';
 import { ActivatedRoute } from '@angular/router';
+import { CardHeaderComponent } from "src/app/components/card-header/card-header.component";
+import { InputTextoRestritoComponent } from "src/app/components/inputs/input-texto/input-texto-restrito.component";
 
 
 @Component({
@@ -22,8 +24,10 @@ import { ActivatedRoute } from '@angular/router';
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
-    MatButtonModule
-  ],
+    MatButtonModule,
+    CardHeaderComponent,
+    InputTextoRestritoComponent
+],
   templateUrl: './novo-usuario.component.html',
   styleUrl: './novo-usuario.component.scss'
 })
@@ -38,7 +42,7 @@ export class NovoUsuarioComponent implements OnInit {
     private usuarioService: UsuarioService,
     private perfilService: PerfilService,
     private toastrService: ToastrService,
-    private route: ActivatedRoute // ⬅️ novo
+    private route: ActivatedRoute 
   ) {}
 
   ngOnInit(): void {

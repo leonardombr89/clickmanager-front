@@ -1,73 +1,80 @@
 <mat-card class="cardWithShadow">
-    <div class="p-24">
-      <mat-card-title class="m-b-0">
-        {{ isEditMode ? 'Editar Produto' : 'Novo Produto' }}
-      </mat-card-title>
-    </div>
-  
-    <mat-card-content>
-      <form [formGroup]="form" (ngSubmit)="onSubmit()">
-        <mat-tab-group>
-  
-          <!-- Aba Geral -->
-          <mat-tab label="Geral">
-            <mat-card class="cardWithShadow">
-              <mat-card-content>
-  
-                <app-input-texto-restrito
-                  [control]="nomeControl"
-                  label="Nome"
-                  placeholder="Digite o nome do produto" />
-  
-                <app-input-texto-restrito
-                  [control]="descricaoControl"
-                  label="Descrição"
-                  placeholder="Digite uma descrição do produto" />
-  
-                <div class="m-t-16 m-b-16" *ngIf="isEditMode">
-                  <mat-slide-toggle formControlName="ativo">
-                    {{ form.get('ativo')?.value ? 'Produto Ativo' : 'Produto Inativo' }}
-                  </mat-slide-toggle>
-                </div>
-  
-              </mat-card-content>
-            </mat-card>
-          </mat-tab>
-  
-          <!-- Aba Política de Revenda -->
-          <mat-tab label="Política de Revenda">
-            <mat-card class="cardWithShadow">
-              <mat-card-content>
-                <app-politica-revenda
-                  [formGroup]="form"
-                  [value]="politicaDoProduto"
-                  (valueChange)="onPoliticaChange($event)">
-                </app-politica-revenda>
-              </mat-card-content>
-            </mat-card>
-          </mat-tab>
-  
-          <!-- Aba Variações -->
-          <mat-tab label="Variações">
-            <mat-card class="cardWithShadow">
-              <mat-card-content>
-                <app-variacoes-produto
-                  [variacoesIniciais]="variacoesIniciais"
-                  [politicaProduto]="politicaDoProduto"
-                  (variacoesChange)="onVariacoesChange($event)">
-                </app-variacoes-produto>
-              </mat-card-content>
-            </mat-card>
-          </mat-tab>
-  
-        </mat-tab-group>
-  
-        <div class="m-t-24">
-          <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid || loading">
-            {{ isEditMode ? 'Atualizar' : 'Salvar' }}
-          </button>
-        </div>
-      </form>
-    </mat-card-content>
-  </mat-card>
-  
+
+  <!-- Cabeçalho com botão voltar -->
+  <app-card-header [titulo]="isEditMode ? 'Editar Produto' : 'Novo Produto'" botaoTexto="Voltar" botaoIcone="arrow_back"
+    [botaoRota]="['/page/cadastro-tecnico/produtos']" [mostrarDivisor]="true">
+  </app-card-header>
+
+  <mat-card-content>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+
+      <mat-tab-group>
+
+        <!-- Aba Geral -->
+        <mat-tab label="Geral">
+          <mat-card class="cardWithShadow">
+            <mat-card-content>
+
+              <app-input-texto-restrito [control]="nomeControl" label="Nome" placeholder="Digite o nome do produto">
+              </app-input-texto-restrito>
+
+              <app-input-texto-restrito [control]="descricaoControl" label="Descrição"
+                placeholder="Digite uma descrição do produto">
+              </app-input-texto-restrito>
+
+              <div class="m-t-16 m-b-16" *ngIf="isEditMode">
+                <mat-slide-toggle formControlName="ativo">
+                  {{ form.get('ativo')?.value ? 'Produto Ativo' : 'Produto Inativo' }}
+                </mat-slide-toggle>
+              </div>
+
+            </mat-card-content>
+          </mat-card>
+        </mat-tab>
+
+        <!-- Aba Política de Revenda -->
+        <mat-tab label="Política de Revenda">
+          <mat-card class="cardWithShadow">
+            <mat-card-content>
+              <app-politica-revenda [formGroup]="form" [value]="politicaDoProduto"
+                (valueChange)="onPoliticaChange($event)">
+              </app-politica-revenda>
+            </mat-card-content>
+          </mat-card>
+        </mat-tab>
+
+        <!-- Aba Variações -->
+        <mat-tab label="Variações">
+          <mat-card class="cardWithShadow">
+            <mat-card-content>
+              <app-variacoes-produto [variacoesIniciais]="variacoesIniciais" [politicaProduto]="politicaDoProduto"
+                (variacoesChange)="onVariacoesChange($event)">
+              </app-variacoes-produto>
+            </mat-card-content>
+          </mat-card>
+        </mat-tab>
+
+      </mat-tab-group>
+
+      <!-- Botões -->
+      <div class="d-flex gap-12 m-t-24">
+
+        <!-- CANCELAR -->
+        <button mat-flat-button class="bg-error text-white" type="button"
+          [routerLink]="['/page/cadastro-tecnico/produtos']">
+          Cancelar
+        </button>
+
+        <!-- SALVAR -->
+        <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || loading">
+          {{ isEditMode ? 'Atualizar' : 'Salvar' }}
+        </button>
+
+      </div>
+
+    </form>
+
+  </mat-card-content>
+
+</mat-card>
