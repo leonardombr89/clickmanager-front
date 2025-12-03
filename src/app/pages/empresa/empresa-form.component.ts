@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, Input, Output, EventEmitter } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl, ValidationErrors } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { MatInputModule } from '@angular/material/input';
@@ -15,13 +15,13 @@ import { NgxMaskDirective, provideNgxMask } from 'ngx-mask';
 import { ImagemUtil } from 'src/app/utils/imagem-util';
 import { ToastrService } from 'ngx-toastr';
 import { ValidadorUtil } from 'src/app/utils/validador-util';
-import { EnderecoViaCep } from 'src/app/models/endereco.viacep.model';
+import { EnderecoViaCep } from 'src/app/models/endereco/endereco.viacep.model';
 import { CepUtilService } from 'src/app/utils/cep-util.service';
 import { EmpresaFormService } from './empresa-form.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { filter, take } from 'rxjs';
-import { Empresa } from 'src/app/models/empresa.model';
 import { CardHeaderComponent } from "src/app/components/card-header/card-header.component";
+import { Empresa } from 'src/app/models/empresa/empresa.model';
 
 
 @Component({
@@ -47,6 +47,10 @@ import { CardHeaderComponent } from "src/app/components/card-header/card-header.
   providers: [provideNgxMask()]
 })
 export class EmpresaFormComponent implements OnInit {
+
+  @Input() modoOnboarding = false;
+  @Output() empresaSalva = new EventEmitter<Empresa>();
+
   form!: FormGroup;
 
   readonly IMAGEM_PADRAO = './assets/images/logos/LogoPadrao.png';

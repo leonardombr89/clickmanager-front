@@ -10,8 +10,8 @@ import {
 import { Router, RouterModule } from '@angular/router';
 import { MaterialModule } from '../../../material.module';
 import { BrandingComponent } from '../../../layouts/full/vertical/sidebar/branding.component';
-import { AuthService } from '../../../services/auth.service';
 import { ToastrService } from 'ngx-toastr';
+import { OnboardingService } from '../side-register/side-register.service';
 
 @Component({
   selector: 'app-boxed-register',
@@ -25,53 +25,90 @@ import { ToastrService } from 'ngx-toastr';
   ],
   templateUrl: './boxed-register.component.html',
 })
-export class AppBoxedRegisterComponent implements OnInit{
+export class AppBoxedRegisterComponent implements OnInit {
 
   options = this.settings.getOptions();
 
   constructor(
     private settings: CoreService,
     private router: Router,
-    private authService: AuthService,
-    private toastr: ToastrService
-  ) {}
+    private toastr: ToastrService,
+    private onboardingService: OnboardingService
+  ) { }
 
-  ngOnInit(): void {
-    this.authService.verificarSeTemUsuarios().subscribe({
-      next: (temUsuario) => {
-        if (temUsuario) {
-          this.router.navigate(['/authentication/error']);
-        }
-      }, error: () => {
-        this.toastr.error('Erro ao verificar usuários')
-        this.router.navigate(['authentication/login']);
-      }
-    });
-  }
-
+  // Formulário aninhado: empresa + usuario
   form = new FormGroup({
-    uname: new FormControl('', [Validators.required, Validators.minLength(6)]),
-    email: new FormControl('', [Validators.required]),
-    password: new FormControl('', [Validators.required]),
+    empresa: new FormGroup({
+      nome: new FormControl<string | null>('', [Validators.required]),
+      telefone: new FormControl<string | null>('', [Validators.required]),
+      cnpj: new FormControl<string | null>('', [Validators.required])
+    }),
+    usuario: new FormGroup({
+      nome: new FormControl<string | null>('', [Validators.required, Validators.minLength(6)]),
+      email: new FormControl<string | null>('', [Validators.required, Validators.email]),
+      telefone: new FormControl<string | null>(''),
+      senha: new FormControl<string | null>('', [Validators.required, Validators.minLength(6)]),
+      confirmarSenha: new FormControl<string | null>('', [Validators.required]),
+    }),
   });
 
-  get f() {
-    return this.form.controls;
+  ngOnInit(): void {
+    // Aqui NÃO verificamos mais se já existe usuário,
+    // pois agora cada empresa faz seu próprio cadastro (multi-tenant).
+  }
+
+  // getters para facilitar o template
+  get empresa(): FormGroup {
+    return this.form.get('empresa') as FormGroup;
+  }
+
+  get usuario(): FormGroup {
+    return this.form.get('usuario') as FormGroup;
+  }
+
+  get senhaDivergente(): boolean {
+    const senha = this.usuario.get('senha')?.value;
+    const confirmar = this.usuario.get('confirmarSenha')?.value;
+    return !!senha && !!confirmar && senha !== confirmar;
   }
 
   submit() {
-    const { uname, email, password } = this.form.value;
+    if (this.form.invalid || this.senhaDivergente) {
+      this.form.markAllAsTouched();
+      this.toastr.error('Preencha todos os campos obrigatórios corretamente.');
+      return;
+    }
 
-    this.authService.register(email!, password!, uname!).subscribe({
+    const raw = this.form.value;
+
+    const empresa = raw.empresa!;
+    const usuario = raw.usuario!;
+
+    const payload = {
+      empresa: {
+        nome: empresa.nome!,
+        telefone: empresa.telefone!,
+        cnpj: empresa.cnpj!
+      },
+      usuario: {
+        nome: usuario.nome!,
+        username: usuario.email!,       
+        email: usuario.email!,
+        telefone: usuario.telefone || '',
+        senha: usuario.senha!,
+        proprietario: true              
+      },
+    };
+
+    this.onboardingService.registrarEmpresaComGestor(payload).subscribe({
       next: () => {
-        this.toastr.success('Usuário registrado com sucesso!');
+        this.toastr.success('Empresa e gestor cadastrados com sucesso!');
         this.router.navigate(['authentication/login']);
       },
-      error: (err) => {
+      error: err => {
         const msg = err?.error?.message || 'Erro desconhecido';
-        this.toastr.error('Erro ao registrar: ' + msg);
+        this.toastr.error('Erro ao concluir cadastro: ' + msg);
       }
     });
   }
 }
-

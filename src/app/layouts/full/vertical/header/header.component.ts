@@ -17,7 +17,7 @@ import { FormsModule } from '@angular/forms';
 import { NgScrollbarModule } from 'ngx-scrollbar';
 import { AppSettings } from 'src/app/config';
 import { AuthService } from 'src/app/services/auth.service';
-import { Usuario } from 'src/app/models/usuario.model';
+import { Usuario } from 'src/app/models/usuario/usuario.model';
 import { ImagemUtil } from 'src/app/utils/imagem-util';
 import { CalculadoraConfigListResponse } from 'src/app/models/calculadora/calculadora-config-list-response.model';
 import { CalculadoraConfigService } from 'src/app/pages/calculadora-config/calculadora-config.service';

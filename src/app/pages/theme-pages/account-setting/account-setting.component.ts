@@ -16,7 +16,7 @@ import { AccountSettingService } from './account-setting.service';
 import { ActivatedRoute } from '@angular/router';
 import { ImagemUtil } from 'src/app/utils/imagem-util';
 import { AuthService } from 'src/app/services/auth.service';
-import { Usuario } from 'src/app/models/usuario.model';
+import { Usuario } from 'src/app/models/usuario/usuario.model';
 
 @Component({
   selector: 'app-account-setting',

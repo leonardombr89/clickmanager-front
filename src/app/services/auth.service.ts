@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { catchError, switchMap, tap } from 'rxjs/operators';
 import { Observable, BehaviorSubject, throwError } from 'rxjs';
-import { Usuario } from '../models/usuario.model';
+import { Usuario } from '../models/usuario/usuario.model';
 import { ToastrService } from 'ngx-toastr';
 import { decodeToken } from '../utils/token.util';
 import { JwtPayload } from '../pages/authentication/jwt-payload.interface';

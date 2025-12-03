@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { Empresa } from 'src/app/models/empresa.model';
+import { Empresa } from 'src/app/models/empresa/empresa.model';
 import { ApiService } from 'src/app/services/api.service';
 
 @Injectable({

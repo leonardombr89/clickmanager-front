@@ -1,0 +1,93 @@
+<div class="auth-body">
+    <div class="m-t-12 m-b-16 text-center">
+        <app-branding></app-branding>
+    </div>
+
+    <h4 class="f-w-700 f-s-22 lh-base m-0 text-center">
+        Bem-vindo ao ClickManager
+    </h4>
+    <span class="f-s-14 d-block mat-body-1 m-t-8 text-center">
+        Vamos configurar os primeiros passos da sua empresa
+        <strong *ngIf="data?.empresaNome">({{ data.empresaNome }})</strong>.
+    </span>
+
+    <div class="or-border m-t-20 m-b-12">Onboarding inicial</div>
+
+    <mat-stepper #stepper [linear]="true">
+
+        <!-- STEP 1: DADOS EMPRESA -->
+        <mat-step [stepControl]="empresaStepGroup">
+            <ng-template matStepLabel>Dados da empresa</ng-template>
+
+            <!-- Reaproveitando TODO o formulário de empresa -->
+            <app-empresa-form [modoOnboarding]="true" (empresaSalva)="onEmpresaSalva($event)">
+            </app-empresa-form>
+        </mat-step>
+
+        <!-- STEP 2: ACABAMENTOS PADRÃO -->
+        <mat-step [stepControl]="acabamentosForm">
+            <form [formGroup]="acabamentosForm" class="m-t-12">
+
+                <ng-template matStepLabel>Acabamentos padrão</ng-template>
+
+                <mat-card class="b-1 shadow-none">
+
+                    <app-card-header
+                        [titulo]="'Selecione os acabamentos que você usa com mais frequência. Vamos criar esses acabamentos para sua empresa automaticamente.'"
+                        [mostrarDivisor]="true">
+                    </app-card-header>
+
+                    <mat-card-content>
+
+                        <div *ngIf="carregandoAcabamentos" class="text-center m-t-16">
+                            <mat-spinner diameter="40"></mat-spinner>
+                        </div>
+
+                        <div class="row" *ngIf="!carregandoAcabamentos">
+                            <div class="col-md-4" *ngFor="let a of acabamentosPadrao">
+                                <mat-checkbox (change)="toggleAcabamento($event.checked, a.id)"
+                                    class="m-r-8 f-w-600 f-s-14">{{ a.nome }}</mat-checkbox>
+                            </div>
+                        </div>
+                    </mat-card-content>
+                </mat-card>
+
+                <div class="d-flex align-items-center justify-content-between m-t-16">
+                    <button mat-flat-button class="bg-error text-white" type="button" matStepperPrevious>
+                        Voltar
+                    </button>
+                    <button mat-flat-button color="primary" type="button" (click)="salvarAcabamentosEProsseguir()">
+                        Próximo
+                    </button>
+                </div>
+
+            </form>
+        </mat-step>
+
+        <!-- STEP 3: FINALIZAR -->
+        <mat-step [stepControl]="finalForm">
+            <form [formGroup]="finalForm" class="m-t-12">
+                <ng-template matStepLabel>Finalizar</ng-template>
+
+                <h4 class="mat-headline-6 m-t-8">Tudo pronto!</h4>
+                <p class="m-t-8 f-s-14">
+                    Seu ambiente inicial está configurado. Você já pode começar a
+                    criar clientes, produtos e pedidos.
+                </p>
+
+                <mat-checkbox formControlName="naoMostrarMais" color="primary" class="m-t-12">
+                    Não mostrar mais este passo a passo nos próximos acessos
+                </mat-checkbox>
+
+                <div class="d-flex justify-content-between m-t-24">
+                    <button mat-flat-button class="bg-error text-white" type="button" matStepperPrevious>
+                        Voltar
+                    </button>
+                    <button mat-flat-button color="primary" type="button" (click)="finalizarOnboarding()">
+                        Concluir
+                    </button>
+                </div>
+            </form>
+        </mat-step>
+    </mat-stepper>
+</div>
