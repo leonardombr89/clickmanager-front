@@ -44,6 +44,8 @@ export class PrecoSelectorComponent implements OnInit, OnChanges {
   private todosTipos = ['FIXO', 'HORA', 'QUANTIDADE', 'DEMANDA', 'METRO'];
   private demandaSubs: Subscription[] = [];
 
+  private tipoSub?: Subscription;
+
   get tipos(): string[] {
     return this.tiposDisponiveis?.length ? this.tiposDisponiveis : this.todosTipos;
   }
@@ -52,11 +54,13 @@ export class PrecoSelectorComponent implements OnInit, OnChanges {
 
   ngOnInit(): void {
     this.setupForm();
+    this.setupTipoListener();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['formGroup'] && changes['formGroup'].currentValue) {
       this.setupForm();
+      this.setupTipoListener();
     }
   }
 
@@ -77,6 +81,24 @@ export class PrecoSelectorComponent implements OnInit, OnChanges {
     } else {
       this.aplicarValidadorDePreco(tipoAtual);
     }
+  }
+
+  private setupTipoListener(): void {
+    if (!this.formGroup) return;
+
+    const tipoCtrl = this.formGroup.get('tipo');
+    if (!tipoCtrl) return;
+
+
+    if (this.tipoSub) {
+      this.tipoSub.unsubscribe();
+    }
+
+    this.tipoSub = tipoCtrl.valueChanges.subscribe((tipo: string) => {
+      if (tipo) {
+        this.onTipoSelecionado(tipo);
+      }
+    });
   }
 
   private existeEstruturaPara(tipo: string): boolean {

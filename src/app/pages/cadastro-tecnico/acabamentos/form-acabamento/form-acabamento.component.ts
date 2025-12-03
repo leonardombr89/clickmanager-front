@@ -26,7 +26,7 @@ import { CardHeaderComponent } from "src/app/components/card-header/card-header.
     PrecoSelectorComponent,
     InputTextoRestritoComponent,
     CardHeaderComponent
-],
+  ],
   templateUrl: './form-acabamento.component.html',
   styleUrl: './form-acabamento.component.scss'
 })
@@ -41,7 +41,7 @@ export class FormAcabamentoComponent implements OnInit {
     private router: Router,
     private acabamentoService: AcabamentoService,
     private toastr: ToastrService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.form = this.fb.group({
@@ -52,7 +52,7 @@ export class FormAcabamentoComponent implements OnInit {
       }),
       ativo: [true]
     });
-  
+
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.isEditMode = true;
@@ -69,12 +69,14 @@ export class FormAcabamentoComponent implements OnInit {
           descricao: acabamento.descricao,
           ativo: acabamento.ativo
         });
-  
-        // Preencher preco após o template renderizar o tipo
+
         const precoGroup = this.getFormGroup('preco');
-        precoGroup.get('tipo')?.setValue(acabamento.preco.tipo);
-  
-        // Aguarda o tipo renderizar e os campos aparecerem
+
+        // 1) seta o tipo - dispara o listener na PrecoSelector
+        const tipo = acabamento.preco?.tipo || 'FIXO';
+        precoGroup.get('tipo')?.setValue(tipo);
+
+        // 2) dá um pequeno tempo pra estrutura ser criada e depois patcha os campos
         setTimeout(() => {
           precoGroup.patchValue(acabamento.preco);
         });
@@ -91,15 +93,15 @@ export class FormAcabamentoComponent implements OnInit {
       this.updateErrorMessage();
       return;
     }
-  
+
     const acabamentoData = this.form.value as Acabamento;
 
     console.log(this.form.value);
-  
+
     const acao: Observable<Acabamento> = this.isEditMode
       ? this.acabamentoService.atualizar(this.acabamentoId, acabamentoData)
       : this.acabamentoService.salvar(acabamentoData);
-  
+
     acao.subscribe({
       next: () => {
         const mensagem = this.isEditMode ? 'atualizado' : 'criado';
@@ -112,7 +114,7 @@ export class FormAcabamentoComponent implements OnInit {
       }
     });
   }
-  
+
   updateErrorMessage(): void {
     Object.values(this.form.controls).forEach(control => {
       control.markAsTouched();
@@ -134,7 +136,7 @@ export class FormAcabamentoComponent implements OnInit {
     }
     return control;
   }
-  
+
 
   getErrorMessage(campo: string): string {
     const control = this.form.get(campo);
