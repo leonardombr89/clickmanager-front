@@ -103,11 +103,11 @@
           </div>
         </div>
       </mat-card-content>
-      
+
     </mat-card>
 
     <!-- Preço por Demanda -->
-    <mat-card *ngIf="formGroup.get('tipo')?.value === 'DEMANDA'">
+    <mat-card *ngIf="formGroup.get('tipo')?.value === 'DEMANDA' && formGroup.get('faixas')">
       <mat-card-content>
         <div [formGroup]="formGroup">
           <div formArrayName="faixas">
