@@ -289,7 +289,6 @@ export class FullComponent implements OnInit {
     const possuiPermissao = (requeridas?: string[]) => {
       const resultado = !requeridas || requeridas.some(p => permissoesUsuario.includes(p));
       if (requeridas && !resultado) {
-        console.log('Sem permissão para:', requeridas);
       }
       return resultado;
     };

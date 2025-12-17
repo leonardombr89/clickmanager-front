@@ -62,7 +62,6 @@ export class CalculadoraConfigComponent implements OnInit {
 
     private loadConfig(): void {
         const t0 = performance.now();
-        console.log('[SmartCalc] loadConfig -> buscando configuração atual...');
 
         this.calculadoraService.getConfigCompleta()
             .pipe(
@@ -75,27 +74,15 @@ export class CalculadoraConfigComponent implements OnInit {
                     this.produtoOptions = res?.produtosDisponiveis ?? [];
                     const produtos = res?.config?.produtos ?? [];
 
-                    console.log('[SmartCalc] config recebida:', {
-                        ativo: res?.config?.ativo,
-                        produtosCount: produtos.length,
-                        produtosExemplos: produtos.slice(0, 3)
-                    });
-
                     const produtoIds = produtos
                         .map(p => p?.id)
                         .filter((id): id is number => typeof id === 'number');
-
-                    console.log('[SmartCalc] mapeamento ProdutoOption -> ids:', {
-                        idsCount: produtoIds.length,
-                        idsExemplos: produtoIds.slice(0, 5)
-                    });
 
                     this.form.patchValue({
                         ativo: res?.config?.ativo ?? false,
                         produtoIds,
                     });
 
-                    console.log('[SmartCalc] form.patchValue aplicado:', this.form.getRawValue());
                 },
                 error: (err) => {
                     console.error('[SmartCalc] erro ao carregar config:', err);
@@ -103,11 +90,6 @@ export class CalculadoraConfigComponent implements OnInit {
                 },
                 complete: () => {
                     const t1 = performance.now();
-                    console.log('[SmartCalc] loadConfig -> complete', {
-                        duracaoMs: Math.round(t1 - t0),
-                        carregandoAtual: this.carregando(),
-                        formValue: this.form.getRawValue()
-                    });
                 }
             });
     }

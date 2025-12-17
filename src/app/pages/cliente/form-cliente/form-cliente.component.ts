@@ -60,7 +60,6 @@ export class FormClienteComponent implements OnInit {
 
     this.route.queryParamMap.subscribe(params => {
       this.retorno = params.get('retorno');
-      console.log('[ngOnInit] retorno recebido:', this.retorno);
     });
     
   }
@@ -96,21 +95,16 @@ export class FormClienteComponent implements OnInit {
   onSubmit(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
-      console.log('[onSubmit] Formulário inválido:', this.form.value);
       return;
     }
   
     const cliente: ClienteRequest = this.form.value;
     const destino = this.retorno ?? '/page/cliente';
-    console.log('[onSubmit] Modo de edição:', this.isEditMode);
-    console.log('[onSubmit] Cliente a ser salvo:', cliente);
-    console.log('[onSubmit] Destino de redirecionamento:', destino);
   
   
     if (this.isEditMode) {
       const idParam = this.route.snapshot.paramMap.get('id');
       const id = idParam ? Number(idParam) : null;
-      console.log('[onSubmit] ID para atualização:', id);
   
       if (!id) {
         this.toastr.error('ID do cliente inválido.');
@@ -120,7 +114,6 @@ export class FormClienteComponent implements OnInit {
       this.clienteService.atualizar(id, cliente).subscribe({
         next: () => {
           this.toastr.success('Cliente atualizado com sucesso!');
-          console.log('[onSubmit] Redirecionando para:', destino);
           this.router.navigate([destino]);
         },
         error: (err) => {
@@ -132,7 +125,6 @@ export class FormClienteComponent implements OnInit {
       this.clienteService.salvar(cliente).subscribe({
         next: () => {
           this.toastr.success('Cliente cadastrado com sucesso!');
-          console.log('[onSubmit] Redirecionando para:', destino);
           this.router.navigate([destino]);
         },
         error: (err) => {

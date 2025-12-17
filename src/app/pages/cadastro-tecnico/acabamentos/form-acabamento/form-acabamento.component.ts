@@ -160,7 +160,6 @@ export class FormAcabamentoComponent implements OnInit {
     }
 
     const payload = this.toAcabamentoRequest(this.form.getRawValue());
-    console.log(this.form.value);
 
     this.loading = true;
 

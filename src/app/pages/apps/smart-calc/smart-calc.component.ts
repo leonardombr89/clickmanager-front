@@ -413,7 +413,6 @@ export class SmartCalcComponent implements OnInit {
     }
 
     const itens: PedidoItemRequest[] = [...bases, ...filhos];
-    // console.log('PAYLOAD FINAL >>>', itens);
 
     // 5) Envia tudo pro pedido + salva observação antes
     this.carregandoAdd = true;

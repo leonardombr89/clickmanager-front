@@ -64,7 +64,6 @@ export class CalendarFormDialogComponent {
       );
     }
 
-    // console.log(data);
     this.eventForm = this.buildEventForm(this.event());
   }
 

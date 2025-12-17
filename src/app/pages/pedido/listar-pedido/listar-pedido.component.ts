@@ -73,7 +73,6 @@ export class ListarPedidoComponent implements OnInit {
   }
 
   onPaginaAlterada(event: PageEvent): void {
-    console.log('Página alterada:', event);
     this.paginaAtual = event.pageIndex;
     this.tamanhoPagina = event.pageSize;
     this.carregarPedidos();
