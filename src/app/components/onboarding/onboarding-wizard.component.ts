@@ -101,26 +101,24 @@ export class OnboardingWizardComponent implements OnInit {
       ?.setValue(Array.from(this.selecionados));
   }
 
-  /**
-   * Chamado pelo <app-empresa-form> quando salvar com sucesso.
-   */
-  onEmpresaSalva(empresa: Empresa): void {
-    // marca o step 1 como válido
-    this.empresaStepGroup.get('done')?.setValue(true);
 
-    // avisa o backend que o step de dados da empresa foi concluído
-    this.onboardingService.concluirTarefa({ step: 'DADOS_EMPRESA' }).subscribe({
-      next: () => {
-        this.toastr.success(
-          'Dados da empresa salvos e etapa concluída com sucesso.'
-        );
-        this.stepper.next(); // 👉 aqui ele deve ir para o step 2
-      },
-      error: () => {
-        this.toastr.error('Erro ao concluir etapa de dados da empresa.');
-      },
-    });
-  }
+  onEmpresaSalva(): void {
+  // marca o step 1 como válido
+  this.empresaStepGroup.get('done')?.setValue(true);
+
+  this.onboardingService.concluirTarefa({ step: 'DADOS_EMPRESA' }).subscribe({
+    next: () => {
+      this.toastr.success(
+        'Dados da empresa salvos e etapa concluída com sucesso.'
+      );
+      this.stepper.next(); 
+    },
+    error: () => {
+      this.toastr.error('Erro ao concluir etapa de dados da empresa.');
+    },
+  });
+}
+
 
   // STEP 2
   salvarAcabamentosEProsseguir(): void {

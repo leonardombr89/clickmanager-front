@@ -20,7 +20,7 @@
             <ng-template matStepLabel>Dados da empresa</ng-template>
 
             <!-- Reaproveitando TODO o formulário de empresa -->
-            <app-empresa-form [modoOnboarding]="true" (empresaSalva)="onEmpresaSalva($event)">
+            <app-empresa-form [modoOnboarding]="true" (empresaSalva)="onEmpresaSalva()">
             </app-empresa-form>
         </mat-step>
 

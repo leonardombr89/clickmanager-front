@@ -54,7 +54,7 @@ import { CardHeaderComponent } from "src/app/components/card-header/card-header.
     VariacoesProdutoComponent,
     PoliticaRevendaComponent,
     CardHeaderComponent
-],
+  ],
   templateUrl: './form-produto.component.html',
   styleUrls: ['./form-produto.component.scss'],
 })
@@ -134,25 +134,25 @@ export class FormProdutoComponent implements OnInit, OnDestroy {
   }
 
   private fetchProduto(id: number): void {
-  this.loading = true;
-  this.cdr.markForCheck();
+    this.loading = true;
+    this.cdr.markForCheck();
 
-  this.produtoService.buscarPorId(id)
-    .pipe(takeUntil(this.destroy$))
-    .subscribe({
-      next: (produto: ProdutoResponse) => {
-        this.patchProduto(produto);
-        this.loading = false;
-        this.cdr.markForCheck();
-      },
-      error: () => {
-        this.loading = false;
-        this.toastr.error('Erro ao carregar produto.');
-        this.router.navigate(['/page/cadastro-tecnico/produtos']);
-        this.cdr.markForCheck();
-      }
-    });
-}
+    this.produtoService.buscarPorId(id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (produto: ProdutoResponse) => {
+          this.patchProduto(produto);
+          this.loading = false;
+          this.cdr.markForCheck();
+        },
+        error: () => {
+          this.loading = false;
+          this.toastr.error('Erro ao carregar produto.');
+          this.router.navigate(['/page/cadastro-tecnico/produtos']);
+          this.cdr.markForCheck();
+        }
+      });
+  }
 
   private dedupeById<T extends { id: number }>(arr: T[] = []): T[] {
     const seen = new Set<number>();
@@ -181,7 +181,6 @@ export class FormProdutoComponent implements OnInit, OnDestroy {
           id: a.id,
           nome: a.nome,
           descricao: a.descricao,
-          preco: a.preco ?? null,
           ativo: a.ativo,
         }))
       ),
@@ -190,12 +189,11 @@ export class FormProdutoComponent implements OnInit, OnDestroy {
           id: s.id,
           nome: s.nome,
           descricao: s.descricao,
-          preco: s.preco ?? null,
           ativo: s.ativo,
         }))
       ),
 
-      // preço da variação (já vem pronto)
+      // preço da variação (já vem pronto para o PrecoSelector)
       preco: v.preco ?? null,
 
       politicaRevenda: this.politicaDoProduto ?? null,

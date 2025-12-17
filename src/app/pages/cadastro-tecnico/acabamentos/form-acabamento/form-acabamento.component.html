@@ -1,8 +1,12 @@
 <mat-card class="cardWithShadow">
 
   <!-- Cabeçalho padrão com botão Voltar -->
-  <app-card-header [titulo]="isEditMode ? 'Editar Acabamento' : 'Novo Acabamento'" botaoTexto="Voltar"
-    botaoIcone="arrow_back" botaoCor="primary" [botaoRota]="['/page/cadastro-tecnico/acabamentos']"
+  <app-card-header
+    [titulo]="isEditMode ? 'Editar Acabamento' : 'Novo Acabamento'"
+    botaoTexto="Voltar"
+    botaoIcone="arrow_back"
+    botaoCor="primary"
+    [botaoRota]="['/page/cadastro-tecnico/acabamentos']"
     [mostrarDivisor]="true">
   </app-card-header>
 
@@ -10,42 +14,71 @@
 
     <form [formGroup]="form" (ngSubmit)="onSubmit()">
 
-      <!-- Nome do Acabamento -->
-      <app-input-texto-restrito class="m-b-16" [control]="getFormControl('nome')" label="Nome"
-        placeholder="Digite o nome do acabamento">
-      </app-input-texto-restrito>
+      <mat-tab-group>
 
-      <!-- Descrição do Acabamento -->
-      <app-input-texto-restrito class="m-b-16" [control]="getFormControl('descricao')" label="Descrição"
-        placeholder="Digite uma descrição">
-      </app-input-texto-restrito>
+        <!-- Aba Geral -->
+        <mat-tab label="Geral">
+          <mat-card class="cardWithShadow">
+            <mat-card-content>
 
-      <!-- Preço -->
-      <div class="m-b-24">
-        <app-preco-selector [formGroup]="getFormGroup('preco')"
-          [tiposDisponiveis]="['FIXO', 'QUANTIDADE', 'DEMANDA', 'METRO', 'HORA']">
-        </app-preco-selector>
-      </div>
+              <app-input-texto-restrito
+                class="m-b-16"
+                [control]="nomeControl"
+                label="Nome"
+                placeholder="Digite o nome do acabamento">
+              </app-input-texto-restrito>
 
-      <!-- Ativo (somente no modo edição) -->
-      @if (isEditMode) {
-      <div class="m-b-24">
-        <mat-slide-toggle formControlName="ativo">
-          {{ form.get('ativo')?.value ? 'Acabamento Ativo' : 'Acabamento Inativo' }}
-        </mat-slide-toggle>
-      </div>
-      }
+              <app-input-texto-restrito
+                class="m-b-16"
+                [control]="descricaoControl"
+                label="Descrição"
+                placeholder="Digite uma descrição">
+              </app-input-texto-restrito>
+
+              <!-- Ativo (somente no modo edição) -->
+              <div class="m-b-24" *ngIf="isEditMode">
+                <mat-slide-toggle formControlName="ativo">
+                  {{ form.get('ativo')?.value ? 'Acabamento Ativo' : 'Acabamento Inativo' }}
+                </mat-slide-toggle>
+              </div>
+
+            </mat-card-content>
+          </mat-card>
+        </mat-tab>
+
+        <!-- Aba Variações -->
+        <mat-tab label="Variações">
+          <mat-card class="cardWithShadow">
+            <mat-card-content>
+              <app-variacoes-acabamento
+                [variacoesIniciais]="variacoesIniciais"
+                (variacoesChange)="onVariacoesChange($event)">
+              </app-variacoes-acabamento>
+            </mat-card-content>
+          </mat-card>
+        </mat-tab>
+
+      </mat-tab-group>
 
       <!-- Botões -->
-      <div class="d-flex gap-12 m-t-8">
+      <div class="d-flex gap-12 m-t-24">
 
-        <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid">
-          {{ isEditMode ? 'Atualizar' : 'Salvar' }}
-        </button>
-
-        <a mat-flat-button class="bg-error text-white" [routerLink]="['/page/cadastro-tecnico/acabamentos']">
+        <!-- CANCELAR -->
+        <a
+          mat-flat-button
+          class="bg-error text-white"
+          [routerLink]="['/page/cadastro-tecnico/acabamentos']">
           Cancelar
         </a>
+
+        <!-- SALVAR -->
+        <button
+          mat-flat-button
+          color="primary"
+          type="submit"
+          [disabled]="form.invalid || loading">
+          {{ isEditMode ? 'Atualizar' : 'Salvar' }}
+        </button>
 
       </div>
 

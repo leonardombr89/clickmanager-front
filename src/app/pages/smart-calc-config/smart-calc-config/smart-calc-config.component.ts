@@ -1,7 +1,9 @@
 import { Component, OnInit, DestroyRef, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { finalize } from 'rxjs';
+import { ToastrService } from 'ngx-toastr';
 
 import { MatCardModule } from '@angular/material/card';
 import { MatTabsModule } from '@angular/material/tabs';
@@ -16,13 +18,9 @@ import { MatIconModule } from '@angular/material/icon';
 
 type ProdutoOption = { id: number; nome: string };
 
-// 👉 Se já tiver um ProdutoService, use-o. Aqui vai um stub simples.
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
 import { CalculadoraConfigService } from '../calculadora-config.service';
 import { CalculadoraConfigResponse } from 'src/app/models/calculadora/calculadora-config-response.model';
 import { CalculadoraConfigRequest } from 'src/app/models/calculadora/calculadora-config-request.model';
-import { ProdutoService } from '../../cadastro-tecnico/services/produto.service';
 import { CardHeaderComponent } from "src/app/components/card-header/card-header.component";
 import { MatDivider } from "@angular/material/divider";
 
@@ -37,14 +35,14 @@ import { MatDivider } from "@angular/material/divider";
     CardHeaderComponent,
     MatDivider
 ],
-    templateUrl: './calculadora-config.component.html',
-    styleUrls: ['./calculadora-config.component.scss']
+    templateUrl: './smart-calc-config.component.html',
+    styleUrls: ['./smart-calc-config.component.scss']
 })
 export class CalculadoraConfigComponent implements OnInit {
     private fb = inject(FormBuilder);
     private destroyRef = inject(DestroyRef);
     private calculadoraService = inject(CalculadoraConfigService);
-    private produtoService = inject(ProdutoService);
+    private toastr = inject(ToastrService);
 
     carregando = signal<boolean>(true);
     salvando = signal<boolean>(false);
@@ -52,55 +50,33 @@ export class CalculadoraConfigComponent implements OnInit {
     produtoOptions: ProdutoOption[] = [];
     configAtual?: CalculadoraConfigResponse;
 
-    // ✅ nonNullable para casar com CalculadoraConfigRequest
     form = this.fb.nonNullable.group({
         ativo: this.fb.nonNullable.control<boolean>(true),
         produtoIds: this.fb.nonNullable.control<number[]>([]),
     });
 
     ngOnInit(): void {
-        const t0 = performance.now();
-        console.log('[SmartCalc] init -> carregando produtos...');
-
-        this.produtoService.listarOptionsAtivos()
-            .pipe(takeUntilDestroyed(this.destroyRef))
-            .subscribe({
-                next: (opts) => {
-                    this.produtoOptions = opts ?? [];
-                    console.log('[SmartCalc] produtos recebidos:',
-                        { quantidade: this.produtoOptions.length, exemplos: this.produtoOptions.slice(0, 3) });
-                },
-                error: (err) => {
-                    console.error('[SmartCalc] erro ao carregar produtos:', err);
-                    this.produtoOptions = [];
-                },
-                complete: () => {
-                    const t1 = performance.now();
-                    console.log('[SmartCalc] produtos -> complete',
-                        { duracaoMs: Math.round(t1 - t0), carregandoAntes: this.carregando() });
-
-                    this.carregando.set(false);
-                    console.log('[SmartCalc] carregando=false; chamando loadConfig()');
-
-                    this.loadConfig();
-                }
-            });
+        this.carregando.set(true);
+        this.loadConfig();
     }
 
     private loadConfig(): void {
         const t0 = performance.now();
         console.log('[SmartCalc] loadConfig -> buscando configuração atual...');
-        this.carregando.set(true);
 
-        this.calculadoraService.getConfig()
-            .pipe(takeUntilDestroyed(this.destroyRef))
+        this.calculadoraService.getConfigCompleta()
+            .pipe(
+                takeUntilDestroyed(this.destroyRef),
+                finalize(() => this.carregando.set(false))
+            )
             .subscribe({
                 next: (res) => {
-                    this.configAtual = res;
-                    const produtos = res?.produtos ?? [];
+                    this.configAtual = res?.config ?? undefined;
+                    this.produtoOptions = res?.produtosDisponiveis ?? [];
+                    const produtos = res?.config?.produtos ?? [];
 
                     console.log('[SmartCalc] config recebida:', {
-                        ativo: res?.ativo,
+                        ativo: res?.config?.ativo,
                         produtosCount: produtos.length,
                         produtosExemplos: produtos.slice(0, 3)
                     });
@@ -115,7 +91,7 @@ export class CalculadoraConfigComponent implements OnInit {
                     });
 
                     this.form.patchValue({
-                        ativo: res?.ativo ?? true,
+                        ativo: res?.config?.ativo ?? false,
                         produtoIds,
                     });
 
@@ -123,10 +99,10 @@ export class CalculadoraConfigComponent implements OnInit {
                 },
                 error: (err) => {
                     console.error('[SmartCalc] erro ao carregar config:', err);
+                    this.produtoOptions = [];
                 },
                 complete: () => {
                     const t1 = performance.now();
-                    this.carregando.set(false);
                     console.log('[SmartCalc] loadConfig -> complete', {
                         duracaoMs: Math.round(t1 - t0),
                         carregandoAtual: this.carregando(),
@@ -144,23 +120,30 @@ export class CalculadoraConfigComponent implements OnInit {
     }
 
     onSubmit(): void {
+        const formValue = this.form.getRawValue();
+        if (formValue.ativo && (!formValue.produtoIds || formValue.produtoIds.length === 0)) {
+            this.toastr.warning('Para habilitar o SmartCalc, selecione ao menos um produto.');
+            this.form.markAllAsTouched();
+            return;
+        }
+
         if (this.form.invalid) {
             this.form.markAllAsTouched();
             return;
         }
 
-        const req: CalculadoraConfigRequest = this.form.getRawValue(); // tipos casam por ser nonNullable
+        const req: CalculadoraConfigRequest = formValue;
         this.salvando.set(true);
 
         this.calculadoraService.salvar(req)
             .pipe(takeUntilDestroyed(this.destroyRef))
             .subscribe({
                 next: (res) => {
-                    this.configAtual = res;
-                    // opcional: snackbar "Salvo com sucesso"
+                    this.configAtual = res ?? undefined;
+                    this.toastr.success('Configurações salvas com sucesso!', 'SmartCalc');
                 },
                 error: () => {
-                    // opcional: snackbar de erro
+                    this.toastr.error('Não foi possível salvar as configurações.', 'SmartCalc');
                 },
                 complete: () => this.salvando.set(false)
             });

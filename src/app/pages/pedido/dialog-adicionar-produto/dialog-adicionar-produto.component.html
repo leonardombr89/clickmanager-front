@@ -74,6 +74,7 @@
                             <div class="opt-grid">
                                 <label class="opt-card" *ngFor="let a of acabamentosDisponiveis; trackBy: trackById"
                                     (click)="toggle(acabamentoIdsCtrl, a.id, !isSelected(acabamentoIdsCtrl, a.id))">
+
                                     <mat-checkbox class="opt-check" [checked]="isSelected(acabamentoIdsCtrl, a.id)"
                                         (click)="$event.stopPropagation()"
                                         (change)="toggle(acabamentoIdsCtrl, a.id, $event.checked)">
@@ -88,6 +89,7 @@
                                         {{ precoResumo(a.preco) }}
                                     </div>
                                 </label>
+
                             </div>
                         </ng-container>
 

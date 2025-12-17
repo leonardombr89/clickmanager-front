@@ -22,7 +22,7 @@ import { ListarClienteComponent } from './cliente/listar-cliente/listar-cliente.
 import { DetalhesPedidoComponent } from './pedido/detalhes-pedido/detalhes-pedido.component';
 import { FormServicoComponent } from './cadastro-tecnico/servicos/form-servico/form-servico.component';
 import { ListarServicoComponent } from './cadastro-tecnico/servicos/listar-servicos/listar-servicos.component';
-import { CalculadoraConfigComponent } from './calculadora-config/calculadora-config/calculadora-config.component';
+import { CalculadoraConfigComponent } from './smart-calc-config/smart-calc-config/smart-calc-config.component';
 
 export const PagesRoutes: Routes = [
   {

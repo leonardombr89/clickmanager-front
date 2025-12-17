@@ -22,6 +22,7 @@ import { PrecoFixoConfigComponent } from './preco-fixo-component/preco-fixo-conf
 import { PrecoQuantidadeConfigComponent } from './preco-quantidade-component/preco-quantidade-config.component';
 import { PrecoDemandaConfigComponent } from './preco-demanda-component/preco-demanda-config.component';
 import { PrecoMetroConfigComponent } from './preco-metro-component/preco-metro-config.component';
+import { AcabamentoVariacaoResponse } from 'src/app/models/acabamento/acabamento-variacao-response.model';
 
 type IdNome = { id: number; nome: string };
 
@@ -31,9 +32,10 @@ type Variacao = {
     formatoId: number; formatoNome: string;
     corId?: number | null; corNome?: string | null;
     preco: Preco;
-    acabamentos: AcabamentoResponse[];
+    acabamentos: AcabamentoVariacaoResponse[];
     servicos: ServicoResponse[];
 };
+
 
 @Component({
     standalone: true,
@@ -92,7 +94,7 @@ export class DialogAdicionarProdutoComponent {
 
     // disponíveis por variação
     servicosDisponiveis: ServicoResponse[] = [];
-    acabamentosDisponiveis: AcabamentoResponse[] = [];
+    acabamentosDisponiveis: AcabamentoVariacaoResponse[] = [];
 
     @ViewChild(MatStepper) stepper!: MatStepper;
 
@@ -314,7 +316,8 @@ export class DialogAdicionarProdutoComponent {
         const ids = this.servicoIdsCtrl.value ?? [];
         return this.servicosDisponiveis.filter(s => ids.includes(s.id));
     }
-    get acabamentosSelecionadosDetalhe(): AcabamentoResponse[] {
+
+    get acabamentosSelecionadosDetalhe(): AcabamentoVariacaoResponse[] {
         const ids = this.acabamentoIdsCtrl.value ?? [];
         return this.acabamentosDisponiveis.filter(a => ids.includes(a.id));
     }
@@ -508,7 +511,7 @@ export class DialogAdicionarProdutoComponent {
 
         const baseNome = this.produtoBase?.nome ?? 'Produto';
         const variacaoTxt = [v.materialNome, v.formatoNome, v.corNome].filter(Boolean).join(' / ');
-        const nomeComposto = `${baseNome} / ${variacaoTxt}`; 
+        const nomeComposto = `${baseNome} / ${variacaoTxt}`;
 
         const qtd = Number(p?.quantidade ?? 1) || 1;
 
@@ -545,8 +548,8 @@ export class DialogAdicionarProdutoComponent {
         const altura = Number((p as any)?.altura ?? (p as any)?.alturaCm ?? NaN);
 
         itens.push({
-            produtoVariacaoId: v.id,           
-            nome: nomeComposto,                
+            produtoVariacaoId: v.id,
+            nome: nomeComposto,
             quantidade: qtd,
             valor: unit,
             subTotal: subtotal,

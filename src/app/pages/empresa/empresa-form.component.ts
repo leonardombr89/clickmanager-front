@@ -49,7 +49,7 @@ import { Empresa } from 'src/app/models/empresa/empresa.model';
 export class EmpresaFormComponent implements OnInit {
 
   @Input() modoOnboarding = false;
-  @Output() empresaSalva = new EventEmitter<Empresa>();
+  @Output() empresaSalva = new EventEmitter<void>();
 
   form!: FormGroup;
 
@@ -156,19 +156,26 @@ export class EmpresaFormComponent implements OnInit {
   }
 
   onSubmit(): void {
-    if (this.form.invalid) {
-      this.toastr.warning('Preencha todos os campos obrigatórios corretamente.', 'Formulário inválido');
-      this.form.markAllAsTouched();
-      return;
-    }
-
-    const formData = this.montarFormData();
-
-    this.empresaService.cadastrarEmpresaFormData(formData).subscribe({
-      next: () => this.toastr.success('Empresa cadastrada com sucesso!'),
-      error: () => this.toastr.error('Erro ao cadastrar empresa')
-    });
+  if (this.form.invalid) {
+    this.toastr.warning('Preencha todos os campos obrigatórios corretamente.', 'Formulário inválido');
+    this.form.markAllAsTouched();
+    return;
   }
+
+  const formData = this.montarFormData();
+
+  this.empresaService.cadastrarEmpresaFormData(formData).subscribe({
+    next: () => {
+      this.toastr.success('Empresa cadastrada com sucesso!');
+
+      if (this.modoOnboarding) {
+        this.empresaSalva.emit();
+      }
+    },
+    error: () => this.toastr.error('Erro ao cadastrar empresa')
+  });
+}
+
 
   private montarFormData(): FormData {
     const formData = new FormData();

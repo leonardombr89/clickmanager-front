@@ -38,7 +38,7 @@ import { Router } from '@angular/router';
 import { PedidoService } from '../../pedido/pedido.service';
 import { ItemTipo } from 'src/app/models/pedido/item-tipo.enum';
 import { PedidoResponse } from 'src/app/models/pedido/pedido-response.model';
-import { CalculadoraConfigService } from '../../calculadora-config/calculadora-config.service';
+import { CalculadoraConfigService } from '../../smart-calc-config/calculadora-config.service';
 import { CalculadoraConfigResponse } from 'src/app/models/calculadora/calculadora-config-response.model';
 import { MatCardTitle, MatCard } from "@angular/material/card";
 
