@@ -41,6 +41,7 @@ import { PedidoResponse } from 'src/app/models/pedido/pedido-response.model';
 import { CalculadoraConfigService } from '../../smart-calc-config/calculadora-config.service';
 import { CalculadoraConfigResponse } from 'src/app/models/calculadora/calculadora-config-response.model';
 import { MatCardTitle, MatCard } from "@angular/material/card";
+import { extrairMensagemErro } from 'src/app/utils/mensagem.util';
 
 type Material = { id: number; nome: string; descricao?: string };
 type Servico = { id: number; nome: string };
@@ -304,7 +305,7 @@ export class SmartCalcComponent implements OnInit {
         this.carregandoCalculo = false;
       },
       error: (err) => {
-        const msg = err?.error?.message ?? err?.message ?? 'Não foi possível calcular. Tente novamente.';
+        const msg = extrairMensagemErro(err, 'Não foi possível calcular. Tente novamente.');
         this.toastr.error(msg, 'SmartCalc', { timeOut: 6000, closeButton: true, progressBar: true });
         this.resultado.set(null);
         this.erroCalculo = msg;

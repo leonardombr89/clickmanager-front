@@ -23,6 +23,7 @@ import { CalculadoraConfigResponse } from 'src/app/models/calculadora/calculador
 import { CalculadoraConfigRequest } from 'src/app/models/calculadora/calculadora-config-request.model';
 import { CardHeaderComponent } from "src/app/components/card-header/card-header.component";
 import { MatDivider } from "@angular/material/divider";
+import { extrairMensagemErro } from 'src/app/utils/mensagem.util';
 
 @Component({
     selector: 'app-calculadora-config',
@@ -85,7 +86,8 @@ export class CalculadoraConfigComponent implements OnInit {
 
                 },
                 error: (err) => {
-                    console.error('[SmartCalc] erro ao carregar config:', err);
+                    const msg = extrairMensagemErro(err, 'Não foi possível carregar as configurações.');
+                    this.toastr.error(msg, 'SmartCalc');
                     this.produtoOptions = [];
                 },
                 complete: () => {
@@ -124,8 +126,9 @@ export class CalculadoraConfigComponent implements OnInit {
                     this.configAtual = res ?? undefined;
                     this.toastr.success('Configurações salvas com sucesso!', 'SmartCalc');
                 },
-                error: () => {
-                    this.toastr.error('Não foi possível salvar as configurações.', 'SmartCalc');
+                error: (err) => {
+                    const msg = extrairMensagemErro(err, 'Não foi possível salvar as configurações.');
+                    this.toastr.error(msg, 'SmartCalc');
                 },
                 complete: () => this.salvando.set(false)
             });

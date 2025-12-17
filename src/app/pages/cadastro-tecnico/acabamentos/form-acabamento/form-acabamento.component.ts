@@ -30,6 +30,7 @@ import { PrecoRequest } from 'src/app/models/preco/preco.model';
 import { InputTextoRestritoComponent } from '../../../../components/inputs/input-texto/input-texto-restrito.component';
 import { CardHeaderComponent } from 'src/app/components/card-header/card-header.component';
 import { AcabamentoVariacaoForm, VariacoesAcabamentoComponent } from '../variacoes-acabamento/variacoes-acabamento.component';
+import { extrairMensagemErro } from 'src/app/utils/mensagem.util';
 
 @Component({
   selector: 'app-form-acabamento',
@@ -112,9 +113,9 @@ export class FormAcabamentoComponent implements OnInit {
         this.patchAcabamento(acabamento);
         this.loading = false;
       },
-      error: () => {
+      error: (err) => {
         this.loading = false;
-        this.toastr.error('Erro ao carregar acabamento.');
+        this.toastr.error(extrairMensagemErro(err, 'Erro ao carregar acabamento.'));
         this.router.navigate(['/page/cadastro-tecnico/acabamentos']);
       }
     });
@@ -174,10 +175,10 @@ export class FormAcabamentoComponent implements OnInit {
         this.loading = false;
         this.router.navigate(['/page/cadastro-tecnico/acabamentos']);
       },
-      error: () => {
+      error: (err) => {
         const mensagem = this.isEditMode ? 'atualizar' : 'criar';
         this.loading = false;
-        this.toastr.error(`Erro ao ${mensagem} acabamento.`);
+        this.toastr.error(extrairMensagemErro(err, `Erro ao ${mensagem} acabamento.`));
       }
     });
   }

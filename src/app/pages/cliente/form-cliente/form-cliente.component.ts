@@ -18,6 +18,7 @@ import { InputEmailComponent } from "../../../components/inputs/input-email/inpu
 import { InputDocumentoComponent } from "../../../components/inputs/input-documento/input-documento.component";
 import { EnderecoFormComponent } from 'src/app/components/endereco-form/endereco-form.component';
 import { CardHeaderComponent } from "src/app/components/card-header/card-header.component";
+import { extrairMensagemErro } from 'src/app/utils/mensagem.util';
 
 @Component({
   selector: 'app-form-cliente',
@@ -88,7 +89,7 @@ export class FormClienteComponent implements OnInit {
   private carregarCliente(id: number): void {
     this.clienteService.buscarPorId(id).subscribe({
       next: cliente => this.form.patchValue(cliente),
-      error: () => this.toastr.error('Erro ao carregar cliente.')
+      error: (err) => this.toastr.error(extrairMensagemErro(err, 'Erro ao carregar cliente.'))
     });
   }
 
@@ -116,10 +117,7 @@ export class FormClienteComponent implements OnInit {
           this.toastr.success('Cliente atualizado com sucesso!');
           this.router.navigate([destino]);
         },
-        error: (err) => {
-          console.error('[onSubmit] Erro ao atualizar cliente:', err);
-          this.toastr.error('Erro ao atualizar cliente.');
-        }
+        error: (err) => this.toastr.error(extrairMensagemErro(err, 'Erro ao atualizar cliente.'))
       });
     } else {
       this.clienteService.salvar(cliente).subscribe({
@@ -127,10 +125,7 @@ export class FormClienteComponent implements OnInit {
           this.toastr.success('Cliente cadastrado com sucesso!');
           this.router.navigate([destino]);
         },
-        error: (err) => {
-          console.error('[onSubmit] Erro ao cadastrar cliente:', err);
-          this.toastr.error('Erro ao cadastrar cliente.');
-        }
+        error: (err) => this.toastr.error(extrairMensagemErro(err, 'Erro ao cadastrar cliente.'))
       });
     }
   } 
