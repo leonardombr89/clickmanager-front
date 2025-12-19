@@ -11,6 +11,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { CardHeaderComponent } from "src/app/components/card-header/card-header.component";
+import { extrairMensagemErro } from 'src/app/utils/mensagem.util';
 
 @Component({
   selector: 'app-form-cores',
@@ -68,8 +69,8 @@ export class FormCoresComponent implements OnInit{
           ativo: cor.ativo
         });
       },
-      error: () => {
-        this.toastr.error('Erro ao carregar cor.');
+      error: (err) => {
+        this.toastr.error(extrairMensagemErro(err, 'Erro ao carregar cor.'));
         this.router.navigate(['/page/cadastro-tecnico/cores']);
       }
     });
@@ -86,7 +87,7 @@ export class FormCoresComponent implements OnInit{
           this.toastr.success('Cor atualizada com sucesso!');
           this.router.navigate(['/page/cadastro-tecnico/cores']);
         },
-        error: () => this.toastr.error('Erro ao atualizar cor.')
+        error: (err) => this.toastr.error(extrairMensagemErro(err, 'Erro ao atualizar cor.'))
       });
     } else {
       this.coresService.salvar(corData).subscribe({
@@ -94,7 +95,7 @@ export class FormCoresComponent implements OnInit{
           this.toastr.success('Cor criada com sucesso!');
           this.router.navigate(['/page/cadastro-tecnico/cores']);
         },
-        error: () => this.toastr.error('Erro ao criar cor.')
+        error: (err) => this.toastr.error(extrairMensagemErro(err, 'Erro ao criar cor.'))
       });
     }
   }
