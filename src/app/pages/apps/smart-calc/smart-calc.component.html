@@ -54,6 +54,7 @@
             <mat-form-field appearance="outline" class="w-100">
               <mat-label>Produto</mat-label>
               <mat-select formControlName="produtoId" [disabled]="carregandoProdutos || !!erroProdutos">
+                <mat-option [value]="null">Selecione um produto…</mat-option>
                 <mat-option *ngIf="carregandoProdutos" disabled>Carregando…</mat-option>
                 <mat-option *ngIf="erroProdutos" disabled>{{ erroProdutos }}</mat-option>
 

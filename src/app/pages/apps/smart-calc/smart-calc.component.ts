@@ -128,7 +128,7 @@ export class SmartCalcComponent implements OnInit {
     private toastr: ToastrService,
     private router: Router,
     private calcCfgSvc: CalculadoraConfigService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     // 1) cria o form
@@ -145,7 +145,11 @@ export class SmartCalcComponent implements OnInit {
 
     // 2) listeners
     this.form.controls.produtoId.valueChanges.subscribe((id) => {
-      if (id) this.carregarProdutoInit(id);
+      if (id) {
+        this.carregarProdutoInit(id);
+      } else {
+        this.resetProdutoDependencias();
+      }
     });
 
     this.form.controls.materialId.valueChanges.subscribe((mid) => {
@@ -206,8 +210,8 @@ export class SmartCalcComponent implements OnInit {
 
         this.produtos = arr;
 
-        if (!this.form.controls.produtoId.value && this.produtos.length) {
-          this.form.controls.produtoId.setValue(this.produtos[0].id);
+        if (!this.form.controls.produtoId.value) {
+          this.form.controls.produtoId.setValue(null, { emitEvent: false });
         }
 
         if (!this.configAtiva) {
@@ -225,6 +229,28 @@ export class SmartCalcComponent implements OnInit {
       },
     });
   }
+
+  private resetProdutoDependencias(): void {
+    this.produtoInitSelecionado = null;
+    this.resultado.set(null);
+
+    this.servicos = [];
+    this.acabamentos = [];
+    this.materiais = [];
+
+    this.variacoesPorMaterialInit.clear();
+
+    this.form.controls.materialId.setValue(null, { emitEvent: false });
+    this.form.controls.servicosIds.setValue([], { emitEvent: false });
+    this.form.controls.acabamentosIds.setValue([], { emitEvent: false });
+
+    this.form.controls.largura.setValue(null, { emitEvent: false });
+    this.form.controls.altura.setValue(null, { emitEvent: false });
+    this.form.controls.quantidade.setValue(null, { emitEvent: false });
+
+    this.aplicarModoCobrancaRegraLargura();
+  }
+
 
   private carregarProdutoInit(produtoId: number): void {
     // limpa estado dependente
@@ -529,25 +555,19 @@ export class SmartCalcComponent implements OnInit {
   }
 
   limpar(): void {
-    this.form.reset({
-      largura: null,
-      altura: null,
-      quantidade: null,
-      produtoId: this.produtos[0]?.id ?? null,
-      materialId: this.materiais[0]?.id ?? null,
-      servicosIds: [],
-      acabamentosIds: [],
-      permiteRotacao: true,
-    });
+  this.form.reset({
+    largura: null,
+    altura: null,
+    quantidade: null,
+    produtoId: null,
+    materialId: null,
+    servicosIds: [],
+    acabamentosIds: [],
+    permiteRotacao: true,
+  });
 
-    this.resultado.set(null);
-
-    // rehidrata listas quando resetar material/produto
-    const pid = this.form.controls.produtoId.value ?? undefined;
-    if (pid != null) this.carregarProdutoInit(pid);
-
-    this.aplicarModoCobrancaRegraLargura();
-  }
+  this.resetProdutoDependencias();
+}
 
   enviarParaPedido(): void {
     this.adicionarAoPedido();

@@ -20,7 +20,7 @@ import { PedidoResponse } from 'src/app/models/pedido/pedido-response.model';
 
 @Injectable({ providedIn: 'root' })
 export class SmartCalcDataService {
-  private readonly calcEndpoint = 'api/smart-calc/calcular';
+  private readonly calcEndpoint = 'api/smartcalc-core/calcular';
   private readonly DRAFT_KEY = 'currentPedidoId';
 
   constructor(
