@@ -379,33 +379,20 @@ export class SmartCalcComponent implements OnInit {
     const r = this.resultado();
     const itensCalc: any[] = Array.isArray(r?.itens) && r!.itens.length ? r!.itens : [top];
 
-    const nomesServ = new Set((this.servicos ?? []).map((s) => (s?.nome ?? '').toLowerCase().trim()));
-    const nomesAcab = new Set((this.acabamentos ?? []).map((a) => (a?.nome ?? '').toLowerCase().trim()));
+    const gerarGrupo = () => (globalThis as any).crypto?.randomUUID?.() ?? String(Date.now() + Math.random());
+    const baseKeyByVar = new Map<number, string>();
 
-    const isProduto = (it: any) => {
-      const nome = (it?.nomeComposto ?? it?.nome ?? it?.descricao ?? '').toString().toLowerCase().trim();
-      const ehServico = !!it?.servicoId || nomesServ.has(nome);
-      const ehAcabamento = !!it?.acabamentoId || nomesAcab.has(nome);
-      if (ehServico || ehAcabamento) return false;
-
-      const temVinculoVariacao =
-        it?.produtoVariacaoId || it?.variacaoId || it?.produtoId || it?.materialId || it?.formatoId;
-      return !!temVinculoVariacao || (!nomesServ.has(nome) && !nomesAcab.has(nome));
+    const normalizar = (v: any) => (v ?? '').toString().toLowerCase().trim();
+    const matchOptionId = (nomeItem: string, lista: { id: number; nome: string }[]) => {
+      const alvo = normalizar(nomeItem);
+      const achado = lista.find((opt) => alvo.includes(normalizar(opt.nome)));
+      return achado?.id;
     };
 
-    const itensProduto = itensCalc.filter(isProduto);
+    const itens: PedidoItemRequest[] = [];
 
-    const bases: PedidoItemRequest[] = [];
-
-    for (const item of itensProduto) {
-      const grupoKey = (globalThis as any).crypto?.randomUUID?.() ?? String(Date.now() + Math.random());
-
-      const variacaoId = Number(item.produtoVariacaoId ?? item.variacaoId ?? this.getSelectedVariacaoId() ?? 0);
-      if (!variacaoId) {
-        this.toastr.error('Variação não identificada para um dos itens.');
-        return;
-      }
-
+    for (const item of itensCalc) {
+      const nomeItem = item.nomeComposto ?? item.nome ?? item.descricao ?? 'Item calculado';
       const quantidade = Number(item.quantidade ?? top.quantidade ?? 1);
       const subTotal = Number(item.subTotal ?? 0);
       const unitTop = Number(item.precoUnitario ?? (quantidade > 0 ? subTotal / quantidade : 0));
@@ -414,50 +401,48 @@ export class SmartCalcComponent implements OnInit {
       const largura = Number(item.largura ?? top.largura ?? 0) || undefined;
       const altura = Number(item.altura ?? top.altura ?? 0) || undefined;
 
-      bases.push({
+      const variacaoId = Number(item.produtoVariacaoId ?? item.variacaoId ?? this.getSelectedVariacaoId() ?? item.produtoId ?? 0);
+
+      const tipoItem: ItemTipo =
+        (item.tipo as ItemTipo | undefined) ??
+        (item.servicoId ? ItemTipo.SERVICO : item.acabamentoId ? ItemTipo.ACABAMENTO : ItemTipo.BASE);
+
+      if (tipoItem === ItemTipo.BASE && !variacaoId) {
+        this.toastr.error('Variação não identificada para um dos itens.');
+        return;
+      }
+
+      const grupoKeyDireto: string | undefined = item.grupoKey;
+      let grupoKey: string;
+
+      if (grupoKeyDireto) {
+        grupoKey = grupoKeyDireto;
+      } else if (tipoItem === ItemTipo.BASE && variacaoId) {
+        grupoKey = gerarGrupo();
+        baseKeyByVar.set(variacaoId, grupoKey);
+      } else if (variacaoId && baseKeyByVar.has(variacaoId)) {
+        grupoKey = baseKeyByVar.get(variacaoId)!;
+      } else {
+        grupoKey = gerarGrupo();
+      }
+
+      const acabamentoId = item.acabamentoId ?? matchOptionId(nomeItem, this.acabamentos ?? []);
+      const servicoId = item.servicoId ?? matchOptionId(nomeItem, this.servicos ?? []);
+
+      itens.push({
         grupoKey,
-        tipo: ItemTipo.BASE,
-        descricao: item.nomeComposto ?? item.nome ?? item.descricao ?? 'Item calculado',
+        tipo: tipoItem,
+        descricao: nomeItem,
         quantidade,
         valor: unitario,
         subTotal,
-        produtoVariacaoId: variacaoId,
+        produtoVariacaoId: tipoItem === ItemTipo.BASE ? variacaoId : undefined,
         largura,
         altura,
+        acabamentoId: tipoItem === ItemTipo.ACABAMENTO ? acabamentoId : undefined,
+        servicoId: tipoItem === ItemTipo.SERVICO ? servicoId : undefined,
       });
     }
-
-    const filhos: PedidoItemRequest[] = [];
-    for (const base of bases) {
-      for (const sid of this.form.controls.servicosIds.value ?? []) {
-        filhos.push({
-          grupoKey: base.grupoKey!,
-          tipo: ItemTipo.SERVICO,
-          servicoId: sid,
-          descricao: this.servicos.find((s) => s.id === sid)?.nome ?? `Serviço #${sid}`,
-          quantidade: 1,
-          valor: 0,
-          subTotal: 0,
-          largura: base.largura,
-          altura: base.altura,
-        });
-      }
-      for (const aid of this.form.controls.acabamentosIds.value ?? []) {
-        filhos.push({
-          grupoKey: base.grupoKey!,
-          tipo: ItemTipo.ACABAMENTO,
-          acabamentoId: aid,
-          descricao: this.acabamentos.find((a) => a.id === aid)?.nome ?? `Acabamento #${aid}`,
-          quantidade: 1,
-          valor: 0,
-          subTotal: 0,
-          largura: base.largura,
-          altura: base.altura,
-        });
-      }
-    }
-
-    const itens: PedidoItemRequest[] = [...bases, ...filhos];
 
     this.carregandoAdd = true;
     const usuario = this.dataSvc.getUsuarioLogado();

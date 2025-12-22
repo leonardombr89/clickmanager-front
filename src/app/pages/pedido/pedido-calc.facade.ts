@@ -5,7 +5,6 @@ import { PedidoResponse } from "src/app/models/pedido/pedido-response.model";
 import { PedidoItemRequest } from "src/app/models/pedido/pedido-item-request.model";
 import { ApiService } from "src/app/services/api.service";
 
-// pedido-calc.facade.ts
 @Injectable({ providedIn: 'root' })
 export class PedidoCalcFacade {
   private readonly KEY = 'currentPedidoId';

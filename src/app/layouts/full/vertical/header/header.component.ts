@@ -87,10 +87,6 @@ export class HeaderComponent implements OnInit {
     this.authService.usuario$.subscribe(usuario => {
       this.usuarioLogado = usuario;
     });
-    this.calculadoraService.getConfig().subscribe({
-      next: (res) => this.calculadoraConfig = res,
-      error: () => console.error('Erro ao buscar configurações')
-    });
   }
 
   toggleCollpase() {
