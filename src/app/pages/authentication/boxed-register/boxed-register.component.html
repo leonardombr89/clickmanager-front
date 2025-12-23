@@ -23,38 +23,37 @@
               <div class="col-12 col-md-6" formGroupName="empresa">
                 <h5 class="m-b-16">Dados da empresa</h5>
 
-                <!-- Nome empresa -->
-                <mat-label class="f-s-14 f-w-600 m-b-12 d-block">Nome da empresa</mat-label>
-                <mat-form-field appearance="outline" class="w-100" color="primary">
-                  <input matInput formControlName="nome" />
-                  @if(empresa.get('nome')?.touched && empresa.get('nome')?.invalid) {
-                  <mat-hint class="error-msg">
-                    <div class="text-error">Nome é obrigatório.</div>
-                  </mat-hint>
-                  }
-                </mat-form-field>
+                <div class="m-b-12">
+                  <app-input-texto-restrito
+                    [control]="empresaNomeControl"
+                    label="Nome da empresa"
+                    placeholder="Digite o nome da empresa">
+                  </app-input-texto-restrito>
+                </div>
 
-                <!-- Telefone -->
-                <mat-label class="f-s-14 f-w-600 m-b-12 d-block">Telefone</mat-label>
-                <mat-form-field appearance="outline" class="w-100" color="primary">
-                  <input matInput formControlName="telefone" />
-                  @if(empresa.get('telefone')?.touched && empresa.get('telefone')?.invalid) {
-                  <mat-hint class="error-msg">
-                    <div class="text-error">Telefone é obrigatório.</div>
-                  </mat-hint>
-                  }
-                </mat-form-field>
+                <div class="m-b-12">
+                  <app-input-telefone
+                    [control]="empresaTelefoneControl"
+                    label="Telefone"
+                    placeholder="Digite o telefone da empresa">
+                  </app-input-telefone>
+                </div>
 
-                <!-- CNPJ -->
-                <mat-label class="f-s-14 f-w-600 m-b-12 d-block">CNPJ</mat-label>
-                <mat-form-field appearance="outline" class="w-100" color="primary">
-                  <input matInput formControlName="cnpj" />
-                  @if(empresa.get('cnpj')?.touched && empresa.get('cnpj')?.invalid) {
-                  <mat-hint class="error-msg">
-                    <div class="text-error">CNPJ é obrigatório.</div>
-                  </mat-hint>
-                  }
-                </mat-form-field>
+                <div class="m-b-12">
+                  <app-input-email
+                    [control]="empresaEmailControl"
+                    label="E-mail da empresa (opcional)"
+                    placeholder="Digite o e-mail da empresa">
+                  </app-input-email>
+                </div>
+
+                <div class="m-b-12">
+                  <app-input-documento
+                    [control]="empresaCnpjControl"
+                    label="CPF ou CNPJ"
+                    placeholder="Digite o CPF ou CNPJ">
+                  </app-input-documento>
+                </div>
               </div>
 
               <!-- ========================================================= -->
@@ -63,33 +62,29 @@
               <div class="col-12 col-md-6" formGroupName="usuario">
                 <h5 class="m-b-16">Dados do gestor</h5>
 
-                <!-- Nome gestor -->
-                <mat-label class="f-s-14 f-w-600 m-b-12 d-block">Nome do gestor</mat-label>
-                <mat-form-field appearance="outline" class="w-100">
-                  <input matInput formControlName="nome" />
-                  @if(usuario.get('nome')?.touched && usuario.get('nome')?.invalid) {
-                  <mat-hint class="error-msg">
-                    @if(usuario.get('nome')?.errors?.['required']) {
-                    <div class="text-error">Nome é obrigatório.</div>
-                    }
-                    @if(usuario.get('nome')?.errors?.['minlength']) {
-                    <div class="text-error">Mínimo de 6 caracteres.</div>
-                    }
-                  </mat-hint>
-                  }
-                </mat-form-field>
+                <div class="m-b-12">
+                  <app-input-texto-restrito
+                    [control]="usuarioNomeControl"
+                    label="Nome do gestor"
+                    placeholder="Digite o nome do gestor">
+                  </app-input-texto-restrito>
+                </div>
 
-                <!-- Email -->
-                <mat-label class="f-s-14 f-w-600 m-b-12 d-block">E-mail</mat-label>
-                <mat-form-field appearance="outline" class="w-100">
-                  <input matInput type="email" formControlName="email" />
-                </mat-form-field>
+                <div class="m-b-12">
+                  <app-input-email
+                    [control]="usuarioEmailControl"
+                    label="E-mail"
+                    placeholder="Digite o e-mail do gestor">
+                  </app-input-email>
+                </div>
 
-                <!-- Telefone -->
-                <mat-label class="f-s-14 f-w-600 m-b-12 d-block">Telefone</mat-label>
-                <mat-form-field appearance="outline" class="w-100">
-                  <input matInput formControlName="telefone" />
-                </mat-form-field>
+                <div class="m-b-12">
+                  <app-input-telefone
+                    [control]="usuarioTelefoneControl"
+                    label="Telefone"
+                    placeholder="Digite o telefone do gestor">
+                  </app-input-telefone>
+                </div>
 
                 <!-- Senha -->
                 <mat-label class="f-s-14 f-w-600 m-b-12 d-block">Senha</mat-label>

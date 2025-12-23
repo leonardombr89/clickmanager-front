@@ -12,6 +12,10 @@ import { MaterialModule } from '../../../material.module';
 import { BrandingComponent } from '../../../layouts/full/vertical/sidebar/branding.component';
 import { ToastrService } from 'ngx-toastr';
 import { OnboardingService } from '../side-register/side-register.service';
+import { InputTextoRestritoComponent } from 'src/app/components/inputs/input-texto/input-texto-restrito.component';
+import { InputTelefoneComponent } from 'src/app/components/inputs/input-telefone/input-telefone.component';
+import { InputDocumentoComponent } from 'src/app/components/inputs/input-documento/input-documento.component';
+import { InputEmailComponent } from 'src/app/components/inputs/input-email/input-custom.component';
 
 @Component({
   selector: 'app-boxed-register',
@@ -22,6 +26,10 @@ import { OnboardingService } from '../side-register/side-register.service';
     FormsModule,
     ReactiveFormsModule,
     BrandingComponent,
+    InputTextoRestritoComponent,
+    InputTelefoneComponent,
+    InputDocumentoComponent,
+    InputEmailComponent,
   ],
   templateUrl: './boxed-register.component.html',
 })
@@ -41,6 +49,7 @@ export class AppBoxedRegisterComponent implements OnInit {
     empresa: new FormGroup({
       nome: new FormControl<string | null>('', [Validators.required]),
       telefone: new FormControl<string | null>('', [Validators.required]),
+      email: new FormControl<string | null>('', [Validators.email]),
       cnpj: new FormControl<string | null>('', [Validators.required])
     }),
     usuario: new FormGroup({
@@ -66,6 +75,42 @@ export class AppBoxedRegisterComponent implements OnInit {
     return this.form.get('usuario') as FormGroup;
   }
 
+  get empresaNomeControl(): FormControl {
+    return this.empresa.get('nome') as FormControl;
+  }
+
+  get empresaTelefoneControl(): FormControl {
+    return this.empresa.get('telefone') as FormControl;
+  }
+
+  get empresaEmailControl(): FormControl {
+    return this.empresa.get('email') as FormControl;
+  }
+
+  get empresaCnpjControl(): FormControl {
+    return this.empresa.get('cnpj') as FormControl;
+  }
+
+  get usuarioNomeControl(): FormControl {
+    return this.usuario.get('nome') as FormControl;
+  }
+
+  get usuarioEmailControl(): FormControl {
+    return this.usuario.get('email') as FormControl;
+  }
+
+  get usuarioTelefoneControl(): FormControl {
+    return this.usuario.get('telefone') as FormControl;
+  }
+
+  get usuarioSenhaControl(): FormControl {
+    return this.usuario.get('senha') as FormControl;
+  }
+
+  get usuarioConfirmarSenhaControl(): FormControl {
+    return this.usuario.get('confirmarSenha') as FormControl;
+  }
+
   get senhaDivergente(): boolean {
     const senha = this.usuario.get('senha')?.value;
     const confirmar = this.usuario.get('confirmarSenha')?.value;
@@ -88,6 +133,7 @@ export class AppBoxedRegisterComponent implements OnInit {
       empresa: {
         nome: empresa.nome!,
         telefone: empresa.telefone!,
+        email: empresa.email || '',
         cnpj: empresa.cnpj!
       },
       usuario: {
