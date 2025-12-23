@@ -1,27 +1,33 @@
 import { Injectable } from '@angular/core';
-import { CanActivate, ActivatedRouteSnapshot, Router } from '@angular/router';
+import { CanActivate, ActivatedRouteSnapshot, Router, UrlTree } from '@angular/router';
+import { Observable, of } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 import { AuthService } from '../../../services/auth.service';
 
 @Injectable({ providedIn: 'root' })
 export class RoleGuard implements CanActivate {
   constructor(private router: Router, private authService: AuthService) {}
 
-  canActivate(route: ActivatedRouteSnapshot): boolean {
+  canActivate(route: ActivatedRouteSnapshot): Observable<boolean | UrlTree> {
     const token = this.authService.getToken();
-    if (!token || this.isTokenExpired(token)) {
-      this.router.navigate(['/login']);
-      return false;
+    const allowedRoles = route.data['roles'] as string[];
+
+    if (token && !this.authService.isAccessTokenExpired(token)) {
+      return of(this.hasRequiredRole(token, allowedRoles));
     }
 
-    const allowedRoles = route.data['roles'] as string[];
-    const userRoles = this.getUserRoles(token);
+    if (this.authService.hasValidRefreshToken()) {
+      return this.authService.refreshToken().pipe(
+        map(tokens => this.hasRequiredRole(tokens.accessToken, allowedRoles)),
+        catchError(() => {
+          this.authService.logout();
+          return of(this.router.createUrlTree(['/login']));
+        })
+      );
+    }
 
-    const hasAccess = allowedRoles.some(role => userRoles.includes(`ROLE_${role}`));
-    if (hasAccess) return true;
-
-    console.warn('Acesso negado: usuário não tem as permissões necessárias');
-    this.router.navigate(['/forbidden']);
-    return false;
+    this.authService.logout();
+    return of(this.router.createUrlTree(['/login']));
   }
 
   private getUserRoles(token: string): string[] {
@@ -33,12 +39,10 @@ export class RoleGuard implements CanActivate {
     }
   }
 
-  private isTokenExpired(token: string): boolean {
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      return (payload.exp * 1000) < Date.now();
-    } catch {
-      return true;
-    }
+  private hasRequiredRole(token: string, allowedRoles: string[]): boolean | UrlTree {
+    const userRoles = this.getUserRoles(token);
+    const hasAccess = allowedRoles.some(role => userRoles.includes(`ROLE_${role}`));
+
+    return hasAccess ? true : this.router.createUrlTree(['/forbidden']);
   }
 }
