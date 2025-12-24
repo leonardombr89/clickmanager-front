@@ -6,7 +6,6 @@ import { MatPaginator, MatPaginatorModule, PageEvent } from '@angular/material/p
 import { MatTableModule } from '@angular/material/table';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
-import { MatChipsModule } from '@angular/material/chips';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog } from '@angular/material/dialog';
@@ -17,6 +16,7 @@ import { ConfirmDialogComponent } from 'src/app/components/dialog/confirm-dialog
 import { TemPermissaoDirective } from 'src/app/diretivas/tem-permissao.directive';
 import { InputPesquisaComponent } from 'src/app/components/inputs/input-pesquisa/input-pesquisa.component';
 import { CardHeaderComponent } from 'src/app/components/card-header/card-header.component';
+import { StatusFilterComponent } from 'src/app/components/status-filter/status-filter.component';
 
 import { AcabamentoService } from '../acabamento.service';
 import { AcabamentoResponse } from 'src/app/models/acabamento/acabamento-response.model';
@@ -34,13 +34,13 @@ import { AcabamentoVariacaoResponse } from 'src/app/models/acabamento/acabamento
     MatTableModule,
     MatProgressSpinnerModule,
     MatIconModule,
-    MatChipsModule,
     MatButtonModule,
     MatTooltipModule,
     TablerIconsModule,
     TemPermissaoDirective,
     InputPesquisaComponent,
-    CardHeaderComponent
+    CardHeaderComponent,
+    StatusFilterComponent
   ],
   templateUrl: './listar-acabamento.component.html',
   styleUrl: './listar-acabamento.component.scss'
@@ -56,7 +56,7 @@ export class ListarAcabamentoComponent implements OnInit {
   filtroStatus: boolean | null = true;
   termoPesquisa = '';
 
-  colunasExibidas = ['nome', 'descricao', 'variacoes', 'status', 'acoes'];
+  colunasExibidas = ['nome', 'descricao', 'variacoes', 'acoes'];
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
@@ -98,18 +98,6 @@ export class ListarAcabamentoComponent implements OnInit {
 
   onPesquisar(valor: string): void {
     this.termoPesquisa = valor;
-    this.pagina = 0;
-    this.carregarAcabamentos();
-  }
-
-  aplicarFiltro(status: boolean): void {
-    this.filtroStatus = status;
-    this.pagina = 0;
-    this.carregarAcabamentos();
-  }
-
-  removerFiltro(): void {
-    this.filtroStatus = null;
     this.pagina = 0;
     this.carregarAcabamentos();
   }
