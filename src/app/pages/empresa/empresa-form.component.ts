@@ -8,7 +8,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatCardModule } from '@angular/material/card';
 import { MatSelectModule } from '@angular/material/select';
-import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatRadioModule } from '@angular/material/radio';
 import { TablerIconsModule } from 'angular-tabler-icons';
 import { NgxMaskDirective, provideNgxMask } from 'ngx-mask';
@@ -38,7 +37,6 @@ import { Empresa } from 'src/app/models/empresa/empresa.model';
     MatTabsModule,
     MatCardModule,
     MatSelectModule,
-    MatCheckboxModule,
     MatRadioModule,
     TablerIconsModule,
     NgxMaskDirective,

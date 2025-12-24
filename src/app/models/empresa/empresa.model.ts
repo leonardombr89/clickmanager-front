@@ -10,5 +10,7 @@ export interface Empresa {
     inscricaoEstadual?: string;
     horario?: string;
     logoPath?: string | null;
+    dataCriacao?: string;
+    ativa?: boolean;
     endereco?: Endereco;
   }
