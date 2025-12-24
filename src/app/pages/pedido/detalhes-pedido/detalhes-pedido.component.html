@@ -7,8 +7,8 @@
                 <h4 class="f-s-18 f-w-600">#{{ (pedido?.status === 'ORCAMENTO' ? pedido?.numeroOrcamento :
                     pedido?.numero) || '—' }}</h4>
             </div>
-            <div class="col-sm-8 text-right d-inline-flex align-items-center justify-content-end">
-                <a routerLink="/pedidos" mat-stroked-button class="m-r-10">Voltar</a>
+  <div class="col-sm-8 text-right d-inline-flex align-items-center justify-content-end">
+                <a routerLink="/page/pedido" mat-stroked-button class="m-r-10">Voltar</a>
 
                 <button mat-flat-button color="primary" class="m-r-10" *ngIf="pedido?.status === 'ORCAMENTO'"
                     (click)="aprovarOrcamento()" [disabled]="aprovando || orcamentoVencido">

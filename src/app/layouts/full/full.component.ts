@@ -20,7 +20,10 @@ import { AppBreadcrumbComponent } from './shared/breadcrumb/breadcrumb.component
 import { CustomizerComponent } from './shared/customizer/customizer.component';
 import { AuthService } from 'src/app/services/auth.service';
 import { NavItem } from './vertical/sidebar/nav-item/nav-item';
-import { Usuario } from 'src/app/models/usuario.model';
+import { Usuario } from 'src/app/models/usuario/usuario.model';
+import { OnboardingService, OnboardingStatusResponse } from 'src/app/components/onboarding/onboarding.service';
+import { OnboardingWizardComponent } from 'src/app/components/onboarding/onboarding-wizard.component';
+import { MatDialog } from '@angular/material/dialog';
 
 const MOBILE_VIEW = 'screen and (max-width: 768px)';
 const TABLET_VIEW = 'screen and (min-width: 769px) and (max-width: 1024px)';
@@ -189,13 +192,17 @@ export class FullComponent implements OnInit {
     },
   ];
 
+  private onboardingChecado = false;
+
   constructor(
     private settings: CoreService,
     private mediaMatcher: MediaMatcher,
     private router: Router,
     private breakpointObserver: BreakpointObserver,
     private navService: NavService,
-    private authService: AuthService
+    private authService: AuthService,
+    private onboardingService: OnboardingService,
+    private dialog: MatDialog,
   ) {
     this.htmlElement = document.querySelector('html')!;
     this.layoutChangesSubscription = this.breakpointObserver
@@ -237,17 +244,51 @@ export class FullComponent implements OnInit {
         const permissoes = usuario.perfil!.permissoes.map(p => p.chave);
         this.navItemsFiltrados = this.filtrarMenusPorPermissao(navItems, permissoes);
       });
+       this.verificarOnboarding();
   }
 
   ngOnDestroy() {
     this.layoutChangesSubscription.unsubscribe();
   }
 
+  private verificarOnboarding(): void {
+    if (this.onboardingChecado) {
+      return;
+    }
+
+    this.onboardingService.obterStatus().subscribe({
+      next: (status: OnboardingStatusResponse) => {
+        this.onboardingChecado = true;
+
+        if (!status.onboardingConcluido) {
+          this.abrirOnboarding(status);
+        }
+      },
+      error: () => {
+        // se der erro, só não abre o onboarding
+        this.onboardingChecado = true;
+      },
+    });
+  }
+
+  private abrirOnboarding(status: OnboardingStatusResponse): void {
+    this.dialog.open(OnboardingWizardComponent, {
+      width: '96vw',
+        maxWidth: '96vw',
+        maxHeight: '92vh',
+      disableClose: true,
+      data: {
+        empresaNome: status.empresaNome,
+      },
+    });
+  }
+
+  
+
   filtrarMenusPorPermissao(items: NavItem[], permissoesUsuario: string[]): NavItem[] {  
     const possuiPermissao = (requeridas?: string[]) => {
       const resultado = !requeridas || requeridas.some(p => permissoesUsuario.includes(p));
       if (requeridas && !resultado) {
-        console.log('Sem permissão para:', requeridas);
       }
       return resultado;
     };

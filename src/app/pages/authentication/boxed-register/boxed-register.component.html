@@ -1,66 +1,134 @@
-<div class="blank-layout-container justify-content-center align-items-center">
-  <div class="position-relative row w-100 h-100vh bg-gredient justify-content-center">
-    <div class="col-lg-4 d-flex align-items-center">
-      <mat-card class="cardWithShadow boxed-auth">
-        <mat-card-content class="p-32">
-          <div class="text-center">
+<div class="blank-layout-container justify-content-center">
+  <div class="auth-wrapper">
+    <div class="position-relative shaper-wrapper">
+      <div class="w-100 position-relative rounded bg-white auth-card">
+        <div class="auth-body">
+
+          <div class="m-t-20 text-center">
             <app-branding></app-branding>
           </div>
 
-          <div class="or-border m-t-30">Cadastro de gestor</div>
+          <h4 class="f-w-700 f-s-26 lh-base text-center m-t-16">
+            Cadastro de empresa e gestor
+          </h4>
+
+          <div class="or-border m-t-20">Preencha os dados</div>
 
           <form class="m-t-30" [formGroup]="form" (ngSubmit)="submit()">
-            <mat-label class="f-s-14 f-w-600 m-b-12 d-block">Nome</mat-label>
-            <mat-form-field appearance="outline" class="w-100" color="primary">
-              <input matInput formControlName="uname" />
-              @if(f['uname'].touched && f['uname'].invalid) {
-              <mat-hint class="m-b-16 error-msg">
-                @if(f['uname'].errors && f['uname'].errors['required']) {
-                <div class="text-error">Nome é obrigatório.</div>
-                } @if(f['uname'].errors && f['uname'].errors['minlength']) {
-                <div class="text-error">Nome deve ter no mínimo 6 caracteres.</div>
-                }
-              </mat-hint>
-              }
-            </mat-form-field>
+            <div class="row">
 
-            <mat-label class="f-s-14 f-w-600 m-b-12 d-block">E-mail</mat-label>
-            <mat-form-field appearance="outline" class="w-100" color="primary">
-              <input matInput type="email" formControlName="email" />
-              @if(f['email'].touched && f['email'].invalid) {
-              <mat-hint class="m-b-16 error-msg">
-                @if(f['email'].errors && f['email'].errors['required']) {
-                <div class="text-error">E-mail é obrigatório.</div>
-                }
-              </mat-hint>
-              }
-            </mat-form-field>
+              <!-- ========================================================= -->
+              <!-- COLUNA ESQUERDA – EMPRESA REDUZIDA                        -->
+              <!-- ========================================================= -->
+              <div class="col-12 col-md-6" formGroupName="empresa">
+                <h5 class="m-b-16">Dados da empresa</h5>
 
-            <mat-label class="f-s-14 f-w-600 m-b-12 d-block">Senha</mat-label>
-            <mat-form-field appearance="outline" class="w-100" color="primary">
-              <input matInput type="password" formControlName="password" />
-              @if(f['password'].touched && f['password'].invalid) {
-              <mat-hint class="m-b-16 error-msg">
-                @if(f['password'].errors && f['password'].errors['required']) {
-                <div class="text-error">Senha é obrigatória.</div>
-                }
-              </mat-hint>
-              }
-            </mat-form-field>
+                <div class="m-b-12">
+                  <app-input-texto-restrito
+                    [control]="empresaNomeControl"
+                    label="Nome da empresa"
+                    placeholder="Digite o nome da empresa">
+                  </app-input-texto-restrito>
+                </div>
 
-            <button mat-flat-button color="primary" class="w-100" [disabled]="!form.valid">
-              Criar Conta
-            </button>
+                <div class="m-b-12">
+                  <app-input-telefone
+                    [control]="empresaTelefoneControl"
+                    label="Telefone"
+                    placeholder="Digite o telefone da empresa">
+                  </app-input-telefone>
+                </div>
+
+                <div class="m-b-12">
+                  <app-input-email
+                    [control]="empresaEmailControl"
+                    label="E-mail da empresa (opcional)"
+                    placeholder="Digite o e-mail da empresa">
+                  </app-input-email>
+                </div>
+
+                <div class="m-b-12">
+                  <app-input-documento
+                    [control]="empresaCnpjControl"
+                    label="CPF ou CNPJ"
+                    placeholder="Digite o CPF ou CNPJ">
+                  </app-input-documento>
+                </div>
+              </div>
+
+              <!-- ========================================================= -->
+              <!-- COLUNA DIREITA – USUÁRIO GESTOR                         -->
+              <!-- ========================================================= -->
+              <div class="col-12 col-md-6" formGroupName="usuario">
+                <h5 class="m-b-16">Dados do gestor</h5>
+
+                <div class="m-b-12">
+                  <app-input-texto-restrito
+                    [control]="usuarioNomeControl"
+                    label="Nome do gestor"
+                    placeholder="Digite o nome do gestor">
+                  </app-input-texto-restrito>
+                </div>
+
+                <div class="m-b-12">
+                  <app-input-email
+                    [control]="usuarioEmailControl"
+                    label="E-mail"
+                    placeholder="Digite o e-mail do gestor">
+                  </app-input-email>
+                </div>
+
+                <div class="m-b-12">
+                  <app-input-telefone
+                    [control]="usuarioTelefoneControl"
+                    label="Telefone"
+                    placeholder="Digite o telefone do gestor">
+                  </app-input-telefone>
+                </div>
+
+                <!-- Senha -->
+                <mat-label class="f-s-14 f-w-600 m-b-12 d-block">Senha</mat-label>
+                <mat-form-field appearance="outline" class="w-100">
+                  <input matInput type="password" formControlName="senha" />
+                </mat-form-field>
+
+                <!-- Confirmar senha -->
+                <mat-label class="f-s-14 f-w-600 m-b-12 d-block">Confirmar senha</mat-label>
+                <mat-form-field appearance="outline" class="w-100">
+                  <input matInput type="password" formControlName="confirmarSenha" />
+                  @if(senhaDivergente) {
+                  <mat-hint class="error-msg">
+                    <div class="text-error">As senhas não conferem.</div>
+                  </mat-hint>
+                  }
+                </mat-form-field>
+
+              </div>
+
+            </div>
+
+            <!-- ========================================================= -->
+            <!-- BOTÃO FINAL — ABAIXO DE TUDO                             -->
+            <!-- ========================================================= -->
+            <div class="row m-t-24">
+              <div class="col-12">
+                <button mat-flat-button color="primary" class="w-100" [disabled]="form.invalid || senhaDivergente">
+                  Criar conta e empresa
+                </button>
+              </div>
+            </div>
+
           </form>
 
           <span class="d-block f-w-500 text-center m-t-24">
             Já tem uma conta?
-            <a [routerLink]="['/authentication/boxed-login']"
-              class="text-decoration-none text-primary f-w-500 f-s-14">
-              Entrar</a>
+            <a [routerLink]="['/authentication/login']" class="text-decoration-none text-primary f-w-500 f-s-14">
+              Entrar
+            </a>
           </span>
-        </mat-card-content>
-      </mat-card>
+
+        </div>
+      </div>
     </div>
   </div>
 </div>

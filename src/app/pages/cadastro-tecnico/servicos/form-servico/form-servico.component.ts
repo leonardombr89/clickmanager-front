@@ -6,7 +6,6 @@ import { ToastrService } from 'ngx-toastr';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatTabsModule } from '@angular/material/tabs';
 import { ServicoRequest } from 'src/app/models/servico/servico-request.model';
 import { ServicoResponse } from 'src/app/models/servico/servico-response.model';
@@ -26,7 +25,6 @@ import { CardHeaderComponent } from "src/app/components/card-header/card-header.
     ReactiveFormsModule,
     MatCardModule,
     MatButtonModule,
-    MatSlideToggleModule,
     MatTabsModule,
     SharedComponentsModule,
     InputTextareaComponent,
@@ -58,7 +56,6 @@ export class FormServicoComponent implements OnInit {
       nome: ['', Validators.required],
       descricao: [''],
       preco: this.fb.group({}),
-      ativo: [true]
     });
   }
 
@@ -73,7 +70,11 @@ export class FormServicoComponent implements OnInit {
 
   carregarServico(id: number): void {
     this.servicoService.buscarPorId(id).subscribe({
-      next: (servico: ServicoResponse) => this.form.patchValue(servico),
+      next: (servico: ServicoResponse) => this.form.patchValue({
+        nome: servico.nome,
+        descricao: servico.descricao,
+        preco: servico.preco
+      }),
       error: () => {
         this.toastr.error('Erro ao carregar serviço.');
         this.router.navigate(['/page/cadastro-tecnico/servicos']);

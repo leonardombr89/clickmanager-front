@@ -1,0 +1,16 @@
+<div class="m-b-16">
+  <label class="f-s-14 f-w-600 d-block m-b-8">{{ title }}</label>
+  <mat-chip-listbox aria-label="Filtro de status" class="m-b-16">
+    <mat-chip-option [selected]="selected === true" (click)="onSelect(true)" color="primary">
+      {{ labelAtivos }}
+    </mat-chip-option>
+
+    <mat-chip-option [selected]="selected === false" (click)="onSelect(false)" color="warn">
+      {{ labelInativos }}
+    </mat-chip-option>
+
+    <mat-chip-option [selected]="selected === null" (click)="onSelect(null)">
+      {{ labelTodos }}
+    </mat-chip-option>
+  </mat-chip-listbox>
+</div>

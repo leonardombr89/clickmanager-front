@@ -1,13 +1,18 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiService } from './api.service';
+import { AuthTokens } from '../models/auth-tokens.interface';
 
 @Injectable({ providedIn: 'root' })
 export class AuthApiService {
   constructor(private api: ApiService) {}
 
-  login(username: string, password: string): Observable<{ token: string }> {
-    return this.api.post('auth/login', { username, password });
+  login(username: string, password: string): Observable<AuthTokens> {
+    return this.api.post<AuthTokens>('auth/login', { username, password });
+  }
+
+  refreshToken(refreshToken: string): Observable<AuthTokens> {
+    return this.api.post<AuthTokens>('auth/refresh', { refreshToken });
   }
 
   register(username: string, senha: string, nome: string): Observable<any> {

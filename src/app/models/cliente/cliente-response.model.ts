@@ -1,4 +1,4 @@
-import { Endereco } from "../endereco.model";
+import { Endereco } from "../endereco/endereco.model";
 
 export interface ClienteResponse {
     id: number;

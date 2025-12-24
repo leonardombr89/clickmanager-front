@@ -9,6 +9,8 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatIconModule } from '@angular/material/icon';
+import { MatCardModule } from '@angular/material/card';
+import { MatDialogClose } from '@angular/material/dialog';
 
 import { ProdutoService } from '../../cadastro-tecnico/services/produto.service';
 import { ListarProdutosComponent } from 'src/app/components/tabela/listar-produtos.component';
@@ -16,24 +18,25 @@ import { ListarProdutosComponent } from 'src/app/components/tabela/listar-produt
 import { ProdutoListagem } from 'src/app/models/produto/produto-listagem.model';
 import { Preco } from 'src/app/models/preco/preco-response.model';
 import { ServicoResponse } from 'src/app/models/servico/servico-response.model';
-import { AcabamentoResponse } from 'src/app/models/acabamento/acabamento-response.model';
 
 import { PrecoFixoConfigComponent } from './preco-fixo-component/preco-fixo-config.component';
 import { PrecoQuantidadeConfigComponent } from './preco-quantidade-component/preco-quantidade-config.component';
 import { PrecoDemandaConfigComponent } from './preco-demanda-component/preco-demanda-config.component';
 import { PrecoMetroConfigComponent } from './preco-metro-component/preco-metro-config.component';
+import { AcabamentoVariacaoResponse } from 'src/app/models/acabamento/acabamento-variacao-response.model';
 
-type IdNome = { id: number; nome: string };
+type IdNome = { id: number | null; nome: string };
 
 type Variacao = {
     id: number;
     materialId: number; materialNome: string;
-    formatoId: number; formatoNome: string;
+    formatoId: number | null; formatoNome: string | null;
     corId?: number | null; corNome?: string | null;
     preco: Preco;
-    acabamentos: AcabamentoResponse[];
+    acabamentos: AcabamentoVariacaoResponse[];
     servicos: ServicoResponse[];
 };
+
 
 @Component({
     standalone: true,
@@ -43,7 +46,9 @@ type Variacao = {
     imports: [
         CommonModule, ReactiveFormsModule,
         MatDialogModule, MatStepperModule, MatButtonModule,
-        MatRadioModule, MatDividerModule, MatCheckboxModule, MatTooltipModule, MatIconModule,
+    MatRadioModule, MatDividerModule, MatCheckboxModule, MatTooltipModule, MatIconModule,
+    MatCardModule,
+    MatDialogClose,
         // filhos
         ListarProdutosComponent,
         PrecoFixoConfigComponent, PrecoQuantidadeConfigComponent,
@@ -92,7 +97,7 @@ export class DialogAdicionarProdutoComponent {
 
     // disponíveis por variação
     servicosDisponiveis: ServicoResponse[] = [];
-    acabamentosDisponiveis: AcabamentoResponse[] = [];
+    acabamentosDisponiveis: AcabamentoVariacaoResponse[] = [];
 
     @ViewChild(MatStepper) stepper!: MatStepper;
 
@@ -166,7 +171,7 @@ export class DialogAdicionarProdutoComponent {
                 this.variacaoForm.reset({ variacaoId: null, acabamentoIds: [] });
 
                 // popula opções iniciais + auto-escolhas se únicas
-                this.rebuildFormatos();
+                this.rebuildMateriais();
                 stepper.next();
             },
             error: () => (this.loadingVariacoes = false),
@@ -175,60 +180,111 @@ export class DialogAdicionarProdutoComponent {
 
     // ======= STEP 2
     private uniq<T extends IdNome>(arr: T[]): T[] {
-        const seen = new Set<number>();
-        return arr.filter(x => (x && !seen.has(x.id) ? (seen.add(x.id), true) : false));
-    }
-
-    private rebuildFormatos(): void {
-        this.formatos = this.uniq(this.variacoes.map(v => ({ id: +v.formatoId, nome: v.formatoNome })));
-        if (this.formatos.length === 1) {
-            this.selFormatoId = this.formatos[0].id;
-            this.rebuildMateriais();
-        } else {
-            this.materiais = [];
-            this.cores = [];
-        }
-        this.updateSelectedVariacao();
+        const seen = new Set<string>();
+        return arr.filter(x => {
+            const key = String(x?.id ?? 'null');
+            if (!x || seen.has(key)) return false;
+            seen.add(key);
+            return true;
+        });
     }
 
     private rebuildMateriais(): void {
-        const base = this.variacoes.filter(v => (this.selFormatoId ? +v.formatoId === this.selFormatoId : true));
-        this.materiais = this.uniq(base.map(v => ({ id: +v.materialId, nome: v.materialNome })));
-        if (this.materiais.length === 1) {
-            this.selMaterialId = this.materiais[0].id;
+        // Materiais vêm primeiro; se nenhum selecionado ainda, lista todos os disponíveis
+        const raw = this.variacoes
+            .filter(v => v.materialId != null)
+            .map(v => ({ id: v.materialId, nome: v.materialNome ?? String(v.materialId) }));
+
+        this.materiais = this.uniq(raw);
+        this.selMaterialId = this.materiais.length === 1 ? this.materiais[0].id : null;
+
+        if (this.selMaterialId != null) {
+            this.rebuildFormatos();
+        } else {
+            this.formatos = [];
+            this.cores = [];
+            this.selFormatoId = null;
+            this.selCorId = null;
+            this.updateSelectedVariacao();
+        }
+    }
+
+    private rebuildFormatos(): void {
+        if (this.selMaterialId == null) {
+            this.formatos = [];
+            this.selFormatoId = null;
+            this.cores = [];
+            this.selCorId = null;
+            this.updateSelectedVariacao();
+            return;
+        }
+
+        const base = this.variacoes.filter(v => this.materialMatches(v));
+
+        const raw = base.map(v => ({
+            id: v.formatoId ?? null,
+            nome: v.formatoId == null ? 'Sem formato' : (v.formatoNome ?? String(v.formatoId))
+        }));
+
+        this.formatos = this.uniq(raw);
+        this.selFormatoId = this.formatos.length === 1 ? this.formatos[0].id : null;
+
+        if (this.selFormatoId !== undefined) {
             this.rebuildCores();
         } else {
-            this.selMaterialId = null;
             this.cores = [];
+            this.selCorId = null;
+            this.updateSelectedVariacao();
         }
-        this.updateSelectedVariacao();
     }
 
     private rebuildCores(): void {
+        if (this.selMaterialId == null) {
+            this.cores = [];
+            this.selCorId = null;
+            this.updateSelectedVariacao();
+            return;
+        }
+
         const base = this.variacoes.filter(
             v =>
-                (this.selFormatoId ? +v.formatoId === this.selFormatoId : true) &&
-                (this.selMaterialId ? +v.materialId === this.selMaterialId : true)
+                this.formatoMatches(v) &&
+                this.materialMatches(v)
         );
 
         const raw = base
-            .map(v => (v.corId != null ? { id: +v.corId!, nome: v.corNome ?? String(v.corId) } : null))
-            .filter(Boolean) as IdNome[];
+            .map(v => v.corId != null
+                ? { id: v.corId!, nome: v.corNome ?? String(v.corId) }
+                : { id: null, nome: 'Sem cor' });
 
         this.cores = this.uniq(raw);
-        this.selCorId = this.cores.length === 1 ? this.cores[0].id : (this.cores.length === 0 ? null : null);
+        this.selCorId = this.cores.length === 1 ? this.cores[0].id : null;
 
         this.updateSelectedVariacao();
     }
 
-    onSelectFormato(id: number) { this.selFormatoId = id ?? null; this.selMaterialId = this.selCorId = null; this.rebuildMateriais(); }
-    onSelectMaterial(id: number) { this.selMaterialId = id ?? null; this.selCorId = null; this.rebuildCores(); }
-    onSelectCor(id: number) { this.selCorId = id ?? null; this.updateSelectedVariacao(); }
+    onSelectMaterial(id: number) {
+        this.selMaterialId = id ?? null;
+        this.selFormatoId = null;
+        this.selCorId = null;
+        this.rebuildFormatos();
+    }
+
+    onSelectFormato(id: number) {
+        this.selFormatoId = id ?? null;
+        this.selCorId = null;
+        this.rebuildCores();
+    }
+
+    onSelectCor(id: number) {
+        this.selCorId = id ?? null;
+        this.updateSelectedVariacao();
+    }
 
     private updateSelectedVariacao(): void {
         const matches = this.variacoes.filter(v =>
-            (this.selFormatoId == null || +v.formatoId === this.selFormatoId) &&
-            (this.selMaterialId == null || +v.materialId === this.selMaterialId) &&
+            this.materialMatches(v) &&
+            this.formatoMatches(v) &&
             (this.selCorId == null ? v.corId == null : +(<any>v.corId) === this.selCorId)
         );
 
@@ -251,6 +307,18 @@ export class DialogAdicionarProdutoComponent {
             this.servicosDisponiveis = [];
             this.acabamentosDisponiveis = [];
         }
+    }
+
+    private formatoMatches(v: Variacao): boolean {
+        return this.selFormatoId == null
+            ? true
+            : Number(v.formatoId) === this.selFormatoId;
+    }
+
+    private materialMatches(v: Variacao): boolean {
+        return this.selMaterialId == null
+            ? true
+            : Number(v.materialId) === this.selMaterialId;
     }
 
     resumoVariacao(v: Variacao): string {
@@ -314,7 +382,8 @@ export class DialogAdicionarProdutoComponent {
         const ids = this.servicoIdsCtrl.value ?? [];
         return this.servicosDisponiveis.filter(s => ids.includes(s.id));
     }
-    get acabamentosSelecionadosDetalhe(): AcabamentoResponse[] {
+
+    get acabamentosSelecionadosDetalhe(): AcabamentoVariacaoResponse[] {
         const ids = this.acabamentoIdsCtrl.value ?? [];
         return this.acabamentosDisponiveis.filter(a => ids.includes(a.id));
     }
@@ -508,7 +577,7 @@ export class DialogAdicionarProdutoComponent {
 
         const baseNome = this.produtoBase?.nome ?? 'Produto';
         const variacaoTxt = [v.materialNome, v.formatoNome, v.corNome].filter(Boolean).join(' / ');
-        const nomeComposto = `${baseNome} / ${variacaoTxt}`; 
+        const nomeComposto = `${baseNome} / ${variacaoTxt}`;
 
         const qtd = Number(p?.quantidade ?? 1) || 1;
 
@@ -545,8 +614,8 @@ export class DialogAdicionarProdutoComponent {
         const altura = Number((p as any)?.altura ?? (p as any)?.alturaCm ?? NaN);
 
         itens.push({
-            produtoVariacaoId: v.id,           
-            nome: nomeComposto,                
+            produtoVariacaoId: v.id,
+            nome: nomeComposto,
             quantidade: qtd,
             valor: unit,
             subTotal: subtotal,
@@ -559,5 +628,5 @@ export class DialogAdicionarProdutoComponent {
         return itens;
     }
 
-    trackById(_: number, item: { id: number }) { return item.id; }
+    trackById(_: number, item: { id: number | null }) { return item.id ?? 'null'; }
 }

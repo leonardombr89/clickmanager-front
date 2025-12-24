@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { catchError, switchMap, tap } from 'rxjs/operators';
 import { Observable, BehaviorSubject, throwError } from 'rxjs';
-import { Usuario } from '../models/usuario.model';
+import { Usuario } from '../models/usuario/usuario.model';
 import { ToastrService } from 'ngx-toastr';
 import { decodeToken } from '../utils/token.util';
 import { JwtPayload } from '../pages/authentication/jwt-payload.interface';
@@ -10,6 +10,7 @@ import { NgxPermissionsService } from 'ngx-permissions';
 import { UsuarioService } from './usuario.service';
 import { AuthTokenStorageService } from './auth-token-storage.service';
 import { AuthApiService } from './auth-api.service';
+import { AuthTokens } from '../models/auth-tokens.interface';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -32,10 +33,7 @@ export class AuthService {
     lembrar ? this.tokenStorage.usarLocalStorage() : this.tokenStorage.usarSessionStorage();
   
     return this.authApi.login(username, password).pipe(
-      tap(res => {
-        this.tokenStorage.salvarToken(res.token);
-        this.jwtPayload = decodeToken(res.token);
-      }),
+      tap(tokens => this.persistirTokens(tokens)),
       switchMap(() => this.carregarUsuarioCompleto())
     );
   }
@@ -75,7 +73,7 @@ export class AuthService {
   }
 
   logout(): void {
-    this.tokenStorage.limparToken();
+    this.tokenStorage.limparTokens();
     this.jwtPayload = null;
     this.usuarioSubject.next(null);
     this.permissionsService.flushPermissions();
@@ -111,7 +109,11 @@ export class AuthService {
   }
 
   getToken(): string | null {
-    return this.tokenStorage.getToken();
+    return this.tokenStorage.getAccessToken();
+  }
+
+  getRefreshToken(): string | null {
+    return this.tokenStorage.getRefreshToken();
   }
 
   register(username: string, senha: string, nome: string): Observable<any> {
@@ -128,5 +130,47 @@ export class AuthService {
 
   verificarSeTemUsuarios(): Observable<boolean> {
     return this.authApi.verificarSeTemUsuarios();
+  }
+
+  refreshToken(): Observable<AuthTokens> {
+    const refreshToken = this.tokenStorage.getRefreshToken();
+    if (!refreshToken) {
+      return throwError(() => new Error('Refresh token ausente'));
+    }
+
+    return this.authApi.refreshToken(refreshToken).pipe(tap(tokens => this.persistirTokens(tokens)));
+  }
+
+  isAccessTokenExpired(token: string): boolean {
+    try {
+      const payload = decodeToken(token);
+      if (!payload?.exp) return true;
+
+      const now = Math.floor(Date.now() / 1000);
+      return payload.exp < now;
+    } catch {
+      return true;
+    }
+  }
+
+  hasValidRefreshToken(): boolean {
+    const refreshToken = this.getRefreshToken();
+    if (!refreshToken) return false;
+
+    try {
+      const payload = decodeToken(refreshToken);
+      if (!payload?.exp) return true;
+
+      const now = Math.floor(Date.now() / 1000);
+      return payload.exp > now;
+    } catch {
+      // Se o refresh token não for JWT, considere-o válido e deixe o backend decidir.
+      return true;
+    }
+  }
+
+  private persistirTokens(tokens: AuthTokens): void {
+    this.tokenStorage.salvarTokens(tokens.accessToken, tokens.refreshToken);
+    this.jwtPayload = decodeToken(tokens.accessToken);
   }
 }

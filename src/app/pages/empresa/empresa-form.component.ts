@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, Input, Output, EventEmitter } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl, ValidationErrors } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { MatInputModule } from '@angular/material/input';
@@ -8,20 +8,19 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatCardModule } from '@angular/material/card';
 import { MatSelectModule } from '@angular/material/select';
-import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatRadioModule } from '@angular/material/radio';
 import { TablerIconsModule } from 'angular-tabler-icons';
 import { NgxMaskDirective, provideNgxMask } from 'ngx-mask';
 import { ImagemUtil } from 'src/app/utils/imagem-util';
 import { ToastrService } from 'ngx-toastr';
 import { ValidadorUtil } from 'src/app/utils/validador-util';
-import { EnderecoViaCep } from 'src/app/models/endereco.viacep.model';
+import { EnderecoViaCep } from 'src/app/models/endereco/endereco.viacep.model';
 import { CepUtilService } from 'src/app/utils/cep-util.service';
 import { EmpresaFormService } from './empresa-form.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { filter, take } from 'rxjs';
-import { Empresa } from 'src/app/models/empresa.model';
 import { CardHeaderComponent } from "src/app/components/card-header/card-header.component";
+import { Empresa } from 'src/app/models/empresa/empresa.model';
 
 
 @Component({
@@ -38,7 +37,6 @@ import { CardHeaderComponent } from "src/app/components/card-header/card-header.
     MatTabsModule,
     MatCardModule,
     MatSelectModule,
-    MatCheckboxModule,
     MatRadioModule,
     TablerIconsModule,
     NgxMaskDirective,
@@ -47,6 +45,10 @@ import { CardHeaderComponent } from "src/app/components/card-header/card-header.
   providers: [provideNgxMask()]
 })
 export class EmpresaFormComponent implements OnInit {
+
+  @Input() modoOnboarding = false;
+  @Output() empresaSalva = new EventEmitter<void>();
+
   form!: FormGroup;
 
   readonly IMAGEM_PADRAO = './assets/images/logos/LogoPadrao.png';
@@ -152,19 +154,26 @@ export class EmpresaFormComponent implements OnInit {
   }
 
   onSubmit(): void {
-    if (this.form.invalid) {
-      this.toastr.warning('Preencha todos os campos obrigatórios corretamente.', 'Formulário inválido');
-      this.form.markAllAsTouched();
-      return;
-    }
-
-    const formData = this.montarFormData();
-
-    this.empresaService.cadastrarEmpresaFormData(formData).subscribe({
-      next: () => this.toastr.success('Empresa cadastrada com sucesso!'),
-      error: () => this.toastr.error('Erro ao cadastrar empresa')
-    });
+  if (this.form.invalid) {
+    this.toastr.warning('Preencha todos os campos obrigatórios corretamente.', 'Formulário inválido');
+    this.form.markAllAsTouched();
+    return;
   }
+
+  const formData = this.montarFormData();
+
+  this.empresaService.cadastrarEmpresaFormData(formData).subscribe({
+    next: () => {
+      this.toastr.success('Empresa cadastrada com sucesso!');
+
+      if (this.modoOnboarding) {
+        this.empresaSalva.emit();
+      }
+    },
+    error: () => this.toastr.error('Erro ao cadastrar empresa')
+  });
+}
+
 
   private montarFormData(): FormData {
     const formData = new FormData();

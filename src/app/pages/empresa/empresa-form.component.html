@@ -197,13 +197,21 @@
                     </div>
 
                     <!-- Botões -->
-                    <div class="m-t-24 d-flex gap-2 flex-wrap">
+                    <!-- MODO NORMAL (tela de configurações) -->
+                    <div class="m-t-24 d-flex gap-2 flex-wrap" *ngIf="!modoOnboarding">
                         <button mat-flat-button class="bg-error text-white" type="button">
                             Cancelar
                         </button>
 
                         <button mat-flat-button color="primary" type="submit">
                             Salvar
+                        </button>
+                    </div>
+
+                    <!-- MODO ONBOARDING (dentro do wizard) -->
+                    <div class="m-t-24 d-flex justify-content-end" *ngIf="modoOnboarding">
+                        <button mat-flat-button color="primary" type="submit">
+                            Salvar dados da empresa
                         </button>
                     </div>
 

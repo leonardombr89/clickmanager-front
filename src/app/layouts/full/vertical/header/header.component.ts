@@ -17,10 +17,10 @@ import { FormsModule } from '@angular/forms';
 import { NgScrollbarModule } from 'ngx-scrollbar';
 import { AppSettings } from 'src/app/config';
 import { AuthService } from 'src/app/services/auth.service';
-import { Usuario } from 'src/app/models/usuario.model';
+import { Usuario } from 'src/app/models/usuario/usuario.model';
 import { ImagemUtil } from 'src/app/utils/imagem-util';
 import { CalculadoraConfigListResponse } from 'src/app/models/calculadora/calculadora-config-list-response.model';
-import { CalculadoraConfigService } from 'src/app/pages/calculadora-config/calculadora-config.service';
+import { CalculadoraConfigService } from 'src/app/pages/smart-calc-config/calculadora-config.service';
 import { SmartCalcComponent } from 'src/app/pages/apps/smart-calc/smart-calc.component';
 import { CalculadoraConfigResponse } from 'src/app/models/calculadora/calculadora-config-response.model';
 
@@ -73,7 +73,7 @@ export class HeaderComponent implements OnInit {
 
   options = this.settings.getOptions();
 
-  calculadoraConfig!: CalculadoraConfigResponse;
+  calculadoraConfig: CalculadoraConfigResponse | null = null;
 
   constructor(
     private settings: CoreService,
@@ -86,10 +86,6 @@ export class HeaderComponent implements OnInit {
   ngOnInit() {
     this.authService.usuario$.subscribe(usuario => {
       this.usuarioLogado = usuario;
-    });
-    this.calculadoraService.getConfig().subscribe({
-      next: (res) => this.calculadoraConfig = res,
-      error: () => console.error('Erro ao buscar configurações')
     });
   }
 
@@ -157,4 +153,3 @@ export class HeaderComponent implements OnInit {
     },
   ];
 }
-

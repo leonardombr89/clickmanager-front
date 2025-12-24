@@ -1,5 +1,7 @@
 import { Injectable } from '@angular/core';
-import { CanActivate, Router } from '@angular/router';
+import { CanActivate, Router, UrlTree } from '@angular/router';
+import { Observable, of } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 import { AuthService } from '../../../services/auth.service';
 
 @Injectable({
@@ -9,26 +11,24 @@ export class AuthGuard implements CanActivate {
 
   constructor(private router: Router, private authService: AuthService) {}
 
-  canActivate(): boolean {
+  canActivate(): Observable<boolean | UrlTree> {
     const token = this.authService.getToken();
 
-    if (token && !this.isTokenExpired(token)) {
-      return true;
+    if (token && !this.authService.isAccessTokenExpired(token)) {
+      return of(true);
     }
-    
-    this.authService.logout();
-    this.router.navigate(['/login']);
-    return false;
-  }
 
-  private isTokenExpired(token: string): boolean {
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      const exp = payload.exp;
-      const now = Math.floor(Date.now() / 1000);
-      return exp < now;
-    } catch (e) {
-      return true;
+    if (this.authService.hasValidRefreshToken()) {
+      return this.authService.refreshToken().pipe(
+        map(() => true),
+        catchError(() => {
+          this.authService.logout();
+          return of(this.router.createUrlTree(['/login']));
+        })
+      );
     }
+
+    this.authService.logout();
+    return of(this.router.createUrlTree(['/login']));
   }
 }

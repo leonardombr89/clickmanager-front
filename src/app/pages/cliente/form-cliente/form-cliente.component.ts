@@ -3,8 +3,6 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormControl } from '@angular/forms';
 import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { ToastrService } from 'ngx-toastr';
 import { ClienteRequest } from 'src/app/models/cliente/cliente-request.model';
@@ -18,6 +16,7 @@ import { InputEmailComponent } from "../../../components/inputs/input-email/inpu
 import { InputDocumentoComponent } from "../../../components/inputs/input-documento/input-documento.component";
 import { EnderecoFormComponent } from 'src/app/components/endereco-form/endereco-form.component';
 import { CardHeaderComponent } from "src/app/components/card-header/card-header.component";
+import { extrairMensagemErro } from 'src/app/utils/mensagem.util';
 
 @Component({
   selector: 'app-form-cliente',
@@ -27,8 +26,6 @@ import { CardHeaderComponent } from "src/app/components/card-header/card-header.
     RouterModule,
     ReactiveFormsModule,
     MatCardModule,
-    MatFormFieldModule,
-    MatInputModule,
     MatButtonModule,
     MatTabsModule,
     InputTextoRestritoComponent,
@@ -60,7 +57,6 @@ export class FormClienteComponent implements OnInit {
 
     this.route.queryParamMap.subscribe(params => {
       this.retorno = params.get('retorno');
-      console.log('[ngOnInit] retorno recebido:', this.retorno);
     });
     
   }
@@ -70,7 +66,7 @@ export class FormClienteComponent implements OnInit {
       nome: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
       telefone: ['', Validators.required],
-      documento: ['', Validators.required],
+      documento: [''],
       endereco: this.fb.group({})
     });
   }
@@ -89,28 +85,23 @@ export class FormClienteComponent implements OnInit {
   private carregarCliente(id: number): void {
     this.clienteService.buscarPorId(id).subscribe({
       next: cliente => this.form.patchValue(cliente),
-      error: () => this.toastr.error('Erro ao carregar cliente.')
+      error: (err) => this.toastr.error(extrairMensagemErro(err, 'Erro ao carregar cliente.'))
     });
   }
 
   onSubmit(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
-      console.log('[onSubmit] Formulário inválido:', this.form.value);
       return;
     }
   
     const cliente: ClienteRequest = this.form.value;
     const destino = this.retorno ?? '/page/cliente';
   
-    console.log('[onSubmit] Modo de edição:', this.isEditMode);
-    console.log('[onSubmit] Cliente a ser salvo:', cliente);
-    console.log('[onSubmit] Destino de redirecionamento:', destino);
   
     if (this.isEditMode) {
       const idParam = this.route.snapshot.paramMap.get('id');
       const id = idParam ? Number(idParam) : null;
-      console.log('[onSubmit] ID para atualização:', id);
   
       if (!id) {
         this.toastr.error('ID do cliente inválido.');
@@ -120,25 +111,17 @@ export class FormClienteComponent implements OnInit {
       this.clienteService.atualizar(id, cliente).subscribe({
         next: () => {
           this.toastr.success('Cliente atualizado com sucesso!');
-          console.log('[onSubmit] Redirecionando para:', destino);
           this.router.navigate([destino]);
         },
-        error: (err) => {
-          console.error('[onSubmit] Erro ao atualizar cliente:', err);
-          this.toastr.error('Erro ao atualizar cliente.');
-        }
+        error: (err) => this.toastr.error(extrairMensagemErro(err, 'Erro ao atualizar cliente.'))
       });
     } else {
       this.clienteService.salvar(cliente).subscribe({
         next: () => {
           this.toastr.success('Cliente cadastrado com sucesso!');
-          console.log('[onSubmit] Redirecionando para:', destino);
           this.router.navigate([destino]);
         },
-        error: (err) => {
-          console.error('[onSubmit] Erro ao cadastrar cliente:', err);
-          this.toastr.error('Erro ao cadastrar cliente.');
-        }
+        error: (err) => this.toastr.error(extrairMensagemErro(err, 'Erro ao cadastrar cliente.'))
       });
     }
   } 

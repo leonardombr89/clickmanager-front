@@ -146,7 +146,7 @@
       <img [src]="ImagemUtil.montarUrlImagemPerfil(usuarioLogado?.fotoPerfil)" (error)="usarImagemPadrao($event)"
         class="rounded-circle object-cover" width="40" />
       <div class="d-none d-lg-flex text-left flex-col">
-        <h5 class="f-s-16 f-w-600">{{usuarioLogado?.nome}}</h5>
+        <h5 class="f-s-16 f-w-600">{{usuarioLogado?.empresa?.nome}} - {{usuarioLogado?.nome}}</h5>
         <span class="f-s-14">{{usuarioLogado?.perfil?.nome}}</span>
       </div>
     </div>
@@ -160,7 +160,7 @@
         <img [src]="ImagemUtil.montarUrlImagemPerfil(usuarioLogado?.fotoPerfil)" (error)="usarImagemPadrao($event)"
           class="rounded-circle" width="95" />
         <div class="m-l-16">
-          <h6 class="f-s-16 f-w-600 m-0">{{usuarioLogado?.nome}}</h6>
+          <h6 class="f-s-16 f-w-600 m-0">{{usuarioLogado?.empresa?.nome}} - {{usuarioLogado?.nome}}</h6>
           <span class="f-s-14 text-body d-block m-b-4">{{usuarioLogado?.perfil?.nome}}</span>
           <span class="d-flex align-items-center">
             <i-tabler name="mail" class="icon-15 m-r-4"></i-tabler>

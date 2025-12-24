@@ -98,7 +98,6 @@ import { MatButtonModule } from '@angular/material/button';
             const dialogRef = this.dialog.open(AppDialogContentComponent);
         
             dialogRef.afterClosed().subscribe((result) => {
-              console.log('Dialog result: result');
             });
           }
     }
@@ -273,7 +272,6 @@ import { MatButtonModule } from '@angular/material/button';
             });
         
             dialogRef.afterClosed().subscribe(result => {
-              console.log('The dialog was closed');
               if (result !== undefined) {
                 this.animal.set(result);
               }

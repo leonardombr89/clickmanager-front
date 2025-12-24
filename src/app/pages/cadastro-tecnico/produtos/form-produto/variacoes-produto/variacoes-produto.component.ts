@@ -67,7 +67,6 @@ export class VariacoesProdutoComponent {
     coresDisponiveis: any[] = [];
 
     @Input() set variacoesIniciais(v: VariacaoProduto[] | null) {
-        console.log('[variacoesIniciais] recebido =>', v);
         if (!v || !v.length) return;
 
         // preenche a MatTable
@@ -120,7 +119,7 @@ export class VariacoesProdutoComponent {
     iniciarFormulario(): void {
         this.formVariacaoAtual = this.fb.group({
             materialId: [null, Validators.required],
-            formatoId: [null, Validators.required],
+            formatoId: [null],
             cor: [null],
             acabamentos: this.fb.control([]),
             servicos: this.fb.control([]),
@@ -142,7 +141,6 @@ export class VariacoesProdutoComponent {
 
     private wirePoliticaRevendaReactions(): void {
         this.formVariacaoAtual.get('politicaAtiva')!.valueChanges.subscribe((on: boolean) => {
-            console.log('[politicaAtiva] =>', on);
             this.applyPoliticaEstado(on, 'toggle');
         });
 
@@ -177,13 +175,6 @@ export class VariacoesProdutoComponent {
 
         grp.updateValueAndValidity({ emitEvent: false });
 
-        console.log('[applyPoliticaEstado]', {
-            from, ativa, isPercentual,
-            percDisabled: grp.get('percentualDesconto')!.disabled,
-            fixoDisabled: grp.get('precoFixo')!.disabled,
-            percVal: grp.get('percentualDesconto')!.value,
-            fixoVal: grp.get('precoFixo')!.value
-        });
     }
 
     verVariacao(v: VariacaoProduto) {
@@ -215,21 +206,16 @@ export class VariacoesProdutoComponent {
             const msgPreco = (precoFG?.errors as any)?.precoInvalido?.msg;
             this.toastr.error(msgPreco || 'Preencha os campos obrigatórios.', 'Formulário incompleto');
             this.scrollToFirstInvalid();
-            console.log('[addVariacao] inválido =>', {
-                formErrors: this.formVariacaoAtual.errors,
-                precoErrors: precoFG?.errors
-            });
             return;
         }
 
         const toId = (x: any) => (x == null ? null : (typeof x === 'object' ? Number(x.id) : Number(x)));
         const raw = this.formVariacaoAtual.getRawValue();
-        console.log('[addVariacao] raw =>', raw);
 
         // --- Cor: salva id e rótulo para exibir na tabela ---
         const corId = toId(raw.cor);
         const corLabel =
-            typeof raw.cor === 'object'
+            raw?.cor && typeof raw.cor === 'object'
                 ? (raw.cor.nome ?? raw.cor.descricao ?? '---')
                 : this.resolveLabel(corId, this.coresDisponiveis);
 

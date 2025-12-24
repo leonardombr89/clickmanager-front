@@ -4,7 +4,7 @@ export interface VariacaoProdutoRequest {
     
     produtoId?: number;
     materialId: number;
-    formatoId: number;
+    formatoId?: number | null;
     acabamentoIds?: number[];
     servicoIds?: number[];
     corId?: number | null;

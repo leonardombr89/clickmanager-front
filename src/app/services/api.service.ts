@@ -2,7 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { catchError, Observable, throwError } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { ToastrService } from 'ngx-toastr';
+import { extrairMensagemErro } from '../utils/mensagem.util';
 
 @Injectable({
   providedIn: 'root'
@@ -11,7 +11,7 @@ export class ApiService {
 
   private readonly BASE_URL = environment.apiUrl;
 
-  constructor(private http: HttpClient, private toastr: ToastrService) { }
+  constructor(private http: HttpClient) { }
 
   get<T>(endpoint: string, params?: HttpParams): Observable<T> {
     return this.http.get<T>(`${this.BASE_URL}/${endpoint}`, { params })
@@ -52,7 +52,8 @@ export class ApiService {
   }
 
   private handleError(error: any) {
-    console.error('Erro na requisição:', error);
-    return throwError(() => error);
+    const userMessage = extrairMensagemErro(error, 'Erro na requisição. Tente novamente.');
+    const enriched = { ...error, userMessage };
+    return throwError(() => enriched);
   }
 }

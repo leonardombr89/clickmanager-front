@@ -4,9 +4,6 @@ import { MatCardModule } from '@angular/material/card';
 import { MatPaginator, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatTableModule } from '@angular/material/table';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatIconModule } from '@angular/material/icon';
-import { MatChipsModule } from '@angular/material/chips';
-import { MatButtonModule } from '@angular/material/button';
 import { Router, RouterModule } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { ToastrService } from 'ngx-toastr';
@@ -29,9 +26,6 @@ import { CardHeaderComponent } from "src/app/components/card-header/card-header.
     MatPaginatorModule,
     MatTableModule,
     MatProgressSpinnerModule,
-    MatIconModule,
-    MatChipsModule,
-    MatButtonModule,
     TablerIconsModule,
     RouterModule,
     TemPermissaoDirective,
@@ -50,7 +44,6 @@ export class ListarProdutosComponent implements OnInit {
   carregando = false;
   pagina = 0;
   tamanhoPagina = 10;
-  filtroStatus: boolean | null = true;
   termoPesquisa: string = '';
 
   // ✅ agora só nome, descricao, variacoes, acoes
@@ -72,7 +65,7 @@ export class ListarProdutosComponent implements OnInit {
 
   carregarProdutos(): void {
     this.carregando = true;
-    this.produtoService.listar(this.pagina, this.tamanhoPagina, this.filtroStatus, this.termoPesquisa).subscribe({
+    this.produtoService.listar(this.pagina, this.tamanhoPagina, undefined, this.termoPesquisa).subscribe({
       next: (res) => {
         this.produtos = res.content || [];
         this.totalProdutos = res.totalElements;
@@ -120,19 +113,9 @@ export class ListarProdutosComponent implements OnInit {
     });
   }
 
-  aplicarFiltro(status: boolean): void {
-    this.filtroStatus = status;
-    this.carregarProdutos();
-  }
-
   onPesquisar(valor: string): void {
     this.termoPesquisa = valor;
     this.pagina = 0;
-    this.carregarProdutos();
-  }
-
-  removerFiltro(): void {
-    this.filtroStatus = null;
     this.carregarProdutos();
   }
 

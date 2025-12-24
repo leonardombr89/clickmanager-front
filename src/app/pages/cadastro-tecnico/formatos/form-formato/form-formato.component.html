@@ -10,67 +10,36 @@
 
     <form [formGroup]="form" (ngSubmit)="onSubmit()">
 
-      <!-- Nome -->
-      <mat-label class="f-s-14 f-w-600 m-b-8 d-block">Nome</mat-label>
-      <mat-form-field appearance="outline" class="w-100 m-b-16">
-        <input matInput formControlName="nome" placeholder="Digite o nome do formato" (blur)="updateErrorMessage()"
-          required />
-        @if (form.get('nome')?.invalid) {
-        <mat-error>{{ getErrorMessage('nome') }}</mat-error>
-        }
-      </mat-form-field>
 
-      <!-- Largura -->
-      <mat-label class="f-s-14 f-w-600 m-b-8 d-block">Largura (cm)</mat-label>
-      <mat-form-field appearance="outline" class="w-100 m-b-16">
-        <input matInput type="number" formControlName="larguraCm" placeholder="Ex: 21.0" (blur)="updateErrorMessage()"
-          required />
-        @if (form.get('larguraCm')?.invalid) {
-        <mat-error>{{ getErrorMessage('larguraCm') }}</mat-error>
-        }
-      </mat-form-field>
-
-      <!-- Altura -->
-      <mat-label class="f-s-14 f-w-600 m-b-8 d-block">Altura (cm)</mat-label>
-      <mat-form-field appearance="outline" class="w-100 m-b-16">
-        <input matInput type="number" formControlName="alturaCm" placeholder="Ex: 29.7" (blur)="updateErrorMessage()"
-          required />
-        @if (form.get('alturaCm')?.invalid) {
-        <mat-error>{{ getErrorMessage('alturaCm') }}</mat-error>
-        }
-      </mat-form-field>
-
-      <!-- Largura útil -->
-      <mat-label class="f-s-14 f-w-600 m-b-8 d-block">Largura Útil (cm)</mat-label>
-      <mat-form-field appearance="outline" class="w-100 m-b-16">
-        <input matInput type="number" formControlName="larguraUtilCm" placeholder="Ex: 20.0"
-          (blur)="updateErrorMessage()" required />
-        @if (form.get('larguraUtilCm')?.invalid) {
-        <mat-error>{{ getErrorMessage('larguraUtilCm') }}</mat-error>
-        }
-      </mat-form-field>
-
-      <!-- Altura útil -->
-      <mat-label class="f-s-14 f-w-600 m-b-8 d-block">Altura Útil (cm)</mat-label>
-      <mat-form-field appearance="outline" class="w-100 m-b-16">
-        <input matInput type="number" formControlName="alturaUtilCm" placeholder="Ex: 28.0"
-          (blur)="updateErrorMessage()" required />
-        @if (form.get('alturaUtilCm')?.invalid) {
-        <mat-error>{{ getErrorMessage('alturaUtilCm') }}</mat-error>
-        }
-      </mat-form-field>
-
-      <!-- Ativo (somente no modo edição) -->
-      @if (isEditMode) {
-      <div class="m-t-16 m-b-24">
-        <mat-slide-toggle formControlName="ativo">
-          {{ form.get('ativo')?.value ? 'Formato Ativo' : 'Formato Inativo' }}
-        </mat-slide-toggle>
+      <div class="row">
+        <div class="col-12">
+          <app-input-texto-restrito class="m-b-16" [control]="nomeControl" label="Nome"
+            placeholder="Digite o nome do formato"></app-input-texto-restrito>
+        </div>
       </div>
-      }
+
+      <div class="row">
+        <div class="col-6">
+          <app-input-numerico class="m-b-16" [control]="alturaControl" label="Altura (cm)"></app-input-numerico>
+        </div>
+
+        <div class="col-6">
+          <app-input-numerico class="m-b-16" [control]="alturaUtilControl" label="Altura Útil (cm)"></app-input-numerico>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-6">
+          <app-input-numerico class="m-b-16" [control]="larguraControl" label="Largura (cm)"></app-input-numerico>
+        </div>
+
+        <div class="col-6">
+          <app-input-numerico class="m-b-16" [control]="larguraUtilControl" label="Largura Útil (cm)"></app-input-numerico>
+        </div>
+      </div>
 
       <!-- Botões -->
-      <div class="d-flex gap-12 m-t-24">
+      <div class="d-flex gap-12 m-t-24 flex-wrap">
 
         <button mat-flat-button class="bg-error text-white" type="button"
           [routerLink]="['/page/cadastro-tecnico/formatos']">

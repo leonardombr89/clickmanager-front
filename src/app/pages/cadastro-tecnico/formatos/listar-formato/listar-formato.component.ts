@@ -10,12 +10,12 @@ import { Router, RouterModule } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogComponent } from 'src/app/components/dialog/confirm-dialog/confirm-dialog.component';
 import { ToastrService } from 'ngx-toastr';
-import { MatChipsModule } from '@angular/material/chips';
 import { MatButtonModule } from '@angular/material/button';
 import { TablerIconsModule } from 'angular-tabler-icons';
 import { FormatoService } from '../../services/formato.service';
 import { TemPermissaoDirective } from 'src/app/diretivas/tem-permissao.directive';
 import { CardHeaderComponent } from "src/app/components/card-header/card-header.component";
+import { InputPesquisaComponent } from 'src/app/components/inputs/input-pesquisa/input-pesquisa.component';
 
 @Component({
   selector: 'app-listar-formato',
@@ -27,12 +27,12 @@ import { CardHeaderComponent } from "src/app/components/card-header/card-header.
     MatTableModule,
     MatProgressSpinnerModule,
     MatIconModule,
-    MatChipsModule,
     MatButtonModule,
     TablerIconsModule,
     RouterModule,
     TemPermissaoDirective,
-    CardHeaderComponent
+    CardHeaderComponent,
+    InputPesquisaComponent
 ],
   templateUrl: './listar-formato.component.html',
   styleUrl: './listar-formato.component.scss'
@@ -43,8 +43,8 @@ export class ListarFormatoComponent implements OnInit {
   carregando = false;
   pagina = 0;
   tamanhoPagina = 10;
-  filtroStatus: boolean | null = true;
-  colunasExibidas = ['nome', 'tamanho', 'areaUtil', 'status', 'acoes'];
+  termoPesquisa = '';
+  colunasExibidas = ['nome', 'tamanho', 'areaUtil', 'acoes'];
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
@@ -61,7 +61,7 @@ export class ListarFormatoComponent implements OnInit {
 
   carregarFormatos(): void {
     this.carregando = true;
-    this.formatoService.listar(this.pagina, this.tamanhoPagina, this.filtroStatus).subscribe({
+    this.formatoService.listar(this.pagina, this.tamanhoPagina, undefined, this.termoPesquisa).subscribe({
       next: (res) => {
         this.formatos = res.content || [];
         this.totalFormatos = res.totalElements;
@@ -77,6 +77,12 @@ export class ListarFormatoComponent implements OnInit {
   onPaginaAlterada(event: PageEvent): void {
     this.pagina = event.pageIndex;
     this.tamanhoPagina = event.pageSize;
+    this.carregarFormatos();
+  }
+
+  onPesquisar(valor: string): void {
+    this.termoPesquisa = valor;
+    this.pagina = 0;
     this.carregarFormatos();
   }
 
@@ -108,15 +114,5 @@ export class ListarFormatoComponent implements OnInit {
         });
       }
     });
-  }
-
-  aplicarFiltro(status: boolean): void {
-    this.filtroStatus = status;
-    this.carregarFormatos();
-  }
-
-  removerFiltro(): void {
-    this.filtroStatus = null;
-    this.carregarFormatos();
   }
 }

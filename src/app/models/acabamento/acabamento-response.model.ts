@@ -1,9 +1,12 @@
-import { Preco } from "../preco/preco-response.model";
+import { AcabamentoVariacaoResponse } from "./acabamento-variacao-response.model";
 
 export interface AcabamentoResponse {
-    id: number;
-    nome: string;
-    descricao: string | null;
-    preco: Preco | null;
-    ativo: boolean;
-  }
+  id: number;
+  nome: string;
+  descricao?: string | null;
+  ativo: boolean;
+  variacoes?: AcabamentoVariacaoResponse[];
+}
+
+
+  

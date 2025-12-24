@@ -193,7 +193,6 @@ export class AppDialogComponent {
     });
 
     dialogRef.afterClosed().subscribe((result) => {
-      console.log('The dialog was closed');
       if (result !== undefined) {
         this.animal.set(result);
       }
@@ -217,7 +216,6 @@ export class AppDialogComponent {
     const dialogRef = this.dialog.open(AppDialogContentComponent);
 
     dialogRef.afterClosed().subscribe((result) => {
-      console.log(`Dialog result: ${result}`);
     });
   }
 

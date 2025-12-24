@@ -10,28 +10,19 @@
     <form [formGroup]="form" (ngSubmit)="onSubmit()">
 
       <!-- Nome -->
-      <app-input-texto-restrito [control]="nomeControl" label="Nome" placeholder="Digite o nome do serviço">
+      <app-input-texto-restrito class="m-b-16" [control]="nomeControl" label="Nome" placeholder="Digite o nome do serviço">
       </app-input-texto-restrito>
 
       <!-- Descrição -->
-      <app-input-textarea [control]="descricaoControl" label="Descrição" placeholder="Digite uma descrição do serviço">
+      <app-input-textarea class="m-b-16" [control]="descricaoControl" label="Descrição" placeholder="Digite uma descrição do serviço">
       </app-input-textarea>
 
       <!-- Preço -->
       <app-preco-selector *ngIf="precoControl" [formGroup]="precoControl" [tiposDisponiveis]="['FIXO']">
       </app-preco-selector>
 
-      <!-- Ativo (somente no modo edição) -->
-      @if (isEditMode) {
-      <div class="m-t-16 m-b-24">
-        <mat-slide-toggle formControlName="ativo">
-          {{ form.get('ativo')?.value ? 'Serviço Ativo' : 'Serviço Inativo' }}
-        </mat-slide-toggle>
-      </div>
-      }
-
       <!-- Botões -->
-      <div class="d-flex gap-12 m-t-24">
+      <div class="d-flex gap-12 m-t-24 flex-wrap">
         <!-- Cancelar -->
         <button mat-flat-button class="bg-error text-white" type="button"
           [routerLink]="['/page/cadastro-tecnico/servico']">

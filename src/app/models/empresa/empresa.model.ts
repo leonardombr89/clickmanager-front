@@ -1,4 +1,5 @@
-import { Endereco } from "./endereco.model";
+import { Endereco } from "../endereco/endereco.model";
+
 
 export interface Empresa {
     id?: number;
@@ -8,6 +9,8 @@ export interface Empresa {
     cnpj?: string;
     inscricaoEstadual?: string;
     horario?: string;
-    logoPath?: string;
+    logoPath?: string | null;
+    dataCriacao?: string;
+    ativa?: boolean;
     endereco?: Endereco;
   }

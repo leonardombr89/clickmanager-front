@@ -37,7 +37,6 @@ export class AppSideForgotPasswordComponent {
   }
 
   submit() {
-    // console.log(this.form.value);
     this.router.navigate(['/dashboards/dashboard1']);
   }
 }

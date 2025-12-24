@@ -2,9 +2,8 @@ import { Routes } from '@angular/router';
 import { StarterComponent } from './starter/starter.component';
 import { EmpresaFormComponent } from './empresa/empresa-form.component';
 import { GerenciarPerfilComponent } from './usuarios/perfil/gerenciar-perfil/gerenciar-perfil.component';
-import { NovoUsuarioComponent } from './usuarios/novo-usuario/novo-usuario.component';
 import { ListarUsuariosComponent } from './usuarios/listar-usuarios/listar-usuarios.component';
-import { EditarUsuarioComponent } from './usuarios/editar-usuario/editar-usuario.component';
+import { FormUsuarioComponent } from './usuarios/form-usuario/form-usuario.component';
 import { FormProdutoComponent } from './cadastro-tecnico/produtos/form-produto/form-produto.component';
 import { ListarCoresComponent } from './cadastro-tecnico/cores/listar-cores/listar-cores.component';
 import { FormCoresComponent } from './cadastro-tecnico/cores/form-cores/form-cores.component';
@@ -22,7 +21,7 @@ import { ListarClienteComponent } from './cliente/listar-cliente/listar-cliente.
 import { DetalhesPedidoComponent } from './pedido/detalhes-pedido/detalhes-pedido.component';
 import { FormServicoComponent } from './cadastro-tecnico/servicos/form-servico/form-servico.component';
 import { ListarServicoComponent } from './cadastro-tecnico/servicos/listar-servicos/listar-servicos.component';
-import { CalculadoraConfigComponent } from './calculadora-config/calculadora-config/calculadora-config.component';
+import { CalculadoraConfigComponent } from './smart-calc-config/smart-calc-config/smart-calc-config.component';
 
 export const PagesRoutes: Routes = [
   {
@@ -56,7 +55,7 @@ export const PagesRoutes: Routes = [
   },
   {
     path: 'usuarios/novo',
-    component: NovoUsuarioComponent,
+    component: FormUsuarioComponent,
     data: {
       title: 'Cadastro de novo usuário',
       urls: [
@@ -67,7 +66,7 @@ export const PagesRoutes: Routes = [
   },
   {
     path: 'usuarios/editar/:id',
-    component: EditarUsuarioComponent,
+    component: FormUsuarioComponent,
     data: {
       title: 'Editar usuário',
       urls: [

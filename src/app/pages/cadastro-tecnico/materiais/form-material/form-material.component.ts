@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { Material } from 'src/app/models/material.model';
@@ -7,10 +7,8 @@ import { MaterialService } from '../../services/material.service';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { CardHeaderComponent } from "src/app/components/card-header/card-header.component";
+import { SharedComponentsModule } from 'src/app/components/shared-components.module';
 
 @Component({
   selector: 'app-form-material',
@@ -20,11 +18,9 @@ import { CardHeaderComponent } from "src/app/components/card-header/card-header.
     RouterModule,
     ReactiveFormsModule,
     MatCardModule,
-    MatFormFieldModule,
-    MatInputModule,
     MatButtonModule,
-    MatSlideToggleModule,
-    CardHeaderComponent
+    CardHeaderComponent,
+    SharedComponentsModule
 ],
   templateUrl: './form-material.component.html',
   styleUrl: './form-material.component.scss'
@@ -45,8 +41,7 @@ export class FormMaterialComponent implements OnInit {
   ngOnInit(): void {
     this.form = this.fb.group({
       nome: ['', Validators.required],
-      descricao: ['', Validators.required],
-      ativo: [true]
+      descricao: ['', Validators.required]
     });
 
     this.route.paramMap.subscribe(params => {
@@ -64,8 +59,7 @@ export class FormMaterialComponent implements OnInit {
       next: (material: Material) => {
         this.form.patchValue({
           nome: material.nome,
-          descricao: material.descricao,
-          ativo: material.ativo
+          descricao: material.descricao
         });
       },
       error: () => {
@@ -114,5 +108,13 @@ export class FormMaterialComponent implements OnInit {
       return 'Campo obrigatório';
     }
     return 'Campo inválido';
+  }
+
+  get nomeControl(): FormControl {
+    return this.form.get('nome') as FormControl;
+  }
+
+  get descricaoControl(): FormControl {
+    return this.form.get('descricao') as FormControl;
   }
 }

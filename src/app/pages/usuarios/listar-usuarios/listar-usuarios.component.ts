@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { Usuario } from 'src/app/models/usuario.model';
+import { Usuario } from 'src/app/models/usuario/usuario.model';
 import { UsuarioService } from '../services/usuario.service';
 import { MatCardModule } from '@angular/material/card';
 import { MatTableModule } from '@angular/material/table';

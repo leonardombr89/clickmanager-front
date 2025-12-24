@@ -1,0 +1,246 @@
+<div class="auth-body">
+    <div class="m-t-12 m-b-16 text-center">
+        <app-branding></app-branding>
+    </div>
+
+    <h4 class="f-w-700 f-s-22 lh-base m-0 text-center">
+        Bem-vindo ao ClickManager
+    </h4>
+    <span class="f-s-14 d-block mat-body-1 m-t-8 text-center">
+        Vamos configurar os primeiros passos da sua empresa
+        <strong *ngIf="data?.empresaNome">({{ data.empresaNome }})</strong>.
+    </span>
+
+    <div class="or-border m-t-20 m-b-12">Onboarding inicial</div>
+
+    <mat-stepper #stepper [linear]="true">
+
+        <!-- STEP 1: DADOS EMPRESA -->
+        <mat-step [stepControl]="empresaStepGroup">
+            <ng-template matStepLabel>Dados da empresa</ng-template>
+
+            <!-- Reaproveitando TODO o formulário de empresa -->
+            <app-empresa-form [modoOnboarding]="true" (empresaSalva)="onEmpresaSalva()">
+            </app-empresa-form>
+        </mat-step>
+
+        <!-- STEP 2: ACABAMENTOS PADRÃO -->
+        <mat-step [stepControl]="acabamentosForm">
+            <form [formGroup]="acabamentosForm" class="m-t-12">
+
+                <ng-template matStepLabel>Acabamentos padrão</ng-template>
+
+                <mat-card class="b-1 shadow-none">
+
+                    <app-card-header
+                        [titulo]="'Selecione os acabamentos que você usa com mais frequência. Vamos criar esses acabamentos para sua empresa automaticamente.'"
+                        [mostrarDivisor]="true">
+                    </app-card-header>
+
+                    <mat-card-content>
+
+                        <div *ngIf="carregandoAcabamentos" class="text-center m-t-16">
+                            <mat-spinner diameter="40"></mat-spinner>
+                        </div>
+
+                        <div class="row" *ngIf="!carregandoAcabamentos">
+                            <div class="col-md-4" *ngFor="let a of acabamentosPadrao">
+                                <mat-checkbox (change)="toggleAcabamento($event.checked, a.id)"
+                                    class="m-r-8 f-w-600 f-s-14">{{ a.nome }}</mat-checkbox>
+                            </div>
+                        </div>
+                    </mat-card-content>
+                </mat-card>
+
+                <div class="d-flex align-items-center justify-content-between m-t-16">
+                    <button mat-flat-button class="bg-error text-white" type="button" matStepperPrevious>
+                        Voltar
+                    </button>
+                    <button mat-flat-button color="primary" type="button" (click)="salvarAcabamentosEProsseguir()">
+                        Próximo
+                    </button>
+                </div>
+
+            </form>
+        </mat-step>
+
+        <!-- STEP 3: CORES PADRÃO -->
+        <mat-step [stepControl]="coresForm">
+            <form [formGroup]="coresForm" class="m-t-12">
+
+                <ng-template matStepLabel>Cores padrão</ng-template>
+
+                <mat-card class="b-1 shadow-none">
+                    <app-card-header
+                        [titulo]="'Selecione as cores que mais utiliza. Criaremos essas cores na sua empresa automaticamente.'"
+                        [mostrarDivisor]="true">
+                    </app-card-header>
+
+                    <mat-card-content>
+                        <div *ngIf="carregandoCores" class="text-center m-t-16">
+                            <mat-spinner diameter="40"></mat-spinner>
+                        </div>
+
+                        <div class="row" *ngIf="!carregandoCores">
+                            <div class="col-md-4" *ngFor="let cor of coresPadrao">
+                                <mat-checkbox (change)="toggleCor($event.checked, cor.id)"
+                                    class="m-r-8 f-w-600 f-s-14">{{ cor.nome }}</mat-checkbox>
+                            </div>
+                        </div>
+                    </mat-card-content>
+                </mat-card>
+
+                <div class="d-flex align-items-center justify-content-between m-t-16">
+                    <button mat-flat-button class="bg-error text-white" type="button" matStepperPrevious>
+                        Voltar
+                    </button>
+                    <button mat-flat-button color="primary" type="button" (click)="salvarCoresEProsseguir()">
+                        Próximo
+                    </button>
+                </div>
+
+            </form>
+        </mat-step>
+
+        <!-- STEP 4: FORMATOS PADRÃO -->
+        <mat-step [stepControl]="formatosForm">
+            <form [formGroup]="formatosForm" class="m-t-12">
+
+                <ng-template matStepLabel>Formatos padrão</ng-template>
+
+                <mat-card class="b-1 shadow-none">
+                    <app-card-header
+                        [titulo]="'Selecione os formatos que costuma oferecer. Vamos adicioná-los automaticamente para você.'"
+                        [mostrarDivisor]="true">
+                    </app-card-header>
+
+                    <mat-card-content>
+                        <div *ngIf="carregandoFormatos" class="text-center m-t-16">
+                            <mat-spinner diameter="40"></mat-spinner>
+                        </div>
+
+                        <div class="row" *ngIf="!carregandoFormatos">
+                            <div class="col-md-4" *ngFor="let formato of formatosPadrao">
+                                <mat-checkbox (change)="toggleFormato($event.checked, formato.id)"
+                                    class="m-r-8 f-w-600 f-s-14">{{ formato.nome }}</mat-checkbox>
+                            </div>
+                        </div>
+                    </mat-card-content>
+                </mat-card>
+
+                <div class="d-flex align-items-center justify-content-between m-t-16">
+                    <button mat-flat-button class="bg-error text-white" type="button" matStepperPrevious>
+                        Voltar
+                    </button>
+                    <button mat-flat-button color="primary" type="button" (click)="salvarFormatosEProsseguir()">
+                        Próximo
+                    </button>
+                </div>
+
+            </form>
+        </mat-step>
+
+        <!-- STEP 5: MATERIAIS PADRÃO -->
+        <mat-step [stepControl]="materiaisForm">
+            <form [formGroup]="materiaisForm" class="m-t-12">
+
+                <ng-template matStepLabel>Materiais padrão</ng-template>
+
+                <mat-card class="b-1 shadow-none">
+                    <app-card-header
+                        [titulo]="'Escolha os materiais mais usados. Vamos criá-los automaticamente para você.'"
+                        [mostrarDivisor]="true">
+                    </app-card-header>
+
+                    <mat-card-content>
+                        <div *ngIf="carregandoMateriais" class="text-center m-t-16">
+                            <mat-spinner diameter="40"></mat-spinner>
+                        </div>
+
+                        <div class="row" *ngIf="!carregandoMateriais">
+                            <div class="col-md-4" *ngFor="let material of materiaisPadrao">
+                                <mat-checkbox (change)="toggleMaterial($event.checked, material.id)"
+                                    class="m-r-8 f-w-600 f-s-14">{{ material.nome }}</mat-checkbox>
+                            </div>
+                        </div>
+                    </mat-card-content>
+                </mat-card>
+
+                <div class="d-flex align-items-center justify-content-between m-t-16">
+                    <button mat-flat-button class="bg-error text-white" type="button" matStepperPrevious>
+                        Voltar
+                    </button>
+                    <button mat-flat-button color="primary" type="button" (click)="salvarMateriaisEProsseguir()">
+                        Próximo
+                    </button>
+                </div>
+
+            </form>
+        </mat-step>
+
+        <!-- STEP 6: SERVIÇOS PADRÃO -->
+        <mat-step [stepControl]="servicosForm">
+            <form [formGroup]="servicosForm" class="m-t-12">
+
+                <ng-template matStepLabel>Serviços padrão</ng-template>
+
+                <mat-card class="b-1 shadow-none">
+                    <app-card-header
+                        [titulo]="'Selecione os serviços mais comuns. Eles serão criados automaticamente na sua conta.'"
+                        [mostrarDivisor]="true">
+                    </app-card-header>
+
+                    <mat-card-content>
+
+                        <div *ngIf="carregandoServicos" class="text-center m-t-16">
+                            <mat-spinner diameter="40"></mat-spinner>
+                        </div>
+
+                        <div class="row" *ngIf="!carregandoServicos">
+                            <div class="col-md-4" *ngFor="let servico of servicosPadrao">
+                                <mat-checkbox (change)="toggleServico($event.checked, servico.id)"
+                                    class="m-r-8 f-w-600 f-s-14">{{ servico.nome }}</mat-checkbox>
+                            </div>
+                        </div>
+                    </mat-card-content>
+                </mat-card>
+
+                <div class="d-flex align-items-center justify-content-between m-t-16">
+                    <button mat-flat-button class="bg-error text-white" type="button" matStepperPrevious>
+                        Voltar
+                    </button>
+                    <button mat-flat-button color="primary" type="button" (click)="salvarServicosEProsseguir()">
+                        Próximo
+                    </button>
+                </div>
+
+            </form>
+        </mat-step>
+
+        <!-- STEP 7: FINALIZAR -->
+        <mat-step [stepControl]="finalForm">
+            <form [formGroup]="finalForm" class="m-t-12">
+                <ng-template matStepLabel>Finalizar</ng-template>
+
+                <h4 class="mat-headline-6 m-t-8">Tudo pronto!</h4>
+                <p class="m-t-8 f-s-14">
+                    Seu ambiente inicial está configurado. Você já pode começar a
+                    criar clientes, produtos e pedidos.
+                </p>
+
+                <mat-checkbox formControlName="naoMostrarMais" color="primary" class="m-t-12">
+                    Não mostrar mais este passo a passo nos próximos acessos
+                </mat-checkbox>
+
+                <div class="d-flex justify-content-between m-t-24">
+                    <button mat-flat-button class="bg-error text-white" type="button" matStepperPrevious>
+                        Voltar
+                    </button>
+                    <button mat-flat-button color="primary" type="button" (click)="finalizarOnboarding()">
+                        Concluir
+                    </button>
+                </div>
+            </form>
+        </mat-step>
+    </mat-stepper>
+</div>

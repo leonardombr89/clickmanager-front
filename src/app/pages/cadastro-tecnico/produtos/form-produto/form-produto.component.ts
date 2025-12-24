@@ -14,7 +14,6 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatTabsModule } from '@angular/material/tabs';
 import { TablerIconsModule } from 'angular-tabler-icons';
 import { ToastrService } from 'ngx-toastr';
@@ -45,7 +44,6 @@ import { CardHeaderComponent } from "src/app/components/card-header/card-header.
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
-    MatSlideToggleModule,
     MatTabsModule,
     MatIconModule,
     MatDividerModule,
@@ -54,7 +52,7 @@ import { CardHeaderComponent } from "src/app/components/card-header/card-header.
     VariacoesProdutoComponent,
     PoliticaRevendaComponent,
     CardHeaderComponent
-],
+  ],
   templateUrl: './form-produto.component.html',
   styleUrls: ['./form-produto.component.scss'],
 })
@@ -111,7 +109,6 @@ export class FormProdutoComponent implements OnInit, OnDestroy {
     this.form = this.fb.group({
       nome: ['', [Validators.required, Validators.maxLength(120)]],
       descricao: ['', [Validators.required, Validators.maxLength(1000)]],
-      ativo: [true],
       // se precisar no futuro:
       // categoriaId: [null],
       // grupoId: [null],
@@ -134,25 +131,25 @@ export class FormProdutoComponent implements OnInit, OnDestroy {
   }
 
   private fetchProduto(id: number): void {
-  this.loading = true;
-  this.cdr.markForCheck();
+    this.loading = true;
+    this.cdr.markForCheck();
 
-  this.produtoService.buscarPorId(id)
-    .pipe(takeUntil(this.destroy$))
-    .subscribe({
-      next: (produto: ProdutoResponse) => {
-        this.patchProduto(produto);
-        this.loading = false;
-        this.cdr.markForCheck();
-      },
-      error: () => {
-        this.loading = false;
-        this.toastr.error('Erro ao carregar produto.');
-        this.router.navigate(['/page/cadastro-tecnico/produtos']);
-        this.cdr.markForCheck();
-      }
-    });
-}
+    this.produtoService.buscarPorId(id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (produto: ProdutoResponse) => {
+          this.patchProduto(produto);
+          this.loading = false;
+          this.cdr.markForCheck();
+        },
+        error: () => {
+          this.loading = false;
+          this.toastr.error('Erro ao carregar produto.');
+          this.router.navigate(['/page/cadastro-tecnico/produtos']);
+          this.cdr.markForCheck();
+        }
+      });
+  }
 
   private dedupeById<T extends { id: number }>(arr: T[] = []): T[] {
     const seen = new Set<number>();
@@ -163,8 +160,7 @@ export class FormProdutoComponent implements OnInit, OnDestroy {
   private patchProduto(produto: ProdutoResponse): void {
     this.form.patchValue({
       nome: produto?.nome ?? '',
-      descricao: produto?.descricao ?? '',
-      ativo: !!produto?.ativo,
+      descricao: produto?.descricao ?? ''
     });
 
     this.politicaDoProduto = this.mapPoliticaRevenda(produto.politicaRevenda);
@@ -181,7 +177,6 @@ export class FormProdutoComponent implements OnInit, OnDestroy {
           id: a.id,
           nome: a.nome,
           descricao: a.descricao,
-          preco: a.preco ?? null,
           ativo: a.ativo,
         }))
       ),
@@ -190,12 +185,11 @@ export class FormProdutoComponent implements OnInit, OnDestroy {
           id: s.id,
           nome: s.nome,
           descricao: s.descricao,
-          preco: s.preco ?? null,
           ativo: s.ativo,
         }))
       ),
 
-      // preço da variação (já vem pronto)
+      // preço da variação (já vem pronto para o PrecoSelector)
       preco: v.preco ?? null,
 
       politicaRevenda: this.politicaDoProduto ?? null,
@@ -256,9 +250,8 @@ export class FormProdutoComponent implements OnInit, OnDestroy {
     if (typeof v !== 'object' || v == null) return true;
     const toId = (x: any) => x == null ? null : (typeof x === 'object' ? Number(x.id) : Number(x));
     const materialId = toId(v.materialId);
-    const formatoId = toId(v.formatoId);
     const precoTipo = v?.preco?.tipo;
-    return !materialId || !formatoId || !precoTipo;
+    return !materialId || !precoTipo;
   }
 
   private num(v: any): number {
@@ -351,15 +344,15 @@ export class FormProdutoComponent implements OnInit, OnDestroy {
       // aceita v.cor (objeto/numero) ou v.corId (fallback)
       const corId = this.extractId(v.cor ?? v.corId);
 
-      if (!materialId || !formatoId || !v?.preco?.tipo) {
-        throw new Error('Variação inválida (material, formato ou preço ausente).');
+      if (!materialId || !v?.preco?.tipo) {
+        throw new Error('Variação inválida (material ou preço ausente).');
       }
 
       return {
         ...(v?.id ? { id: Number(v.id) } : {}),
         ...(this.isEditMode ? {} : {}), // não enviar produtoId (mantém o mesmo shape do criar)
         materialId: Number(materialId),
-        formatoId: Number(formatoId),
+        ...(formatoId != null ? { formatoId: Number(formatoId) } : { formatoId: null }),
         corId: corId != null ? Number(corId) : null,
         acabamentoIds: Array.isArray(v.acabamentos) ? v.acabamentos.map((x: any) => Number(this.extractId(x))) : [],
         servicoIds: Array.isArray(v.servicos) ? v.servicos.map((x: any) => Number(this.extractId(x))) : [],

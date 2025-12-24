@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, catchError, map, of } from 'rxjs';
-import { EnderecoViaCep } from '../models/endereco.viacep.model';
+import { EnderecoViaCep } from '../models/endereco/endereco.viacep.model';
 
 @Injectable({ providedIn: 'root' })
 export class CepUtilService {

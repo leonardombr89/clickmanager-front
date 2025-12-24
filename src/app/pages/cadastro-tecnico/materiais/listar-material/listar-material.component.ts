@@ -5,7 +5,6 @@ import { MatPaginator, MatPaginatorModule, PageEvent } from '@angular/material/p
 import { MatTableModule } from '@angular/material/table';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
-import { MatChipsModule } from '@angular/material/chips';
 import { MatButtonModule } from '@angular/material/button';
 import { Router, RouterModule } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
@@ -16,6 +15,7 @@ import { MaterialService } from '../../services/material.service';
 import { Material } from 'src/app/models/material.model';
 import { TemPermissaoDirective } from 'src/app/diretivas/tem-permissao.directive';
 import { CardHeaderComponent } from "src/app/components/card-header/card-header.component";
+import { InputPesquisaComponent } from 'src/app/components/inputs/input-pesquisa/input-pesquisa.component';
 
 @Component({
   selector: 'app-listar-material',
@@ -27,12 +27,12 @@ import { CardHeaderComponent } from "src/app/components/card-header/card-header.
     MatTableModule,
     MatProgressSpinnerModule,
     MatIconModule,
-    MatChipsModule,
     MatButtonModule,
     TablerIconsModule,
     RouterModule,
     TemPermissaoDirective,
-    CardHeaderComponent
+    CardHeaderComponent,
+    InputPesquisaComponent
 ],
   templateUrl: './listar-material.component.html',
   styleUrl: './listar-material.component.scss'
@@ -43,8 +43,8 @@ export class ListarMaterialComponent implements OnInit {
   carregando = false;
   pagina = 0;
   tamanhoPagina = 10;
-  filtroStatus: boolean | null = true;
-  colunasExibidas = ['nome', 'descricao', 'status', 'acoes'];
+  termoPesquisa = '';
+  colunasExibidas = ['nome', 'descricao', 'acoes'];
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
@@ -61,7 +61,7 @@ export class ListarMaterialComponent implements OnInit {
 
   carregarMateriais(): void {
     this.carregando = true;
-    this.materialService.listar(this.pagina, this.tamanhoPagina, this.filtroStatus).subscribe({
+    this.materialService.listar(this.pagina, this.tamanhoPagina, undefined, this.termoPesquisa).subscribe({
       next: (res) => {
         this.materiais = res.content || [];
         this.totalMateriais = res.totalElements;
@@ -76,6 +76,12 @@ export class ListarMaterialComponent implements OnInit {
   onPaginaAlterada(event: PageEvent): void {
     this.pagina = event.pageIndex;
     this.tamanhoPagina = event.pageSize;
+    this.carregarMateriais();
+  }
+
+  onPesquisar(valor: string): void {
+    this.termoPesquisa = valor;
+    this.pagina = 0;
     this.carregarMateriais();
   }
 
@@ -107,15 +113,5 @@ export class ListarMaterialComponent implements OnInit {
         });
       }
     });
-  }
-
-  aplicarFiltro(status: boolean): void {
-    this.filtroStatus = status;
-    this.carregarMateriais();
-  }
-
-  removerFiltro(): void {
-    this.filtroStatus = null;
-    this.carregarMateriais();
   }
 }

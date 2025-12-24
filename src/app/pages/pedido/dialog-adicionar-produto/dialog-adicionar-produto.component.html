@@ -1,4 +1,9 @@
-<h2 mat-dialog-title>Adicionar produto</h2>
+<div class="dialog-header d-flex align-items-center justify-content-between">
+  <h2 mat-dialog-title class="m-b-0">Adicionar produto</h2>
+  <button mat-icon-button mat-dialog-close aria-label="Fechar">
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
 
 <!-- BODY ROLÁVEL DO MODAL -->
 <mat-dialog-content class="wizard-body">
@@ -20,30 +25,40 @@
 
                 <ng-container *ngIf="!loadingVariacoes; else loadingTpl">
                     <div class="var-grid">
-                        <!-- Formato -->
-                        <section>
-                            <h4 class="sec-title">Formato</h4>
-                            <mat-radio-group [value]="selFormatoId" (change)="onSelectFormato($event.value)">
-                                <div class="radio-col">
-                                    <mat-radio-button *ngFor="let f of formatos; trackBy: trackById" [value]="f.id"
-                                        class="m-b-8">
-                                        {{ f.nome }}
-                                    </mat-radio-button>
-                                </div>
-                            </mat-radio-group>
-                        </section>
-
                         <!-- Material -->
                         <section>
                             <h4 class="sec-title">Material</h4>
-                            <mat-radio-group [value]="selMaterialId" (change)="onSelectMaterial($event.value)">
-                                <div class="radio-col">
+                            <ng-container *ngIf="materiais.length; else noMaterial">
+                                <mat-radio-group [value]="selMaterialId" (change)="onSelectMaterial($event.value)">
+                                    <div class="radio-col">
                                     <mat-radio-button *ngFor="let m of materiais; trackBy: trackById" [value]="m.id"
                                         class="m-b-8">
                                         {{ m.nome }}
                                     </mat-radio-button>
                                 </div>
                             </mat-radio-group>
+                        </ng-container>
+                            <ng-template #noMaterial>
+                                <div class="text-muted">— Sem opções de material —</div>
+                            </ng-template>
+                        </section>
+
+                        <!-- Formato -->
+                        <section>
+                            <h4 class="sec-title">Formato</h4>
+                            <ng-container *ngIf="formatos.length; else noFormato">
+                                <mat-radio-group [value]="selFormatoId" (change)="onSelectFormato($event.value)">
+                                    <div class="radio-col">
+                                    <mat-radio-button *ngFor="let f of formatos; trackBy: trackById" [value]="f.id"
+                                            class="m-b-8">
+                                        {{ f.nome }}
+                                    </mat-radio-button>
+                                </div>
+                            </mat-radio-group>
+                        </ng-container>
+                            <ng-template #noFormato>
+                                <div class="text-muted">— Sem opções de formato —</div>
+                            </ng-template>
                         </section>
 
                         <!-- Cor -->
@@ -74,6 +89,7 @@
                             <div class="opt-grid">
                                 <label class="opt-card" *ngFor="let a of acabamentosDisponiveis; trackBy: trackById"
                                     (click)="toggle(acabamentoIdsCtrl, a.id, !isSelected(acabamentoIdsCtrl, a.id))">
+
                                     <mat-checkbox class="opt-check" [checked]="isSelected(acabamentoIdsCtrl, a.id)"
                                         (click)="$event.stopPropagation()"
                                         (change)="toggle(acabamentoIdsCtrl, a.id, $event.checked)">
@@ -88,6 +104,7 @@
                                         {{ precoResumo(a.preco) }}
                                     </div>
                                 </label>
+
                             </div>
                         </ng-container>
 
@@ -130,6 +147,20 @@
                     <app-preco-metro-config *ngIf="p?.preco?.tipo === 'METRO'" [produto]="p"
                         (adicionar)="onConfigConcluida($event)" (readyChange)="onPrecoReady($event)">
                     </app-preco-metro-config>
+
+                    <!-- Resumo da configuração escolhida -->
+                    <mat-card *ngIf="resumoPreco" class="cardWithShadow m-t-16">
+                        <mat-card-content>
+                            <div class="d-flex align-items-center justify-content-between m-b-12">
+                                <span class="f-w-600">Configuração adicionada</span>
+                                <mat-icon color="primary">check_circle</mat-icon>
+                            </div>
+                            <div class="f-s-14 m-b-4">Tipo: {{ p?.preco?.tipo || '—' }}</div>
+                            <div class="f-s-14 m-b-4" *ngIf="baseResumoTexto">Detalhe: {{ baseResumoTexto }}</div>
+                            <div class="f-s-14 m-b-4" *ngIf="baseSubtotal !== null">Subtotal estimado: {{ baseSubtotal | currency:'BRL' }}</div>
+                            <div class="f-s-12 text-muted">Clique em “Próximo” para continuar.</div>
+                        </mat-card-content>
+                    </mat-card>
 
                     <div class="m-t-16" *ngIf="!p?.preco?.tipo">
                         <em>Este produto não possui um tipo de preço definido.</em>

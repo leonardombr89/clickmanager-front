@@ -10,10 +10,18 @@ export class MaterialService {
 
   constructor(private api: ApiService) {}
 
-  listar(page: number = 0, size: number = 10, ativo?: boolean | null): Observable<PaginaResponse<Material>> {
+  listar(
+    page: number = 0,
+    size: number = 10,
+    ativo?: boolean | null,
+    textoPesquisa?: string
+  ): Observable<PaginaResponse<Material>> {
     let url = `${this.endpoint}?page=${page}&size=${size}`;
     if (ativo !== null && ativo !== undefined) {
       url += `&ativo=${ativo}`;
+    }
+    if (textoPesquisa && textoPesquisa.trim()) {
+      url += `&textoPesquisa=${encodeURIComponent(textoPesquisa.trim())}`;
     }
     return this.api.get<PaginaResponse<Material>>(url);
   }

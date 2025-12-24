@@ -1,4 +1,5 @@
 import { AcabamentoResponse } from "../acabamento/acabamento-response.model";
+import { AcabamentoVariacaoResponse } from "../acabamento/acabamento-variacao-response.model";
 import { Preco } from "../preco/preco-response.model";
 import { ServicoResponse } from "../servico/servico-response.model";
 
@@ -13,7 +14,7 @@ export interface ProdutoVariacaoResponse {
   corId?: number;
   corNome?: string;
 
-  acabamentos: AcabamentoResponse[];
+  acabamentos: AcabamentoVariacaoResponse[];
   servicos: ServicoResponse[];
 
   precoId: number;

@@ -35,16 +35,42 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
     }
   }
 
-  .dialog-grande {
+.dialog-grande {
     max-width: 95vw !important;
     width: 90vw !important;
-    min-height: 80vh !important;
+    max-height: 85vh !important;
   }
   
-  .dialog-grande .mat-mdc-dialog-panel {
+  .dialog-grande .mat-mdc-dialog-panel,
+  .dialog-grande .mat-mdc-dialog-surface {
     max-width: unset !important;
     width: 100% !important;
+    max-height: 85vh !important;
+    padding-inline: 12px;
+    box-sizing: border-box;
   }
+
+  .dialog-grande .mat-mdc-dialog-content {
+    overflow-x: hidden;
+    padding-right: 4px;
+  }
+
+  .dialog-grande .wizard-body {
+    max-height: calc(85vh - 140px);
+    width: 100%;
+    min-width: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  .dialog-grande .dialog-header {
+    padding-right: 8px;
+  }
+
+/* Fundo claro reutilizável para tabelas em cards */
+.table-bg-light {
+  background: #f2f4f7;
+}
 
   @media print {
     app-sidebar,
@@ -79,6 +105,24 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
     .no-print {
       display: none !important;
     }
+  }
+
+  /* === Ações nas tabelas: alinhadas à direita e centralizadas verticalmente === */
+  .mat-mdc-table .mat-mdc-header-cell.mat-column-acoes {
+    text-align: right;
+  }
+
+  .mat-mdc-table .mat-mdc-cell.mat-column-acoes {
+    text-align: right;
+    vertical-align: top;
+    min-width: 96px;
+    white-space: nowrap;
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+
+  .mat-mdc-table .mat-mdc-cell.mat-column-acoes a + a {
+    margin-left: 12px;
   }
 
   

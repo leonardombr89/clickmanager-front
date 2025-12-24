@@ -27,6 +27,7 @@ import { Observable, of } from 'rxjs';
 import { catchError, map as rxMap, tap, debounceTime, distinctUntilChanged, switchMap, filter, map } from 'rxjs/operators';
 import { MatSelectModule } from '@angular/material/select';
 import { Subscription } from 'rxjs';
+import { RouterModule } from '@angular/router';
 
 
 @Component({
@@ -44,6 +45,7 @@ import { Subscription } from 'rxjs';
         MatFormFieldModule,
         MatInputModule,
         MatSelectModule,
+        RouterModule,
         TelefonePipe,
         InputMoedaComponent,
         InputOptionsComponent,
@@ -510,4 +512,3 @@ export class DetalhesPedidoComponent implements OnInit {
         return this.form.get('status') as FormControl;
     }
 }
-
