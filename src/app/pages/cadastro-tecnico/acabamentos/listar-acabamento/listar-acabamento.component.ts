@@ -16,7 +16,6 @@ import { ConfirmDialogComponent } from 'src/app/components/dialog/confirm-dialog
 import { TemPermissaoDirective } from 'src/app/diretivas/tem-permissao.directive';
 import { InputPesquisaComponent } from 'src/app/components/inputs/input-pesquisa/input-pesquisa.component';
 import { CardHeaderComponent } from 'src/app/components/card-header/card-header.component';
-import { StatusFilterComponent } from 'src/app/components/status-filter/status-filter.component';
 
 import { AcabamentoService } from '../acabamento.service';
 import { AcabamentoResponse } from 'src/app/models/acabamento/acabamento-response.model';
@@ -39,8 +38,7 @@ import { AcabamentoVariacaoResponse } from 'src/app/models/acabamento/acabamento
     TablerIconsModule,
     TemPermissaoDirective,
     InputPesquisaComponent,
-    CardHeaderComponent,
-    StatusFilterComponent
+    CardHeaderComponent
   ],
   templateUrl: './listar-acabamento.component.html',
   styleUrl: './listar-acabamento.component.scss'
@@ -53,7 +51,6 @@ export class ListarAcabamentoComponent implements OnInit {
 
   pagina = 0;
   tamanhoPagina = 10;
-  filtroStatus: boolean | null = true;
   termoPesquisa = '';
 
   colunasExibidas = ['nome', 'descricao', 'variacoes', 'acoes'];
@@ -75,7 +72,7 @@ export class ListarAcabamentoComponent implements OnInit {
     this.carregando = true;
 
     this.acabamentoService
-      .listar(this.pagina, this.tamanhoPagina, this.filtroStatus, this.termoPesquisa)
+      .listar(this.pagina, this.tamanhoPagina, undefined, this.termoPesquisa)
       .subscribe({
         next: (res) => {
           const content = res.content || [];

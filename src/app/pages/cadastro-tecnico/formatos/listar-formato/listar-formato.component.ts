@@ -10,7 +10,6 @@ import { Router, RouterModule } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogComponent } from 'src/app/components/dialog/confirm-dialog/confirm-dialog.component';
 import { ToastrService } from 'ngx-toastr';
-import { MatChipsModule } from '@angular/material/chips';
 import { MatButtonModule } from '@angular/material/button';
 import { TablerIconsModule } from 'angular-tabler-icons';
 import { FormatoService } from '../../services/formato.service';
@@ -27,7 +26,6 @@ import { CardHeaderComponent } from "src/app/components/card-header/card-header.
     MatTableModule,
     MatProgressSpinnerModule,
     MatIconModule,
-    MatChipsModule,
     MatButtonModule,
     TablerIconsModule,
     RouterModule,
@@ -43,8 +41,7 @@ export class ListarFormatoComponent implements OnInit {
   carregando = false;
   pagina = 0;
   tamanhoPagina = 10;
-  filtroStatus: boolean | null = true;
-  colunasExibidas = ['nome', 'tamanho', 'areaUtil', 'status', 'acoes'];
+  colunasExibidas = ['nome', 'tamanho', 'areaUtil', 'acoes'];
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
@@ -61,7 +58,7 @@ export class ListarFormatoComponent implements OnInit {
 
   carregarFormatos(): void {
     this.carregando = true;
-    this.formatoService.listar(this.pagina, this.tamanhoPagina, this.filtroStatus).subscribe({
+    this.formatoService.listar(this.pagina, this.tamanhoPagina).subscribe({
       next: (res) => {
         this.formatos = res.content || [];
         this.totalFormatos = res.totalElements;
@@ -108,15 +105,5 @@ export class ListarFormatoComponent implements OnInit {
         });
       }
     });
-  }
-
-  aplicarFiltro(status: boolean): void {
-    this.filtroStatus = status;
-    this.carregarFormatos();
-  }
-
-  removerFiltro(): void {
-    this.filtroStatus = null;
-    this.carregarFormatos();
   }
 }

@@ -10,7 +10,6 @@ import { Router, RouterModule } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogComponent } from 'src/app/components/dialog/confirm-dialog/confirm-dialog.component';
 import { ToastrService } from 'ngx-toastr';
-import { MatChipsModule } from '@angular/material/chips';
 import { TemPermissaoDirective } from 'src/app/diretivas/tem-permissao.directive';
 import { MatButtonModule } from '@angular/material/button';
 import { TablerIconsModule } from 'angular-tabler-icons';
@@ -28,7 +27,6 @@ import { CardHeaderComponent } from "src/app/components/card-header/card-header.
     MatTableModule,
     MatProgressSpinnerModule,
     MatIconModule,
-    MatChipsModule,
     MatButtonModule,
     TablerIconsModule,
     RouterModule,
@@ -44,8 +42,7 @@ export class ListarCoresComponent implements OnInit{
   carregando = false;
   pagina = 0;
   tamanhoPagina = 10;
-  filtroStatus: boolean | null = true;
-  colunasExibidas = ['nome', 'descricao', 'status', 'acoes'];
+  colunasExibidas = ['nome', 'descricao', 'acoes'];
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
@@ -57,7 +54,7 @@ export class ListarCoresComponent implements OnInit{
 
   carregarCores(): void {
     this.carregando = true;
-    this.coresService.listar(this.pagina, this.tamanhoPagina, this.filtroStatus).subscribe({
+    this.coresService.listar(this.pagina, this.tamanhoPagina).subscribe({
       next: (res) => {
         this.cores = res.content || [];
         this.totalCores = res.totalElements;
@@ -103,15 +100,5 @@ export class ListarCoresComponent implements OnInit{
         });
       }
     });
-  }
-
-  aplicarFiltro(status: boolean): void {
-    this.filtroStatus = status;
-    this.carregarCores();
-  }
-
-  removerFiltro(): void {
-    this.filtroStatus = null;
-    this.carregarCores();
   }
 }

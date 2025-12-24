@@ -5,7 +5,6 @@ import { MatPaginator, MatPaginatorModule, PageEvent } from '@angular/material/p
 import { MatTableModule } from '@angular/material/table';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
-import { MatChipsModule } from '@angular/material/chips';
 import { MatButtonModule } from '@angular/material/button';
 import { Router, RouterModule } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
@@ -28,7 +27,6 @@ import { CardHeaderComponent } from "src/app/components/card-header/card-header.
     MatTableModule,
     MatProgressSpinnerModule,
     MatIconModule,
-    MatChipsModule,
     MatButtonModule,
     TablerIconsModule,
     RouterModule,
@@ -45,9 +43,8 @@ export class ListarServicoComponent implements OnInit {
   carregando = false;
   pagina = 0;
   tamanhoPagina = 10;
-  filtroStatus: boolean | null = true;
   termoPesquisa: string = '';
-  colunasExibidas = ['nome', 'status', 'acoes'];
+  colunasExibidas = ['nome', 'acoes'];
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
@@ -68,7 +65,7 @@ export class ListarServicoComponent implements OnInit {
     this.servicoService.listar(
       this.pagina,
       this.tamanhoPagina,
-      this.filtroStatus !== null ? this.filtroStatus : undefined,
+      undefined,
       this.termoPesquisa
     ).subscribe({
       next: (res) => {
@@ -118,19 +115,9 @@ export class ListarServicoComponent implements OnInit {
     });
   }
 
-  aplicarFiltro(status: boolean): void {
-    this.filtroStatus = status;
-    this.carregarServicos();
-  }
-
   onPesquisar(valor: string): void {
     this.termoPesquisa = valor;
     this.pagina = 0;
-    this.carregarServicos();
-  }
-
-  removerFiltro(): void {
-    this.filtroStatus = null;
     this.carregarServicos();
   }
 }
