@@ -250,9 +250,8 @@ export class FormProdutoComponent implements OnInit, OnDestroy {
     if (typeof v !== 'object' || v == null) return true;
     const toId = (x: any) => x == null ? null : (typeof x === 'object' ? Number(x.id) : Number(x));
     const materialId = toId(v.materialId);
-    const formatoId = toId(v.formatoId);
     const precoTipo = v?.preco?.tipo;
-    return !materialId || !formatoId || !precoTipo;
+    return !materialId || !precoTipo;
   }
 
   private num(v: any): number {
@@ -345,15 +344,15 @@ export class FormProdutoComponent implements OnInit, OnDestroy {
       // aceita v.cor (objeto/numero) ou v.corId (fallback)
       const corId = this.extractId(v.cor ?? v.corId);
 
-      if (!materialId || !formatoId || !v?.preco?.tipo) {
-        throw new Error('Variação inválida (material, formato ou preço ausente).');
+      if (!materialId || !v?.preco?.tipo) {
+        throw new Error('Variação inválida (material ou preço ausente).');
       }
 
       return {
         ...(v?.id ? { id: Number(v.id) } : {}),
         ...(this.isEditMode ? {} : {}), // não enviar produtoId (mantém o mesmo shape do criar)
         materialId: Number(materialId),
-        formatoId: Number(formatoId),
+        ...(formatoId != null ? { formatoId: Number(formatoId) } : { formatoId: null }),
         corId: corId != null ? Number(corId) : null,
         acabamentoIds: Array.isArray(v.acabamentos) ? v.acabamentos.map((x: any) => Number(this.extractId(x))) : [],
         servicoIds: Array.isArray(v.servicos) ? v.servicos.map((x: any) => Number(this.extractId(x))) : [],

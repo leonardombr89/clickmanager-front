@@ -119,7 +119,7 @@ export class VariacoesProdutoComponent {
     iniciarFormulario(): void {
         this.formVariacaoAtual = this.fb.group({
             materialId: [null, Validators.required],
-            formatoId: [null, Validators.required],
+            formatoId: [null],
             cor: [null],
             acabamentos: this.fb.control([]),
             servicos: this.fb.control([]),
@@ -215,7 +215,7 @@ export class VariacoesProdutoComponent {
         // --- Cor: salva id e rótulo para exibir na tabela ---
         const corId = toId(raw.cor);
         const corLabel =
-            typeof raw.cor === 'object'
+            raw?.cor && typeof raw.cor === 'object'
                 ? (raw.cor.nome ?? raw.cor.descricao ?? '---')
                 : this.resolveLabel(corId, this.coresDisponiveis);
 
