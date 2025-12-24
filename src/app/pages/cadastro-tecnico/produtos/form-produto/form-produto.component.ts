@@ -14,7 +14,6 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatTabsModule } from '@angular/material/tabs';
 import { TablerIconsModule } from 'angular-tabler-icons';
 import { ToastrService } from 'ngx-toastr';
@@ -45,7 +44,6 @@ import { CardHeaderComponent } from "src/app/components/card-header/card-header.
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
-    MatSlideToggleModule,
     MatTabsModule,
     MatIconModule,
     MatDividerModule,
@@ -111,7 +109,6 @@ export class FormProdutoComponent implements OnInit, OnDestroy {
     this.form = this.fb.group({
       nome: ['', [Validators.required, Validators.maxLength(120)]],
       descricao: ['', [Validators.required, Validators.maxLength(1000)]],
-      ativo: [true],
       // se precisar no futuro:
       // categoriaId: [null],
       // grupoId: [null],
@@ -163,8 +160,7 @@ export class FormProdutoComponent implements OnInit, OnDestroy {
   private patchProduto(produto: ProdutoResponse): void {
     this.form.patchValue({
       nome: produto?.nome ?? '',
-      descricao: produto?.descricao ?? '',
-      ativo: !!produto?.ativo,
+      descricao: produto?.descricao ?? ''
     });
 
     this.politicaDoProduto = this.mapPoliticaRevenda(produto.politicaRevenda);

@@ -35,13 +35,6 @@
                 placeholder="Digite uma descrição">
               </app-input-texto-restrito>
 
-              <!-- Ativo (somente no modo edição) -->
-              <div class="m-b-24" *ngIf="isEditMode">
-                <mat-slide-toggle formControlName="ativo">
-                  {{ form.get('ativo')?.value ? 'Acabamento Ativo' : 'Acabamento Inativo' }}
-                </mat-slide-toggle>
-              </div>
-
             </mat-card-content>
           </mat-card>
         </mat-tab>
@@ -61,7 +54,7 @@
       </mat-tab-group>
 
       <!-- Botões -->
-      <div class="d-flex gap-12 m-t-24">
+      <div class="d-flex gap-12 m-t-24 flex-wrap">
 
         <!-- CANCELAR -->
         <a

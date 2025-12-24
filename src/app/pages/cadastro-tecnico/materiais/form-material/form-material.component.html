@@ -10,38 +10,18 @@
     <form [formGroup]="form" (ngSubmit)="onSubmit()">
 
       <!-- Nome -->
-      <mat-label class="f-s-14 f-w-600 m-b-8 d-block">Nome</mat-label>
-      <mat-form-field appearance="outline" class="w-100 m-b-16">
-        <input matInput formControlName="nome" placeholder="Digite o nome do material" (blur)="updateErrorMessage()"
-          required />
-
-        @if (form.get('nome')?.invalid) {
-        <mat-error>{{ getErrorMessage('nome') }}</mat-error>
-        }
-      </mat-form-field>
+      <app-input-texto-restrito class="m-b-16" [control]="nomeControl" label="Nome"
+        placeholder="Digite o nome do material">
+      </app-input-texto-restrito>
 
       <!-- Descrição -->
-      <mat-label class="f-s-14 f-w-600 m-b-8 d-block">Descrição</mat-label>
-      <mat-form-field appearance="outline" class="w-100 m-b-16">
-        <input matInput formControlName="descricao" placeholder="Digite uma descrição" (blur)="updateErrorMessage()"
-          required />
-
-        @if (form.get('descricao')?.invalid) {
-        <mat-error>{{ getErrorMessage('descricao') }}</mat-error>
-        }
-      </mat-form-field>
+      <app-input-texto-restrito class="m-b-16" [control]="descricaoControl" label="Descrição"
+        placeholder="Digite uma descrição">
+      </app-input-texto-restrito>
 
       <!-- Ativo (somente edição) -->
-      @if (isEditMode) {
-      <div class="m-t-16 m-b-24">
-        <mat-slide-toggle formControlName="ativo">
-          {{ form.get('ativo')?.value ? 'Material Ativo' : 'Material Inativo' }}
-        </mat-slide-toggle>
-      </div>
-      }
-
       <!-- Botões -->
-      <div class="d-flex gap-12 m-t-24">
+      <div class="d-flex gap-12 m-t-24 flex-wrap">
 
         <!-- Cancelar -->
         <button mat-flat-button class="bg-error text-white" type="button"

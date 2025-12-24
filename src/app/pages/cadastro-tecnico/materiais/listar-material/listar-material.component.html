@@ -6,6 +6,9 @@
   </app-card-header>
 
   <mat-card-content>
+    <!-- Pesquisa -->
+    <app-input-pesquisa placeholder="Ex: nome do material" (valorAlterado)="onPesquisar($event)">
+    </app-input-pesquisa>
 
     <!-- Tabela de materiais -->
     <div class="table-responsive">

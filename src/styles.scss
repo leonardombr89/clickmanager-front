@@ -81,6 +81,24 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
     }
   }
 
+  /* === Ações nas tabelas: alinhadas à direita e centralizadas verticalmente === */
+  .mat-mdc-table .mat-mdc-header-cell.mat-column-acoes {
+    text-align: right;
+  }
+
+  .mat-mdc-table .mat-mdc-cell.mat-column-acoes {
+    text-align: right;
+    vertical-align: top;
+    min-width: 96px;
+    white-space: nowrap;
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+
+  .mat-mdc-table .mat-mdc-cell.mat-column-acoes a + a {
+    margin-left: 12px;
+  }
+
   
   
   

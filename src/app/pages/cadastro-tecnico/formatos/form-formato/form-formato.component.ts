@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { CommonModule } from '@angular/common';
@@ -7,10 +7,11 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { Formato } from 'src/app/models/formato.model';
 import { FormatoService } from '../../services/formato.service';
 import { CardHeaderComponent } from "src/app/components/card-header/card-header.component";
+import { SharedComponentsModule } from 'src/app/components/shared-components.module';
+import { InputNumericoComponent } from 'src/app/components/inputs/input-numerico/input-numerico.component';
 
 @Component({
   selector: 'app-form-formato',
@@ -23,8 +24,9 @@ import { CardHeaderComponent } from "src/app/components/card-header/card-header.
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
-    MatSlideToggleModule,
-    CardHeaderComponent
+    CardHeaderComponent,
+    SharedComponentsModule,
+    InputNumericoComponent
 ],
   templateUrl: './form-formato.component.html',
   styleUrl: './form-formato.component.scss'
@@ -47,9 +49,8 @@ export class FormFormatoComponent implements OnInit {
       nome: ['', Validators.required],
       larguraCm: [null, [Validators.required, Validators.min(0.1)]],
       alturaCm: [null, [Validators.required, Validators.min(0.1)]],
-      larguraUtilCm: [null, [Validators.required, Validators.min(0.1)]],
-      alturaUtilCm: [null, [Validators.required, Validators.min(0.1)]],
-      ativo: [true]
+      larguraUtilCm: [null, [Validators.min(0.1)]],
+      alturaUtilCm: [null, [Validators.min(0.1)]]
     });
 
     this.route.paramMap.subscribe(params => {
@@ -70,8 +71,7 @@ export class FormFormatoComponent implements OnInit {
           larguraCm: formato.larguraCm,
           alturaCm: formato.alturaCm,
           larguraUtilCm: formato.larguraUtilCm,
-          alturaUtilCm: formato.alturaUtilCm,
-          ativo: formato.ativo
+          alturaUtilCm: formato.alturaUtilCm
         });
       },
       error: () => {
@@ -123,5 +123,25 @@ export class FormFormatoComponent implements OnInit {
       return 'Valor deve ser maior que zero';
     }
     return 'Campo inválido';
+  }
+
+  get nomeControl(): FormControl {
+    return this.form.get('nome') as FormControl;
+  }
+
+  get alturaControl(): FormControl {
+    return this.form.get('alturaCm') as FormControl;
+  }
+
+  get alturaUtilControl(): FormControl {
+    return this.form.get('alturaUtilCm') as FormControl;
+  }
+
+  get larguraControl(): FormControl {
+    return this.form.get('larguraCm') as FormControl;
+  }
+
+  get larguraUtilControl(): FormControl {
+    return this.form.get('larguraUtilCm') as FormControl;
   }
 }

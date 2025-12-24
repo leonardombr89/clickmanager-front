@@ -15,6 +15,7 @@ import { TablerIconsModule } from 'angular-tabler-icons';
 import { FormatoService } from '../../services/formato.service';
 import { TemPermissaoDirective } from 'src/app/diretivas/tem-permissao.directive';
 import { CardHeaderComponent } from "src/app/components/card-header/card-header.component";
+import { InputPesquisaComponent } from 'src/app/components/inputs/input-pesquisa/input-pesquisa.component';
 
 @Component({
   selector: 'app-listar-formato',
@@ -30,7 +31,8 @@ import { CardHeaderComponent } from "src/app/components/card-header/card-header.
     TablerIconsModule,
     RouterModule,
     TemPermissaoDirective,
-    CardHeaderComponent
+    CardHeaderComponent,
+    InputPesquisaComponent
 ],
   templateUrl: './listar-formato.component.html',
   styleUrl: './listar-formato.component.scss'
@@ -41,6 +43,7 @@ export class ListarFormatoComponent implements OnInit {
   carregando = false;
   pagina = 0;
   tamanhoPagina = 10;
+  termoPesquisa = '';
   colunasExibidas = ['nome', 'tamanho', 'areaUtil', 'acoes'];
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
@@ -58,7 +61,7 @@ export class ListarFormatoComponent implements OnInit {
 
   carregarFormatos(): void {
     this.carregando = true;
-    this.formatoService.listar(this.pagina, this.tamanhoPagina).subscribe({
+    this.formatoService.listar(this.pagina, this.tamanhoPagina, undefined, this.termoPesquisa).subscribe({
       next: (res) => {
         this.formatos = res.content || [];
         this.totalFormatos = res.totalElements;
@@ -74,6 +77,12 @@ export class ListarFormatoComponent implements OnInit {
   onPaginaAlterada(event: PageEvent): void {
     this.pagina = event.pageIndex;
     this.tamanhoPagina = event.pageSize;
+    this.carregarFormatos();
+  }
+
+  onPesquisar(valor: string): void {
+    this.termoPesquisa = valor;
+    this.pagina = 0;
     this.carregarFormatos();
   }
 

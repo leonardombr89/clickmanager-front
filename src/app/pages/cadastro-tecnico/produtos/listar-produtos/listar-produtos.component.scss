@@ -2,26 +2,3 @@
 .mat-mdc-table .mat-mdc-row .mat-mdc-cell {
   white-space: normal;
 }
-
-/* A coluna de ações: centralizada verticalmente e largura fixa */
-.col-acoes {
-  width: 96px;
-  vertical-align: middle !important; /* <- O pulo do gato */
-  text-align: right;
-  white-space: nowrap; /* ícones não quebram */
-}
-
-/* O wrapper interno ocupa a altura da célula e centraliza os ícones */
-.acoes-wrap {
-  display: flex;
-  align-items: center;   /* centraliza verticalmente dentro do td */
-  justify-content: flex-end;
-  gap: 6px;
-  min-height: 40px;      /* dá um “mínimo” agradável em linhas baixas */
-}
-
-/* Se preferir todo mundo alinhado no topo (e não ao centro), troque por: */
-/*
-.col-acoes { vertical-align: top !important; }
-.acoes-wrap { align-items: flex-start; padding-top: 2px; }
-*/

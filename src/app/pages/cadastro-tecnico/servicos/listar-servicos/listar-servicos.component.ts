@@ -16,6 +16,7 @@ import { ServicoService } from '../../services/servico.service';
 import { ServicoListagem } from 'src/app/models/servico/servico-listagem.model';
 import { ConfirmDialogComponent } from 'src/app/components/dialog/confirm-dialog/confirm-dialog.component';
 import { CardHeaderComponent } from "src/app/components/card-header/card-header.component";
+import { Preco } from 'src/app/models/preco/preco-response.model';
 
 @Component({
   selector: 'app-listar-servicos',
@@ -44,7 +45,7 @@ export class ListarServicoComponent implements OnInit {
   pagina = 0;
   tamanhoPagina = 10;
   termoPesquisa: string = '';
-  colunasExibidas = ['nome', 'acoes'];
+  colunasExibidas = ['nome', 'descricao', 'preco', 'acoes'];
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
@@ -53,7 +54,7 @@ export class ListarServicoComponent implements OnInit {
     private router: Router,
     private dialog: MatDialog,
     private toastr: ToastrService
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     this.carregarServicos();
@@ -119,5 +120,13 @@ export class ListarServicoComponent implements OnInit {
     this.termoPesquisa = valor;
     this.pagina = 0;
     this.carregarServicos();
+  }
+
+  formatarPreco(preco: Preco | undefined | null): string {
+    if (!preco) return '-';
+    if (preco.tipo === 'FIXO' && typeof (preco as any).valor === 'number') {
+      return (preco as any).valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    }
+    return preco.tipo;
   }
 }

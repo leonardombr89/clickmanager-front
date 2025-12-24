@@ -15,7 +15,6 @@ import { ToastrService } from 'ngx-toastr';
 
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatTabsModule } from '@angular/material/tabs';
 
 import { Observable } from 'rxjs';
@@ -41,7 +40,6 @@ import { extrairMensagemErro } from 'src/app/utils/mensagem.util';
     ReactiveFormsModule,
     MatCardModule,
     MatButtonModule,
-    MatSlideToggleModule,
     MatTabsModule,
     InputTextoRestritoComponent,
     CardHeaderComponent,
@@ -83,7 +81,6 @@ export class FormAcabamentoComponent implements OnInit {
     this.form = this.fb.group({
       nome: ['', [Validators.required, Validators.maxLength(120)]],
       descricao: ['', [Validators.required, Validators.maxLength(1000)]],
-      ativo: [true],
     });
   }
 
@@ -125,7 +122,6 @@ export class FormAcabamentoComponent implements OnInit {
     this.form.patchValue({
       nome: acabamento?.nome ?? '',
       descricao: acabamento?.descricao ?? '',
-      ativo: !!acabamento?.ativo,
     });
 
     this.variacoesIniciais = acabamento.variacoes ?? [];
@@ -189,7 +185,6 @@ export class FormAcabamentoComponent implements OnInit {
     return {
       nome: String(formValue?.nome ?? '').trim(),
       descricao: String(formValue?.descricao ?? '').trim(),
-      ativo: !!formValue?.ativo,
       variacoes: this.toVariacoesRequest(this.variacoes),
     };
   }

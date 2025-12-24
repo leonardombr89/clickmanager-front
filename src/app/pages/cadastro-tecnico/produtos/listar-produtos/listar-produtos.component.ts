@@ -4,8 +4,6 @@ import { MatCardModule } from '@angular/material/card';
 import { MatPaginator, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatTableModule } from '@angular/material/table';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
 import { Router, RouterModule } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { ToastrService } from 'ngx-toastr';
@@ -28,8 +26,6 @@ import { CardHeaderComponent } from "src/app/components/card-header/card-header.
     MatPaginatorModule,
     MatTableModule,
     MatProgressSpinnerModule,
-    MatIconModule,
-    MatButtonModule,
     TablerIconsModule,
     RouterModule,
     TemPermissaoDirective,

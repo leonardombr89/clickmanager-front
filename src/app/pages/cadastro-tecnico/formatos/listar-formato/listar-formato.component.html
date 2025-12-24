@@ -8,6 +8,10 @@
 
   <mat-card-content>
 
+    <!-- Pesquisa -->
+    <app-input-pesquisa placeholder="Ex: nome do formato" (valorAlterado)="onPesquisar($event)">
+    </app-input-pesquisa>
+
     <!-- Tabela de formatos -->
     <div class="table-responsive">
       <table mat-table [dataSource]="formatos" class="mat-elevation-z1 no-wrap m-t-0 v-middle w-100">

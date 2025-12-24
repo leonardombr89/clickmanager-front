@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { Cor } from 'src/app/models/cor.model';
@@ -7,10 +7,8 @@ import { CorService } from '../../services/cor.service';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { CardHeaderComponent } from "src/app/components/card-header/card-header.component";
+import { SharedComponentsModule } from 'src/app/components/shared-components.module';
 import { extrairMensagemErro } from 'src/app/utils/mensagem.util';
 
 @Component({
@@ -21,11 +19,9 @@ import { extrairMensagemErro } from 'src/app/utils/mensagem.util';
     RouterModule,
     ReactiveFormsModule,
     MatCardModule,
-    MatFormFieldModule,
-    MatInputModule,
     MatButtonModule,
-    MatSlideToggleModule,
-    CardHeaderComponent
+    CardHeaderComponent,
+    SharedComponentsModule
 ],
   templateUrl: './form-cores.component.html',
   styleUrl: './form-cores.component.scss'
@@ -46,8 +42,7 @@ export class FormCoresComponent implements OnInit{
   ngOnInit(): void {
     this.form = this.fb.group({
       nome: ['', Validators.required],
-      descricao: ['', Validators.required],
-      ativo: [true]
+      descricao: ['', Validators.required]
     });
 
     this.route.paramMap.subscribe(params => {
@@ -65,8 +60,7 @@ export class FormCoresComponent implements OnInit{
       next: (cor: Cor) => {
         this.form.patchValue({
           nome: cor.nome,
-          descricao: cor.descricao,
-          ativo: cor.ativo
+          descricao: cor.descricao
         });
       },
       error: (err) => {
@@ -115,5 +109,13 @@ export class FormCoresComponent implements OnInit{
       return 'Campo obrigatório';
     }
     return 'Campo inválido';
+  }
+
+  get nomeControl(): FormControl {
+    return this.form.get('nome') as FormControl;
+  }
+
+  get descricaoControl(): FormControl {
+    return this.form.get('descricao') as FormControl;
   }
 }

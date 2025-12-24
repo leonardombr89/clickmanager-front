@@ -11,6 +11,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogComponent } from 'src/app/components/dialog/confirm-dialog/confirm-dialog.component';
 import { ToastrService } from 'ngx-toastr';
 import { TemPermissaoDirective } from 'src/app/diretivas/tem-permissao.directive';
+import { InputPesquisaComponent } from 'src/app/components/inputs/input-pesquisa/input-pesquisa.component';
 import { MatButtonModule } from '@angular/material/button';
 import { TablerIconsModule } from 'angular-tabler-icons';
 import { CorService } from '../../services/cor.service';
@@ -31,6 +32,7 @@ import { CardHeaderComponent } from "src/app/components/card-header/card-header.
     TablerIconsModule,
     RouterModule,
     TemPermissaoDirective,
+    InputPesquisaComponent,
     CardHeaderComponent
 ],
   templateUrl: './listar-cores.component.html',
@@ -42,6 +44,7 @@ export class ListarCoresComponent implements OnInit{
   carregando = false;
   pagina = 0;
   tamanhoPagina = 10;
+  termoPesquisa = '';
   colunasExibidas = ['nome', 'descricao', 'acoes'];
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
@@ -54,7 +57,7 @@ export class ListarCoresComponent implements OnInit{
 
   carregarCores(): void {
     this.carregando = true;
-    this.coresService.listar(this.pagina, this.tamanhoPagina).subscribe({
+    this.coresService.listar(this.pagina, this.tamanhoPagina, undefined, this.termoPesquisa).subscribe({
       next: (res) => {
         this.cores = res.content || [];
         this.totalCores = res.totalElements;
@@ -69,6 +72,12 @@ export class ListarCoresComponent implements OnInit{
   onPaginaAlterada(event: PageEvent): void {
     this.pagina = event.pageIndex;
     this.tamanhoPagina = event.pageSize;
+    this.carregarCores();
+  }
+
+  onPesquisar(valor: string): void {
+    this.termoPesquisa = valor;
+    this.pagina = 0;
     this.carregarCores();
   }
 
