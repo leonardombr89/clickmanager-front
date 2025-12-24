@@ -5,7 +5,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
-import { MatChipsModule } from '@angular/material/chips';
 import { RouterModule } from '@angular/router';
 import { animate, state, style, transition, trigger } from '@angular/animations';
 import { InputPesquisaComponent } from 'src/app/components/inputs/input-pesquisa/input-pesquisa.component';
@@ -27,7 +26,6 @@ import { CardHeaderComponent } from "src/app/components/card-header/card-header.
     MatButtonModule,
     MatTableModule,
     MatPaginatorModule,
-    MatChipsModule,
     InputPesquisaComponent,
     TemPermissaoDirective,
     CardHeaderComponent
@@ -48,10 +46,9 @@ export class ListarPedidoComponent implements OnInit {
   tamanhoPagina = 10;
   paginaAtual = 0;
   textoPesquisa = '';
-  filtroStatus: string | null = null;
 
   expandedElement: PedidoListagem | null = null;
-  readonly columnsToDisplay = ['numero', 'cliente', 'total', 'status', 'acoes'];
+  readonly columnsToDisplay = ['numero', 'cliente', 'total', 'acoes'];
   readonly columnsToDisplayWithExpand = [...this.columnsToDisplay, 'expand'];
 
   ngOnInit(): void {
@@ -59,7 +56,7 @@ export class ListarPedidoComponent implements OnInit {
   }
 
   carregarPedidos(): void {
-    this.pedidoService.listar(this.paginaAtual, this.tamanhoPagina, this.textoPesquisa, this.filtroStatus ?? undefined)
+    this.pedidoService.listar(this.paginaAtual, this.tamanhoPagina, this.textoPesquisa)
       .subscribe(pagina => {
         this.pedidos.set(pagina.content);
         this.totalPedidos = pagina.totalElements;
@@ -75,16 +72,6 @@ export class ListarPedidoComponent implements OnInit {
   onPaginaAlterada(event: PageEvent): void {
     this.paginaAtual = event.pageIndex;
     this.tamanhoPagina = event.pageSize;
-    this.carregarPedidos();
-  }
-
-  aplicarFiltro(status: string): void {
-    this.filtroStatus = status;
-    this.carregarPedidos();
-  }
-
-  removerFiltro(): void {
-    this.filtroStatus = null;
     this.carregarPedidos();
   }
 

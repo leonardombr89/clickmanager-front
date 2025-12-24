@@ -51,7 +51,7 @@ import { CardHeaderComponent } from "src/app/components/card-header/card-header.
     InputOptionsComponent,
     InputDataComponent,
     CardHeaderComponent
-],
+  ],
   templateUrl: './form-pedido.component.html',
   animations: [
     trigger('expandCollapse', [

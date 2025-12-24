@@ -3,8 +3,6 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormControl } from '@angular/forms';
 import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { ToastrService } from 'ngx-toastr';
 import { ClienteRequest } from 'src/app/models/cliente/cliente-request.model';
@@ -28,8 +26,6 @@ import { extrairMensagemErro } from 'src/app/utils/mensagem.util';
     RouterModule,
     ReactiveFormsModule,
     MatCardModule,
-    MatFormFieldModule,
-    MatInputModule,
     MatButtonModule,
     MatTabsModule,
     InputTextoRestritoComponent,
@@ -70,7 +66,7 @@ export class FormClienteComponent implements OnInit {
       nome: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
       telefone: ['', Validators.required],
-      documento: ['', Validators.required],
+      documento: [''],
       endereco: this.fb.group({})
     });
   }

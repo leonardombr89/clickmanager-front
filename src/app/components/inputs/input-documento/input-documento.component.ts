@@ -4,7 +4,6 @@ import {
   FormControl,
   ValidationErrors,
   ValidatorFn,
-  Validators
 } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -39,7 +38,6 @@ export class InputDocumentoComponent implements OnInit, AfterViewInit {
     const validators = this.control.validator ? [this.control.validator] : [];
     this.control.setValidators([
       ...validators,
-      Validators.required,
       this.documentoValidoValidator()
     ]);
     this.control.updateValueAndValidity();
@@ -98,7 +96,9 @@ export class InputDocumentoComponent implements OnInit, AfterViewInit {
   documentoValidoValidator(): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
       const raw = control.value?.replace(/\D/g, '');
-      return !raw || (raw.length !== 11 && raw.length !== 14)
+      if (!raw) return null;
+
+      return raw.length !== 11 && raw.length !== 14
         ? { documentoInvalido: true }
         : null;
     };
