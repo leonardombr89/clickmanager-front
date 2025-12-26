@@ -31,7 +31,10 @@
             <p class="f-s-18 m-t-16 banner-subtitle">
               Precifique em segundos, pare de refazer contas e devolva horas preciosas para o time focar na produção e no atendimento.
             </p>
-            <div class="pill pill-outline m-t-10 d-inline-flex">30 dias grátis para começar</div>
+            <div class="pill pill-outline pill-strong m-t-10 d-inline-flex">
+              <i-tabler name="sparkles" class="icon-16 m-r-6"></i-tabler>
+              30 dias grátis para começar
+            </div>
             <div class="m-t-24 hstack">
               <a mat-flat-button color="primary" [routerLink]="['/authentication/registro-gestor']" class="btn-custom">
                 Quero testar agora
@@ -50,6 +53,20 @@
                 </div>
               </div>
               }
+            </div>
+            <div class="trust-bar m-t-20">
+              <div class="trust-pill">
+                <i-tabler name="bolt" class="icon-16 m-r-6"></i-tabler>
+                Orçamentos em minutos, não em horas
+              </div>
+              <div class="trust-pill">
+                <i-tabler name="shield-check" class="icon-16 m-r-6"></i-tabler>
+                Margem protegida e regras centralizadas
+              </div>
+              <div class="trust-pill">
+                <i-tabler name="clock-hour-4" class="icon-16 m-r-6"></i-tabler>
+                Teste sem risco por 30 dias
+              </div>
             </div>
           </div>
           <div class="col-lg-5 m-t-24 m-t-lg-0">
@@ -196,7 +213,7 @@
           <div class="hstack m-t-16 cta-buttons">
             <a mat-flat-button color="primary" [routerLink]="['/authentication/registro-gestor']" class="btn-custom btn-primary-glow">
               <i-tabler name="edit" class="icon-18 m-r-6"></i-tabler>
-              Preencher formulário de cadastro
+              Cadastre-se
             </a>
             <a mat-flat-button color="accent" [routerLink]="['/authentication/login']" class="btn-custom sm btn-ghost-light">
               <i-tabler name="login" class="icon-18 m-r-6"></i-tabler>
