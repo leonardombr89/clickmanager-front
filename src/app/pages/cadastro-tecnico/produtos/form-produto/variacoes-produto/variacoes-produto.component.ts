@@ -33,6 +33,7 @@ import { VariacaoDetalheDialogComponent } from 'src/app/components/dialog/variac
     standalone: true,
     selector: 'app-variacoes-produto',
     templateUrl: './variacoes-produto.component.html',
+    styleUrls: ['./variacoes-produto.component.scss'],
     imports: [
         CommonModule,
         FormsModule,

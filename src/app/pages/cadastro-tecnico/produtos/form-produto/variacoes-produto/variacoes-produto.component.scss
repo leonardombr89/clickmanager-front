@@ -1,0 +1,57 @@
+@use "sass:map";
+
+:host {
+  display: block;
+}
+
+.var-accordion .mat-expansion-panel-header {
+  padding: 0 16px;
+}
+
+.var-form-grid {
+  padding: 12px 8px 16px;
+}
+
+.add-var-action button {
+  min-width: 220px;
+}
+
+.variacoes-card {
+  overflow: hidden;
+}
+
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+table {
+  min-width: 680px;
+}
+
+@media (max-width: 768px) {
+  .var-accordion .mat-expansion-panel-header {
+    padding: 0 12px;
+  }
+
+  .var-form-grid {
+    padding: 8px 0 12px;
+  }
+
+  .table-responsive {
+    margin: 0 -8px;
+    padding: 0 8px;
+  }
+
+  table {
+    min-width: 520px;
+  }
+
+  .add-var-action {
+    text-align: center;
+  }
+
+  .add-var-action button {
+    width: 100%;
+  }
+}

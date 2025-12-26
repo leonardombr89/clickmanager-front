@@ -1,5 +1,5 @@
 <!-- Nova Variação (acordeon) -->
-<mat-accordion [multi]="false" #accordion="matAccordion">
+<mat-accordion [multi]="false" #accordion="matAccordion" class="var-accordion">
     <mat-expansion-panel #novaVarPanel class="cardWithShadow" [expanded]="false">
         <mat-expansion-panel-header>
             <mat-panel-title class="f-w-600">Nova Variação</mat-panel-title>
@@ -8,22 +8,22 @@
             </mat-panel-description>
         </mat-expansion-panel-header>
 
-        <div *ngIf="formVariacaoAtual" class="p-16">
+        <div *ngIf="formVariacaoAtual" class="p-16 var-form-grid">
 
             <div class="row g-3 m-b-16">
-                <div class="col-md-4">
+                <div class="col-12 col-md-4">
                     <app-auto-complete [control]="getFormControl(formVariacaoAtual.get('materialId'))" label="Material"
                         [displayWith]="mostrarDescricaoMaterial" [buscarFn]="buscarMateriais" [minimoCaracteres]="0"
                         [multiplo]="false" />
                 </div>
 
-                <div class="col-md-4">
+                <div class="col-12 col-md-4">
                     <app-auto-complete [control]="getFormControl(formVariacaoAtual.get('formatoId'))" label="Formato"
                         [displayWith]="mostrarDescricaoFormato" [buscarFn]="buscarFormatos" [minimoCaracteres]="0"
                         [multiplo]="false" />
                 </div>
 
-                <div class="col-md-4">
+                <div class="col-12 col-md-4">
                     <app-auto-complete [control]="getFormControl(formVariacaoAtual.get('cor'))" label="Cor"
                         [displayWith]="mostrarDescricao" [buscarFn]="buscarCores" [minimoCaracteres]="0"
                         [multiplo]="false" />
@@ -31,26 +31,26 @@
             </div>
 
             <div class="row g-3 m-b-16">
-                <div class="col-md-6">
+                <div class="col-12 col-md-6">
                     <app-input-multi-select [control]="getFormControl(formVariacaoAtual.get('acabamentos'))"
                         [options]="acabamentosDisponiveis" label="Acabamentos" />
                 </div>
 
-                <div class="col-md-6">
+                <div class="col-12 col-md-6">
                     <app-input-multi-select [control]="getFormControl(formVariacaoAtual.get('servicos'))"
                         [options]="servicosDisponiveis" label="Serviços" />
                 </div>
             </div>
 
             <div class="row g-3 m-b-16">
-                <div class="col-md-12">
+                <div class="col-12">
                     <app-preco-selector [formGroup]="getFormGroup(formVariacaoAtual.get('preco')!)"
                         [tiposDisponiveis]="['FIXO', 'QUANTIDADE', 'DEMANDA', 'METRO']">
                     </app-preco-selector>
                 </div>
             </div>
 
-            <div class="text-end">
+            <div class="text-end add-var-action">
                 <button type="button" mat-flat-button color="primary" (click)="addVariacao()"
                     [disabled]="formVariacaoAtual?.invalid || formVariacaoAtual.get('preco')?.invalid">
                     <mat-icon>add</mat-icon>
@@ -63,10 +63,11 @@
 </mat-accordion>
 
 <!-- Tabela com variações salvas -->
-<mat-card class="p-16 m-t-16 cardWithShadow">
+<mat-card class="p-16 m-t-16 cardWithShadow variacoes-card">
     <mat-card-title class="f-s-16 f-w-600 m-b-16">Variações Salvas</mat-card-title>
 
-    <table mat-table [dataSource]="dataSource" class="w-100 f-s-14">
+    <div class="table-responsive">
+        <table mat-table [dataSource]="dataSource" class="w-100 f-s-14">
         <!-- Material -->
         <ng-container matColumnDef="material">
             <th mat-header-cell *matHeaderCellDef>Material</th>
@@ -127,5 +128,6 @@
 
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
         <tr mat-row *matRowDef="let row; columns: displayedColumns; trackBy: trackByIndex"></tr>
-    </table>
+        </table>
+    </div>
 </mat-card>

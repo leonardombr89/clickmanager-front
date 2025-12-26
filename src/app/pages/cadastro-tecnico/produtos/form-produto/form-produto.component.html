@@ -1,4 +1,4 @@
-<mat-card class="cardWithShadow">
+<mat-card class="cardWithShadow produto-form">
 
   <!-- Cabeçalho com botão voltar -->
   <app-card-header [titulo]="isEditMode ? 'Editar Produto' : 'Novo Produto'" botaoTexto="Voltar" botaoIcone="arrow_back"
@@ -9,11 +9,11 @@
 
     <form [formGroup]="form" (ngSubmit)="onSubmit()">
 
-      <mat-tab-group>
+      <mat-tab-group class="tabs-responsive">
 
         <!-- Aba Geral -->
         <mat-tab label="Geral">
-          <mat-card class="cardWithShadow">
+          <mat-card class="cardWithShadow tab-card">
             <mat-card-content>
 
               <app-input-texto-restrito class="m-b-16" [control]="nomeControl" label="Nome" placeholder="Digite o nome do produto">
@@ -29,7 +29,7 @@
 
         <!-- Aba Política de Revenda -->
         <mat-tab label="Política de Revenda">
-          <mat-card class="cardWithShadow">
+          <mat-card class="cardWithShadow tab-card">
             <mat-card-content>
               <app-politica-revenda [formGroup]="form" [value]="politicaDoProduto"
                 (valueChange)="onPoliticaChange($event)">
@@ -40,7 +40,7 @@
 
         <!-- Aba Variações -->
         <mat-tab label="Variações">
-          <mat-card class="cardWithShadow">
+          <mat-card class="cardWithShadow tab-card">
             <mat-card-content>
               <app-variacoes-produto [variacoesIniciais]="variacoesIniciais" [politicaProduto]="politicaDoProduto"
                 (variacoesChange)="onVariacoesChange($event)">
@@ -52,7 +52,7 @@
       </mat-tab-group>
 
       <!-- Botões -->
-      <div class="d-flex gap-12 m-t-24 flex-wrap">
+      <div class="actions m-t-24">
 
         <!-- CANCELAR -->
         <button mat-flat-button class="bg-error text-white" type="button"

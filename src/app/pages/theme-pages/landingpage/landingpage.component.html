@@ -1,21 +1,17 @@
-<mat-sidenav-container class="mainWrapper">
+<mat-sidenav-container class="mainWrapper app-landingpage">
   <mat-sidenav-content>
-    <!-- ------------------------------------------------------------------
-    Header
-    ------------------------------------------------------------------ -->
-    <mat-toolbar class="topbar topbar-xl m-auto">
+    <mat-toolbar class="topbar topbar-xl m-auto glass-bar">
       <div class="container full-width p-xs-6 justify-content-between">
-        <!-- --------------------------------------------------------------- -->
         <div class="branding p-x-0">
           <app-branding></app-branding>
         </div>
-
-        <!-- --------------------------------------------------------------- -->
-
         <div class="d-flex align-items-center gap-10">
-          <a mat-flat-button color="primary" class="m-l-10" [routerLink]="['/authentication/boxed-login']">Acessar Sistema</a>
-        
-          <!-- Mobile Menu -->
+          <a mat-stroked-button color="primary" class="m-l-10" [routerLink]="['/authentication/login']">
+            Login
+          </a>
+          <a mat-flat-button color="primary" class="m-l-6" [routerLink]="['/authentication/registro-gestor']">
+            Criar conta
+          </a>
           <button mat-icon-button (click)="filterNavRight.toggle()" class="d-flex d-lg-none">
             <i-tabler name="menu-2" class="icon-20 d-flex"></i-tabler>
           </button>
@@ -23,385 +19,243 @@
       </div>
     </mat-toolbar>
 
-    <!-- ------------------------------------------------------------------
-   End Header
-    ------------------------------------------------------------------ -->
-
-    <!-- ------------------------------------------------------------------
-    Banner
-    ------------------------------------------------------------------ -->
-    <div class="overflow-hidden banner-section">
-      <div class="container">
-        <div class="row justify-content-center">
-          <div class="col-lg-11">
-            <div class="text-center">
-              <h1 class="banner-title m-0 f-w-700">
-                CRM Clickarte: o sistema completo para gestão de gráficas e comunicados visuais
-              </h1>
-              <p class="f-s-18 p-y-24 m-t-12 m-0 banner-subtitle">
-                Organize seus orçamentos, controle seus clientes e automatize sua produção com uma solução pensada para o seu dia a dia.
-              </p>
-              <div class="m-t-24 hstack justify-content-center">
-                <a mat-flat-button color="primary" [routerLink]="['/authentication/boxed-login']" class="btn-custom">
-                  Acessar Sistema Agora
+    <section class="hero-area">
+      <div class="hero-gradient"></div>
+      <div class="container position-relative">
+        <div class="row align-items-center">
+          <div class="col-lg-7">
+            <div class="eyebrow text-uppercase f-w-700">SmartCalc · Orçamentos sem atrito</div>
+            <h1 class="banner-title m-0 f-w-700 m-t-12">
+              Transforme cada pedido em valor com o SmartCalc
+            </h1>
+            <p class="f-s-18 m-t-16 banner-subtitle">
+              Precifique em segundos, pare de refazer contas e devolva horas preciosas para o time focar na produção e no atendimento.
+            </p>
+            <div class="pill pill-outline pill-strong m-t-10 d-inline-flex">
+              <i-tabler name="sparkles" class="icon-16 m-r-6"></i-tabler>
+              30 dias grátis para começar
+            </div>
+            <div class="m-t-24 hstack">
+              <a mat-flat-button color="primary" [routerLink]="['/authentication/registro-gestor']" class="btn-custom">
+                Quero testar agora
+              </a>
+              <a mat-stroked-button color="primary" [routerLink]="['/authentication/login']" class="btn-custom sm">
+                Já sou cliente
+              </a>
+            </div>
+            <div class="hero-metrics row m-t-24">
+              @for(win of timeWins; track win.title) {
+              <div class="col-sm-6 m-b-12">
+                <div class="metric-card">
+                  <span class="metric-accent">{{ win.accent }}</span>
+                  <h3 class="metric-title">{{ win.title }}</h3>
+                  <p class="metric-copy m-0">{{ win.detail }}</p>
+                </div>
+              </div>
+              }
+            </div>
+            <div class="trust-bar m-t-20">
+              <div class="trust-pill">
+                <i-tabler name="bolt" class="icon-16 m-r-6"></i-tabler>
+                Orçamentos em minutos, não em horas
+              </div>
+              <div class="trust-pill">
+                <i-tabler name="shield-check" class="icon-16 m-r-6"></i-tabler>
+                Margem protegida e regras centralizadas
+              </div>
+              <div class="trust-pill">
+                <i-tabler name="clock-hour-4" class="icon-16 m-r-6"></i-tabler>
+                Teste sem risco por 30 dias
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-5 m-t-24 m-t-lg-0">
+            <div class="smartcalc-card">
+              <div class="pill pill-success">Tempo de equipe recuperado</div>
+              <h4 class="m-t-16 m-b-12 f-w-700">O cálculo certo na primeira tentativa</h4>
+              <ul class="list-unstyled feature-list m-0 p-0">
+                <li class="d-flex align-items-start m-b-12">
+                  <span class="check-icon bg-light-success">
+                    <i-tabler name="clock-play" class="text-success icon-20"></i-tabler>
+                  </span>
+                  <div class="m-l-12">
+                    <strong>SmartCalc automatiza o preço</strong>
+                    <p class="m-0 f-s-14">Considere insumos, área, acabamento e margem com fórmulas vivas.</p>
+                  </div>
+                </li>
+                <li class="d-flex align-items-start m-b-12">
+                  <span class="check-icon bg-light-primary">
+                    <i-tabler name="sparkles" class="text-primary icon-20"></i-tabler>
+                  </span>
+                  <div class="m-l-12">
+                    <strong>Simule cenários em minutos</strong>
+                    <p class="m-0 f-s-14">Compare materiais e prazos sem abrir planilhas paralelas.</p>
+                  </div>
+                </li>
+                <li class="d-flex align-items-start">
+                  <span class="check-icon bg-light-warning">
+                    <i-tabler name="route" class="text-warning icon-20"></i-tabler>
+                  </span>
+                  <div class="m-l-12">
+                    <strong>Acompanhe do pedido à entrega</strong>
+                    <p class="m-0 f-s-14">Status claros para produção e comercial verem o mesmo fluxo.</p>
+                  </div>
+                </li>
+              </ul>
+              <div class="glass-note m-t-20">
+                Em média, as equipes recuperam <strong>6 a 10 horas por semana</strong> só em orçamentos.
+              </div>
+              <div class="m-t-16">
+                <a mat-flat-button color="accent" [routerLink]="['/authentication/registro-gestor']" class="w-100">
+                  Abrir formulário de cadastro
                 </a>
               </div>
             </div>
           </div>
         </div>
       </div>
+    </section>
 
-      <!-- slider -->
-      <div class="slider-wrapper overflow-hidden position-relative m-t-40 p-t-30 p-b-10">
-        <div class="d-flex flex-row w-100">
-          <div class="slider-img">
-            <img src="assets/images/landingpage/slider-group.png" alt="bg-img" />
-          </div>
-          <div class="slider-img">
-            <img src="assets/images/landingpage/slider-group.png" alt="bg-img" />
-          </div>
-          <div class="slider-img">
-            <img src="assets/images/landingpage/slider-group.png" alt="bg-img" />
-          </div>
-          <div class="slider-img">
-            <img src="assets/images/landingpage/slider-group.png" alt="bg-img" />
-          </div>
-          <div class="slider-img">
-            <img src="assets/images/landingpage/slider-group.png" alt="bg-img" />
-          </div>
-        </div>
-      </div>
-    </div>
-    <!-- ------------------------------------------------------------------
-    End Banner
-    ------------------------------------------------------------------ -->
-
-    <!-- ------------------------------------------------------------------
-    Template
-    ------------------------------------------------------------------ -->
-    <div class="spacer bg-white" id="demos">
+    <section class="spacer bg-white" id="smartcalc">
       <div class="container">
-        <div class="row justify-content-center">
-          <div class="col-lg-8 text-center">
-            <div class="d-sm-flex align-items-center justify-content-center">
-              <div class="d-flex align-items-center justify-content-center social-chips">
-                <img src="assets/images/profile/user-2.jpg" width="30" alt="social" class="rounded-circle" />
-                <img src="assets/images/profile/user-3.jpg" width="30" alt="social" class="rounded-circle" />
-                <img src="assets/images/profile/user-4.jpg" width="30" alt="social" class="rounded-circle" />
-              </div>
-              <span class="f-s-16 f-w-500 m-l-10"><span class="f-w-600">52,589+</span> developers & agencies
-                using our templates</span>
-            </div>
-            <h2 class="section-title f-w-700 m-y-30">
-              Production Ready & Developer Friendly Material Angular Admin
-              Template
-            </h2>
+        <div class="row justify-content-center text-center">
+          <div class="col-lg-8">
+            <span class="pill pill-outline">Funcionalidades principais</span>
+            <h2 class="section-title m-t-16 f-w-700">SmartCalc cuida das contas, sua equipe cuida do cliente</h2>
+            <p class="f-s-16 m-t-10 m-b-0">
+              Combine cálculo automático, histórico de preços e fluxo integrado de atendimento para nunca perder um prazo.
+            </p>
           </div>
         </div>
-        <div class="text-center m-t-30 m-b-32">
-          <span class="bg-primary p-8 rounded-pill text-white f-w-600 p-x-10 f-s-14">
-            Demos
-          </span>
-        </div>
-        <!-- demos and apps -->
-        <div class="row m-t-24 justify-content-center">
-          @for(demo of demos; track demo.name) {
-          <div class="col-lg-4 col-sm-6 m-b-16">
-            <div>
-              <div class="demos-card overflow-hidden">
-                <div class="bg-light-primary p-16 p-b-0">
-                  <div class="img-overlay">
-                    <img [src]="demo.imgSrc" alt="demos" class="w-100" />
-                    <div class="overlay-content">
-                      <a href="{{ demo.url }}" target="_blank" mat-flat-button color="primary">
-                        Live preview
-                      </a>
-                    </div>
-                  </div>
-                </div>
-                <div class="p-16">
-                  <span class="f-s-16 d-block f-w-500">{{ demo.name }}</span>
-                  <span class="f-s-14 d-block m-t-8">{{ demo.subtext }}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          }
-        </div>
-        <div class="text-center m-t-30 m-b-32">
-          <span class="bg-primary p-8 rounded-pill text-white f-w-600 p-x-10 f-s-14">
-            Apps
-          </span>
-        </div>
-        <!-- apss -->
-        <div class="row justify-content-center">
-          @for(app of appdemos; track app.name) {
-          <div class="col-lg-4 col-sm-6 m-t-16">
-            <div>
-              <div class="demos-card overflow-hidden">
-                <div class="bg-light-primary p-16 p-b-0">
-                  <div class="img-overlay">
-                    <img [src]="app.imgSrc" alt="app" class="w-100" />
-                    <div class="overlay-content">
-                      <a href="{{ app.url }}" target="_blank" mat-flat-button color="primary">
-                        Live preview
-                      </a>
-                    </div>
-                  </div>
-                </div>
-                <div class="p-16">
-                  <span class="f-s-16 d-block f-w-500">{{ app.name }}</span>
-                  <span class="f-s-14 d-block m-t-8">{{ app.subtext }}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          }
-        </div>
-      </div>
-    </div>
-    <!-- ------------------------------------------------------------------
-    End Template
-    ------------------------------------------------------------------ -->
-
-    <!-- ------------------------------------------------------------------
-    Features
-    ------------------------------------------------------------------ -->
-    <div class="spacer">
-      <div class="container">
-        <div class="row justify-content-center">
-          <div class="col-lg-6 col-sm-8">
-            <span class="d-block text-center f-w-500 f-s-16">Almost Covered Everything</span>
-            <h2 class="section-title text-center m-t-16 f-w-700">
-              Other Amazing Features & Flexibility Provided
-            </h2>
-          </div>
-        </div>
-
-        <!-- features -->
-        <div class="row m-t-24">
+        <div class="row m-t-32">
           @for(feature of features; track feature.title) {
-          <div class="col-sm-6 col-lg-3">
-            <mat-card class="cardWithShadow">
-              <mat-card-content>
-                <span class="icon-50 bg-light-{{
-                    feature.color
-                  }} rounded d-flex align-items-center justify-content-center">
-                  <i-tabler [name]="feature.icon" class="text-{{ feature.color }} icon-30"></i-tabler>
-                </span>
-                <h6 class="m-0 f-s-18 f-w-600 m-b-8 m-t-24">
-                  {{ feature.title }}
-                </h6>
-                <span class="f-s-14 m-b-24 d-block lh-base">{{
-                  feature.subtext
-                  }}</span>
-              </mat-card-content>
-            </mat-card>
+          <div class="col-sm-6 col-lg-4 m-b-20">
+            <div class="cardWithShadow feature-card h-100">
+              <span class="icon-50 bg-light-{{ feature.color }} rounded d-inline-flex align-items-center justify-content-center">
+                <i-tabler [name]="feature.icon" class="text-{{ feature.color }} icon-26"></i-tabler>
+              </span>
+              <h5 class="m-t-16 m-b-8 f-w-700">{{ feature.title }}</h5>
+              <p class="m-0 f-s-14 lh-base">{{ feature.subtext }}</p>
+            </div>
           </div>
           }
         </div>
       </div>
-    </div>
+    </section>
 
-    <!-- ------------------------------------------------------------------
-    End Features
-    ------------------------------------------------------------------ -->
-
-    <!-- ------------------------------------------------------------------
-    Testimonial
-    ------------------------------------------------------------------ -->
-    <div class="spacer bg-white">
+    <section class="spacer bg-extra-light" id="resultados">
       <div class="container">
-        <div class="row m-t-24">
-          <div class="col-12">
-            <div class="p-24">
-              <div class="d-flex align-items-center justify-content-center">
-                <i-tabler name="star-filled" class="fill-warning icon-26"></i-tabler>
-                <i-tabler name="star-filled" class="fill-warning icon-26 m-l-4"></i-tabler>
-                <i-tabler name="star-filled" class="fill-warning icon-26 m-l-4"></i-tabler>
-                <i-tabler name="star-filled" class="fill-warning icon-26 m-l-4"></i-tabler>
-                <i-tabler name="star-filled" class="fill-warning icon-26 m-l-4"></i-tabler>
-              </div>
-              <p class="m-t-24 review-subtext text-center f-w-500">
-                This template is great, UI-rich and up-to-date. Although it is
-                pretty much complete, I suggest to improve a bit of
-                documentation. Thanks & Highly recomended!
-              </p>
-              <div class="d-flex align-items-center justify-content-center m-t-24">
-                <img src="assets/images/profile/user-1.jpg" alt="profile" class="rounded-circle" width="64" />
-                <div class="m-l-12">
-                  <h6 class="mat-subtitle-1 f-s-16 f-w-600">Eminson Mendoza</h6>
-                  <span class="f-s-14">Features avaibility</span>
+        <div class="row align-items-center">
+          <div class="col-lg-6">
+            <div class="pill pill-dark">Resultados em poucas semanas</div>
+            <h3 class="section-title m-t-16 f-w-700">
+              Mais agilidade para quem aprova, produz e entrega
+            </h3>
+            <p class="f-s-16 m-t-8">
+              Dashboards claros mostram gargalos, margens por pedido e onde o SmartCalc liberou tempo. Nada de retrabalho entre vendas e produção.
+            </p>
+            <div class="stacked-cards m-t-20">
+              <div class="stack-card">
+                <div class="d-flex align-items-center">
+                  <i-tabler name="clock-pause" class="text-primary icon-22"></i-tabler>
+                  <span class="f-w-700 m-l-10">Lead time 30% menor</span>
                 </div>
+                <p class="m-0 f-s-14">Ajuste o preço certo de primeira e diminua idas e vindas com o cliente.</p>
+              </div>
+              <div class="stack-card">
+                <div class="d-flex align-items-center">
+                  <i-tabler name="users" class="text-success icon-22"></i-tabler>
+                  <span class="f-w-700 m-l-10">Equipe alinhada</span>
+                </div>
+                <p class="m-0 f-s-14">Pedidos, notas e follow-ups no mesmo lugar para não perder contexto.</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-6 m-t-24 m-t-lg-0">
+            <div class="workflow-card">
+              <div class="d-flex align-items-center justify-content-between m-b-12">
+                <span class="pill pill-outline">Fluxo simples</span>
+                <a mat-button color="primary" (click)="scrollTo('cta-final')" class="text-capitalize">Ir para cadastro</a>
+              </div>
+              <div class="row">
+                @for(step of steps; track step.title) {
+                <div class="col-md-4 m-b-12">
+                  <div class="workflow-step h-100">
+                    <span class="step-badge">{{ step.badge }}</span>
+                    <h6 class="m-t-12 m-b-6 f-w-700">{{ step.title }}</h6>
+                    <p class="m-0 f-s-13 lh-base">{{ step.desc }}</p>
+                  </div>
+                </div>
+                }
+              </div>
+              <div class="cta-inline m-t-12">
+                <span class="text-muted f-s-14">Precisa mostrar ao time?</span>
+                <a mat-stroked-button color="primary" [routerLink]="['/authentication/login']" class="m-l-12">
+                  Abrir login agora
+                </a>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-    <!-- ------------------------------------------------------------------
-    End Testimonial
-    ------------------------------------------------------------------ -->
+    </section>
 
-    <!-- ------------------------------------------------------------------
-    buy section
-    ------------------------------------------------------------------ -->
-    <div class="bg-white">
+    <section class="spacer cta-section" id="cta-final">
       <div class="container">
-        <div class="bg-dark rounded p-32 position-relative">
-          <div class="row justify-content-between">
-            <div class="col-lg-6">
-              <h3 class="m-t-0 section-title2 text-white m-b-8">
-                Haven't found an answer to your question?
-              </h3>
-              <span class="f-s-16 m-b-30 p-b-10 m-t-8 d-block text-white">Connect with us either on discord or email
-                us</span>
-              <div class="hstack">
-                <a mat-flat-button href="https://discord.com/invite/eMzE8F6Wqs" color="primary"
-                  class="btn-custom sm">Ask on Discord</a>
-                <a mat-stroked-button href="https://support.wrappixel.com/" color="primary"
-                  class="btn-custom sm border-accent">Submit Ticket</a>
-              </div>
-            </div>
-            <div class="col-lg-5 text-right">
-              <img src="assets/images/landingpage/background/c2a.png" alt="img" width="596"
-                class="c2a-img d-none d-lg-flex" />
-            </div>
+        <div class="cta-card">
+          <div>
+            <div class="pill pill-light">Cadastro rápido</div>
+            <h3 class="section-title2 m-b-8 m-t-12 text-white">Pronto para ganhar tempo com o SmartCalc?</h3>
+            <p class="text-white m-0 f-s-16">
+              Cadastre a sua gráfica e coloque o time para orçar em minutos. <strong>30 dias grátis</strong> para testar o SmartCalc sem risco.
+            </p>
+          </div>
+          <div class="hstack m-t-16 cta-buttons">
+            <a mat-flat-button color="primary" [routerLink]="['/authentication/registro-gestor']" class="btn-custom btn-primary-glow">
+              <i-tabler name="edit" class="icon-18 m-r-6"></i-tabler>
+              Cadastre-se
+            </a>
+            <a mat-flat-button color="accent" [routerLink]="['/authentication/login']" class="btn-custom sm btn-ghost-light">
+              <i-tabler name="login" class="icon-18 m-r-6"></i-tabler>
+              Fazer login
+            </a>
           </div>
         </div>
       </div>
-    </div>
+    </section>
 
-    <!-- ------------------------------------------------------------------
-    buy section
-    ------------------------------------------------------------------ -->
-
-    <!-- ------------------------------------------------------------------
-    footer
-    ------------------------------------------------------------------ -->
     <footer class="p-y-30 bg-white">
       <div class="container">
         <div class="row justify-content-center">
           <div class="col-12 text-center">
-            <div class="f-s-16 m-t-8">
-              All rights reserved by Spike Admin. Designed & Developed by
-              <a href="https://www.wrappixel.com/" class="mat-subtitle-2 text-primary text-decoration-none">Wrappixel
-              </a>.
+            <div class="f-s-16 m-t-8 text-muted">
+              CRM Clickarte · SmartCalc para gráficas e comunicação visual. {{ currentYear }}.
             </div>
           </div>
         </div>
       </div>
     </footer>
-
-    <!-- ------------------------------------------------------------------
-    end footer
-    ------------------------------------------------------------------ -->
   </mat-sidenav-content>
 
-  <!-- ------------------------------------------------------------------
-    Mobile Sidebar
-    ------------------------------------------------------------------ -->
   <mat-sidenav #filterNavRight mode="over" position="end" class="filter-sidebar">
-    <div>
+    <div class="p-16">
       <div class="branding">
         <app-branding></app-branding>
       </div>
-
-      <mat-accordion>
-        <mat-expansion-panel class="shadow-none">
-          <mat-expansion-panel-header>
-            <mat-panel-title class="f-s-16 f-w-500"> Demos </mat-panel-title>
-          </mat-expansion-panel-header>
-          <div>
-            <h5 class="f-s-18 mat-subtitle-1 f-w-600">Different Demos</h5>
-            <span>Included with the package</span>
-            <div class="row m-t-24">
-              @for(demo of demos; track demo.url) {
-              <div class="col-lg-3 m-b-16">
-                <div>
-                  <div class="img-overlay rounded">
-                    <img [src]="demo.imgSrc" alt="demos" class="rounded w-100" />
-                    <div class="overlay-content">
-                      <a href="{{ demo.url }}" mat-flat-button color="primary">
-                        Live preview
-                      </a>
-                    </div>
-                  </div>
-                  <span class="f-s-14 d-block text-center m-t-8">{{
-                    demo.name
-                    }}</span>
-                </div>
-              </div>
-              }
-            </div>
-            <!-- apps -->
-            <h5 class="f-s-18 mat-subtitle-1 f-w-600 m-t-24">Different Apps</h5>
-            <div class="row m-t-24">
-              @for(app of appdemos; track app.name) {
-              <div class="col-lg-3 m-t-16">
-                <div>
-                  <div class="img-overlay rounded">
-                    <img [src]="app.imgSrc" alt="apps" class="rounded w-100" />
-                    <div class="overlay-content">
-                      <a href="{{ app.url }}" mat-flat-button color="primary">
-                        Live preview
-                      </a>
-                    </div>
-                  </div>
-                  <span class="f-s-14 d-block text-center m-t-8">{{
-                    app.name
-                    }}</span>
-                </div>
-              </div>
-              }
-            </div>
-          </div>
-        </mat-expansion-panel>
-        <mat-expansion-panel class="shadow-none">
-          <mat-expansion-panel-header>
-            <mat-panel-title class="f-s-16 f-w-500"> Pages </mat-panel-title>
-          </mat-expansion-panel-header>
-          <div>
-            <div class="row">
-              @for(appdd of apps; track appdd.title) {
-              <div class="col-12 text-hover-primary">
-                <a [routerLink]="[appdd.link]" class="d-flex align-items-center text-decoration-none m-b-24">
-                  <button mat-mini-fab class="text-primary bg-light-primary shadow-none rounded">
-                    <img [src]="appdd.img" width="20" />
-                  </button>
-
-                  <div class="m-l-16">
-                    <h5 class="f-s-14 f-w-600 m-0 textprimary mat-body-1 hover-text">
-                      {{ appdd.title }}
-                    </h5>
-                    <span class="mat-body-1 f-s-12">{{ appdd.subtitle }}</span>
-                  </div>
-                </a>
-              </div>
-              }
-            </div>
-            <h4 class="f-s-18 f-w-600 mat-subtitle-1 m-b-16">Quick Links</h4>
-            @for(quicklink of quicklinks; track quicklink.title) {
-            <div class="text-hover-primary">
-              <a [routerLink]="['quicklink.link']"
-                class="hover-text text-decoration-none mat-body-1 f-w-600 d-block p-y-8">{{ quicklink.title }}</a>
-            </div>
-            }
-          </div>
-        </mat-expansion-panel>
-      </mat-accordion>
-
-      <div class="p-x-16">
-        <a href="
-            https://demos.wrappixel.com/premium-admin-templates/angular/spike-angular/docs/index.html
-          " class="d-flex align-items-center text-decoration-none mat-body-1 p-y-16">
-          <span class="f-s-15 f-w-500 m-l-8">Documentation</span>
+      <div class="m-t-16">
+        <h5 class="f-s-16 f-w-700 m-b-8">Acesso rápido</h5>
+        <button mat-stroked-button color="primary" class="w-100 m-b-10" (click)="scrollTo('smartcalc')">
+          Ver funcionalidades
+        </button>
+        <button mat-stroked-button color="primary" class="w-100 m-b-10" (click)="scrollTo('resultados')">
+          Resultados
+        </button>
+        <a mat-flat-button color="primary" class="w-100 m-b-10" [routerLink]="['/authentication/registro-gestor']">
+          Cadastro
         </a>
-        <a [routerLink]="['https://support.wrappixel.com/']"
-          class="d-flex align-items-center text-decoration-none mat-body-1 p-y-16">
-          <span class="f-s-15 f-w-500 m-l-8">Support</span>
+        <a mat-stroked-button color="primary" class="w-100" [routerLink]="['/authentication/login']">
+          Login
         </a>
-        <a mat-flat-button color="primary" class="w-100" [routerLink]="['/']">Buy Now</a>
       </div>
     </div>
   </mat-sidenav>

@@ -49,7 +49,7 @@ export class AppBoxedLoginComponent {
   
     this.authService.login(uname!, password!, lembrar!).subscribe({
       next: () => {
-        this.router.navigate(['/']);
+        this.router.navigate(['/dashboards/dashboard1']);
       },
       error: () => {
         this.toastr.error('Usuário ou senha inválidos');
