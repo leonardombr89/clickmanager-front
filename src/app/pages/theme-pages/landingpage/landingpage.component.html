@@ -6,15 +6,12 @@
           <app-branding></app-branding>
         </div>
         <div class="d-flex align-items-center gap-10">
-          <a mat-stroked-button color="primary" class="m-l-10" [routerLink]="['/authentication/login']">
+          <a mat-stroked-button color="primary" class="m-l-10 hide-on-mobile" [routerLink]="['/authentication/login']">
             Login
           </a>
-          <a mat-flat-button color="primary" class="m-l-6" [routerLink]="['/authentication/registro-gestor']">
+          <a mat-flat-button color="primary" class="m-l-6 hide-on-mobile" [routerLink]="['/authentication/registro-gestor']">
             Criar conta
           </a>
-          <button mat-icon-button (click)="filterNavRight.toggle()" class="d-flex d-lg-none">
-            <i-tabler name="menu-2" class="icon-20 d-flex"></i-tabler>
-          </button>
         </div>
       </div>
     </mat-toolbar>
@@ -236,27 +233,4 @@
       </div>
     </footer>
   </mat-sidenav-content>
-
-  <mat-sidenav #filterNavRight mode="over" position="end" class="filter-sidebar">
-    <div class="p-16">
-      <div class="branding">
-        <app-branding></app-branding>
-      </div>
-      <div class="m-t-16">
-        <h5 class="f-s-16 f-w-700 m-b-8">Acesso rápido</h5>
-        <button mat-stroked-button color="primary" class="w-100 m-b-10" (click)="scrollTo('smartcalc')">
-          Ver funcionalidades
-        </button>
-        <button mat-stroked-button color="primary" class="w-100 m-b-10" (click)="scrollTo('resultados')">
-          Resultados
-        </button>
-        <a mat-flat-button color="primary" class="w-100 m-b-10" [routerLink]="['/authentication/registro-gestor']">
-          Cadastro
-        </a>
-        <a mat-stroked-button color="primary" class="w-100" [routerLink]="['/authentication/login']">
-          Login
-        </a>
-      </div>
-    </div>
-  </mat-sidenav>
 </mat-sidenav-container>

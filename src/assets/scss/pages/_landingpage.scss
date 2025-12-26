@@ -12,6 +12,17 @@
   box-shadow: none !important;
 }
 
+.topbar .branding {
+  display: flex;
+  align-items: center;
+}
+
+.hide-on-mobile {
+  @media (max-width: 767px) {
+    display: none !important;
+  }
+}
+
 .glass-bar {
   backdrop-filter: blur(12px);
   background: rgba(255, 255, 255, 0.72) !important;
@@ -312,9 +323,28 @@
     flex-direction: column;
     align-items: flex-start;
   }
+
+  .hero-area .row {
+    text-align: center;
+  }
+
+  .smartcalc-card {
+    margin: 16px auto 0;
+  }
+
+  .hero-metrics .col-sm-6 {
+    width: 100%;
+  }
 }
 
 @media (max-width: 767px) {
+  .topbar .container.full-width {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center !important;
+    gap: 6px;
+  }
+
   .btn-custom.mdc-button {
     padding: 0 30px !important;
   }
@@ -325,5 +355,46 @@
 
   .hero-area {
     padding-bottom: 10px;
+  }
+
+  .feature-card {
+    text-align: center;
+  }
+
+  .trust-bar {
+    grid-template-columns: 1fr;
+  }
+
+  .cta-card {
+    align-items: center;
+    text-align: center;
+  }
+
+  .topbar .container.full-width {
+    justify-content: center;
+  }
+
+  .topbar .branding {
+    justify-content: center;
+    width: 100%;
+    margin-bottom: 8px;
+  }
+
+  .topbar .d-flex.align-items-center.gap-10 {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .topbar .d-flex.align-items-center.gap-10 {
+    width: 100%;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+
+  .topbar .btn-custom,
+  .topbar a.mat-stroked-button,
+  .topbar a.mat-flat-button {
+    width: auto;
+    padding: 0 16px;
   }
 }
