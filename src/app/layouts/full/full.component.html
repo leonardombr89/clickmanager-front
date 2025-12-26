@@ -15,7 +15,7 @@
   <!-- ============================================================== -->
   <!-- Vertical Sidebar -->
   <!-- ============================================================== -->
-  @if(!options.horizontal) {
+  @if(!options.horizontal && !resView) {
   <mat-sidenav #leftsidenav position="start" [mode]="isOver ? 'over' : 'side'"
     [opened]="options.navPos === 'side' && options.sidenavOpened && !isOver &&  !resView"
     (openedChange)="onSidenavOpenedChange($event)" (closedStart)="onSidenavClosedStart()" class="sidebarNav">

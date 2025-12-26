@@ -10,42 +10,44 @@
       <!-- Cliente e Ações -->
       <mat-card class="cardWithShadow m-t-30">
         <mat-card-content>
-          <div class="row">
+          <div class="row cliente-acao-row">
 
             <!-- Cliente -->
-            <div class="col-md-6">
+            <div class="col-md-6 cliente-col">
               <app-auto-complete [control]="clienteControl" label="Selecione o cliente" [displayWith]="mostrarCliente"
                 [buscarFn]="buscarClientes" [minimoCaracteres]="3" [multiplo]="false">
               </app-auto-complete>
 
-              <button type="button" mat-stroked-button color="primary" class="m-t-12" (click)="onCriarCliente()">
-                Novo cliente
-              </button>
+              <div class="d-flex justify-content-center justify-content-md-start m-t-12">
+                <button type="button" mat-stroked-button color="primary" (click)="onCriarCliente()">
+                  Novo cliente
+                </button>
+              </div>
             </div>
 
             <!-- Ações -->
-            <div class="col-md-6">
+            <div class="col-md-6 cliente-col">
               <mat-label class="f-s-14 f-w-600 m-b-8 d-block">
                 Adicione itens ao pedido
               </mat-label>
 
               <div class="row align-items-center text-center">
-                <div class="col-md-5 d-grid">
-                  <button mat-stroked-button color="primary" (click)="onBuscarProdutos()">
-                    Buscar produtos
-                  </button>
-                </div>
+            <div class="col-md-5 d-grid">
+              <button mat-stroked-button color="primary" (click)="onBuscarProdutos()">
+                Buscar produtos
+              </button>
+            </div>
 
-                <div class="col-md-2">
-                  <span class="f-w-500">ou</span>
-                </div>
+            <div class="col-md-2">
+              <span class="f-w-500">ou</span>
+            </div>
 
-                <div class="col-md-5 d-grid">
-                  <button mat-stroked-button color="accent" (click)="onDescreverItens()">
-                    Descrever itens
-                  </button>
-                </div>
-              </div>
+            <div class="col-md-5 d-grid">
+              <button mat-stroked-button color="accent" (click)="onDescreverItens()">
+                Descrever itens
+              </button>
+            </div>
+          </div>
             </div>
 
           </div>
@@ -122,7 +124,7 @@
               <!-- Pagamentos - FormArray -->
               <div formArrayName="pagamentos">
 
-                <div *ngFor="let pg of pagamentosControls; let i = index" class="row align-items-end m-b-16"
+                <div *ngFor="let pg of pagamentosControls; let i = index" class="row align-items-end m-b-16 pagamento-row"
                   [formGroupName]="i">
 
                   <div class="col-md-6">
@@ -131,24 +133,30 @@
                     </app-input-options>
                   </div>
 
-                  <div class="col-md-5">
-                    <app-input-moeda [control]="getPagamentoValorControl(i)"></app-input-moeda>
-                  </div>
-
-                  <div class="col-md-1 text-right m-b-16">
-                    <button mat-icon-button color="warn" (click)="removerPagamento(i)">
-                      <mat-icon>delete</mat-icon>
-                    </button>
+                  <div class="col-12 col-md-6">
+                    <div class="row align-items-center g-2 pagamento-valor-row">
+                      <div class="col-9 col-sm-9 col-md-9">
+                        <app-input-moeda [control]="getPagamentoValorControl(i)"></app-input-moeda>
+                      </div>
+                      <div class="col-3 col-sm-3 col-md-3 d-flex justify-content-center">
+                        <button mat-icon-button color="warn" class="w-100" (click)="removerPagamento(i)"
+                          matTooltip="Remover pagamento">
+                          <mat-icon>delete</mat-icon>
+                        </button>
+                      </div>
+                    </div>
                   </div>
 
                 </div>
 
               </div>
 
-              <button mat-flat-button color="primary" (click)="addPagamento()">
-                <mat-icon class="m-r-8">add</mat-icon>
-                Adicionar
-              </button>
+              <div class="add-btn-wrap m-t-8">
+                <button mat-flat-button color="primary" class="btn-add-pagamento" (click)="addPagamento()">
+                  <mat-icon class="m-r-8">add</mat-icon>
+                  Adicionar
+                </button>
+              </div>
 
             </mat-card-content>
           </mat-card>
@@ -223,19 +231,21 @@
 
         <mat-divider></mat-divider>
 
-        <div class="row align-items-center justify-content-between m-t-24">
+        <div class="row align-items-center justify-content-between m-t-24 actions-row">
 
-          <div class="col-md-6 d-flex gap-2 flex-wrap">
-            <a routerLink="/page/pedido" mat-flat-button class="bg-error text-white">
-              Cancelar
-            </a>
+          <div class="col-md-6">
+            <div class="d-flex gap-2 flex-wrap">
+              <a routerLink="/page/pedido" mat-flat-button class="bg-error text-white">
+                Cancelar
+              </a>
 
-            <button mat-flat-button color="primary" (click)="saveDetail($event)" [disabled]="addForm.invalid">
-              Salvar Pedido
-            </button>
+              <button mat-flat-button color="primary" (click)="saveDetail($event)" [disabled]="addForm.invalid">
+                Salvar Pedido
+              </button>
+            </div>
           </div>
 
-          <div class="col-md-6 text-md-right">
+          <div class="col-md-6 text-md-right m-t-8 m-t-md-0">
             <h3 class="m-b-0 f-s-18">
               Total Geral: {{ grandTotal | currency:'BRL' }}
             </h3>

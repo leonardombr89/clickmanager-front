@@ -60,8 +60,6 @@
     max-width: none;
 }
 
-/* use para 100% do modal */
-
 /* grids e estilos (os que você já tinha) */
 .var-grid {
     display: grid;
@@ -236,46 +234,73 @@
 }
 
 @media (max-width: 720px) {
+    .wizard-body {
+        --title-h: 56px;
+        --footer-h: 88px;
+    }
+
+    .wizard-stepper ::ng-deep .mat-horizontal-stepper-header-container {
+        padding: 8px 12px 0;
+        flex-wrap: nowrap;
+        gap: 6px;
+        justify-content: flex-start;
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+
+    .wizard-stepper ::ng-deep .mat-horizontal-stepper-header-container::-webkit-scrollbar {
+        display: none;
+    }
+
+    .wizard-stepper ::ng-deep .mat-step-label {
+        font-size: 12px;
+        white-space: nowrap;
+    }
+
+    .step-inner {
+        padding: 12px;
+    }
+
+    .var-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .opt-grid {
+        grid-template-columns: 1fr;
+    }
+
     .rev-header {
         grid-template-columns: 1fr;
     }
 
     .rev-row {
-        grid-template-columns: 1fr 100px 120px;
+        grid-template-columns: 1fr 90px 90px;
     }
-}
 
-.var-selected-line {
-    font-size: 14px;
-    display: flex;
-    gap: 8px;
-    align-items: baseline;
-}
+    .wizard-footer {
+        flex-direction: column;
+        gap: 8px;
+        align-items: stretch;
+    }
 
-.rev-row {
-    display: grid;
-    grid-template-columns: 1fr 90px 140px 160px;
-    /* Item | Qtd | Unitário | Total */
-    gap: 12px;
-    padding: 10px 12px;
-    border-top: 1px solid rgba(0, 0, 0, .06);
-}
+    .wizard-footer .left,
+    .wizard-footer .right {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+    }
 
-.rev-head {
-    background: #f8fafc;
-    font-weight: 600;
-}
+    .wizard-footer .right {
+        justify-content: space-between;
+        flex-wrap: wrap;
+    }
 
-.text-center {
-    text-align: center;
-}
+    .wizard-footer button {
+        flex: 1 1 48%;
+    }
 
-.text-right {
-    text-align: right;
-}
-
-@media (max-width:720px) {
-    .rev-row {
-        grid-template-columns: 1fr 70px 110px 120px;
+    .wizard-footer .right button {
+        flex: 1 1 48%;
     }
 }
