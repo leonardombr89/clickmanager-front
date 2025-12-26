@@ -53,6 +53,7 @@ import { CardHeaderComponent } from "src/app/components/card-header/card-header.
     CardHeaderComponent
   ],
   templateUrl: './form-pedido.component.html',
+  styleUrls: ['./form-pedido.component.scss'],
   animations: [
     trigger('expandCollapse', [
       transition(':enter', [
@@ -440,6 +441,5 @@ export class FormPedidoComponent implements OnInit {
   }
 
 }
-
 
 

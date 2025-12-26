@@ -14,7 +14,7 @@
         <mat-step [stepControl]="selectForm" label="Selecionar Produto">
             <form [formGroup]="selectForm" class="step-inner step-wide m-t-8">
                 <app-listar-produtos [showActions]="false" [showSelect]="true" [selectedId]="produtoIdSelecionado"
-                    (selectedChange)="onSelecionarProduto($event)">
+                    [hideHeader]="true" (selectedChange)="onSelecionarProduto($event)">
                 </app-listar-produtos>
             </form>
         </mat-step>

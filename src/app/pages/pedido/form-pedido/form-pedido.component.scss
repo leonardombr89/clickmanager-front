@@ -1,0 +1,96 @@
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.actions-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.add-btn-wrap {
+  display: flex;
+  justify-content: center;
+}
+
+.btn-add-pagamento {
+  min-width: 0;
+  width: auto;
+  max-width: 200px;
+  padding: 0 16px;
+  height: 44px;
+}
+
+.pagamento-valor-row button {
+  width: 100%;
+}
+
+@media (max-width: 767px) {
+  .row.align-items-center.text-center .col-md-5,
+  .row.align-items-center.text-center .col-md-2 {
+    width: 100%;
+    margin-bottom: 8px;
+  }
+
+  .row.align-items-center.text-center .col-md-2 {
+    order: -1;
+  }
+
+  .table-responsive {
+    margin: 0 -8px;
+    padding: 0 8px;
+  }
+
+  .actions-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .actions-row a,
+  .actions-row button {
+    width: 100%;
+  }
+
+  .row.m-t-16 > .col-md-8,
+  .row.m-t-16 > .col-md-4,
+  .row.m-t-16 > .col-md-6 {
+    width: 100%;
+  }
+
+  .cliente-acao-row {
+    text-align: center;
+  }
+
+  .cliente-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .cliente-col .d-grid,
+  .cliente-col button,
+  .cliente-col app-auto-complete {
+    width: 100%;
+  }
+
+  .cliente-col .row.align-items-center .col-md-2 {
+    order: 0;
+  }
+
+  .btn-add-pagamento {
+    width: 100%;
+    max-width: none;
+  }
+
+  .add-btn-wrap {
+    justify-content: center;
+  }
+}
+
+@media (min-width: 768px) {
+  .add-btn-wrap {
+    justify-content: flex-start;
+  }
+}

@@ -49,6 +49,8 @@ export class ListarProdutosComponent implements OnInit {
   @Input() showActions = true;
   /** Ativa seleção única via radio na coluna Ações */
   @Input() showSelect = false;
+  /** Oculta cabeçalho (título + botão Novo) para usos em diálogos */
+  @Input() hideHeader = false;
   /** ID atualmente selecionado (quando showSelect = true) */
   @Input() selectedId: number | null = null;
   /** Dispara ao selecionar um item (quando showSelect = true) */

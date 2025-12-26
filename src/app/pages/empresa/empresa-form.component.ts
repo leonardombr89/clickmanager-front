@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild, ElementRef, Input, Output, EventEmitter } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl, ValidationErrors } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl, ValidationErrors, FormControl } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -21,6 +21,11 @@ import { AuthService } from 'src/app/services/auth.service';
 import { filter, take } from 'rxjs';
 import { CardHeaderComponent } from "src/app/components/card-header/card-header.component";
 import { Empresa } from 'src/app/models/empresa/empresa.model';
+import { InputTextoRestritoComponent } from 'src/app/components/inputs/input-texto/input-texto-restrito.component';
+import { InputEmailComponent } from 'src/app/components/inputs/input-email/input-custom.component';
+import { InputTelefoneComponent } from 'src/app/components/inputs/input-telefone/input-telefone.component';
+import { InputDocumentoComponent } from 'src/app/components/inputs/input-documento/input-documento.component';
+import { InputCepComponent } from 'src/app/components/inputs/input-cep/input-cep.component';
 
 
 @Component({
@@ -40,8 +45,13 @@ import { Empresa } from 'src/app/models/empresa/empresa.model';
     MatRadioModule,
     TablerIconsModule,
     NgxMaskDirective,
-    CardHeaderComponent
-],
+    CardHeaderComponent,
+    InputTextoRestritoComponent,
+    InputEmailComponent,
+    InputTelefoneComponent,
+    InputDocumentoComponent,
+    InputCepComponent
+  ],
   providers: [provideNgxMask()]
 })
 export class EmpresaFormComponent implements OnInit {
@@ -139,7 +149,7 @@ export class EmpresaFormComponent implements OnInit {
 
         const fileFromBlob = new File([blob], file.name, { type: blob.type });
         this.imagemBlob = fileFromBlob;
-        this.form.get('fotoPerfil')?.setValue(fileFromBlob);
+        this.form.get('logo')?.setValue(fileFromBlob);
       })
       .catch(err => this.toastr.warning(err));
   }
@@ -147,7 +157,7 @@ export class EmpresaFormComponent implements OnInit {
   resetarImagem(input: HTMLInputElement): void {
     this.imagemPreview = null;
     this.imagemBlob = null;
-    this.form.get('fotoPerfil')?.setValue(null);
+    this.form.get('logo')?.setValue(null);
     this.imagemOriginal = this.IMAGEM_PADRAO;
 
     if (input) input.value = '';
@@ -237,5 +247,60 @@ export class EmpresaFormComponent implements OnInit {
     });
   }
 
+  preencherEnderecoViaCep(dados: EnderecoViaCep | null): void {
+    if (!dados) return;
+    this.form.patchValue({
+      enderecoRequest: {
+        logradouro: dados.logradouro || '',
+        bairro: dados.bairro || '',
+        cidade: dados.localidade || '',
+        estado: dados.uf || ''
+      }
+    });
+  }
 
+  // Getters para inputs reutilizáveis
+  get nomeControl(): FormControl {
+    return this.form.get('nome') as FormControl;
+  }
+  get telefoneControl(): FormControl {
+    return this.form.get('telefone') as FormControl;
+  }
+  get emailControl(): FormControl {
+    return this.form.get('email') as FormControl;
+  }
+  get cnpjControl(): FormControl {
+    return this.form.get('cnpj') as FormControl;
+  }
+  get inscricaoEstadualControl(): FormControl {
+    return this.form.get('inscricaoEstadual') as FormControl;
+  }
+  get horarioControl(): FormControl {
+    return this.form.get('horario') as FormControl;
+  }
+  get logoControl(): FormControl {
+    return this.form.get('logo') as FormControl;
+  }
+
+  get cepControl(): FormControl {
+    return this.form.get('enderecoRequest.cep') as FormControl;
+  }
+  get logradouroControl(): FormControl {
+    return this.form.get('enderecoRequest.logradouro') as FormControl;
+  }
+  get numeroControl(): FormControl {
+    return this.form.get('enderecoRequest.numero') as FormControl;
+  }
+  get complementoControl(): FormControl {
+    return this.form.get('enderecoRequest.complemento') as FormControl;
+  }
+  get bairroControl(): FormControl {
+    return this.form.get('enderecoRequest.bairro') as FormControl;
+  }
+  get cidadeControl(): FormControl {
+    return this.form.get('enderecoRequest.cidade') as FormControl;
+  }
+  get estadoControl(): FormControl {
+    return this.form.get('enderecoRequest.estado') as FormControl;
+  }
 }

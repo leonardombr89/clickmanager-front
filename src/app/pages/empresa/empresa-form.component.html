@@ -23,49 +23,25 @@
                                     <div class="row m-t-16">
                                         <div class="col-lg-6">
 
-                                            <mat-label class="f-s-14 f-w-600 m-b-8 d-block">
-                                                Nome da Empresa *
-                                            </mat-label>
-                                            <mat-form-field appearance="outline" class="w-100">
-                                                <input matInput formControlName="nome" required />
-                                            </mat-form-field>
+                                            <app-input-texto-restrito [control]="nomeControl" label="Nome da Empresa"
+                                                placeholder="Digite o nome" [maxlength]="120"></app-input-texto-restrito>
 
-                                            <mat-label class="f-s-14 f-w-600 m-b-8 d-block">
-                                                Telefone *
-                                            </mat-label>
-                                            <mat-form-field appearance="outline" class="w-100">
-                                                <input matInput formControlName="telefone" mask="(00) 00000-0000"
-                                                    required />
-                                            </mat-form-field>
+                                            <app-input-telefone [control]="telefoneControl" label="Telefone"
+                                                placeholder="(00) 00000-0000"></app-input-telefone>
 
-                                            <mat-label class="f-s-14 f-w-600 m-b-8 d-block">
-                                                Email *
-                                            </mat-label>
-                                            <mat-form-field appearance="outline" class="w-100">
-                                                <input matInput formControlName="email" required />
-                                            </mat-form-field>
+                                            <app-input-email [control]="emailControl" label="E-mail"
+                                                placeholder="contato@suaempresa.com"></app-input-email>
 
-                                            <mat-label class="f-s-14 f-w-600 m-b-8 d-block">
-                                                CNPJ *
-                                            </mat-label>
-                                            <mat-form-field appearance="outline" class="w-100">
-                                                <input matInput formControlName="cnpj" mask="00.000.000/0000-00"
-                                                    required />
-                                            </mat-form-field>
+                                            <app-input-documento [control]="cnpjControl" label="CNPJ/CPF"
+                                                placeholder="00.000.000/0000-00"></app-input-documento>
 
-                                            <mat-label class="f-s-14 f-w-600 m-b-8 d-block">
-                                                Inscrição Estadual
-                                            </mat-label>
-                                            <mat-form-field appearance="outline" class="w-100">
-                                                <input matInput formControlName="inscricaoEstadual" />
-                                            </mat-form-field>
+                                            <app-input-texto-restrito [control]="inscricaoEstadualControl"
+                                                label="Inscrição Estadual" placeholder="Informe a inscrição estadual"
+                                                [maxlength]="60"></app-input-texto-restrito>
 
-                                            <mat-label class="f-s-14 f-w-600 m-b-8 d-block">
-                                                Horário de Funcionamento
-                                            </mat-label>
-                                            <mat-form-field appearance="outline" class="w-100">
-                                                <input matInput formControlName="horario" />
-                                            </mat-form-field>
+                                            <app-input-texto-restrito [control]="horarioControl"
+                                                label="Horário de Funcionamento" placeholder="Ex.: Seg a Sex, 08h às 18h"
+                                                [maxlength]="120"></app-input-texto-restrito>
 
                                         </div>
 
@@ -129,65 +105,42 @@
                                     <div formGroupName="enderecoRequest">
                                         <div class="row m-t-16">
                                             <div class="col-lg-6">
+                                                <app-input-cep [control]="cepControl" label="CEP"
+                                                    (enderecoEncontrado)="preencherEnderecoViaCep($event)">
+                                                </app-input-cep>
 
-                                                <mat-label class="f-s-14 f-w-600 m-b-8 d-block">
-                                                    CEP *
-                                                </mat-label>
-                                                <mat-form-field appearance="outline" class="w-100">
-                                                    <input matInput formControlName="cep" mask="00000-000"
-                                                        (blur)="buscarEnderecoPorCep()" />
-                                                </mat-form-field>
+                                                <app-input-texto-restrito [control]="complementoControl"
+                                                    label="Complemento" placeholder="Sala, bloco..." [maxlength]="120">
+                                                </app-input-texto-restrito>
 
-                                                <mat-label class="f-s-14 f-w-600 m-b-8 d-block">
-                                                    Complemento
-                                                </mat-label>
-                                                <mat-form-field appearance="outline" class="w-100">
-                                                    <input matInput formControlName="complemento" />
-                                                </mat-form-field>
-
-                                                <mat-label class="f-s-14 f-w-600 m-b-8 d-block">
-                                                    Cidade *
-                                                </mat-label>
-                                                <mat-form-field appearance="outline" class="w-100">
-                                                    <input matInput formControlName="cidade" />
-                                                </mat-form-field>
+                                                <app-input-texto-restrito [control]="cidadeControl" label="Cidade"
+                                                    placeholder="Informe a cidade" [maxlength]="120">
+                                                </app-input-texto-restrito>
 
                                             </div>
 
                                             <div class="col-lg-6">
                                                 <div class="row">
                                                     <div class="col-sm-8">
-                                                        <mat-label class="f-s-14 f-w-600 m-b-8 d-block">
-                                                            Logradouro *
-                                                        </mat-label>
-                                                        <mat-form-field appearance="outline" class="w-100">
-                                                            <input matInput formControlName="logradouro" />
-                                                        </mat-form-field>
+                                                        <app-input-texto-restrito [control]="logradouroControl" label="Logradouro"
+                                                            placeholder="Rua, avenida..." [maxlength]="200">
+                                                        </app-input-texto-restrito>
                                                     </div>
 
                                                     <div class="col-sm-4">
-                                                        <mat-label class="f-s-14 f-w-600 m-b-8 d-block">
-                                                            Número *
-                                                        </mat-label>
-                                                        <mat-form-field appearance="outline" class="w-100">
-                                                            <input matInput formControlName="numero" />
-                                                        </mat-form-field>
+                                                        <app-input-texto-restrito [control]="numeroControl" label="Número"
+                                                            placeholder="Informe o número" [maxlength]="10">
+                                                        </app-input-texto-restrito>
                                                     </div>
                                                 </div>
 
-                                                <mat-label class="f-s-14 f-w-600 m-b-8 d-block">
-                                                    Bairro *
-                                                </mat-label>
-                                                <mat-form-field appearance="outline" class="w-100">
-                                                    <input matInput formControlName="bairro" />
-                                                </mat-form-field>
+                                                <app-input-texto-restrito [control]="bairroControl" label="Bairro"
+                                                    placeholder="Informe o bairro" [maxlength]="120">
+                                                </app-input-texto-restrito>
 
-                                                <mat-label class="f-s-14 f-w-600 m-b-8 d-block">
-                                                    Estado *
-                                                </mat-label>
-                                                <mat-form-field appearance="outline" class="w-100">
-                                                    <input matInput formControlName="estado" />
-                                                </mat-form-field>
+                                                <app-input-texto-restrito [control]="estadoControl" label="Estado"
+                                                    placeholder="UF" [maxlength]="2">
+                                                </app-input-texto-restrito>
                                             </div>
                                         </div>
                                     </div>
