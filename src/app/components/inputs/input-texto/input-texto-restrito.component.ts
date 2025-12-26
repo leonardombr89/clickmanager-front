@@ -48,7 +48,7 @@ export class InputTextoRestritoComponent implements OnInit {
 
   permitirSomenteLetrasENumeros(event: KeyboardEvent): void {
     const allowedKeys = ['Backspace', 'Tab', 'ArrowLeft', 'ArrowRight', 'Delete'];
-    const isValidChar = /^[a-zA-Z0-9À-ÿ ]$/.test(event.key);
+    const isValidChar = /^[a-zA-Z0-9À-ÿ .]$/.test(event.key);
     if (!isValidChar && !allowedKeys.includes(event.key)) {
       event.preventDefault();
     }
@@ -56,7 +56,7 @@ export class InputTextoRestritoComponent implements OnInit {
 
   atualizarValor(event: Event): void {
     const input = (event.target as HTMLInputElement).value;
-    const filtrado = input.replace(/[^a-zA-Z0-9À-ÿ ]/g, '');
+    const filtrado = input.replace(/[^a-zA-Z0-9À-ÿ .]/g, '');
     this.control.setValue(filtrado);
   }
 }
