@@ -22,6 +22,7 @@ import { DetalhesPedidoComponent } from './pedido/detalhes-pedido/detalhes-pedid
 import { FormServicoComponent } from './cadastro-tecnico/servicos/form-servico/form-servico.component';
 import { ListarServicoComponent } from './cadastro-tecnico/servicos/listar-servicos/listar-servicos.component';
 import { CalculadoraConfigComponent } from './smart-calc-config/smart-calc-config/smart-calc-config.component';
+import { EmailServidorComponent } from './config/email-servidor/email-servidor.component';
 
 export const PagesRoutes: Routes = [
   {
@@ -369,6 +370,17 @@ export const PagesRoutes: Routes = [
       urls: [
         { title: 'Lista de Configurações', url: '/page/calculadora/config' },
         { title: 'Editar Configuração' }
+      ]
+    }
+  },
+  {
+    path: 'config/email-servidor',
+    component: EmailServidorComponent,
+    data: {
+      title: 'Servidor de E-mail',
+      urls: [
+        { title: 'Configurações', url: '/dashboards/dashboard1' },
+        { title: 'Servidor de E-mail' }
       ]
     }
   }
