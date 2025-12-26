@@ -10,6 +10,11 @@ import { ImprimirWhatsAppComponent } from './pages/pedido/pedido-imprimir-whatsa
 export const routes: Routes = [
   {
     path: '',
+    pathMatch: 'full',
+    redirectTo: 'landingpage',
+  },
+  {
+    path: '',
     component: FullComponent,
     canActivate: [AuthGuard],
     data: { perfil: 'GESTOR' },
