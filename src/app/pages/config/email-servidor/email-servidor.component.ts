@@ -7,6 +7,8 @@ import { CardHeaderComponent } from 'src/app/components/card-header/card-header.
 import { InputTextoRestritoComponent } from 'src/app/components/inputs/input-texto/input-texto-restrito.component';
 import { InputEmailComponent } from 'src/app/components/inputs/input-email/input-custom.component';
 import { InputNumericoComponent } from 'src/app/components/inputs/input-numerico/input-numerico.component';
+import { EmailServidorConfig, EmailServidorService } from './email-servidor.service';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-email-servidor',
@@ -26,7 +28,12 @@ import { InputNumericoComponent } from 'src/app/components/inputs/input-numerico
 export class EmailServidorComponent {
   form: FormGroup;
 
-  constructor(private fb: FormBuilder, private router: Router) {
+  constructor(
+    private fb: FormBuilder,
+    private router: Router,
+    private emailService: EmailServidorService,
+    private toastr: ToastrService
+  ) {
     this.form = this.fb.group({
       host: ['', Validators.required],
       porta: [587, [Validators.required, Validators.min(1)]],
@@ -35,6 +42,7 @@ export class EmailServidorComponent {
       remetente: ['', [Validators.required, Validators.email]],
       usarSsl: [true]
     });
+    this.carregar();
   }
 
   salvar(): void {
@@ -42,8 +50,11 @@ export class EmailServidorComponent {
       this.form.markAllAsTouched();
       return;
     }
-    // TODO: Integrar com API de configurações de e-mail
-    console.log('Configuração de e-mail salva', this.form.value);
+    const payload = this.form.value as EmailServidorConfig;
+    this.emailService.atualizar(payload).subscribe({
+      next: () => this.toastr.success('Configuração de e-mail salva'),
+      error: () => this.toastr.error('Erro ao salvar configuração de e-mail'),
+    });
   }
 
   cancelar(): void {
@@ -68,5 +79,16 @@ export class EmailServidorComponent {
 
   get remetenteControl() {
     return this.form.get('remetente') as FormControl;
+  }
+
+  private carregar(): void {
+    this.emailService.obter().subscribe({
+      next: (cfg) => {
+        if (cfg) {
+          this.form.patchValue(cfg);
+        }
+      },
+      error: () => this.toastr.error('Não foi possível carregar configuração de e-mail'),
+    });
   }
 }
