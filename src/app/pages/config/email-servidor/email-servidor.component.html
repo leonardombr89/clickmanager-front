@@ -19,8 +19,8 @@
         </div>
 
         <div class="col-md-6">
-          <app-input-texto-restrito [control]="usuarioControl" label="Usuário" [maxlength]="200">
-          </app-input-texto-restrito>
+          <app-input-email [control]="usuarioControl" label="Usuário (e-mail)" placeholder="email@seudominio.com">
+          </app-input-email>
         </div>
         <div class="col-md-6">
           <app-input-texto-restrito [control]="senhaControl" label="Senha" [maxlength]="200">
@@ -31,6 +31,12 @@
           <app-input-email [control]="remetenteControl" label="Remetente padrão"
             placeholder="nome@seudominio.com">
           </app-input-email>
+        </div>
+
+        <div class="col-md-6 d-flex align-items-end">
+          <button mat-stroked-button color="primary" type="button" (click)="testar()">
+            Testar configuração
+          </button>
         </div>
       </div>
 

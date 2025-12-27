@@ -7,8 +7,11 @@ import { CardHeaderComponent } from 'src/app/components/card-header/card-header.
 import { InputTextoRestritoComponent } from 'src/app/components/inputs/input-texto/input-texto-restrito.component';
 import { InputEmailComponent } from 'src/app/components/inputs/input-email/input-custom.component';
 import { InputNumericoComponent } from 'src/app/components/inputs/input-numerico/input-numerico.component';
-import { EmailServidorConfig, EmailServidorService } from './email-servidor.service';
+import { EmailServidorConfig, EmailServidorService, EmailServidorTesteRequest } from './email-servidor.service';
 import { ToastrService } from 'ngx-toastr';
+import { MatDialog } from '@angular/material/dialog';
+import { EmailServidorTesteDialogComponent } from './email-servidor-teste-dialog.component';
+import { AuthService } from 'src/app/services/auth.service';
 
 @Component({
   selector: 'app-email-servidor',
@@ -27,22 +30,29 @@ import { ToastrService } from 'ngx-toastr';
 })
 export class EmailServidorComponent {
   form: FormGroup;
+  private emailUsuario?: string;
+  private mensagemPadraoTeste = 'E-mail de teste do servidor de e-mail do ClickManager. Se você recebeu esta mensagem, sua configuração está funcionando.';
 
   constructor(
     private fb: FormBuilder,
     private router: Router,
     private emailService: EmailServidorService,
-    private toastr: ToastrService
+    private toastr: ToastrService,
+    private dialog: MatDialog,
+    private authService: AuthService
   ) {
     this.form = this.fb.group({
       host: ['', Validators.required],
       porta: [587, [Validators.required, Validators.min(1)]],
-      usuario: ['', Validators.required],
+      usuario: ['', [Validators.required, Validators.email]],
       senha: ['', Validators.required],
       remetente: ['', [Validators.required, Validators.email]],
       usarSsl: [true]
     });
     this.carregar();
+    this.authService.usuario$.subscribe(usuario => {
+      this.emailUsuario = usuario?.email || undefined;
+    });
   }
 
   salvar(): void {
@@ -53,12 +63,42 @@ export class EmailServidorComponent {
     const payload = this.form.value as EmailServidorConfig;
     this.emailService.atualizar(payload).subscribe({
       next: () => this.toastr.success('Configuração de e-mail salva'),
-      error: () => this.toastr.error('Erro ao salvar configuração de e-mail'),
+      error: (err) => this.exibirErro(err, 'Erro ao salvar configuração de e-mail'),
     });
   }
 
   cancelar(): void {
     this.router.navigate(['/dashboards/dashboard1']);
+  }
+
+  testar(): void {
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      this.toastr.warning('Preencha a configuração antes de testar.');
+      return;
+    }
+
+    const dialogRef = this.dialog.open(EmailServidorTesteDialogComponent, {
+      width: '600px',
+      data: {
+        emailDestino: this.emailUsuario ?? '',
+        mensagemPadrao: this.mensagemPadraoTeste
+      }
+    });
+
+    dialogRef.afterClosed().subscribe((result: EmailServidorTesteRequest | undefined) => {
+      if (!result) return;
+      this.dispararTeste(result);
+    });
+  }
+
+  private dispararTeste(payload: EmailServidorTesteRequest): void {
+    this.emailService.testarEnvio(payload).subscribe({
+      next: () => {
+        this.toastr.success(`E-mail de teste enviado. Verifique a caixa de entrada de ${payload.emailDestino}.`);
+      },
+      error: (err) => this.exibirErro(err, 'Não foi possível enviar o e-mail de teste.')
+    });
   }
 
   get hostControl() {
@@ -88,7 +128,12 @@ export class EmailServidorComponent {
           this.form.patchValue(cfg);
         }
       },
-      error: () => this.toastr.error('Não foi possível carregar configuração de e-mail'),
+      error: (err) => this.exibirErro(err, 'Não foi possível carregar configuração de e-mail'),
     });
+  }
+
+  private exibirErro(err: any, fallback: string): void {
+    const mensagem = err?.userMessage || fallback;
+    this.toastr.error(mensagem);
   }
 }

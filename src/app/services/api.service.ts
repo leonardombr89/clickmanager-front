@@ -1,8 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { catchError, Observable, throwError } from 'rxjs';
+import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { extrairMensagemErro } from '../utils/mensagem.util';
 
 @Injectable({
   providedIn: 'root'
@@ -14,35 +13,27 @@ export class ApiService {
   constructor(private http: HttpClient) { }
 
   get<T>(endpoint: string, params?: HttpParams): Observable<T> {
-    return this.http.get<T>(`${this.BASE_URL}/${endpoint}`, { params })
-      .pipe(catchError(error => this.handleError(error)));
+    return this.http.get<T>(`${this.BASE_URL}/${endpoint}`, { params });
   }
 
   getExterno<T>(url: string): Observable<T> {
-    return this.http.get<T>(url)
-      .pipe(
-        catchError(error => this.handleError(error))
-      );
+    return this.http.get<T>(url);
   }
 
   post<T>(endpoint: string, body: any, params?: HttpParams): Observable<T> {
-    return this.http.post<T>(`${this.BASE_URL}/${endpoint}`, body, { params })
-      .pipe(catchError(error => this.handleError(error)));
+    return this.http.post<T>(`${this.BASE_URL}/${endpoint}`, body, { params });
   }
 
   put<T>(endpoint: string, body: any, params?: HttpParams): Observable<T> {
-    return this.http.put<T>(`${this.BASE_URL}/${endpoint}`, body, { params })
-      .pipe(catchError(error => this.handleError(error)));
+    return this.http.put<T>(`${this.BASE_URL}/${endpoint}`, body, { params });
   }
 
   patch<T>(endpoint: string, body: any, params?: HttpParams): Observable<T> {
-    return this.http.patch<T>(`${this.BASE_URL}/${endpoint}`, body, { params })
-      .pipe(catchError(error => this.handleError(error)));
+    return this.http.patch<T>(`${this.BASE_URL}/${endpoint}`, body, { params });
   }
 
   delete<T>(endpoint: string, params?: HttpParams): Observable<T> {
-    return this.http.delete<T>(`${this.BASE_URL}/${endpoint}`, { params })
-      .pipe(catchError(error => this.handleError(error)));
+    return this.http.delete<T>(`${this.BASE_URL}/${endpoint}`, { params });
   }
 
   buscarEnderecoPorCep(cep: string): Observable<any> {
@@ -51,9 +42,4 @@ export class ApiService {
     return this.getExterno(url);
   }
 
-  private handleError(error: any) {
-    const userMessage = extrairMensagemErro(error, 'Erro na requisição. Tente novamente.');
-    const enriched = { ...error, userMessage };
-    return throwError(() => enriched);
-  }
 }

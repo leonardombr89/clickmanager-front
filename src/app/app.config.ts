@@ -44,6 +44,7 @@ import 'highlight.js/styles/atom-one-dark.min.css';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { AuthInterceptor } from './interceptors/auth.interceptor';
 import { LoadingInterceptor } from './interceptors/loading.interceptor';
+import { ErrorMessageInterceptor } from './interceptors/error-message.interceptor';
 import { provideNgxMask } from 'ngx-mask';
 import { registerLocaleData } from '@angular/common';
 
@@ -62,6 +63,11 @@ export const appConfig: ApplicationConfig = {
     {
       provide: HTTP_INTERCEPTORS,
       useClass: LoadingInterceptor,
+      multi: true
+    },
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: ErrorMessageInterceptor,
       multi: true
     },
     provideAnimationsAsync(), // required animations providers

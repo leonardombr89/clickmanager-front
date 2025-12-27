@@ -11,6 +11,11 @@ export interface EmailServidorConfig {
   usarSsl: boolean;
 }
 
+export interface EmailServidorTesteRequest {
+  emailDestino: string;
+  mensagem: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class EmailServidorService {
   private readonly endpoint = 'api/config/email-servidor';
@@ -27,5 +32,9 @@ export class EmailServidorService {
 
   atualizar(config: EmailServidorConfig): Observable<void> {
     return this.api.put<void>(this.endpoint, config);
+  }
+
+  testarEnvio(payload: EmailServidorTesteRequest): Observable<void> {
+    return this.api.post<void>(`${this.endpoint}/teste`, payload);
   }
 }
