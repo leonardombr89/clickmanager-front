@@ -34,7 +34,7 @@
         </div>
 
         <div class="col-md-6 d-flex align-items-end">
-          <button mat-stroked-button color="primary" type="button" (click)="testar()">
+          <button mat-stroked-button color="primary" type="button" (click)="testar()" [disabled]="form.invalid">
             Testar configuração
           </button>
         </div>

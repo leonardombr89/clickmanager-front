@@ -14,6 +14,13 @@ export interface EmailServidorConfig {
 export interface EmailServidorTesteRequest {
   emailDestino: string;
   mensagem: string;
+  host: string;
+  porta: number;
+  usuario: string;
+  senha: string;
+  remetente: string;
+  usarSsl: boolean;
+  id?: number;
 }
 
 @Injectable({ providedIn: 'root' })

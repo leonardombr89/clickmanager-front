@@ -86,13 +86,26 @@ export class EmailServidorComponent {
       }
     });
 
-    dialogRef.afterClosed().subscribe((result: EmailServidorTesteRequest | undefined) => {
+    dialogRef.afterClosed().subscribe((result: { emailDestino: string; mensagem: string } | undefined) => {
       if (!result) return;
       this.dispararTeste(result);
     });
   }
 
-  private dispararTeste(payload: EmailServidorTesteRequest): void {
+  private dispararTeste(result: { emailDestino: string; mensagem: string }): void {
+    const config = this.form.getRawValue() as EmailServidorConfig & { id?: number };
+    const payload: EmailServidorTesteRequest = {
+      emailDestino: result.emailDestino,
+      mensagem: result.mensagem,
+      host: config.host,
+      porta: config.porta,
+      usuario: config.usuario,
+      senha: config.senha,
+      remetente: config.remetente,
+      usarSsl: config.usarSsl,
+      id: (config as any).id
+    };
+
     this.emailService.testarEnvio(payload).subscribe({
       next: () => {
         this.toastr.success(`E-mail de teste enviado. Verifique a caixa de entrada de ${payload.emailDestino}.`);
