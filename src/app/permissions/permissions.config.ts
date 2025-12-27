@@ -48,7 +48,10 @@ export const DEFINICOES: PermissaoDefinicao[] = [
 
   // 🧮 Calculadoras
   { chave: 'CONFIG_CALCULADORAS', titulo: 'Configurar calculadoras', grupo: 'Calculadoras' },
-  { chave: 'USAR_CALCULADORAS', titulo: 'Utilizar calculadoras', grupo: 'Calculadoras' }
+  { chave: 'USAR_CALCULADORAS', titulo: 'Utilizar calculadoras', grupo: 'Calculadoras' },
+
+  // ⚙️ Configurações
+  { chave: 'CONFIG_EMAIL', titulo: 'Configurar e-mail', grupo: 'Configurações' }
 
 ];
 

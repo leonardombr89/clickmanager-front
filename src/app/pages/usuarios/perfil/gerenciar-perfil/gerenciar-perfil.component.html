@@ -9,7 +9,7 @@
     <div class="layout-container">
       <!-- Sidebar -->
       <div class="sidebar" #sidebar [style.width.px]="sidebarWidth">
-        <mat-toolbar class="bg-white d-flex justify-content-between align-items-center">
+        <mat-toolbar class="bg-white d-flex justify-content-between align-items-center sidebar-toolbar">
           <h4 class="f-w-500 f-s-18 m-0">Perfis</h4>
 
           <button mat-mini-fab class="bg-primary text-white" (click)="openDialogPerfil('Add')"
@@ -27,12 +27,12 @@
                 </span>
 
                 <div class="acoes">
-                  <button mat-icon-button color="primary" (click)="editar(perfil)">
-                    <mat-icon>edit</mat-icon>
+                  <button mat-icon-button color="primary" class="icon-button" (click)="editar(perfil)">
+                    <i-tabler name="edit" class="icon-18"></i-tabler>
                   </button>
 
-                  <button mat-icon-button color="warn" *ngIf="perfil.id !== undefined" (click)="excluir(perfil.id!)">
-                    <mat-icon>delete</mat-icon>
+                  <button mat-icon-button color="warn" class="icon-button" *ngIf="perfil.id !== undefined" (click)="excluir(perfil.id!)">
+                    <i-tabler name="trash" class="icon-18"></i-tabler>
                   </button>
                 </div>
               </div>
@@ -43,7 +43,7 @@
 
       <!-- Conteúdo principal -->
       <div class="content">
-        <mat-toolbar class="bg-white">
+        <mat-toolbar class="bg-white content-toolbar">
           <!--<button mat-icon-button (click)="sidebarCollapsed = !sidebarCollapsed">
             <i-tabler name="align-left" class="icon-20"></i-tabler>
           </button> -->
