@@ -22,7 +22,7 @@ export const routes: Routes = [
       {
         path: '',
         redirectTo: '/dashboards/dashboard1',
-        pathMatch: 'full',
+        pathMatch: 'full'
       },
       {
         path: 'page',

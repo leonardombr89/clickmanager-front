@@ -1,7 +1,6 @@
 import { Routes } from '@angular/router';
 import { StarterComponent } from './starter/starter.component';
 import { EmpresaFormComponent } from './empresa/empresa-form.component';
-import { GerenciarPerfilComponent } from './usuarios/perfil/gerenciar-perfil/gerenciar-perfil.component';
 import { ListarUsuariosComponent } from './usuarios/listar-usuarios/listar-usuarios.component';
 import { FormUsuarioComponent } from './usuarios/form-usuario/form-usuario.component';
 import { FormProdutoComponent } from './cadastro-tecnico/produtos/form-produto/form-produto.component';
@@ -23,6 +22,7 @@ import { FormServicoComponent } from './cadastro-tecnico/servicos/form-servico/f
 import { ListarServicoComponent } from './cadastro-tecnico/servicos/listar-servicos/listar-servicos.component';
 import { CalculadoraConfigComponent } from './smart-calc-config/smart-calc-config/smart-calc-config.component';
 import { EmailServidorComponent } from './config/email-servidor/email-servidor.component';
+import { GerenciarPerfilComponent } from './perfil/gerenciar-perfil/gerenciar-perfil.component';
 
 export const PagesRoutes: Routes = [
   {
