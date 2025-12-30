@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { PerfilService } from '../../services/perfil.service';
 import { ToastrService } from 'ngx-toastr';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
@@ -9,7 +8,6 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { MatDividerModule } from '@angular/material/divider';
 import { TablerIconsModule } from 'angular-tabler-icons';
@@ -21,12 +19,9 @@ import { ImagemUtil } from 'src/app/utils/imagem-util';
 import { TrocarPerfilDialogComponent } from '../modal-trocar-perfil/trocar-perfil-dialog.component';
 import { ConfirmDialogComponent } from 'src/app/components/dialog/confirm-dialog/confirm-dialog.component';
 import { CardHeaderComponent } from "src/app/components/card-header/card-header.component";
-
-interface Perfil {
-  id?: number;
-  nome: string;
-  descricao?: string;
-}
+import { Perfil } from 'src/app/models/perfil.model';
+import { PerfilService } from '../../usuarios/services/perfil.service';
+import { PerfilRequest } from 'src/app/models/perfil/perfil-request.model';
 
 @Component({
   selector: 'app-gerenciar-perfil',
@@ -41,7 +36,6 @@ interface Perfil {
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
-    MatIconModule,
     MatListModule,
     MatDividerModule,
     TablerIconsModule,
@@ -60,6 +54,7 @@ export class GerenciarPerfilComponent implements OnInit {
   displayedColumns1: string[] = ['usuario', 'perfil', 'acoes'];
   dataSource = new MatTableDataSource<Usuario>([]);
   imagemUtil = ImagemUtil;
+  private permissoesMap: Record<string, number> = {};
 
   constructor(private fb: FormBuilder, private perfilService: PerfilService, private dialog: MatDialog, private toastrService: ToastrService) {}
 
@@ -73,7 +68,26 @@ export class GerenciarPerfilComponent implements OnInit {
   }
 
   carregarPerfis(): void {
-    this.perfilService.listar().subscribe(perfis => this.perfis = perfis);
+    this.perfilService.listar().subscribe(perfis => {
+      this.perfis = perfis;
+    });
+  }
+
+  private carregarPermissoes(onLoaded: () => void): void {
+    if (Object.keys(this.permissoesMap).length) {
+      onLoaded();
+      return;
+    }
+
+    this.perfilService.listarPermissoes().subscribe(permissoes => {
+      this.permissoesMap = permissoes.reduce((acc: Record<string, number>, perm) => {
+        if (perm.chave && typeof perm.id === 'number' && acc[perm.chave] === undefined) {
+          acc[perm.chave] = perm.id;
+        }
+        return acc;
+      }, {});
+      onLoaded();
+    });
   }
 
   listarUsuariosDoPerfil(perfil: Perfil): void {
@@ -88,10 +102,6 @@ export class GerenciarPerfilComponent implements OnInit {
     this.perfilService.listarUsuariosDoPerfil(perfil.id!).subscribe(usuarios => {
       this.usuarios = usuarios;
     });
-  }
-
-  salvar(): void {
-    // lógica de salvar
   }
 
   cancelar(): void {
@@ -129,9 +139,7 @@ export class GerenciarPerfilComponent implements OnInit {
               this.toastrService.success('Perfil excluído com sucesso.');
               this.carregarPerfis();
             },
-            error: () => {
-              this.toastrService.error('Erro ao excluir o perfil.');
-            }
+            error: (err) => this.exibirErro(err, 'Erro ao excluir o perfil.')
           });
         }
       });
@@ -140,6 +148,20 @@ export class GerenciarPerfilComponent implements OnInit {
   
 
   openDialogPerfil(action: 'Add' | 'Edit', perfil: any = {}): void {
+    const prepararAbertura = (perfilDados: any) => {
+      this.carregarPermissoes(() => this.abrirDialog(action, perfilDados));
+    };
+
+    if (action === 'Edit' && perfil?.id) {
+      this.perfilService.obter(perfil.id).subscribe(perfilCompleto => {
+        prepararAbertura(perfilCompleto);
+      });
+    } else {
+      prepararAbertura(perfil);
+    }
+  }
+
+  private abrirDialog(action: 'Add' | 'Edit', perfil: any): void {
     const dialogRef = this.dialog.open(PerfilDialogComponent, {
       data: { action, perfil },
       autoFocus: false,
@@ -148,10 +170,16 @@ export class GerenciarPerfilComponent implements OnInit {
   
     dialogRef.afterClosed().subscribe((result) => {
       if (result?.event === 'Save') {
+        const payload = this.montarPayloadPerfil(result.data);
+        const algumaSelecionada = payload.permissoes.some(p => p.selecionada);
+        if (!algumaSelecionada) {
+          this.toastrService.error('Selecione ao menos uma permissão.');
+          return;
+        }
         if (action === 'Add') {
-          this.salvarPerfil(result.data);
-        } else {
-          this.atualizarPerfil(perfil.id, result.data);
+          this.salvarPerfil(payload);
+        } else if (perfil?.id) {
+          this.atualizarPerfil(perfil.id, payload);
         }
       }
     });
@@ -174,35 +202,29 @@ export class GerenciarPerfilComponent implements OnInit {
             this.toastrService.success(`Perfil do usuário ${usuarioAtualizado.nome} alterado com sucesso.`);
             this.carregarPerfis();
           },
-          error: () => {
-            this.toastrService.error(`Erro ao alterar o perfil do usuário ${usuario.nome}.`);
-          }
+          error: (err) => this.exibirErro(err, `Erro ao alterar o perfil do usuário ${usuario.nome}.`)
         });
       }
     });
   }
   
 
-  salvarPerfil(dados: Perfil): void {
+  salvarPerfil(dados: PerfilRequest): void {
     this.perfilService.salvar(dados).subscribe({
       next: () => {
         this.carregarPerfis();
       },
-      error: () => {
-        console.error('Erro ao salvar perfil');
-      }
+      error: (err) => this.exibirErro(err, 'Erro ao salvar perfil')
     });
   }
   
-  atualizarPerfil(id: number, dados: Perfil): void {
+  atualizarPerfil(id: number, dados: PerfilRequest): void {
     this.perfilService.atualizar(id, dados).subscribe({
       next: () => {
         this.toastrService.success('Perfil atualizado com sucesso');
         this.carregarPerfis();
       },
-      error: () => {
-        console.error('Erro ao atualizar perfil');
-      }
+      error: (err) => this.exibirErro(err, 'Erro ao atualizar perfil')
     });
   }
 
@@ -210,4 +232,23 @@ export class GerenciarPerfilComponent implements OnInit {
     (event.target as HTMLImageElement).src = '/assets/images/profile/user-1.jpg';
   }
 
+  private exibirErro(err: any, fallback: string): void {
+    const mensagem = err?.userMessage || err?.error?.message || err?.message || fallback;
+    this.toastrService.error(mensagem);
+  }
+
+  private montarPayloadPerfil(data: any): PerfilRequest {
+    const permissoes = Object.entries(data.permissoes || {})
+      .map(([chave, selecionada]) => ({
+        id: this.permissoesMap[chave],
+        selecionada: !!selecionada
+      }))
+      .filter((p): p is { id: number; selecionada: boolean } => typeof p.id === 'number');
+
+    return {
+      nome: data.nome,
+      descricao: data.descricao,
+      permissoes
+    };
+  }
 }

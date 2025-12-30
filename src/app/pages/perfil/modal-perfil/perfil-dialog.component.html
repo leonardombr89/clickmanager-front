@@ -1,0 +1,57 @@
+<h2 mat-dialog-title class="m-0 f-w-600">Perfil</h2>
+
+<mat-dialog-content class="perfil-dialog-content">
+  <form [formGroup]="form" class="perfil-form">
+    <div class="row g-3">
+      <div class="col-12 col-md-6">
+        <app-input-texto-restrito
+          [control]="nomeControl"
+          label="Nome do Perfil"
+          placeholder="Informe o nome"
+          [maxlength]="100">
+        </app-input-texto-restrito>
+      </div>
+      <div class="col-12 col-md-6">
+        <app-input-texto-restrito
+          [control]="descricaoControl"
+          label="Descrição"
+          placeholder="Descreva o perfil"
+          [maxlength]="200">
+        </app-input-texto-restrito>
+      </div>
+    </div>
+
+    <div class="permissoes-section">
+      <div class="section-header d-flex align-items-center justify-content-between flex-wrap gap-8">
+        <div class="d-flex align-items-center gap-8">
+          <i-tabler name="shield" class="icon-18 text-primary"></i-tabler>
+          <h3 class="f-s-14 f-w-600 m-0">Permissões</h3>
+        </div>
+        <mat-slide-toggle color="primary" [checked]="todasSelecionadas" (change)="selecionarTodos($event.checked)">
+          Selecionar todos
+        </mat-slide-toggle>
+      </div>
+
+      <div formGroupName="permissoes" class="permissoes-grid">
+        <div *ngFor="let grupo of grupos | keyvalue" class="permissao-card">
+          <div class="permissao-title">
+            <span class="f-w-600">{{ grupo.key }}</span>
+          </div>
+          <div class="permissao-list">
+            <mat-slide-toggle
+              *ngFor="let permissao of grupo.value"
+              [formControlName]="permissao.chave"
+              color="primary">
+              {{ permissao.titulo }}
+            </mat-slide-toggle>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="actions-row">
+  <button mat-stroked-button color="warn" (click)="cancelar()">Cancelar</button>
+  <button mat-flat-button color="primary" (click)="salvar()" [disabled]="form.invalid">Salvar</button>
+</mat-dialog-actions>

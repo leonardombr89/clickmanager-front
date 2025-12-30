@@ -20,7 +20,7 @@ import { AppAddInvoiceComponent } from './invoice/add-invoice/add-invoice.compon
 import { AppInvoiceViewComponent } from './invoice/invoice-view/invoice-view.component';
 import { AppEditInvoiceComponent } from './invoice/edit-invoice/edit-invoice.component';
 import { AppContactListComponent } from './contact-list/contact-list.component';
-import { GerenciarPerfilComponent } from '../usuarios/perfil/gerenciar-perfil/gerenciar-perfil.component';
+import { GerenciarPerfilComponent } from '../perfil/gerenciar-perfil/gerenciar-perfil.component';
 
 export const AppsRoutes: Routes = [
   {

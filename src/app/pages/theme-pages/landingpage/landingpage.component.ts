@@ -1,4 +1,4 @@
-import { Component, Output, EventEmitter, Input } from '@angular/core';
+import { Component, Output, EventEmitter, Input, OnInit, OnDestroy } from '@angular/core';
 import { CoreService } from 'src/app/services/core.service';
 import { ViewportScroller } from '@angular/common';
 import { MaterialModule } from 'src/app/material.module';
@@ -25,13 +25,44 @@ interface Step {
   badge: string;
 }
 
+interface PermissionUseCase {
+  title: string;
+  detail: string;
+}
+
+interface Gain {
+  title: string;
+  desc: string;
+}
+
+interface Metric {
+  value: string;
+  label: string;
+  accent?: string;
+}
+
+interface Testimonial {
+  name: string;
+  role: string;
+  quote: string;
+  result: string;
+}
+
+interface CaseStudy {
+  title: string;
+  before: string;
+  after: string;
+  detail: string;
+}
+
 @Component({
   selector: 'app-landingpage',
   standalone: true,
   imports: [MaterialModule, TablerIconsModule, RouterLink, BrandingComponent],
   templateUrl: './landingpage.component.html',
+  styleUrls: ['./landingpage.component.scss'],
 })
-export class AppLandingpageComponent {
+export class AppLandingpageComponent implements OnInit, OnDestroy {
   @Input() showToggle = true;
   @Output() toggleMobileNav = new EventEmitter<void>();
   @Output() toggleMobileFilterNav = new EventEmitter<void>();
@@ -51,79 +82,218 @@ export class AppLandingpageComponent {
 
   timeWins: TimeWin[] = [
     {
-      title: '60% menos tempo em orçamentos',
-      detail:
-        'O SmartCalc calcula automaticamente área, insumos e margem, evitando contas manuais e planilhas paralelas.',
-      accent: 'Tempo salvo',
+      title: 'Angular + Material',
+      detail: 'Interface moderna, rápida e responsiva para sua operação diária.',
+      accent: 'Tecnologia',
     },
     {
-      title: 'Preços consistentes, sem surpresas',
-      detail:
-        'Histórico de preços e regras de cálculo centralizadas mantêm a margem segura para cada pedido.',
-      accent: 'Margem protegida',
+      title: 'Onboarding em minutos',
+      detail: 'Fluxos guiados e formulários simples para começar sem esforço.',
+      accent: 'Fácil de usar',
     },
     {
-      title: 'Equipe responde 2x mais rápido',
-      detail:
-        'Com fórmulas prontas e simulação de cenários, o time envia propostas enquanto o cliente ainda está na linha.',
-      accent: 'Velocidade real',
+      title: '30 dias grátis',
+      detail: 'Teste todos os recursos, SmartCalc e perfis, sem risco.',
+      accent: 'Trial',
     },
   ];
 
-  features: Feature[] = [
+  smartCalcHighlights: Feature[] = [
     {
       icon: 'calculator',
       title: 'Cálculo inteligente',
       color: 'primary',
-      subtext: 'Configure insumos, perdas e acabamento uma vez e deixe o SmartCalc precificar por você.',
+      subtext: 'Insumos, perdas e acabamento configurados uma vez; o SmartCalc precifica por você.',
     },
     {
       icon: 'clock-play',
       title: 'Simulação em segundos',
       color: 'warning',
-      subtext: 'Teste materiais e prazos na hora, comparando margens antes de enviar o orçamento.',
+      subtext: 'Troque materiais, prazos e margens para encontrar o preço ideal na hora.',
     },
     {
       icon: 'history',
-      title: 'Histórico sempre à mão',
+      title: 'Histórico e consistência',
       color: 'success',
-      subtext: 'Veja preços anteriores e aprove as melhores condições com dados reais.',
+      subtext: 'Use preços anteriores e regras centralizadas para manter margens saudáveis.',
     },
-    {
-      icon: 'chart-donut-3',
-      title: 'Métricas de produção',
-      color: 'secondary',
-      subtext: 'Acompanhe lead time, margens e gargalos do pedido à entrega em um painel único.',
-    },
-    {
-      icon: 'clipboard-list',
-      title: 'Fluxo integrado',
-      color: 'primary',
-      subtext: 'Vendas, atendimento e produção enxergam o mesmo status, sem retrabalho.',
-    },
+  ];
+
+  permissionHighlights: Feature[] = [
     {
       icon: 'shield-lock',
-      title: 'Governança simples',
-      color: 'error',
-      subtext: 'Perfis e permissões para cada área garantem segurança e controle de acesso.',
+      title: 'Perfis flexíveis',
+      color: 'primary',
+      subtext: 'Escolha exatamente o que cada perfil pode ver ou editar.',
+    },
+    {
+      icon: 'users',
+      title: 'Vincule usuários com 1 clique',
+      color: 'secondary',
+      subtext: 'Aplique o perfil pronto ao time e altere facilmente quando precisar.',
+    },
+    {
+      icon: 'adjustments-cog',
+      title: 'Selecionar todos ou granular',
+      color: 'warning',
+      subtext: 'Marque por grupo (Calculadoras, Pedidos, Clientes, Configurações) ou permissão a permissão.',
     },
   ];
 
   steps: Step[] = [
     {
       title: 'Centralize pedidos',
-      desc: 'Organize tudo em um só lugar: cliente, peças, materiais e prazos.',
+      desc: 'Organize cliente, peças, materiais e prazos em um só lugar.',
       badge: '1',
     },
     {
       title: 'Ative o SmartCalc',
-      desc: 'O cálculo roda com suas regras e simula cenários em segundos.',
+      desc: 'Calcule e simule cenários em segundos com suas regras.',
       badge: '2',
     },
     {
-      title: 'Aprove, produza e entregue',
-      desc: 'Status claros, margin alert e histórico sempre visível para o time.',
+      title: 'Controle acessos',
+      desc: 'Perfis sob medida para cada função: orçamentista, produção, financeiro.',
       badge: '3',
     },
   ];
+
+  permissionUseCases: PermissionUseCase[] = [
+    {
+      title: 'Orçamentista enxuto',
+      detail: 'Acesso somente ao SmartCalc para simular preços e enviar propostas rápidas.',
+    },
+    {
+      title: 'Gestor de produção',
+      detail: 'Visualiza pedidos, dashboards e histórico, sem editar preços ou usuários.',
+    },
+    {
+      title: 'Time financeiro',
+      detail: 'Permissões para faturar, ajustar dados da empresa e acompanhar margens.',
+    },
+  ];
+
+  gains: Gain[] = [
+    {
+      title: 'Time produtivo',
+      desc: 'Horas recuperadas com cálculos automáticos e menos retrabalho.',
+    },
+    {
+      title: 'Margem protegida',
+      desc: 'Regras centralizadas e histórico reduzem erros de precificação.',
+    },
+    {
+      title: 'Governança simples',
+      desc: 'Perfis sob medida deixam cada pessoa com o acesso certo.',
+    },
+  ];
+
+  metrics: Metric[] = [
+    { value: '60%', label: 'menos tempo em orçamentos', accent: 'Tempo' },
+    { value: '+8%', label: 'margem média preservada', accent: 'Margem' },
+    { value: '30 dias', label: 'de teste completo', accent: 'Trial' },
+  ];
+
+  testimonials: Testimonial[] = [
+    {
+      name: 'Ana Souza',
+      role: 'COO · Gráfica Digital',
+      quote: 'O SmartCalc tirou a equipe das planilhas e reduziu o tempo de orçamento de horas para minutos.',
+      result: '-65% no tempo de orçamento em 4 semanas',
+    },
+    {
+      name: 'Marcos Lima',
+      role: 'Diretor · Comunicação Visual',
+      quote: 'Perfis flexíveis deixaram produção e comercial organizados. Menos retrabalho, mais entregas.',
+      result: '+10% de produtividade em produção',
+    },
+    {
+      name: 'Patrícia Nogueira',
+      role: 'Gestora · Gráfica Rápida',
+      quote: 'Consegui criar um perfil só para orçamentista com acesso ao SmartCalc. Ficou simples de treinar.',
+      result: 'Onboarding em 2 dias, orçamentos padronizados',
+    },
+    {
+      name: 'Ricardo Almeida',
+      role: 'CEO · Indústria de rótulos',
+      quote: 'Os dashboards mostraram gargalos e conseguimos ajustar prazos antes de virar crise.',
+      result: '-30% em atrasos de pedidos',
+    },
+    {
+      name: 'Larissa Campos',
+      role: 'Financeiro · Comunicação Visual',
+      quote: 'Segregamos acessos: financeiro vê faturamento e dados da empresa, sem entrar no fluxo de produção.',
+      result: 'Governança simples, zero acessos indevidos',
+    },
+    {
+      name: 'Diego Martins',
+      role: 'Operações · Impressão',
+      quote: 'O histórico de preços e regras centralizadas deram previsibilidade de margem.',
+      result: '+8% de margem média em 60 dias',
+    },
+  ];
+
+  caseStudy: CaseStudy = {
+    title: 'Case rápido: gráfica de médio porte',
+    before: '2h por orçamento, margens inconsistentes',
+    after: '15min por orçamento, margem estável',
+    detail: 'Com SmartCalc ativo e perfis de orçamentista/gestor, o time ganhou previsibilidade e reduziu idas e vindas com clientes.',
+  };
+
+  currentSlideIndex = 0;
+  private readonly itemsPerSlide = 3;
+  private testimonialInterval: any;
+
+  get currentTestimonials(): Testimonial[] {
+    const start = this.currentSlideIndex * this.itemsPerSlide;
+    const slice = this.testimonials.slice(start, start + this.itemsPerSlide);
+    if (slice.length < this.itemsPerSlide) {
+      return slice.concat(this.testimonials.slice(0, this.itemsPerSlide - slice.length));
+    }
+    return slice;
+  }
+
+  get totalSlides(): number {
+    return Math.ceil(this.testimonials.length / this.itemsPerSlide);
+  }
+
+  get testimonialSlides(): number[] {
+    return Array.from({ length: this.totalSlides }, (_, i) => i);
+  }
+
+  nextTestimonial(): void {
+    this.currentSlideIndex = (this.currentSlideIndex + 1) % this.totalSlides;
+  }
+
+  prevTestimonial(): void {
+    this.currentSlideIndex = (this.currentSlideIndex - 1 + this.totalSlides) % this.totalSlides;
+  }
+
+  ngOnInit(): void {
+    this.startCarousel();
+  }
+
+  ngOnDestroy(): void {
+    this.stopCarousel();
+  }
+
+  pauseCarousel(): void {
+    this.stopCarousel();
+  }
+
+  resumeCarousel(): void {
+    this.startCarousel();
+  }
+
+  private startCarousel(): void {
+    this.stopCarousel();
+    this.testimonialInterval = setInterval(() => this.nextTestimonial(), 5000);
+  }
+
+  private stopCarousel(): void {
+    if (this.testimonialInterval) {
+      clearInterval(this.testimonialInterval);
+      this.testimonialInterval = null;
+    }
+  }
 }

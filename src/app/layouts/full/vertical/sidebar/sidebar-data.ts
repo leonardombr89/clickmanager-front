@@ -105,4 +105,20 @@ export const navItems: NavItem[] = [
         route: '/page/empresa',
         requiredPermission: ['DADOS_EMPRESA']
     },
+    {
+        displayName: 'Configurações',
+        iconName: 'settings-automation',
+        bgcolor: 'primary',
+        route: '/config',
+        requiredPermission: ['CONFIG_EMAIL'],
+        children: [
+            {
+                displayName: 'Servidor de E-mail',
+                iconName: 'point',
+                bgcolor: 'transparent',
+                route: '/page/config/email-servidor',
+                requiredPermission: ['CONFIG_EMAIL']
+            }
+        ]
+    },
 ];

@@ -11,7 +11,8 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { ToastrService } from 'ngx-toastr';
 import { CardHeaderComponent } from 'src/app/components/card-header/card-header.component';
 import { UsuarioService } from '../services/usuario.service';
-import { Perfil, PerfilService } from '../services/perfil.service';
+import { PerfilService } from '../services/perfil.service';
+import { Perfil } from 'src/app/models/perfil.model';
 
 @Component({
   selector: 'app-form-usuario',

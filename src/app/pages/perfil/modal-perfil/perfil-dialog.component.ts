@@ -1,15 +1,13 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { FormBuilder, FormControl, FormGroup, FormsModule, NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormControl, FormGroup, NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
-import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatIconModule } from '@angular/material/icon';
-import { MatInputModule } from '@angular/material/input';
 import { ToastrService } from 'ngx-toastr';
 import { DEFINICOES, PermissaoDefinicao } from 'src/app/permissions/permissions.config';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { InputTextoRestritoComponent } from 'src/app/components/inputs/input-texto/input-texto-restrito.component';
+import { TablerIconsModule } from 'angular-tabler-icons';
 
 @Component({
   selector: 'app-perfil-dialog',
@@ -19,14 +17,11 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
   imports: [
         CommonModule,
         ReactiveFormsModule,
-        FormsModule,
         MatDialogModule,
-        MatFormFieldModule,
-        MatInputModule,
         MatButtonModule,
-        MatCheckboxModule,
-        MatIconModule,
-        MatSlideToggleModule
+        MatSlideToggleModule,
+        InputTextoRestritoComponent,
+        TablerIconsModule
       ]
 })
 export class PerfilDialogComponent implements OnInit {
@@ -90,5 +85,29 @@ export class PerfilDialogComponent implements OnInit {
   
     getPermissaoControl(chave: string): FormControl<boolean> {
       return this.form.get('permissoes.' + chave) as FormControl<boolean>;
+    }
+
+    get permissoesGroup(): FormGroup {
+      return this.form.get('permissoes') as FormGroup;
+    }
+
+    get nomeControl(): FormControl {
+      return this.form.get('nome') as FormControl;
+    }
+
+    get descricaoControl(): FormControl {
+      return this.form.get('descricao') as FormControl;
+    }
+
+    get todasSelecionadas(): boolean {
+      const permissoes = this.permissoesGroup?.value;
+      return permissoes ? Object.values(permissoes).every(Boolean) : false;
+    }
+
+    selecionarTodos(checked: boolean): void {
+      if (!this.permissoesGroup) return;
+      Object.keys(this.permissoesGroup.controls).forEach(key => {
+        this.permissoesGroup.get(key)?.setValue(checked);
+      });
     }
   }
