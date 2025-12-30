@@ -16,23 +16,36 @@
       </div>
     </mat-toolbar>
 
+    <!-- 1. Sobre o sistema -->
     <section class="hero-area">
       <div class="hero-gradient"></div>
       <div class="container position-relative">
         <div class="row align-items-center">
-          <div class="col-lg-7">
-            <div class="eyebrow text-uppercase f-w-700">SmartCalc · Orçamentos sem atrito</div>
-            <h1 class="banner-title m-0 f-w-700 m-t-12">
-              Transforme cada pedido em valor com o SmartCalc
+          <div class="col-lg-6">
+            <div class="eyebrow text-uppercase f-w-800" style="font-size: 44px; line-height: 1.05;">
+              ClickManager · CRM para sua gráfica
+            </div>
+            <h1 class="banner-title m-0 f-w-700 m-t-6" style="font-size: 30px; line-height: 1.2;">
+              Sistema completo, rápido e fácil — 30 dias grátis
             </h1>
             <p class="f-s-18 m-t-16 banner-subtitle">
-              Precifique em segundos, pare de refazer contas e devolva horas preciosas para o time focar na produção e no atendimento.
+              Angular + Material para velocidade e estabilidade, com fluxos simples de cadastro, orçamento e produção. Teste tudo sem risco.
             </p>
-            <div class="pill pill-outline pill-strong m-t-10 d-inline-flex">
-              <i-tabler name="sparkles" class="icon-16 m-r-6"></i-tabler>
-              30 dias grátis para começar
+            <div class="m-t-16 hero-bullets">
+              <div class="trust-pill">
+                <i-tabler name="bolt" class="icon-16 m-r-6"></i-tabler>
+                Interface leve e responsiva
+              </div>
+              <div class="trust-pill">
+                <i-tabler name="shield-check" class="icon-16 m-r-6"></i-tabler>
+                Onboarding guiado e fácil de usar
+              </div>
+              <div class="trust-pill">
+                <i-tabler name="sparkles" class="icon-16 m-r-6"></i-tabler>
+                Trial completo por 30 dias
+              </div>
             </div>
-            <div class="m-t-24 hstack">
+            <div class="m-t-20 hstack">
               <a mat-flat-button color="primary" [routerLink]="['/authentication/registro-gestor']" class="btn-custom">
                 Quero testar agora
               </a>
@@ -40,72 +53,25 @@
                 Já sou cliente
               </a>
             </div>
-            <div class="hero-metrics row m-t-24">
-              @for(win of timeWins; track win.title) {
-              <div class="col-sm-6 m-b-12">
-                <div class="metric-card">
-                  <span class="metric-accent">{{ win.accent }}</span>
-                  <h3 class="metric-title">{{ win.title }}</h3>
-                  <p class="metric-copy m-0">{{ win.detail }}</p>
+            <div class="hero-metrics row m-t-20">
+              @for(metric of metrics; track metric.label) {
+              <div class="col-sm-4 m-b-12">
+                <div class="metric-card text-center">
+                  <span class="metric-accent">{{ metric.accent }}</span>
+                  <h3 class="metric-title m-b-4">{{ metric.value }}</h3>
+                  <p class="m-0 f-s-14">{{ metric.label }}</p>
                 </div>
               </div>
               }
             </div>
-            <div class="trust-bar m-t-20">
-              <div class="trust-pill">
-                <i-tabler name="bolt" class="icon-16 m-r-6"></i-tabler>
-                Orçamentos em minutos, não em horas
-              </div>
-              <div class="trust-pill">
-                <i-tabler name="shield-check" class="icon-16 m-r-6"></i-tabler>
-                Margem protegida e regras centralizadas
-              </div>
-              <div class="trust-pill">
-                <i-tabler name="clock-hour-4" class="icon-16 m-r-6"></i-tabler>
-                Teste sem risco por 30 dias
-              </div>
-            </div>
           </div>
-          <div class="col-lg-5 m-t-24 m-t-lg-0">
+          <div class="col-lg-6 m-t-24 m-t-lg-0">
             <div class="smartcalc-card">
-              <div class="pill pill-success">Tempo de equipe recuperado</div>
-              <h4 class="m-t-16 m-b-12 f-w-700">O cálculo certo na primeira tentativa</h4>
-              <ul class="list-unstyled feature-list m-0 p-0">
-                <li class="d-flex align-items-start m-b-12">
-                  <span class="check-icon bg-light-success">
-                    <i-tabler name="clock-play" class="text-success icon-20"></i-tabler>
-                  </span>
-                  <div class="m-l-12">
-                    <strong>SmartCalc automatiza o preço</strong>
-                    <p class="m-0 f-s-14">Considere insumos, área, acabamento e margem com fórmulas vivas.</p>
-                  </div>
-                </li>
-                <li class="d-flex align-items-start m-b-12">
-                  <span class="check-icon bg-light-primary">
-                    <i-tabler name="sparkles" class="text-primary icon-20"></i-tabler>
-                  </span>
-                  <div class="m-l-12">
-                    <strong>Simule cenários em minutos</strong>
-                    <p class="m-0 f-s-14">Compare materiais e prazos sem abrir planilhas paralelas.</p>
-                  </div>
-                </li>
-                <li class="d-flex align-items-start">
-                  <span class="check-icon bg-light-warning">
-                    <i-tabler name="route" class="text-warning icon-20"></i-tabler>
-                  </span>
-                  <div class="m-l-12">
-                    <strong>Acompanhe do pedido à entrega</strong>
-                    <p class="m-0 f-s-14">Status claros para produção e comercial verem o mesmo fluxo.</p>
-                  </div>
-                </li>
-              </ul>
-              <div class="glass-note m-t-20">
-                Em média, as equipes recuperam <strong>6 a 10 horas por semana</strong> só em orçamentos.
-              </div>
-              <div class="m-t-16">
-                <a mat-flat-button color="accent" [routerLink]="['/authentication/registro-gestor']" class="w-100">
-                  Abrir formulário de cadastro
-                </a>
+              <div class="pill pill-success">Facilidade de uso</div>
+              <h4 class="m-t-16 m-b-12 f-w-700">Fluxos claros e interface leve</h4>
+              <p class="m-0 f-s-14">Cadastre clientes, orce com SmartCalc e acompanhe pedidos em um fluxo contínuo, sem telas sobrecarregadas.</p>
+              <div class="glass-note m-t-16">
+                Interface 100% web, responsiva e pronta para o time operar no dia a dia.
               </div>
             </div>
           </div>
@@ -113,59 +79,135 @@
       </div>
     </section>
 
-    <section class="spacer bg-white" id="smartcalc">
+    <!-- 2. Case rápido -->
+    <section class="spacer bg-white" id="case-rapido">
       <div class="container">
         <div class="row justify-content-center text-center">
           <div class="col-lg-8">
-            <span class="pill pill-outline">Funcionalidades principais</span>
-            <h2 class="section-title m-t-16 f-w-700">SmartCalc cuida das contas, sua equipe cuida do cliente</h2>
-            <p class="f-s-16 m-t-10 m-b-0">
-              Combine cálculo automático, histórico de preços e fluxo integrado de atendimento para nunca perder um prazo.
-            </p>
+            <span class="pill pill-outline">Case rápido</span>
+            <h3 class="section-title m-t-12 f-w-700">{{ caseStudy.title }}</h3>
+            <p class="f-s-15 m-t-6 text-muted">{{ caseStudy.detail }}</p>
           </div>
         </div>
-        <div class="row m-t-32">
-          @for(feature of features; track feature.title) {
-          <div class="col-sm-6 col-lg-4 m-b-20">
-            <div class="cardWithShadow feature-card h-100">
-              <span class="icon-50 bg-light-{{ feature.color }} rounded d-inline-flex align-items-center justify-content-center">
-                <i-tabler [name]="feature.icon" class="text-{{ feature.color }} icon-26"></i-tabler>
-              </span>
-              <h5 class="m-t-16 m-b-8 f-w-700">{{ feature.title }}</h5>
-              <p class="m-0 f-s-14 lh-base">{{ feature.subtext }}</p>
+        <div class="row justify-content-center m-t-16">
+          <div class="col-md-5 m-b-12">
+            <div class="stack-card h-100">
+              <div class="f-w-700">Antes</div>
+              <p class="m-0 f-s-14">{{ caseStudy.before }}</p>
             </div>
           </div>
-          }
+          <div class="col-md-5 m-b-12">
+            <div class="stack-card h-100">
+              <div class="f-w-700">Depois</div>
+              <p class="m-0 f-s-14">{{ caseStudy.after }}</p>
+            </div>
+          </div>
         </div>
       </div>
     </section>
 
-    <section class="spacer bg-extra-light" id="resultados">
+    <!-- 3. Funcionalidades: SmartCalc e Perfis -->
+    <section class="spacer bg-extra-light" id="funcionalidades">
+      <div class="container">
+        <div class="row justify-content-center text-center">
+          <div class="col-lg-8">
+            <span class="pill pill-outline">Funcionalidades</span>
+            <h2 class="section-title m-t-16 f-w-700">SmartCalc e Perfis flexíveis para cada função</h2>
+            <p class="f-s-16 m-t-10 m-b-0">
+              Divida o ClickManager em blocos: cálculo inteligente para orçamentos e controle granular de acessos para manter cada um no lugar certo.
+            </p>
+          </div>
+        </div>
+        <div class="row m-t-24">
+          <div class="col-lg-6 m-b-20">
+            <div class="cardWithShadow feature-card h-100">
+              <div class="d-flex align-items-center m-b-12">
+                <span class="icon-50 bg-light-primary rounded d-inline-flex align-items-center justify-content-center">
+                  <i-tabler name="calculator" class="text-primary icon-26"></i-tabler>
+                </span>
+                <div class="m-l-12">
+                  <h5 class="m-0 f-w-700">SmartCalc</h5>
+                  <span class="f-s-13 text-muted">Cálculo automático e simulação em segundos.</span>
+                </div>
+              </div>
+              <ul class="list-unstyled m-0 p-0">
+                @for(feature of smartCalcHighlights; track feature.title) {
+                <li class="d-flex align-items-start m-b-12">
+                  <span class="check-icon bg-light-{{ feature.color }}">
+                    <i-tabler [name]="feature.icon" class="text-{{ feature.color }} icon-18"></i-tabler>
+                  </span>
+                  <div class="m-l-10">
+                    <strong class="d-block">{{ feature.title }}</strong>
+                    <span class="f-s-14 text-muted">{{ feature.subtext }}</span>
+                  </div>
+                </li>
+                }
+              </ul>
+            </div>
+          </div>
+          <div class="col-lg-6 m-b-20">
+            <div class="cardWithShadow feature-card h-100">
+              <div class="d-flex align-items-center m-b-12">
+                <span class="icon-50 bg-light-warning rounded d-inline-flex align-items-center justify-content-center">
+                  <i-tabler name="shield-lock" class="text-warning icon-26"></i-tabler>
+                </span>
+                <div class="m-l-12">
+                  <h5 class="m-0 f-w-700">Perfis e permissões</h5>
+                  <span class="f-s-13 text-muted">Controle granular, do orçamentista ao gestor.</span>
+                </div>
+              </div>
+              <ul class="list-unstyled m-0 p-0">
+                @for(feature of permissionHighlights; track feature.title) {
+                <li class="d-flex align-items-start m-b-12">
+                  <span class="check-icon bg-light-{{ feature.color }}">
+                    <i-tabler [name]="feature.icon" class="text-{{ feature.color }} icon-18"></i-tabler>
+                  </span>
+                  <div class="m-l-10">
+                    <strong class="d-block">{{ feature.title }}</strong>
+                    <span class="f-s-14 text-muted">{{ feature.subtext }}</span>
+                  </div>
+                </li>
+                }
+                @for(useCase of permissionUseCases; track useCase.title) {
+                <li class="d-flex align-items-start m-b-8">
+                  <span class="check-icon bg-light-primary">
+                    <i-tabler name="user-check" class="text-primary icon-18"></i-tabler>
+                  </span>
+                  <div class="m-l-10">
+                    <strong class="d-block">{{ useCase.title }}</strong>
+                    <span class="f-s-14 text-muted">{{ useCase.detail }}</span>
+                  </div>
+                </li>
+                }
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. Ganhos + Prova social -->
+    <section class="spacer bg-white" id="resultados">
       <div class="container">
         <div class="row align-items-center">
           <div class="col-lg-6">
-            <div class="pill pill-dark">Resultados em poucas semanas</div>
+            <div class="pill pill-dark">Ganhos com o ClickManager</div>
             <h3 class="section-title m-t-16 f-w-700">
-              Mais agilidade para quem aprova, produz e entrega
+              Mais agilidade, margem protegida e governança simples
             </h3>
             <p class="f-s-16 m-t-8">
-              Dashboards claros mostram gargalos, margens por pedido e onde o SmartCalc liberou tempo. Nada de retrabalho entre vendas e produção.
+              SmartCalc agiliza orçamentos, dashboards mostram gargalos e perfis garantem o acesso certo.
             </p>
             <div class="stacked-cards m-t-20">
-              <div class="stack-card">
+              @for(gain of gains; track gain.title) {
+              <div class="stack-card m-b-10">
                 <div class="d-flex align-items-center">
-                  <i-tabler name="clock-pause" class="text-primary icon-22"></i-tabler>
-                  <span class="f-w-700 m-l-10">Lead time 30% menor</span>
+                  <i-tabler name="check" class="text-primary icon-22"></i-tabler>
+                  <span class="f-w-700 m-l-10">{{ gain.title }}</span>
                 </div>
-                <p class="m-0 f-s-14">Ajuste o preço certo de primeira e diminua idas e vindas com o cliente.</p>
+                <p class="m-0 f-s-14">{{ gain.desc }}</p>
               </div>
-              <div class="stack-card">
-                <div class="d-flex align-items-center">
-                  <i-tabler name="users" class="text-success icon-22"></i-tabler>
-                  <span class="f-w-700 m-l-10">Equipe alinhada</span>
-                </div>
-                <p class="m-0 f-s-14">Pedidos, notas e follow-ups no mesmo lugar para não perder contexto.</p>
-              </div>
+              }
             </div>
           </div>
           <div class="col-lg-6 m-t-24 m-t-lg-0">
@@ -186,7 +228,7 @@
                 }
               </div>
               <div class="cta-inline m-t-12">
-                <span class="text-muted f-s-14">Precisa mostrar ao time?</span>
+                <span class="text-muted f-s-14">Mostre ao time</span>
                 <a mat-stroked-button color="primary" [routerLink]="['/authentication/login']" class="m-l-12">
                   Abrir login agora
                 </a>
@@ -197,6 +239,119 @@
       </div>
     </section>
 
+    <!-- 5. Depoimentos -->
+    <section class="spacer bg-extra-light" id="depoimentos">
+      <div class="container">
+        <div class="row justify-content-center text-center">
+          <div class="col-lg-8">
+            <span class="pill pill-outline">Depoimentos</span>
+            <h3 class="section-title m-t-12 f-w-700">Quem já usa o ClickManager</h3>
+            <p class="f-s-15 m-t-6 text-muted">Resultados reais com SmartCalc e perfis flexíveis.</p>
+          </div>
+        </div>
+        <div class="row m-t-24 justify-content-center">
+          <div class="col-lg-12">
+            <div class="cardWithShadow p-24 h-100 testimonial-slide"
+                 (mouseenter)="pauseCarousel()"
+                 (mouseleave)="resumeCarousel()">
+              <div class="d-flex align-items-center justify-content-between m-b-12">
+                <button mat-icon-button (click)="prevTestimonial()" aria-label="Anterior">
+                  <i-tabler name="chevron-left" class="icon-20"></i-tabler>
+                </button>
+                <div class="flex-1">
+                  <div class="row">
+                    @for(testimonial of currentTestimonials; track testimonial.name) {
+                    <div class="col-md-4 m-b-12">
+                      <p class="m-0 f-s-16">“{{ testimonial.quote }}”</p>
+                      <div class="f-w-700 m-t-10">{{ testimonial.name }}</div>
+                      <div class="text-muted f-s-13">{{ testimonial.role }}</div>
+                      <div class="pill pill-light m-t-6 d-inline-block text-primary">{{ testimonial.result }}</div>
+                    </div>
+                    }
+                  </div>
+                </div>
+                <button mat-icon-button (click)="nextTestimonial()" aria-label="Próximo">
+                  <i-tabler name="chevron-right" class="icon-20"></i-tabler>
+                </button>
+              </div>
+              <div class="d-flex justify-content-center gap-6 m-t-8">
+                @for(i of testimonialSlides; track i) {
+                <span class="dot" [class.active]="i === currentSlideIndex"></span>
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. Contato rápido (oculto) -->
+    <section class="spacer bg-white" id="lead-rapido" *ngIf="false">
+      <div class="container">
+        <div class="row justify-content-center">
+          <div class="col-lg-8 text-center">
+            <span class="pill pill-outline">Contato rápido</span>
+            <h3 class="section-title m-t-12 f-w-700">Prefere falar antes de criar conta?</h3>
+            <p class="f-s-15 m-t-6 text-muted">
+              Deixe seu nome, e-mail e telefone. Entramos em contato para mostrar o SmartCalc e os perfis em 15 minutos.
+            </p>
+          </div>
+        </div>
+        <div class="row justify-content-center m-t-16">
+          <div class="col-lg-8">
+            <div class="cardWithShadow p-20">
+              <form class="row g-3">
+                <div class="col-md-4">
+                  <mat-form-field appearance="outline" class="w-100">
+                    <mat-label>Nome</mat-label>
+                    <input matInput placeholder="Seu nome">
+                  </mat-form-field>
+                </div>
+                <div class="col-md-4">
+                  <mat-form-field appearance="outline" class="w-100">
+                    <mat-label>E-mail</mat-label>
+                    <input matInput type="email" placeholder="email@empresa.com">
+                  </mat-form-field>
+                </div>
+                <div class="col-md-4">
+                  <mat-form-field appearance="outline" class="w-100">
+                    <mat-label>Telefone</mat-label>
+                    <input matInput type="tel" placeholder="(00) 00000-0000">
+                  </mat-form-field>
+                </div>
+                <div class="col-12 text-center">
+                  <button mat-flat-button color="primary" type="button">
+                    Quero contato rápido
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. Newsletter (oculto) -->
+    <section class="spacer bg-white" id="newsletter" *ngIf="false">
+      <div class="container">
+        <div class="row justify-content-center">
+          <div class="col-lg-8 text-center">
+            <span class="pill pill-outline">Newsletter</span>
+            <h3 class="section-title m-t-12 f-w-700">Receba dicas e novidades do ClickManager</h3>
+            <p class="f-s-15 m-t-6 text-muted">Conteúdos rápidos sobre orçamentos, produção e governança de acesso.</p>
+            <div class="newsletter-form d-flex flex-column flex-md-row justify-content-center gap-10 m-t-16">
+              <mat-form-field appearance="outline" class="w-100 w-md-50">
+                <mat-label>Seu e-mail</mat-label>
+                <input matInput type="email" placeholder="email@empresa.com" />
+              </mat-form-field>
+              <button mat-flat-button color="primary" class="newsletter-btn">Quero receber</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. CTA final -->
     <section class="spacer cta-section" id="cta-final">
       <div class="container">
         <div class="cta-card">
