@@ -48,10 +48,14 @@ import { ErrorMessageInterceptor } from './interceptors/error-message.intercepto
 import { BillingInterceptor } from './interceptors/billing.interceptor';
 import { provideNgxMask } from 'ngx-mask';
 import { registerLocaleData } from '@angular/common';
+import localePt from '@angular/common/locales/pt';
+import { LOCALE_ID } from '@angular/core';
 
 export function HttpLoaderFactory(http: HttpClient): any {
   return new TranslateHttpLoader(http, './assets/i18n/', '.json');
 }
+
+registerLocaleData(localePt);
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -100,6 +104,7 @@ export const appConfig: ApplicationConfig = {
     provideClientHydration(),
     provideNgxMask(),
     provideAnimationsAsync(),
+    { provide: LOCALE_ID, useValue: 'pt-BR' },
     importProvidersFrom(
       FormsModule,
       ToastrModule.forRoot(),
