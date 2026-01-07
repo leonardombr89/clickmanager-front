@@ -1,0 +1,19 @@
+<ng-container *ngIf="billingState.snapshot?.warning && billingState.snapshot?.type !== 'BLOCKED'">
+  <div class="billing-banner m-b-20">
+    <div class="d-flex align-items-center gap-10">
+      <mat-icon color="warn">warning</mat-icon>
+      <div>
+        <div class="f-w-700">{{ billingState.snapshot?.message || 'Assinatura requer atenção.' }}</div>
+        <div class="text-muted f-s-13" *ngIf="billingState.snapshot?.expiresAt">
+          Vencimento: {{ billingState.snapshot?.expiresAt | date:'shortDate' }}
+        </div>
+      </div>
+    </div>
+    <div class="d-flex align-items-center gap-10">
+      <span class="text-muted f-s-13" *ngIf="usuario?.proprietario === false">Somente o proprietário pode regularizar a assinatura.</span>
+      <button mat-flat-button color="primary" *ngIf="podeMostrarPagamento" (click)="irParaPagamento()">
+        Pagar agora
+      </button>
+    </div>
+  </div>
+</ng-container>

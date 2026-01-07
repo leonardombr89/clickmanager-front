@@ -1,0 +1,53 @@
+
+
+<mat-card class="cardWithShadow billing-card-full billing-card-container">
+  <app-card-header titulo="Regularizar Assinatura" [mostrarDivisor]="true"></app-card-header>
+
+  <mat-card-content>
+    <div class="row justify-content-center">
+      <div class="col-lg-8 text-center">
+        <h4 class="f-s-30 f-w-600 lh-lg m-b-16">Planos do ClickManager</h4>
+        <p class="text-muted m-0 f-s-14">
+          Não foi possível identificar uma assinatura ativa para esta empresa. Escolha o plano ideal e conclua o pagamento para liberar o acesso.
+        </p>
+        <div class="d-flex align-items-center justify-content-center m-t-12" *ngIf="planos.length > 1">
+          <span class="f-s-14 m-r-8">Mensal</span>
+          <mat-slide-toggle color="primary" [(ngModel)]="mostrarAnual">Anual</mat-slide-toggle>
+          <span class="f-s-12 text-muted m-l-8" *ngIf="mostrarAnual">12x valor mensal</span>
+        </div>
+      </div>
+    </div>
+
+    <p class="text-muted f-s-13 text-center m-t-12" *ngIf="billing?.expiresAt">
+      Vencimento: {{ billing?.expiresAt | date:'dd/MM/yyyy' }}
+    </p>
+
+    <div class="row m-t-32 p-t-16">
+      @for (plano of planos; track plano.id) {
+      <div class="col-sm-6 col-lg-4 m-b-16">
+        <app-pricing-card
+          [plano]="plano"
+          [popular]="plano.popular || false"
+          [imgSrc]="plano.imgSrc"
+          [ativo]="planoSelecionado?.id === plano.id"
+          [mostrarAnual]="mostrarAnual"
+          selecionarTexto="Selecionar"
+          (escolher)="selecionar(plano)">
+        </app-pricing-card>
+      </div>
+      }
+    </div>
+
+    <div class="m-t-16 d-flex flex-wrap gap-10 align-items-center">
+      <button mat-flat-button color="primary" (click)="irParaPagamento()" [disabled]="!podePagar || loading">
+        <mat-icon *ngIf="loading" class="m-r-6">hourglass_top</mat-icon>
+        Ir para pagamento
+      </button>
+      <button mat-stroked-button color="primary" (click)="voltar()">Voltar</button>
+    </div>
+
+    <div class="m-t-12 text-muted f-s-13" *ngIf="ownerDenied || billing?.proprietario === false">
+      Somente o proprietário pode regularizar a assinatura.
+    </div>
+  </mat-card-content>
+</mat-card>

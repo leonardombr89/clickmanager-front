@@ -83,6 +83,7 @@
       }
 
       <div class="m-t-30" [ngClass]="{ 'p-l-24 p-r-24': options.horizontal }">
+        <app-billing-banner></app-billing-banner>
         <app-breadcrumb></app-breadcrumb>
         <!-- ============================================================== -->
         <!-- Outlet -->
@@ -124,7 +125,14 @@
     </div>
 
     <div class="m-t-12">
-      <h5 class="f-s-16 f-w-700 m-b-12">Aplicativos</h5>
+      <div class="d-flex justify-content-between align-items-center m-b-12">
+        <div class="d-flex align-items-center gap-8">
+          <h5 class="f-s-16 f-w-700 m-0">Aplicativos</h5>
+          <span class="text-muted f-s-12">|</span>
+          <a [routerLink]="['/minha-conta']" class="f-s-12 text-primary text-decoration-none">Minha Conta</a>
+        </div>
+        <a [routerLink]="['/apps']" class="f-s-12 text-primary text-decoration-none">Ver todos</a>
+      </div>
       @for(appdd of apps; track appdd.id) {
       <a [routerLink]="[appdd.link]" class="d-flex align-items-center text-decoration-none m-b-16 gap-12">
         <button mat-mini-fab class="text-primary bg-light-primary shadow-none rounded">

@@ -1,0 +1,15 @@
+<mat-card class="cardWithShadow">
+
+  <app-card-header titulo="Redirecionando para pagamento" [mostrarDivisor]="true"></app-card-header>
+
+  <mat-card-content>
+    <div class="d-flex flex-column align-items-center gap-12">
+      <p class="text-muted f-s-14 m-0">Aguarde enquanto iniciamos o checkout.</p>
+      <mat-spinner diameter="40"></mat-spinner>
+      <button mat-stroked-button color="primary" (click)="voltar()" class="m-t-8">
+        Voltar
+      </button>
+    </div>
+  </mat-card-content>
+
+</mat-card>

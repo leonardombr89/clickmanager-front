@@ -22,6 +22,9 @@ import { AuthService } from 'src/app/services/auth.service';
 import { NavItem } from './vertical/sidebar/nav-item/nav-item';
 import { Usuario } from 'src/app/models/usuario/usuario.model';
 import { BrandingComponent } from './vertical/sidebar/branding.component';
+import { BillingBannerComponent } from '../../components/billing-banner/billing-banner.component';
+import { BillingService } from 'src/app/pages/billing/services/billing.service';
+import { BillingStateService } from 'src/app/pages/billing/services/billing-state.service';
 
 const MOBILE_VIEW = 'screen and (max-width: 768px)';
 const TABLET_VIEW = 'screen and (min-width: 769px) and (max-width: 1024px)';
@@ -57,7 +60,8 @@ interface quicklinks {
     HeaderComponent,
     AppBreadcrumbComponent,
     CustomizerComponent,
-    BrandingComponent
+    BrandingComponent,
+    BillingBannerComponent
   ],
   templateUrl: './full.component.html',
   styleUrls: [],
@@ -114,6 +118,8 @@ export class FullComponent implements OnInit {
     private breakpointObserver: BreakpointObserver,
     private navService: NavService,
     private authService: AuthService,
+    private billingService: BillingService,
+    private billingState: BillingStateService,
   ) {
     this.htmlElement = document.querySelector('html')!;
     this.layoutChangesSubscription = this.breakpointObserver
@@ -154,6 +160,7 @@ export class FullComponent implements OnInit {
         this.usuarioLogado = usuario;
         const permissoes = usuario.perfil!.permissoes.map(p => p.chave);
         this.navItemsFiltrados = this.filtrarMenusPorPermissao(navItems, permissoes);
+        this.carregarStatusBilling();
       });
   }
 
@@ -204,6 +211,13 @@ export class FullComponent implements OnInit {
   receiveOptions(options: AppSettings): void {
     this.options = options;
     this.toggleDarkTheme(options);
+  }
+
+  private carregarStatusBilling(): void {
+    this.billingService.obterStatus().subscribe({
+      next: (resp) => this.billingState.setFromResponse(resp),
+      error: () => {}
+    });
   }
 
   toggleDarkTheme(options: AppSettings) {

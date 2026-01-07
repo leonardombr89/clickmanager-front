@@ -15,6 +15,7 @@ export interface Usuario {
   telefone?: string;
   endereco?: Endereco;
   empresa?: Empresa;
+  proprietario?: boolean;
 }
 
   
