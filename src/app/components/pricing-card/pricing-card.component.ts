@@ -22,11 +22,17 @@ export class PricingCardComponent {
   @Output() escolher = new EventEmitter<PlanoPublico>();
 
   preco(plano: PlanoPublico): number {
-    return (plano.preco_centavos || 0) / 100;
+    const cents = plano.preco_centavos ?? (plano as any).precoCentavos ?? 0;
+    return Number.isFinite(cents) ? cents / 100 : 0;
   }
 
   precoAnual(plano: PlanoPublico): number {
     return this.preco(plano) * 12;
+  }
+
+  get valorExibicao(): number | null {
+    const valor = this.mostrarAnual ? this.precoAnual(this.plano) : this.preco(this.plano);
+    return Number.isFinite(valor) ? valor : null;
   }
 
   getBeneficios(plano: PlanoPublico): string[] {

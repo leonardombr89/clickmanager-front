@@ -12,15 +12,15 @@
       <img [src]="imgSrc" alt="badge" width="90" />
     </div>
 
-    <ng-container *ngIf="!isFree; else freeLabel">
+    <ng-container *ngIf="!isFree && valorExibicao !== null; else freeLabel">
       <div class="d-flex align-items-baseline justify-content-center m-b-24">
-        <span class="f-s-16 dollar-sign">R$</span>
         <h2 class="plan-title m-b-0">
-          {{ (mostrarAnual ? precoAnual(plano) : preco(plano)) | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
+          {{ valorExibicao | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
         </h2>
         <span class="f-s-16 per-month">/{{ mostrarAnual ? 'ano' : (plano?.periodicidade?.toLowerCase() || 'mensal') }}</span>
       </div>
     </ng-container>
+    
     <ng-template #freeLabel>
       <h2 class="plan-title m-b-24">Free</h2>
     </ng-template>
