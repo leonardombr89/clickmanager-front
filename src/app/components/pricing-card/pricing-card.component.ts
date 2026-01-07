@@ -1,0 +1,55 @@
+import { CommonModule, CurrencyPipe, NgIf, NgFor } from '@angular/common';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { MatCardModule } from '@angular/material/card';
+import { MatButtonModule } from '@angular/material/button';
+import { TablerIconsModule } from 'angular-tabler-icons';
+import { PlanoPublico } from 'src/app/types/plano-publico.type';
+
+@Component({
+  selector: 'app-pricing-card',
+  standalone: true,
+  imports: [CommonModule, MatCardModule, MatButtonModule, TablerIconsModule, CurrencyPipe, NgIf, NgFor],
+  templateUrl: './pricing-card.component.html',
+  styleUrls: ['./pricing-card.component.scss']
+})
+export class PricingCardComponent {
+  @Input() plano!: PlanoPublico;
+  @Input() popular: boolean = false;
+  @Input() imgSrc?: string;
+  @Input() ativo: boolean = false;
+  @Input() mostrarAnual: boolean = false;
+  @Input() selecionarTexto: string = 'Escolher plano';
+  @Output() escolher = new EventEmitter<PlanoPublico>();
+
+  preco(plano: PlanoPublico): number {
+    return (plano.preco_centavos || 0) / 100;
+  }
+
+  precoAnual(plano: PlanoPublico): number {
+    return this.preco(plano) * 12;
+  }
+
+  getBeneficios(plano: PlanoPublico): string[] {
+    const beneficios = plano.beneficios_json;
+    if (!beneficios) return [];
+    if (Array.isArray(beneficios)) return beneficios as string[];
+    try {
+      const parsed = JSON.parse(beneficios);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }
+
+  onEscolher(): void {
+    this.escolher.emit(this.plano);
+  }
+
+  get beneficios(): string[] {
+    return this.getBeneficios(this.plano);
+  }
+
+  get isFree(): boolean {
+    return !this.preco(this.plano);
+  }
+}

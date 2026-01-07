@@ -1,0 +1,47 @@
+.selectable {
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: border 0.2s ease, box-shadow 0.2s ease, transform 0.1s ease;
+  border-radius: 20px;
+  text-align: center;
+}
+
+.selectable:hover {
+  border: 1px solid #d5d8dc;
+  transform: translateY(-2px);
+}
+
+.selectable.active {
+  border: 1px solid #5d87ff;
+  box-shadow: 0 8px 20px rgba(93, 135, 255, 0.15);
+}
+
+.popular-badge {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  letter-spacing: 0.5px;
+}
+
+.pricing-card {
+  min-height: 360px;
+}
+
+.plan-title {
+  font-size: 38px;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.dollar-sign {
+  font-weight: 600;
+}
+
+.per-month {
+  color: #6c757d;
+  margin-left: 6px;
+}
+
+.btn-selected {
+  box-shadow: 0 6px 18px rgba(93, 135, 255, 0.25);
+}

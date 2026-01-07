@@ -102,6 +102,15 @@ export const routes: Routes = [
         canActivate: [AuthGuard],
         data: { perfil: 'GESTOR' },
       },
+      {
+        path: 'billing',
+        loadChildren: () =>
+          import('./pages/billing/billing.routes').then(
+            (m) => m.BillingRoutes
+          ),
+        canActivate: [AuthGuard],
+        data: { perfil: 'GESTOR' },
+      }
     ],
   },
   {

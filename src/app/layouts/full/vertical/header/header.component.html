@@ -19,6 +19,10 @@
         Aplicativos <i-tabler name="chevron-down" class="icon-16 m-l-4"></i-tabler>
       </div>
     </button>
+    @if(usuarioLogado?.proprietario) {
+    <span class="text-muted m-x-4 m-t-6" style="opacity: 0.35; font-size: 12px;">|</span>
+    <a mat-button [routerLink]="['/minha-conta']">Minha Conta</a>
+    }
     <mat-menu #appsmenu="matMenu" class="apps-dd cardWithShadow">
       <div class="row">
         <div class="col-sm-8 b-r-1 p-r-0">
