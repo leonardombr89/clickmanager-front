@@ -46,7 +46,7 @@ export class BillingStateService {
 
     const warning = warningHeader === 'true';
     const days = daysRaw ? Number(daysRaw) : undefined;
-    const message = this.decodeBase64(messageEncoded) || undefined;
+    const message = this.normalizeMessage(this.decodeBase64(messageEncoded) || undefined);
 
     const billing: BillingAccessResponse = {
       allowed: true,
@@ -103,6 +103,16 @@ export class BillingStateService {
     }
   }
 
+  private normalizeMessage(msg?: string | null): string | undefined {
+    if (!msg) return msg ?? undefined;
+    try {
+      const fixed = decodeURIComponent(escape(msg));
+      return fixed || msg;
+    } catch {
+      return msg;
+    }
+  }
+
   private setBilling(billing: BillingAccessResponse): void {
     this.billingSubject.next(billing);
     this.persist(billing);
@@ -110,7 +120,7 @@ export class BillingStateService {
 
   private normalize(billing: BillingAccessResponse): BillingAccessResponse {
     const checkoutUrl = (billing as any).checkoutUrl ?? (billing as any).checkout_url ?? (billing as any).checkouturl;
-    return { ...billing, checkoutUrl };
+    return { ...billing, checkoutUrl, message: this.normalizeMessage(billing.message) };
   }
 
   private persist(billing: BillingAccessResponse | null): void {
