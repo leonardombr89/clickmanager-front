@@ -177,9 +177,8 @@ export class BillingPagamentoComponent implements OnInit {
   }
 
   irParaPagamento(): void {
-    const checkoutEndpoint = (this.billing?.checkoutUrl?.includes('/assinaturas/checkout') && this.billing.checkoutUrl)
-      ? this.billing.checkoutUrl
-      : this.fallbackCheckoutEndpoint;
+    // Usa sempre o endpoint atual de checkout de assinaturas (Asaas)
+    const checkoutEndpoint = this.fallbackCheckoutEndpoint;
     if (!this.planoSelecionado?.id) {
       this.toastr.warning('Selecione um plano para continuar.');
       return;
