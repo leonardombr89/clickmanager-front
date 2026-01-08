@@ -1,0 +1,12 @@
+<mat-card class="cardWithShadow billing-card-full">
+  <mat-card-content class="d-flex flex-column align-items-center gap-12 p-24">
+    <h3 class="f-w-700 m-0">Validando pagamento...</h3>
+    <p class="text-muted f-s-14 m-0 text-center">
+      Estamos verificando o status da assinatura. Isso pode levar alguns segundos.
+    </p>
+    <mat-progress-spinner *ngIf="loading" diameter="48" mode="indeterminate"></mat-progress-spinner>
+    <button mat-flat-button color="primary" (click)="tentarNovamente()" [disabled]="loading">
+      Tentar novamente
+    </button>
+  </mat-card-content>
+</mat-card>

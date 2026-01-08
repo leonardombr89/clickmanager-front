@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { BillingBlockedComponent } from './billing-blocked/billing-blocked.component';
 import { BillingPagamentoComponent } from './billing-pagamento/billing-pagamento.component';
+import { BillingReturnComponent } from './billing-return/billing-return.component';
 
 export const BillingRoutes: Routes = [
   {
@@ -28,6 +29,14 @@ export const BillingRoutes: Routes = [
         data: {
           title: 'Pagamento',
           urls: [{ title: 'Dashboard', url: '/dashboards/dashboard1' }, { title: 'Pagamento' }],
+        },
+      },
+      {
+        path: 'return',
+        component: BillingReturnComponent,
+        data: {
+          title: 'Retorno de pagamento',
+          urls: [{ title: 'Dashboard', url: '/dashboards/dashboard1' }, { title: 'Retorno de pagamento' }],
         },
       },
     ],
