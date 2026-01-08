@@ -177,7 +177,9 @@ export class BillingPagamentoComponent implements OnInit {
   }
 
   irParaPagamento(): void {
-    const checkoutEndpoint = this.billing?.checkoutUrl || this.fallbackCheckoutEndpoint;
+    const checkoutEndpoint = (this.billing?.checkoutUrl?.includes('/assinaturas/checkout') && this.billing.checkoutUrl)
+      ? this.billing.checkoutUrl
+      : this.fallbackCheckoutEndpoint;
     if (!this.planoSelecionado?.id) {
       this.toastr.warning('Selecione um plano para continuar.');
       return;
