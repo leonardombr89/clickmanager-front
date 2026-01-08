@@ -5,7 +5,7 @@
       <div>
         <div class="f-w-700">{{ billingState.snapshot?.message || 'Assinatura requer atenção.' }}</div>
         <div class="text-muted f-s-13" *ngIf="billingState.snapshot?.expiresAt">
-          Vencimento: {{ billingState.snapshot?.expiresAt | date:'shortDate' }}
+          Vencimento: {{ billingState.snapshot?.expiresAt | date:'dd/MM/yyyy' }}
         </div>
       </div>
     </div>
