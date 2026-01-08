@@ -21,7 +21,8 @@ export class BillingInterceptor implements HttpInterceptor {
     '/assets/',
     '/billing/blocked',
     '/billing/pay',
-    '/billing/pagamento'
+    '/billing/pagamento',
+    '/billing/return'
   ];
 
   constructor(
@@ -50,7 +51,11 @@ export class BillingInterceptor implements HttpInterceptor {
           const returnUrl = this.router.url;
           this.billingState.setReturnUrl(returnUrl);
           this.billingState.setFromErrorBody(error, returnUrl);
-          this.router.navigate(['/billing/blocked'], { queryParams: { returnUrl } });
+          sessionStorage.setItem('billing_return_url', returnUrl);
+          const inBillingFlow = this.router.url.includes('/billing/blocked') || this.router.url.includes('/billing/pagamento') || this.router.url.includes('/billing/return');
+          if (!inBillingFlow) {
+            this.router.navigate(['/billing/blocked'], { queryParams: { returnUrl } });
+          }
         }
 
         if (error.status === 403 && this.isCheckout(req.url) && this.isOwnerOnlyMessage(error)) {

@@ -10,12 +10,14 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { ToastrService } from 'ngx-toastr';
 import { BillingStateService } from 'src/app/pages/billing/services/billing-state.service';
 import { BillingService } from 'src/app/pages/billing/services/billing.service';
-import { ApiService } from 'src/app/services/api.service';
 import { PlanoPublico } from 'src/app/types/plano-publico.type';
 import { CardHeaderComponent } from 'src/app/components/card-header/card-header.component';
 import { BillingAccessResponse } from 'src/app/models/billing-access.model';
 import { TablerIconsModule } from 'angular-tabler-icons';
 import { PricingCardComponent } from 'src/app/components/pricing-card/pricing-card.component';
+import { AuthService } from 'src/app/services/auth.service';
+import { Usuario } from 'src/app/models/usuario/usuario.model';
+import { CheckoutResponse } from 'src/app/models/billing-access.model';
 
 @Component({
   selector: 'app-billing-pagamento',
@@ -32,17 +34,21 @@ export class BillingPagamentoComponent implements OnInit {
   planos: PlanoPublico[] = [];
   planoSelecionado: PlanoPublico | null = null;
   mostrarAnual = false;
+  checkoutIndisponivel = false;
+  usuario?: Usuario | null;
+  private readonly fallbackCheckoutEndpoint = 'api/assinaturas/checkout';
 
   constructor(
     private billingState: BillingStateService,
     private billingService: BillingService,
-    private api: ApiService,
     private toastr: ToastrService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
+    this.authService.usuario$.subscribe(u => this.usuario = u);
     this.returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
     this.billing = this.billingState.snapshot;
 
@@ -50,6 +56,9 @@ export class BillingPagamentoComponent implements OnInit {
       this.carregarStatus();
     } else {
       this.verificarPlanos();
+      if (!this.billing.checkoutUrl) {
+        this.carregarStatus();
+      }
     }
   }
 
@@ -59,9 +68,16 @@ export class BillingPagamentoComponent implements OnInit {
         this.billingState.setFromResponse(resp);
         this.billing = resp;
         this.verificarPlanos();
+        this.checkoutIndisponivel = !resp?.checkoutUrl;
       },
       error: () => {
-        this.toastr.error('Não foi possível carregar o status de assinatura.');
+        // se 402, o interceptor já redireciona. Aqui evitamos travar o botão.
+        this.billing = this.billingState.snapshot;
+        if (!this.billing) {
+          this.toastr.error('Não foi possível carregar o status de assinatura.');
+        } else if (!this.billing.checkoutUrl) {
+          this.checkoutIndisponivel = true;
+        }
       }
     });
   }
@@ -82,8 +98,17 @@ export class BillingPagamentoComponent implements OnInit {
         this.planos = comDefaults.sort((a, b) => (a.ordem_exibicao || 0) - (b.ordem_exibicao || 0));
         if (this.billing?.planoId) {
           this.planoSelecionado = this.planos.find((plano) => plano.id === this.billing?.planoId) || null;
+          if (this.planoSelecionado?.id) {
+            sessionStorage.setItem('billing_selected_plan', this.planoSelecionado.id.toString());
+          }
         } else {
-          this.planoSelecionado = null;
+          const stored = sessionStorage.getItem('billing_selected_plan');
+          if (stored) {
+            const found = this.planos.find(p => p.id?.toString() === stored);
+            this.planoSelecionado = found || null;
+          } else {
+            this.planoSelecionado = null;
+          }
         }
       },
       error: () => {
@@ -100,12 +125,8 @@ export class BillingPagamentoComponent implements OnInit {
 
   get podePagar(): boolean {
     if (this.ownerDenied) return false;
-    const autorizado = this.billing?.proprietario === true;
-    if (!autorizado) return false;
-    if (!this.billing?.planoId) {
-      return !!this.planoSelecionado;
-    }
-    return true;
+    if (!this.billing?.checkoutUrl) return false;
+    return true; // sempre habilitado quando há checkoutUrl
   }
 
   getBeneficios(plano: PlanoPublico): string[] {
@@ -120,6 +141,17 @@ export class BillingPagamentoComponent implements OnInit {
     }
   }
 
+  private get isProprietario(): boolean {
+    if (this.billing?.proprietario === false || this.usuario?.proprietario === false) {
+      return false;
+    }
+    if (this.billing?.proprietario === true || this.usuario?.proprietario === true) {
+      return true;
+    }
+    // se ainda não sabemos, deixamos o backend validar (evita travar botão)
+    return true;
+  }
+
   preco(plano: PlanoPublico): number {
     return (plano.preco_centavos || 0) / 100;
   }
@@ -130,6 +162,9 @@ export class BillingPagamentoComponent implements OnInit {
 
   selecionar(plano: PlanoPublico): void {
     this.planoSelecionado = plano;
+    if (plano?.id) {
+      sessionStorage.setItem('billing_selected_plan', plano.id.toString());
+    }
   }
 
   private fallbackImg(idx: number): string {
@@ -142,23 +177,26 @@ export class BillingPagamentoComponent implements OnInit {
   }
 
   irParaPagamento(): void {
-    if (this.billing?.proprietario !== true) {
-      this.toastr.error('Somente o proprietário pode regularizar a assinatura.');
-      this.ownerDenied = true;
+    const checkoutEndpoint = this.billing?.checkoutUrl || this.fallbackCheckoutEndpoint;
+    if (!this.planoSelecionado?.id) {
+      this.toastr.warning('Selecione um plano para continuar.');
       return;
     }
 
     this.loading = true;
-    const body: any = {};
-    if (this.planoSelecionado?.id) {
-      body.planoId = this.planoSelecionado.id;
-    }
+    const body: any = { planoId: this.planoSelecionado.id };
 
-    this.billingService.checkout(body).subscribe({
-      next: (resp) => {
-        const link = resp?.link || resp?.initPoint || resp?.init_point;
-        if (link) {
-          window.location.href = link;
+    const obs = checkoutEndpoint === this.fallbackCheckoutEndpoint
+      ? this.billingService.checkoutAssinatura(this.planoSelecionado.id)
+      : this.billingService.checkoutUrl(checkoutEndpoint, body);
+
+    obs.subscribe({
+      next: (resp: CheckoutResponse) => {
+        const invoiceUrl = resp?.initPoint || (resp as any)?.invoiceUrl;
+        if (invoiceUrl) {
+          sessionStorage.setItem('asaas_last_payment_id', resp?.paymentReference || resp?.paymentId || '');
+          sessionStorage.setItem('asaas_last_invoice_url', invoiceUrl);
+          window.location.href = invoiceUrl;
         } else {
           this.toastr.error('Não foi possível iniciar o checkout.');
         }
@@ -166,7 +204,7 @@ export class BillingPagamentoComponent implements OnInit {
       error: (err) => {
         if (err?.status === 403) {
           this.ownerDenied = true;
-          this.toastr.error('Somente o proprietário pode regularizar a assinatura.');
+          this.toastr.error(err?.error?.message || 'Somente o proprietário pode regularizar a assinatura.');
         } else if (err?.error?.billing) {
           this.billingState.setFromErrorBody(err, this.router.url);
           this.billing = this.billingState.snapshot;
@@ -185,7 +223,7 @@ export class BillingPagamentoComponent implements OnInit {
     if (this.returnUrl) {
       this.router.navigateByUrl(this.returnUrl);
     } else {
-      this.router.navigate(['/']);
+      this.router.navigate(['/billing/blocked']);
     }
   }
 }

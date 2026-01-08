@@ -6,8 +6,22 @@ import { BillingAccessResponse } from 'src/app/models/billing-access.model';
 
 @Injectable({ providedIn: 'root' })
 export class BillingStateService {
+  private readonly STORAGE_KEY = 'billing_state';
+  private readonly RETURN_URL_KEY = 'billing_return_url';
   private billingSubject = new BehaviorSubject<BillingAccessResponse | null>(null);
   billing$ = this.billingSubject.asObservable();
+
+  constructor() {
+    const stored = sessionStorage.getItem(this.STORAGE_KEY);
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored) as BillingAccessResponse;
+        this.billingSubject.next(parsed);
+      } catch {
+        sessionStorage.removeItem(this.STORAGE_KEY);
+      }
+    }
+  }
 
   get snapshot(): BillingAccessResponse | null {
     return this.billingSubject.value;
@@ -42,36 +56,42 @@ export class BillingStateService {
       expiresAt,
       message,
     };
-    this.billingSubject.next(billing);
+    this.setBilling(billing);
   }
 
   setFromErrorBody(err: any, returnUrl?: string): void {
-    const billing = err?.error?.billing as BillingAccessResponse | undefined;
-    if (!billing) return;
+    const billingRaw = err?.error?.billing as BillingAccessResponse | undefined;
+    if (!billingRaw) return;
+    const billing = this.normalize(billingRaw);
     const enriched: BillingAccessResponse = {
       ...billing,
       allowed: billing.allowed ?? false,
       returnUrl: returnUrl ?? this.snapshot?.returnUrl,
     };
-    this.billingSubject.next(enriched);
+    this.setBilling(enriched);
   }
 
   setFromResponse(billing: BillingAccessResponse): void {
     if (!billing) return;
-    this.billingSubject.next(billing);
+    this.setBilling(this.normalize(billing));
   }
 
   setReturnUrl(url: string): void {
     const current = this.snapshot;
-    if (!current) {
-      this.billingSubject.next({ allowed: false, returnUrl: url });
-      return;
-    }
-    this.billingSubject.next({ ...current, returnUrl: url });
+    const nextValue = current ? { ...current, returnUrl: url } : { allowed: false, returnUrl: url };
+    sessionStorage.setItem(this.RETURN_URL_KEY, url);
+    this.billingSubject.next(nextValue);
+    this.persist(nextValue);
+  }
+
+  getReturnUrl(): string | null {
+    return sessionStorage.getItem(this.RETURN_URL_KEY);
   }
 
   clear(): void {
     this.billingSubject.next(null);
+    sessionStorage.removeItem(this.STORAGE_KEY);
+    sessionStorage.removeItem(this.RETURN_URL_KEY);
   }
 
   private decodeBase64(value: string): string | null {
@@ -80,6 +100,24 @@ export class BillingStateService {
       return atob(value);
     } catch {
       return value;
+    }
+  }
+
+  private setBilling(billing: BillingAccessResponse): void {
+    this.billingSubject.next(billing);
+    this.persist(billing);
+  }
+
+  private normalize(billing: BillingAccessResponse): BillingAccessResponse {
+    const checkoutUrl = (billing as any).checkoutUrl ?? (billing as any).checkout_url ?? (billing as any).checkouturl;
+    return { ...billing, checkoutUrl };
+  }
+
+  private persist(billing: BillingAccessResponse | null): void {
+    if (billing) {
+      sessionStorage.setItem(this.STORAGE_KEY, JSON.stringify(billing));
+    } else {
+      sessionStorage.removeItem(this.STORAGE_KEY);
     }
   }
 }

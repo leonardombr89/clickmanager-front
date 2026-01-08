@@ -39,9 +39,9 @@
     </div>
 
     <div class="m-t-16 d-flex flex-wrap gap-10 align-items-center">
-      <button mat-flat-button color="primary" (click)="irParaPagamento()" [disabled]="!podePagar || loading">
+      <button mat-flat-button color="primary" (click)="irParaPagamento()" [disabled]="loading">
         <mat-icon *ngIf="loading" class="m-r-6">hourglass_top</mat-icon>
-        Ir para pagamento
+        Pagar agora
       </button>
       <button mat-stroked-button color="primary" (click)="voltar()">Voltar</button>
     </div>
