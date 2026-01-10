@@ -16,8 +16,15 @@
     <div class="col-md-6 m-b-16">
       <mat-card class="cardWithShadow h-100">
         <mat-card-content>
-          <h3 class="f-w-700 m-b-8">Minha assinatura</h3>
-          <p class="text-muted m-b-12">{{ resumo?.planoNome }} ({{ resumo?.planoCodigo }})</p>
+          <div class="card-heading">
+            <div>
+              <h3 class="f-w-700 m-b-4">Minha assinatura</h3>
+              <p class="text-muted m-b-0">{{ resumo?.planoNome }} ({{ resumo?.planoCodigo }})</p>
+            </div>
+            <button mat-stroked-button color="primary" *ngIf="emTrial" (click)="irParaPlanos()">
+              Escolher plano
+            </button>
+          </div>
           <dl class="assinatura-meta f-s-14">
             <div class="meta-row">
               <dt>Status</dt>

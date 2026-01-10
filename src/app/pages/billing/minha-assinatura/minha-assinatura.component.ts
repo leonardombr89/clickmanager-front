@@ -1,5 +1,6 @@
 import { CommonModule, DatePipe, CurrencyPipe } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatTableModule } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
@@ -50,7 +51,8 @@ export class MinhaAssinaturaComponent implements OnInit {
   constructor(
     private billingService: BillingService,
     private authService: AuthService,
-    private toastr: ToastrService
+    private toastr: ToastrService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -122,5 +124,14 @@ export class MinhaAssinaturaComponent implements OnInit {
     } catch {
       return [];
     }
+  }
+
+  get emTrial(): boolean {
+    const status = (this.resumo?.status || '').toString().toUpperCase();
+    return status.includes('TRIAL');
+  }
+
+  irParaPlanos(): void {
+    this.router.navigate(['/billing/pagamento']);
   }
 }
