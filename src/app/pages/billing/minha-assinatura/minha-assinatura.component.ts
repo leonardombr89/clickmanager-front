@@ -45,6 +45,7 @@ export class MinhaAssinaturaComponent implements OnInit {
   pagamentos: Pagamento[] = [];
   usuario?: Usuario | null;
   acessoNegado = false;
+  resumoCarregado = false;
 
   displayedColumns = ['valor', 'forma', 'criado', 'confirmado', 'status', 'referencia', 'link'];
 
@@ -59,12 +60,17 @@ export class MinhaAssinaturaComponent implements OnInit {
     this.authService.usuario$.subscribe(u => {
       this.usuario = u;
       this.acessoNegado = !u?.proprietario;
+
+       if (this.acessoNegado) {
+         this.loading = false;
+         return;
+       }
+
+       if (!this.resumoCarregado) {
+         this.resumoCarregado = true;
+         this.carregarResumo();
+       }
     });
-    if (this.acessoNegado) {
-      this.loading = false;
-      return;
-    }
-    this.carregarResumo();
   }
 
   carregarResumo(): void {
@@ -79,6 +85,7 @@ export class MinhaAssinaturaComponent implements OnInit {
       },
       error: () => {
         this.toastr.error('Não foi possível carregar a assinatura.');
+        this.resumoCarregado = false;
         this.loading = false;
       }
     });
