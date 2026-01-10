@@ -31,6 +31,10 @@ export class BillingService {
     return this.api.post<CheckoutResponse>(this.assinaturaCheckoutEndpoint, { planoId });
   }
 
+  resumoAssinatura(): Observable<any> {
+    return this.api.get<any>('api/billing/assinatura/resumo');
+  }
+
   checkoutUrl(url: string, body: any = {}): Observable<CheckoutResponse> {
     const normalized = this.normalizeUrl(url);
     return this.api.post<CheckoutResponse>(normalized, body);

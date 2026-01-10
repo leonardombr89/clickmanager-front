@@ -123,6 +123,15 @@ export const routes: Routes = [
         canActivate: [AuthGuard],
         data: { perfil: 'GESTOR' },
       },
+      {
+        path: 'billing/minha-assinatura',
+        loadComponent: () =>
+          import('./pages/billing/minha-assinatura/minha-assinatura.component').then(
+            (m) => m.MinhaAssinaturaComponent
+          ),
+        canActivate: [AuthGuard],
+        data: { perfil: 'GESTOR' },
+      },
     ],
   },
   {
