@@ -105,6 +105,10 @@ export class MinhaAssinaturaComponent implements OnInit {
     }
   }
 
+  statusPendente(status?: string): boolean {
+    return (status || '').toUpperCase() === 'PENDENTE';
+  }
+
   get beneficios(): string[] {
     const raw = this.resumo?.beneficiosJson;
     if (!raw) return [];
