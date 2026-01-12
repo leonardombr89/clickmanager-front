@@ -311,10 +311,10 @@ export const PagesRoutes: Routes = [
     path: 'pedido/detalhe/:id',
     component: DetalhesPedidoComponent,
     data: {
-      title: 'detalhes Pedido',
+      title: 'Detalhes Pedido',
       urls: [
-        { title: 'detalhes de Pedidos', url: '/page/pedido' },
-        { title: 'detalhes Pedido' }
+        { title: 'Detalhes de Pedidos', url: '/page/pedido' },
+        { title: 'Detalhes Pedido' }
       ]
     }
   },

@@ -48,7 +48,7 @@ export class ListarPedidoComponent implements OnInit {
   textoPesquisa = '';
 
   expandedElement: PedidoListagem | null = null;
-  readonly columnsToDisplay = ['numero', 'cliente', 'total', 'acoes'];
+  readonly columnsToDisplay = ['numero', 'cliente', 'status', 'total', 'acoes'];
   readonly columnsToDisplayWithExpand = [...this.columnsToDisplay, 'expand'];
 
   ngOnInit(): void {

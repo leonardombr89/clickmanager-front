@@ -16,6 +16,7 @@ export interface Usuario {
   endereco?: Endereco;
   empresa?: Empresa;
   proprietario?: boolean;
+  onboardingIgnorado?: boolean;
 }
 
   

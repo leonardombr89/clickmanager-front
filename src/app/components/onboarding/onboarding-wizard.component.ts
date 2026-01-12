@@ -21,9 +21,10 @@ import { EmpresaFormComponent } from "src/app/pages/empresa/empresa-form.compone
 
 export interface OnboardingWizardData {
   empresaNome: string;
+  naoMostrarMaisDefault?: boolean;
 }
 
-type OpcaoPadrao = { id: number; nome: string };
+type OpcaoPadrao = { id: number; nome: string; descricao?: string };
 
 @Component({
   selector: 'app-onboarding-wizard',
@@ -39,7 +40,7 @@ type OpcaoPadrao = { id: number; nome: string };
     CardHeaderComponent,
     EmpresaFormComponent
 ],
-  templateUrl: './onboarding-wizard.component.html',
+  templateUrl: './onboarding-wizard.component.html'
 })
 export class OnboardingWizardComponent implements OnInit {
   @ViewChild('stepper') stepper!: MatStepper;
@@ -103,8 +104,12 @@ export class OnboardingWizardComponent implements OnInit {
     });
 
     this.finalForm = this.fb.group({
-      naoMostrarMais: [false],
+      naoMostrarMais: [!!this.data?.naoMostrarMaisDefault],
     });
+  }
+
+  fechar(): void {
+    this.dialogRef.close(false);
   }
 
   ngOnInit(): void {
@@ -204,6 +209,26 @@ export class OnboardingWizardComponent implements OnInit {
     this.atualizarSelecionados(checked, id, this.selecionadosServicos, this.servicosForm);
   }
 
+  selecionarTodosAcabamentos(checked: boolean): void {
+    this.selecionarTodos(checked, this.acabamentosPadrao, this.selecionadosAcabamentos, this.acabamentosForm);
+  }
+
+  selecionarTodasCores(checked: boolean): void {
+    this.selecionarTodos(checked, this.coresPadrao, this.selecionadosCores, this.coresForm);
+  }
+
+  selecionarTodosFormatos(checked: boolean): void {
+    this.selecionarTodos(checked, this.formatosPadrao, this.selecionadosFormatos, this.formatosForm);
+  }
+
+  selecionarTodosMateriais(checked: boolean): void {
+    this.selecionarTodos(checked, this.materiaisPadrao, this.selecionadosMateriais, this.materiaisForm);
+  }
+
+  selecionarTodosServicos(checked: boolean): void {
+    this.selecionarTodos(checked, this.servicosPadrao, this.selecionadosServicos, this.servicosForm);
+  }
+
   private atualizarSelecionados(
     checked: boolean,
     id: number,
@@ -214,6 +239,19 @@ export class OnboardingWizardComponent implements OnInit {
       selecionados.add(id);
     } else {
       selecionados.delete(id);
+    }
+    form.get('selecionadosIds')?.setValue(Array.from(selecionados));
+  }
+
+  private selecionarTodos(
+    checked: boolean,
+    lista: OpcaoPadrao[],
+    selecionados: Set<number>,
+    form: FormGroup
+  ): void {
+    selecionados.clear();
+    if (checked) {
+      lista.forEach(item => selecionados.add(item.id));
     }
     form.get('selecionadosIds')?.setValue(Array.from(selecionados));
   }
