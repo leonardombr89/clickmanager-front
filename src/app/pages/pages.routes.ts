@@ -23,6 +23,7 @@ import { ListarServicoComponent } from './cadastro-tecnico/servicos/listar-servi
 import { CalculadoraConfigComponent } from './smart-calc-config/smart-calc-config/smart-calc-config.component';
 import { EmailServidorComponent } from './config/email-servidor/email-servidor.component';
 import { GerenciarPerfilComponent } from './perfil/gerenciar-perfil/gerenciar-perfil.component';
+import { AjudaComponent } from './ajuda/ajuda.component';
 
 export const PagesRoutes: Routes = [
   {
@@ -51,6 +52,17 @@ export const PagesRoutes: Routes = [
       urls: [
         { title: 'Dashboard', url: '/dashboards/dashboard1' },
         { title: 'Gerenciamento de perfil dos usuários' }
+      ]
+    }
+  },
+  {
+    path: 'ajuda',
+    component: AjudaComponent,
+    data: {
+      title: 'Central de ajuda',
+      urls: [
+        { title: 'Dashboard', url: '/dashboards/dashboard1' },
+        { title: 'Ajuda' }
       ]
     }
   },
@@ -355,10 +367,10 @@ export const PagesRoutes: Routes = [
     path: 'calculadora/config/criar',
     component: CalculadoraConfigComponent,
     data: {
-      title: 'Calculadora Config',
+      title: 'Configuração SmartCalc',
       urls: [
-        { title: 'Calculadora Config', url: '/page/calculadora/config' },
-        { title: 'Calculadora Config' }
+        { title: 'Configuração SmartCalc', url: '/page/calculadora/config' },
+        { title: 'Configuração SmartCalc' }
       ]
     }
   },

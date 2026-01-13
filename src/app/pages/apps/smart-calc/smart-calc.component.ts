@@ -7,10 +7,14 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatExpansionModule } from '@angular/material/expansion';
 import { MatCardTitle, MatCard } from '@angular/material/card';
 
 import { InputMultiSelectComponent } from 'src/app/components/inputs/input-multi-select/input-multi-select-component';
 import { InputNumericoComponent } from 'src/app/components/inputs/input-numerico/input-numerico.component';
+import { InputOptionsComponent } from 'src/app/components/inputs/input-options/input-options.component';
 
 import { SmartCalcInitDataService } from './smart-calc-init-data.service';
 import { SmartCalcDataService } from './smart-calc-data.service'; // (por enquanto mantém cálculo + pedido aqui)
@@ -51,8 +55,12 @@ type Acabamento = { id: number; nome: string };
     MatSelectModule,
     MatButtonModule,
     MatIconModule,
+    MatProgressSpinnerModule,
+    MatChipsModule,
+    MatExpansionModule,
     InputMultiSelectComponent,
     InputNumericoComponent,
+    InputOptionsComponent,
     MatCardTitle,
     MatCard,
   ],
@@ -86,6 +94,7 @@ export class SmartCalcComponent implements OnInit {
   carregandoCalculo = false;
   erroCalculo: string | null = null;
   carregandoAdd = false;
+  needsRecalcular = signal(false);
 
   // =========================
   // FORM
@@ -109,6 +118,7 @@ export class SmartCalcComponent implements OnInit {
   observacao = computed<string | undefined>(() => this.resultado()?.observacao);
   total = computed<number>(() => this.resultado()?.total ?? 0);
   melhor = computed<SmartCalcItem | null>(() => this.itens()[0] ?? null);
+  temResultado = computed<boolean>(() => !!this.resultado() && this.itens().length > 0);
 
   // =========================
   // CONFIG (tela config antiga)
@@ -157,6 +167,11 @@ export class SmartCalcComponent implements OnInit {
       // ⚠️ regra METRO/LINEAR depende de preço; no INIT atual não vem preço
       // deixe por enquanto sem travar largura, ou ajuste quando o init passar preço.
       this.aplicarModoCobrancaRegraLargura();
+    });
+
+    this.form.valueChanges.subscribe(() => {
+      if (!this.resultado()) return;
+      this.needsRecalcular.set(true);
     });
 
     // 3) carrega configuração (whitelist)
@@ -233,6 +248,7 @@ export class SmartCalcComponent implements OnInit {
   private resetProdutoDependencias(): void {
     this.produtoInitSelecionado = null;
     this.resultado.set(null);
+    this.needsRecalcular.set(false);
 
     this.servicos = [];
     this.acabamentos = [];
@@ -255,6 +271,7 @@ export class SmartCalcComponent implements OnInit {
   private carregarProdutoInit(produtoId: number): void {
     // limpa estado dependente
     this.resultado.set(null);
+    this.needsRecalcular.set(false);
     this.servicos = [];
     this.acabamentos = [];
     this.materiais = [];
@@ -349,6 +366,7 @@ export class SmartCalcComponent implements OnInit {
     this.dataSvc.calcularSmartCalc(payload).subscribe({
       next: (res) => {
         this.resultado.set(res ?? { itens: [], total: 0, observacao: undefined });
+        this.needsRecalcular.set(false);
         this.carregandoCalculo = false;
       },
       error: (err) => {
@@ -356,6 +374,7 @@ export class SmartCalcComponent implements OnInit {
         this.toastr.error(msg, 'SmartCalc', { timeOut: 6000, closeButton: true, progressBar: true });
         this.resultado.set(null);
         this.erroCalculo = msg;
+        this.needsRecalcular.set(false);
         this.carregandoCalculo = false;
       },
     });
@@ -601,5 +620,9 @@ export class SmartCalcComponent implements OnInit {
     } else {
       if (larguraCtrl.disabled) larguraCtrl.enable({ emitEvent: false });
     }
+  }
+
+  podeCalcular(): boolean {
+    return this.configAtiva && this.form.valid && !this.carregandoCalculo && !this.carregandoProdutos;
   }
 }

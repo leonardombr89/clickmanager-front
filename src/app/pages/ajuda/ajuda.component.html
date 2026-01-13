@@ -1,0 +1,60 @@
+<div class="ajuda-container">
+  <header class="ajuda-header">
+    <div>
+      <h2 class="titulo">Central de Ajuda</h2>
+      <p class="subtitulo">Passo a passo para usar o sistema. Use os atalhos ou abra as seções abaixo.</p>
+    </div>
+    <div class="atalhos">
+      <button mat-stroked-button color="primary" (click)="rolarPara('smartcalc')">
+        <mat-icon>calculate</mat-icon>
+        SmartCalc
+      </button>
+      <button mat-stroked-button color="primary" (click)="rolarPara('pedidos')">
+        <mat-icon>assignment</mat-icon>
+        Pedidos
+      </button>
+      <button mat-stroked-button color="primary" (click)="rolarPara('catalogo')">
+        <mat-icon>inventory_2</mat-icon>
+        Catálogo
+      </button>
+    </div>
+    <div class="pesquisa">
+      <mat-form-field appearance="outline" class="w-100">
+        <mat-label>Pesquisar</mat-label>
+        <input matInput type="text" placeholder="Ex: SmartCalc, pagamento, onboarding" (input)="filtro = $any($event.target).value" />
+        <button *ngIf="filtro" mat-icon-button matSuffix aria-label="Limpar" (click)="filtro = ''">
+          <mat-icon>close</mat-icon>
+        </button>
+      </mat-form-field>
+    </div>
+  </header>
+
+  <div class="secoes">
+    <mat-accordion multi>
+      <mat-expansion-panel *ngFor="let secao of filteredSecoes" [id]="secao.id" [expanded]="expandedId === secao.id">
+        <mat-expansion-panel-header>
+          <mat-panel-title>{{ secao.titulo }}</mat-panel-title>
+          <mat-panel-description>{{ secao.descricao }}</mat-panel-description>
+        </mat-expansion-panel-header>
+
+        <div class="conteudo">
+          <ol *ngIf="secao.passos?.length" class="passos">
+            <li *ngFor="let passo of secao.passos">{{ passo }}</li>
+          </ol>
+
+          <div *ngIf="secao.itens?.length" class="itens">
+            <div class="item" *ngFor="let item of secao.itens">
+              <h4>{{ item.titulo }}</h4>
+              <ul>
+                <li *ngFor="let det of item.detalhes">{{ det }}</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </mat-expansion-panel>
+    </mat-accordion>
+    <div *ngIf="!filteredSecoes.length && filtro" class="no-results">
+      Nenhum resultado para "{{ filtro }}".
+    </div>
+  </div>
+</div>

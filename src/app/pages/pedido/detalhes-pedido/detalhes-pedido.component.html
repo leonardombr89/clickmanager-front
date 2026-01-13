@@ -2,12 +2,16 @@
     <mat-card-content>
 
         <!-- Cabeçalho com ações -->
-        <div class="row m-b-24">
-            <div class="col-sm-4 d-flex align-items-center">
-                <h4 class="f-s-18 f-w-600">#{{ (pedido?.status === 'ORCAMENTO' ? pedido?.numeroOrcamento :
-                    pedido?.numero) || '—' }}</h4>
+        <div class="row m-b-16 align-items-center">
+            <div class="col-sm-6 d-flex align-items-center gap-12">
+                <h4 class="f-s-20 f-w-700 m-0">
+                    #{{ (pedido?.status === 'ORCAMENTO' ? pedido?.numeroOrcamento : pedido?.numero) || '—' }}
+                </h4>
+                <span class="status-pill" [ngClass]="statusClass(pedido?.status)">
+                    {{ pedido?.status || '—' }}
+                </span>
             </div>
-  <div class="col-sm-8 text-right d-inline-flex align-items-center justify-content-end">
+            <div class="col-sm-6 text-right d-inline-flex align-items-center justify-content-end">
                 <a routerLink="/page/pedido" mat-stroked-button class="m-r-10">Voltar</a>
 
                 <button mat-flat-button color="primary" class="m-r-10" *ngIf="pedido?.status === 'ORCAMENTO'"
@@ -17,32 +21,46 @@
                 </button>
 
 
-                <button mat-icon-button [matMenuTriggerFor]="printMenu" matTooltip="Imprimir"
-                    class="m-r-10 d-inline-flex align-items-center justify-content-center"
-                    style="height: 36px; width: 36px;">
-                    <mat-icon>print</mat-icon>
-                </button>
-
-                <mat-menu #printMenu="matMenu">
-                    <button mat-menu-item (click)="imprimirPedidoCompleto()">
-                        <mat-icon>description</mat-icon>
-                        <span>Pedido Completo</span>
+                <div class="print-actions">
+                    <button mat-flat-button color="primary" (click)="imprimirPedidoCompleto()">
+                        <mat-icon class="m-r-4">description</mat-icon>
+                        Pedido completo
                     </button>
-                    <button mat-menu-item (click)="imprimirPedidoDuasVias()">
-                        <mat-icon>description</mat-icon>
-                        <span>Pedido 2 Vias</span>
+                    <button mat-stroked-button color="primary" (click)="imprimirPedidoDuasVias()">
+                        <mat-icon class="m-r-4">description</mat-icon>
+                        Duas vias
                     </button>
-                    <button mat-menu-item (click)="imprimirEtiqueta()">
-                        <mat-icon>label</mat-icon>
-                        <span>Etiqueta</span>
+                    <button mat-stroked-button color="accent" (click)="imprimirEtiqueta()">
+                        <mat-icon class="m-r-4">label</mat-icon>
+                        Etiqueta
                     </button>
-                    <button mat-menu-item (click)="abrirWhatsApp()">
-                        <mat-icon>chat</mat-icon>
-                        <span>WhatsApp</span>
+                    <button mat-flat-button class="btn-whatsapp" (click)="abrirWhatsApp()">
+                        <mat-icon class="m-r-4">chat</mat-icon>
+                        WhatsApp
                     </button>
-                </mat-menu>
+                </div>
             </div>
         </div>
+
+        @if(pedido) {
+        <div class="resumo-grid m-b-20">
+            <div class="resumo-card">
+                <div class="label">Total</div>
+                <div class="valor">R$ {{ pedido.total | number:'1.2-2' }}</div>
+                <div class="sub">Subtotal: R$ {{ pedido.subTotal | number:'1.2-2' }}</div>
+            </div>
+            <div class="resumo-card">
+                <div class="label">Pago</div>
+                <div class="valor verde">R$ {{ pedido.valorTotalPago | number:'1.2-2' }}</div>
+                <div class="sub">Frete: R$ {{ pedido.frete | number:'1.2-2' }}</div>
+            </div>
+            <div class="resumo-card">
+                <div class="label">Resta Pagar</div>
+                <div class="valor laranja">R$ {{ pedido.restaPagar | number:'1.2-2' }}</div>
+                <div class="sub">Desconto: R$ {{ pedido.desconto | number:'1.2-2' }}</div>
+            </div>
+        </div>
+        }
 
         <!-- Informacoes do pedido -->
         <div class="row">
@@ -327,14 +345,22 @@
 
             <!-- Totais -->
             <div class="col-md-5">
-                <div class="text-right">
-                    <h5 class="f-w-600 f-s-16 m-b-4">Subtotal: R$ {{ pedido.subTotal | number:'1.2-2' }}</h5>
-                    <h5 class="f-w-600 f-s-16 m-b-4">Frete: R$ {{ pedido.frete | number:'1.2-2' }}</h5>
-                    <h5 class="f-w-600 f-s-16 m-b-4">Desconto: R$ {{ pedido.desconto | number:'1.2-2' }}</h5>
-                    <h5 class="f-w-600 f-s-16 m-b-4">Acréscimo: R$ {{ pedido.acrescimo | number:'1.2-2' }}</h5>
-                    <h3 class="f-s-18 f-w-700 m-t-24">Total: R$ {{ pedido.total | number:'1.2-2' }}</h3>
-                    <h5 class="f-s-16 f-w-600 m-t-12">Valor Pago: R$ {{ pedido.valorTotalPago | number:'1.2-2' }}</h5>
-                    <h5 class="f-s-16 f-w-600 m-t-4">Resta Pagar: R$ {{ pedido.restaPagar | number:'1.2-2' }}</h5>
+                <div class="resumo-grid fin-resumo">
+                    <div class="resumo-card">
+                        <div class="label">Total</div>
+                        <div class="valor">R$ {{ pedido.total | number:'1.2-2' }}</div>
+                        <div class="sub">Acréscimo: R$ {{ pedido.acrescimo | number:'1.2-2' }}</div>
+                    </div>
+                    <div class="resumo-card">
+                        <div class="label">Pago</div>
+                        <div class="valor verde">R$ {{ pedido.valorTotalPago | number:'1.2-2' }}</div>
+                        <div class="sub">Frete: R$ {{ pedido.frete | number:'1.2-2' }}</div>
+                    </div>
+                    <div class="resumo-card">
+                        <div class="label">Resta</div>
+                        <div class="valor laranja">R$ {{ pedido.restaPagar | number:'1.2-2' }}</div>
+                        <div class="sub">Desconto: R$ {{ pedido.desconto | number:'1.2-2' }}</div>
+                    </div>
                 </div>
             </div>
         </div>

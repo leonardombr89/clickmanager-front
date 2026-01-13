@@ -1,8 +1,16 @@
 <mat-card class="cardWithShadow produto-form">
 
   <!-- Cabeçalho com botão voltar -->
-  <app-card-header [titulo]="isEditMode ? 'Editar Produto' : 'Novo Produto'" botaoTexto="Voltar" botaoIcone="arrow_back"
-    [botaoRota]="['/page/cadastro-tecnico/produtos']" [mostrarDivisor]="true">
+  <app-card-header
+    [titulo]="isEditMode ? 'Editar Produto' : 'Novo Produto'"
+    botaoTexto="Voltar"
+    botaoIcone="arrow_back"
+    [botaoRota]="['/page/cadastro-tecnico/produtos']"
+    [mostrarDivisor]="true"
+    [helpRota]="['/page/ajuda']"
+    helpFragment="pedidos"
+    helpTexto="Manual do Produto"
+    helpIcone="help_outline">
   </app-card-header>
 
   <mat-card-content>

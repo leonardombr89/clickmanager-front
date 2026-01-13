@@ -351,13 +351,15 @@ export class DialogAdicionarProdutoComponent {
             ativo: true,
             categoria: '',
             grupo: '',
+            variacaoId: this.selectedVariacao.id,
+            produtoVariacaoId: this.selectedVariacao.id,
         } as unknown as ProdutoListagem;
 
         stepper.next();
     }
 
     onConfigConcluida(payload: any) {
-        this.resumoPreco = payload;
+        this.resumoPreco = { ...payload, produtoVariacaoId: this.selectedVariacao?.id };
         this.precoReady = true;
     }
 
@@ -615,6 +617,7 @@ export class DialogAdicionarProdutoComponent {
 
         itens.push({
             produtoVariacaoId: v.id,
+            produtoId: this.produtoBase?.id ?? v.id,
             nome: nomeComposto,
             quantidade: qtd,
             valor: unit,

@@ -1,10 +1,13 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { PedidoService } from '../pedido.service';
 import { PedidoResponse } from 'src/app/models/pedido/pedido-response.model';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTableModule } from '@angular/material/table';
+import { AuthService } from 'src/app/services/auth.service';
+import { Empresa } from 'src/app/models/empresa/empresa.model';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-imprimir-pedido',
@@ -13,19 +16,26 @@ import { MatTableModule } from '@angular/material/table';
   templateUrl: './imprimir-pedido.component.html',
   styleUrls: ['./imprimir-pedido.component.scss']
 })
-export class ImprimirPedidoComponent implements OnInit {
+export class ImprimirPedidoComponent implements OnInit, OnDestroy {
   pedido: PedidoResponse | null = null;
   isDuasVias = false;
+  empresa: Empresa | null = null;
+  private usuarioSub?: Subscription;
 
   constructor(
     private route: ActivatedRoute,
     private pedidoService: PedidoService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
     const id = Number(this.route.snapshot.paramMap.get('id'));
     this.isDuasVias = this.route.snapshot.routeConfig?.path?.includes('imprimir-duas-vias') ?? false;
+    this.usuarioSub = this.authService.usuario$.subscribe(u => {
+      this.empresa = u?.empresa ?? null;
+      this.cdr.detectChanges();
+    });
 
     this.pedidoService.buscarPorId(id).subscribe((res) => {
       this.pedido = res;
@@ -33,6 +43,10 @@ export class ImprimirPedidoComponent implements OnInit {
       // opcional: auto-print
       // setTimeout(() => this.onPrint(), 300);
     });
+  }
+
+  ngOnDestroy(): void {
+    this.usuarioSub?.unsubscribe();
   }
 
   displayNumero(p: PedidoResponse | null | undefined): string {

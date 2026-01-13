@@ -28,6 +28,7 @@ import { catchError, map as rxMap, tap, debounceTime, distinctUntilChanged, swit
 import { MatSelectModule } from '@angular/material/select';
 import { Subscription } from 'rxjs';
 import { RouterModule } from '@angular/router';
+import { DialogDescreverItemComponent } from '../dialog-descrever-item/dialog-descrever-item.component';
 
 
 @Component({
@@ -49,9 +50,11 @@ import { RouterModule } from '@angular/router';
         TelefonePipe,
         InputMoedaComponent,
         InputOptionsComponent,
-        SharedComponentsModule
+        SharedComponentsModule,
+        DialogDescreverItemComponent
     ],
-    templateUrl: './detalhes-pedido.component.html'
+    templateUrl: './detalhes-pedido.component.html',
+    styleUrls: ['./detalhes-pedido.component.scss']
 })
 export class DetalhesPedidoComponent implements OnInit {
 
@@ -395,6 +398,7 @@ export class DetalhesPedidoComponent implements OnInit {
                         valor: Number(p.valor ?? 0),
                         subTotal: Number(p.subTotal ?? 0),
                         produtoId: p.produtoId,
+                        produtoVariacaoId: p.produtoVariacaoId,
                         largura: p.largura ?? undefined,
                         altura: p.altura ?? undefined,
                     };
@@ -492,7 +496,43 @@ export class DetalhesPedidoComponent implements OnInit {
 
 
     onDescreverItens(): void {
-        this.toastr.info('Função "Descrever itens" ainda não implementada.');
+        const pedidoId = this.pedido?.id;
+        if (!pedidoId) return;
+
+        const dialogRef = this.dialog.open(DialogDescreverItemComponent, {
+            width: '520px'
+        });
+
+        dialogRef.afterClosed().subscribe((item: any) => {
+            if (item?.descricao && item.quantidade && item.valorUnitario != null) {
+                const quantidade = Number(item.quantidade) || 1;
+                const valor = Number(item.valorUnitario) || 0;
+
+                const grupoKey = (globalThis as any).crypto?.randomUUID?.() ?? String(Date.now());
+
+                const novoItem: PedidoItemRequest = {
+                    grupoKey,
+                    tipo: ItemTipo.MANUAL,
+                    descricao: item.descricao,
+                    quantidade,
+                    valor,
+                    subTotal: valor * quantidade
+                };
+
+                this.adicionandoItens = true;
+                this.pedidoService.adicionarItens(pedidoId, [novoItem]).subscribe({
+                    next: () => {
+                        this.toastr.success('Item adicionado ao pedido.');
+                        this.pedidoService.buscarPorId(pedidoId).subscribe(pedidoAtualizado => {
+                            this.pedido = pedidoAtualizado;
+                        });
+                    },
+                    error: () => {
+                        this.toastr.error('Erro ao adicionar item descrito.');
+                    }
+                }).add(() => this.adicionandoItens = false);
+            }
+        });
     }
 
     // getters de conveniência
@@ -510,5 +550,14 @@ export class DetalhesPedidoComponent implements OnInit {
     }
     get statusControl(): FormControl {
         return this.form.get('status') as FormControl;
+    }
+
+    statusClass(status?: string): string {
+        const s = (status || '').toUpperCase();
+        if (s === 'ORCAMENTO') return 'status-orcamento';
+        if (s === 'RASCUNHO') return 'status-rascunho';
+        if (s === 'CONCLUIDO' || s === 'APROVADO' || s === 'APROVADO_PELO_CLIENTE') return 'status-aprovado';
+        if (s === 'CANCELADO') return 'status-cancelado';
+        return 'status-default';
     }
 }

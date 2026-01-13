@@ -104,9 +104,9 @@ export class HeaderComponent implements OnInit {
   abrirSmartCalc(): void {
     this.dialog.open(SmartCalcComponent, {
       panelClass: 'smartcalc-dialog',
-      width: '96vw',
-      maxWidth: '96vw',
-      maxHeight: '92vh',
+      width: '98vw',
+      maxWidth: '98vw',
+      maxHeight: '98vh',
       autoFocus: false
     });
 
