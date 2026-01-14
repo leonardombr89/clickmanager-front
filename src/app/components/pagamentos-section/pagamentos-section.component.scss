@@ -1,0 +1,56 @@
+.pay-accordion {
+  .mat-expansion-panel-header {
+    padding: 0 12px;
+  }
+
+  .pay-summary {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+
+    .muted {
+      color: #6b7280;
+      font-size: 12px;
+      font-weight: 500;
+    }
+  }
+}
+
+.pay-body {
+  padding: 8px 0 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.btn-add-pagamento {
+  width: 100%;
+  margin-top: 4px;
+}
+
+.table-wrapper {
+  max-height: 260px;
+  overflow: auto;
+}
+
+.header-cell {
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  font-size: 12px;
+}
+
+.bordered-row td {
+  border-top: 1px solid #e5e7eb;
+}
+
+.action-link button {
+  margin-left: auto;
+}
+
+@media (max-width: 767px) {
+  .pay-summary {
+    flex-wrap: wrap;
+  }
+}

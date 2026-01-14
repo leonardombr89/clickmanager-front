@@ -1,0 +1,64 @@
+<app-section-card titulo="Itens do pedido" [divider]="true">
+  <div class="d-flex gap-8 flex-wrap m-b-8" actions>
+    <button mat-flat-button color="primary" type="button" (click)="buscarProdutos.emit()">
+      Buscar produtos
+    </button>
+    <button mat-stroked-button color="accent" type="button" (click)="descreverItens.emit()">
+      Descrever itens
+    </button>
+  </div>
+
+  <div class="table-responsive m-t-12" *ngIf="itens.length; else emptyItens">
+    <table class="table table-hover b-1 no-wrap w-100 rounded text-left table-bg-light">
+      <thead>
+        <tr>
+          <th class="p-12 header-cell">Item</th>
+          <th class="p-12 header-cell text-right">Qtd</th>
+          <th class="p-12 header-cell text-right">Valor</th>
+          <th class="p-12 header-cell text-right">Subtotal</th>
+          <th class="p-12 header-cell text-right">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="bordered-row" *ngFor="let item of itens; let i = index">
+          <td class="p-12">{{ item.descricao }}</td>
+          <td class="p-12 text-right">
+            <ng-container *ngIf="permitirAlterarQuantidade; else qtdText">
+              <input
+                type="number"
+                min="1"
+                class="qty-input"
+                [value]="item.quantidade"
+                (change)="onQtdChange(i, $any($event.target).value)"
+                (keydown.enter)="$event.preventDefault()"
+              />
+            </ng-container>
+            <ng-template #qtdText>
+              <span>{{ item.quantidade }}</span>
+            </ng-template>
+          </td>
+          <td class="p-12 text-right">{{ item.valor | currency:'BRL':'symbol':'1.2-2' }}</td>
+          <td class="p-12 text-right">
+            {{ (item.subTotal ?? item.quantidade * item.valor) | currency:'BRL':'symbol':'1.2-2' }}
+          </td>
+          <td class="p-12 text-right action-link">
+            <button mat-icon-button color="warn" type="button" (click)="removerItem.emit(i)" matTooltip="Remover item">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="subtotal-inline">
+      <span>Subtotal (itens)</span>
+      <strong>{{ subtotal | currency:'BRL':'symbol':'1.2-2' }}</strong>
+    </div>
+  </div>
+
+  <ng-template #emptyItens>
+    <div class="empty-itens">
+      <div class="title">Nenhum item adicionado.</div>
+      <div class="desc">Use “Buscar produtos” ou “Descrever itens” para incluir itens no pedido.</div>
+    </div>
+  </ng-template>
+</app-section-card>

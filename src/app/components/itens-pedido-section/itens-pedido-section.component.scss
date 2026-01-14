@@ -1,0 +1,47 @@
+.table-responsive .table th,
+.table-responsive .table td {
+  vertical-align: middle;
+}
+
+.header-cell {
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  font-size: 12px;
+}
+
+.bordered-row td {
+  border-top: 1px solid #e5e7eb;
+}
+
+.subtotal-inline {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 4px 0;
+  font-weight: 700;
+}
+
+.empty-itens {
+  padding: 12px;
+  border: 1px dashed #d1d5db;
+  border-radius: 8px;
+  color: #6b7280;
+
+  .title {
+    font-weight: 700;
+  }
+
+  .desc {
+    font-size: 13px;
+  }
+}
+
+.qty-input {
+  width: 80px;
+  text-align: right;
+  padding: 4px 6px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+}

@@ -1,0 +1,61 @@
+<app-section-card titulo="Pagamentos" [divider]="true">
+  <mat-accordion class="accordion pay-accordion">
+    <mat-expansion-panel [expanded]="false">
+      <mat-expansion-panel-header>
+        <div class="pay-summary">
+          <mat-icon color="primary">attach_money</mat-icon>
+          <span>Pagamentos</span>
+          <span class="muted">
+            Pago: {{ pago | currency:'BRL':'symbol':'1.2-2' }} • Restante:
+            {{ restante | currency:'BRL':'symbol':'1.2-2' }}
+          </span>
+        </div>
+      </mat-expansion-panel-header>
+
+      <div class="pay-body">
+        <div class="row align-items-end m-b-12">
+          <div class="col-md-6">
+            <app-input-options [control]="formaControl" label="Forma"
+              placeholder="Selecione a forma" [options]="formasPagamento">
+            </app-input-options>
+          </div>
+          <div class="col-md-6">
+            <app-input-moeda [control]="valorControl"></app-input-moeda>
+          </div>
+          <div class="col-12 d-flex justify-content-end">
+            <button mat-flat-button color="primary" type="button" class="btn-add-pagamento" (click)="addPagamento.emit()"
+              [disabled]="pagamentoNovo.invalid">
+              <mat-icon class="m-r-8">add</mat-icon>
+              Adicionar pagamento
+            </button>
+          </div>
+        </div>
+
+        <div class="table-responsive table-wrapper m-t-8" *ngIf="pagamentosControls.length">
+          <table class="table table-hover b-1 no-wrap w-100 rounded text-left table-bg-light">
+            <thead>
+              <tr>
+                <th class="p-12 header-cell">Forma</th>
+                <th class="p-12 header-cell text-right">Valor</th>
+                <th class="p-12 header-cell text-right">Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (pg of pagamentosControls; track $index; let i = $index) {
+              <tr class="bordered-row">
+                <td class="p-12">{{ pg.value.forma || '-' }}</td>
+                <td class="p-12 text-right">{{ pg.value.valor | currency:'BRL':'symbol':'1.2-2' }}</td>
+                <td class="p-12 text-right action-link">
+                  <button mat-icon-button color="warn" type="button" (click)="removerPagamento.emit(i)">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </td>
+              </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </mat-expansion-panel>
+  </mat-accordion>
+</app-section-card>
