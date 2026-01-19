@@ -1,0 +1,26 @@
+<button
+  *ngIf="!onlyIcon; else iconOnly"
+  mat-stroked-button
+  [color]="color"
+  [routerLink]="routerLink"
+  [fragment]="fragment"
+  [attr.aria-label]="ariaLabel"
+  class="manual-btn"
+>
+  <mat-icon>{{ icon }}</mat-icon>
+  <span *ngIf="label">{{ label }}</span>
+</button>
+
+<ng-template #iconOnly>
+  <button
+    mat-icon-button
+    [color]="color"
+    [routerLink]="routerLink"
+    [fragment]="fragment"
+    [matTooltip]="label || ariaLabel"
+    [attr.aria-label]="ariaLabel"
+    class="manual-btn"
+  >
+    <mat-icon>{{ icon }}</mat-icon>
+  </button>
+</ng-template>

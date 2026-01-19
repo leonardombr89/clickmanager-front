@@ -31,51 +31,69 @@
   color: #b71c1c;
 }
 
-.resumo-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+.status-default {
+  background: #e6e8ef;
+  color: #1f2937;
+}
+
+.info-block {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 4px 2px;
+}
+
+.info-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
   gap: 12px;
+  padding: 4px 0;
 }
 
-.resumo-card {
-  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 12px;
-  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.05);
-}
-
-.resumo-card .label {
+.label {
   font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
   text-transform: uppercase;
-  letter-spacing: 0.4px;
-  color: #475569;
-  margin-bottom: 4px;
-  font-weight: 700;
-}
-
-.resumo-card .valor {
-  font-size: 20px;
-  font-weight: 700;
-  color: #0f172a;
-}
-
-.resumo-card .valor.verde {
-  color: #166534;
-}
-
-.resumo-card .valor.laranja {
-  color: #b45309;
-}
-
-.resumo-card .sub {
-  margin-top: 2px;
-  font-size: 12px;
   color: #6b7280;
 }
 
-.fin-resumo {
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+.value {
+  font-weight: 600;
+  color: #0f172a;
+  text-align: right;
+}
+
+.status-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.status-editor {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #f8fafc;
+}
+
+.status-editor .status-field {
+  flex: 1;
+  min-width: 220px;
+}
+
+.status-editor .editor-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .print-actions {
@@ -83,6 +101,11 @@
   align-items: center;
   gap: 10px;
   flex-wrap: wrap;
+
+  &.vertical {
+    flex-direction: column;
+    align-items: stretch;
+  }
 }
 
 .print-actions button {
@@ -92,4 +115,92 @@
 .btn-whatsapp {
   background: #25d366;
   color: #0f172a;
+}
+
+.page-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.title-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.actions-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.top-grid {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+  align-items: stretch;
+  min-height: 190px;
+}
+
+.top-grid > * {
+  flex: 1 1 50%;
+}
+
+.detalhes-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 12px;
+}
+
+.main-column,
+.side-column {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.header-cell {
+  font-weight: 700 !important;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  font-size: 12px !important;
+}
+
+.bordered-row td {
+  border-top: 1px solid #e5e7eb;
+}
+
+@media (max-width: 640px) {
+  .info-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .value {
+    text-align: left;
+  }
+
+  .status-line {
+    align-items: flex-start;
+  }
+
+  .status-editor {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 1024px) {
+  .detalhes-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .top-grid {
+    flex-direction: column;
+  }
 }

@@ -1,0 +1,29 @@
+<app-section-card [titulo]="titulo" [divider]="divider">
+  <div class="resumo-tiles" [class.inativo]="inativo">
+    <div class="tile">
+      <div class="label">Total</div>
+      <div class="value">{{ total | currency:'BRL':'symbol':'1.2-2' }}</div>
+    </div>
+    <div class="tile">
+      <div class="label">Pago</div>
+      <div class="value verde">{{ pago | currency:'BRL':'symbol':'1.2-2' }}</div>
+    </div>
+    <div class="tile">
+      <div class="label">Resta pagar</div>
+      <div class="value laranja">{{ restaPagar | currency:'BRL':'symbol':'1.2-2' }}</div>
+    </div>
+
+    <div class="tile secondary">
+      <div class="label">Subtotal</div>
+      <div class="value">{{ subtotal | currency:'BRL':'symbol':'1.2-2' }}</div>
+    </div>
+    <div class="tile secondary">
+      <div class="label">Frete</div>
+      <div class="value">{{ frete | currency:'BRL':'symbol':'1.2-2' }}</div>
+    </div>
+    <div class="tile secondary">
+      <div class="label">Desconto</div>
+      <div class="value">{{ desconto | currency:'BRL':'symbol':'1.2-2' }}</div>
+    </div>
+  </div>
+</app-section-card>

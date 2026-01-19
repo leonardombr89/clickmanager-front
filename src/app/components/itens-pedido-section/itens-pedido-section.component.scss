@@ -18,9 +18,28 @@
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  gap: 8px;
-  padding: 8px 4px 0;
+  gap: 12px;
+  padding: 16px 8px 0;
+  border-top: 1px solid #e5e7eb;
+}
+
+.subtotal-label {
   font-weight: 700;
+  color: #4b5563;
+}
+
+.subtotal-value {
+  background: #eef2ff;
+  color: #1e3a8a;
+  padding: 6px 12px;
+  border-radius: 12px;
+  font-weight: 800;
+  min-width: 140px;
+  text-align: right;
+}
+
+.subtotal-value .currency {
+  letter-spacing: 0.2px;
 }
 
 .empty-itens {
@@ -44,4 +63,9 @@
   padding: 4px 6px;
   border: 1px solid #e5e7eb;
   border-radius: 8px;
+}
+
+.itens-wrapper.inativo {
+  opacity: 0.6;
+  pointer-events: none;
 }

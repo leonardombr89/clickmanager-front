@@ -141,6 +141,64 @@ export class AjudaComponent implements OnInit, OnDestroy {
         },
       ],
     },
+    {
+      id: 'status-pedido',
+      titulo: 'Fluxo do Pedido e Status (do início ao fim)',
+      descricao: 'Entenda as diferenças entre Pedido e Orçamento, mudanças permitidas e o que cada status libera ou bloqueia.',
+      itens: [
+        {
+          titulo: 'Visão geral do fluxo',
+          detalhes: [
+            'Pedido: RASCUNHO → PENDENTE → AGUARDANDO_PAGAMENTO → EM_PRODUCAO → PRONTO → ENTREGUE (ou CANCELADO).',
+            'Orçamento: ORCAMENTO → AGUARDANDO_PAGAMENTO → EM_PRODUCAO → PRONTO → ENTREGUE (ou CANCELADO).',
+            'Rascunho nasce do SmartCalc. Pendente nasce de um pedido criado manualmente. Orçamento nasce só se você marcar “Salvar como orçamento”.',
+          ],
+        },
+        {
+          titulo: 'Pedido x Orçamento (diferenças)',
+          detalhes: [
+            'Pedido (PENDENTE): criado manualmente; já vale como pedido em aberto.',
+            'Rascunho: gerado pelo SmartCalc; revise cliente/itens e confirme para seguir.',
+            'Orçamento: documento pré-pedido; só existe se marcado na criação. Não vira orçamento depois.',
+            'Orçamento anda só para frente; pode ser cancelado a qualquer momento.',
+          ],
+        },
+        {
+          titulo: 'O que cada status permite',
+          detalhes: [
+            'RASCUNHO/PENDENTE/ORCAMENTO: editar cliente, itens, observações; lançar pagamentos; trocar status.',
+            'AGUARDANDO_PAGAMENTO: editar cliente/itens/observações; lançar pagamentos; iniciar produção.',
+            'EM_PRODUCAO: consultar, registrar pagamento; não voltar para fases anteriores.',
+            'PRONTO: só leitura para dados/itens; pagamentos ainda permitidos.',
+            'ENTREGUE: consulta e pagamentos; sem edição de dados/itens.',
+            'CANCELADO: somente leitura de tudo.',
+          ],
+        },
+        {
+          titulo: 'Mudanças de status permitidas',
+          detalhes: [
+            'Pedido: RASCUNHO → PENDENTE; PENDENTE → AGUARDANDO_PAGAMENTO → EM_PRODUCAO → PRONTO → ENTREGUE.',
+            'Orçamento: ORCAMENTO → AGUARDANDO_PAGAMENTO → EM_PRODUCAO → PRONTO → ENTREGUE.',
+            'A qualquer momento: cancelar (vai para CANCELADO).',
+          ],
+        },
+        {
+          titulo: 'Mudanças bloqueadas',
+          detalhes: [
+            'Não é permitido mudar pedido para ORCAMENTO depois de criado.',
+            'Não é permitido voltar fases: ex.: PRONTO → EM_PRODUCAO ou AGUARDANDO_PAGAMENTO → PENDENTE.',
+            'Orçamento não volta para RASCUNHO ou PENDENTE.',
+          ],
+        },
+        {
+          titulo: 'Exemplos rápidos',
+          detalhes: [
+            'Pedido manual: nasce PENDENTE → confirma pagamento parcial → vai para EM_PRODUCAO → PRONTO → ENTREGUE.',
+            'Orçamento: marque “Salvar como orçamento”; o documento nasce em ORCAMENTO → cliente aprova → segue AGUARDANDO_PAGAMENTO → EM_PRODUCAO → PRONTO → ENTREGUE.',
+          ],
+        },
+      ],
+    },
   ];
 
   get filteredSecoes(): AjudaSecao[] {

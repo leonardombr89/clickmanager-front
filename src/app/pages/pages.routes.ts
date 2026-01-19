@@ -17,7 +17,7 @@ import { FormPedidoComponent } from './pedido/form-pedido/form-pedido.component'
 import { ListarPedidoComponent } from './pedido/listar-pedido/listar-pedido.component';
 import { FormClienteComponent } from './cliente/form-cliente/form-cliente.component';
 import { ListarClienteComponent } from './cliente/listar-cliente/listar-cliente.component';
-import { DetalhesPedidoComponent } from './pedido/detalhes-pedido/detalhes-pedido.component';
+import { DetalhesPedidoComponent } from 'src/app/pages/pedido/detalhes-pedido/detalhes-pedido.component';
 import { FormServicoComponent } from './cadastro-tecnico/servicos/form-servico/form-servico.component';
 import { ListarServicoComponent } from './cadastro-tecnico/servicos/listar-servicos/listar-servicos.component';
 import { CalculadoraConfigComponent } from './smart-calc-config/smart-calc-config/smart-calc-config.component';

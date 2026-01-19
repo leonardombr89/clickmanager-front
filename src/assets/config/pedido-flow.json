@@ -1,0 +1,137 @@
+{
+  "version": "1.0.0",
+  "meta": {
+    "name": "Fluxo de Pedido",
+    "description": "Configuração de fluxo e permissões de pedido/orçamento"
+  },
+  "status": [
+    {
+      "key": "RASCUNHO",
+      "label": "Rascunho",
+      "descricao": "Pedido rascunho vindo do SmartCalc.",
+      "ordem": 0,
+      "final": false,
+      "somenteLeitura": false,
+      "permissoes": { "cliente": true, "itens": true, "observacoes": true, "pagamentos": true, "status": true },
+      "transicoes": {
+        "permitidas": ["PENDENTE", "ORCAMENTO", "CANCELADO"],
+        "regras": [
+          {
+            "to": "PENDENTE",
+            "all": [{ "field": "clienteId", "op": "notEmpty", "message": "Selecione um cliente antes de avançar o rascunho." }]
+          },
+          {
+            "to": "ORCAMENTO",
+            "all": [{ "field": "clienteId", "op": "notEmpty", "message": "Selecione um cliente antes de gerar orçamento." }]
+          }
+        ]
+      }
+    },
+    {
+      "key": "PENDENTE",
+      "label": "Pendente",
+      "descricao": "Pedido criado aguardando definições iniciais.",
+      "ordem": 1,
+      "final": false,
+      "somenteLeitura": false,
+      "permissoes": { "cliente": true, "itens": true, "observacoes": true, "pagamentos": true, "status": true },
+      "transicoes": {
+        "permitidas": ["AGUARDANDO_PAGAMENTO", "EM_PRODUCAO", "CANCELADO"],
+        "regras": [
+          {
+            "to": "EM_PRODUCAO",
+            "all": [
+              { "field": "pagoPercent", "op": ">=", "value": 20, "message": "É necessário pagar ao menos 20% para iniciar a produção." }
+            ],
+            "warnOnly": false
+          }
+        ]
+      }
+    },
+    {
+      "key": "ORCAMENTO",
+      "label": "Orçamento",
+      "descricao": "Documento de orçamento aguardando aprovação.",
+      "ordem": 1,
+      "final": false,
+      "somenteLeitura": false,
+      "permissoes": { "cliente": true, "itens": true, "observacoes": true, "pagamentos": false, "status": true },
+      "transicoes": { "permitidas": ["AGUARDANDO_PAGAMENTO", "CANCELADO"] },
+      "restricoes": { "somenteAvanca": true },
+      "internoBloqueado": ["VENCIDO", "CANCELADO"]
+    },
+    {
+      "key": "AGUARDANDO_PAGAMENTO",
+      "label": "Aguardando pagamento",
+      "descricao": "Aguardando pagamento do cliente.",
+      "ordem": 2,
+      "final": false,
+      "somenteLeitura": false,
+      "permissoes": { "cliente": true, "itens": true, "observacoes": true, "pagamentos": true, "status": true },
+      "transicoes": {
+        "permitidas": ["EM_PRODUCAO", "CANCELADO"],
+        "regras": [
+          {
+            "to": "EM_PRODUCAO",
+            "all": [
+              { "field": "pagoPercent", "op": ">=", "value": 20, "message": "É necessário pagar ao menos 20% para iniciar a produção." }
+            ],
+            "warnOnly": false
+          }
+        ]
+      }
+    },
+    {
+      "key": "EM_PRODUCAO",
+      "label": "Em produção",
+      "descricao": "Produção em andamento.",
+      "ordem": 3,
+      "final": false,
+      "somenteLeitura": false,
+      "permissoes": { "cliente": false, "itens": false, "observacoes": true, "pagamentos": true, "status": true },
+      "transicoes": { "permitidas": ["PRONTO", "CANCELADO"] }
+    },
+    {
+      "key": "PRONTO",
+      "label": "Pronto",
+      "descricao": "Pedido pronto para entrega.",
+      "ordem": 4,
+      "final": false,
+      "somenteLeitura": false,
+      "permissoes": { "cliente": false, "itens": false, "observacoes": true, "pagamentos": true, "status": true },
+      "transicoes": {
+        "permitidas": ["ENTREGUE", "CANCELADO"],
+        "regras": [
+          {
+            "to": "ENTREGUE",
+            "all": [
+              { "field": "pagoPercent", "op": ">=", "value": 100, "message": "É necessário quitar o pedido para marcar como entregue." }
+            ],
+            "warnOnly": false
+          }
+        ]
+      }
+    },
+    {
+      "key": "ENTREGUE",
+      "label": "Entregue",
+      "descricao": "Pedido entregue. Somente leitura.",
+      "ordem": 5,
+      "final": true,
+      "somenteLeitura": true,
+      "permissoes": { "cliente": false, "itens": false, "observacoes": false, "pagamentos": true, "status": false },
+      "transicoes": { "permitidas": [] }
+    },
+    {
+      "key": "CANCELADO",
+      "label": "Cancelado",
+      "descricao": "Pedido cancelado. Somente leitura.",
+      "ordem": 6,
+      "final": true,
+      "somenteLeitura": true,
+      "permissoes": { "cliente": false, "itens": false, "observacoes": false, "pagamentos": false, "status": false },
+      "transicoes": { "permitidas": [] },
+      "limparPagamentosAoCancelar": true
+    }
+  ]
+}

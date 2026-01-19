@@ -22,6 +22,7 @@ import { MatDivider } from "@angular/material/divider";
 })
 export class CardHeaderComponent {
   @Input() titulo!: string;
+  @Input() subtitulo?: string;
 
   @Input() botaoTexto?: string;
   @Input() botaoIcone: string = 'add';

@@ -19,6 +19,7 @@ import { map, Observable, take } from 'rxjs';
 import { DialogAdicionarProdutoComponent } from '../dialog-adicionar-produto/dialog-adicionar-produto.component';
 import { DialogDescreverItemComponent } from '../dialog-descrever-item/dialog-descrever-item.component';
 import { PedidoRequest } from 'src/app/models/pedido/pedido-request.model';
+import { PedidoListagem } from 'src/app/models/pedido/pedido-listagem.model';
 import { PedidoItemRequest } from 'src/app/models/pedido/pedido-item-request.model';
 import { AuthService } from 'src/app/services/auth.service';
 import { InputTextareaComponent } from "../../../components/inputs/input-textarea/input-textarea.component";
@@ -39,6 +40,9 @@ import { CardHeaderComponent } from "src/app/components/card-header/card-header.
 import { PageCardComponent } from "src/app/components/page-card/page-card.component";
 import { PagamentosSectionComponent } from "src/app/components/pagamentos-section/pagamentos-section.component";
 import { ItensPedidoSectionComponent } from "src/app/components/itens-pedido-section/itens-pedido-section.component";
+import { ClienteSelectorCardComponent } from "src/app/components/cliente-selector-card/cliente-selector-card.component";
+import { ObservacoesCardComponent } from "src/app/components/observacoes-card/observacoes-card.component";
+import { ConfirmDialogComponent } from "src/app/components/dialog/confirm-dialog/confirm-dialog.component";
 
 @Component({
   selector: 'app-form-pedido',
@@ -58,7 +62,10 @@ import { ItensPedidoSectionComponent } from "src/app/components/itens-pedido-sec
     SectionCardComponent,
     PageCardComponent,
     PagamentosSectionComponent,
-    ItensPedidoSectionComponent
+    ItensPedidoSectionComponent,
+    ClienteSelectorCardComponent,
+    ObservacoesCardComponent,
+    ConfirmDialogComponent
   ],
   templateUrl: './form-pedido.component.html',
   styleUrls: ['./form-pedido.component.scss'],
@@ -86,6 +93,10 @@ export class FormPedidoComponent implements OnInit {
   addForm!: FormGroup;
   rows!: FormArray;
   pedidoItens: PedidoItemRequest[] = [];
+  clienteConfirmado: any | null = null;
+  trocandoCliente = true;
+  observacaoSalva = '';
+  obsSalvo = false;
 
   produtoControl = new FormControl();
   pagamentoNovo = this.fb.group({
@@ -128,11 +139,7 @@ export class FormPedidoComponent implements OnInit {
 
     this.addForm.valueChanges.subscribe(() => this.recalcularTotais());
 
-    this.clienteControl.valueChanges.subscribe(cliente => {
-      if (cliente?.id) {
-        this.addForm.get('clienteId')?.setValue(cliente.id);
-      }
-    });
+    this.observacoesControl.valueChanges.subscribe(() => this.obsSalvo = false);
   }
 
   addPagamento(): void {
@@ -395,9 +402,26 @@ export class FormPedidoComponent implements OnInit {
       };
 
       this.pedidoService.salvar(pedido).subscribe({
-        next: () => {
+        next: (resp: PedidoListagem) => {
           this.toastr.success(isOrcamento ? 'Orçamento salvo com sucesso!' : 'Pedido salvo com sucesso!');
-          this.router.navigate(['/page/pedido']);
+
+          const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+            data: {
+              title: 'Abrir detalhes',
+              message: 'Deseja abrir o detalhe do pedido agora?',
+              confirmText: 'Abrir detalhe',
+              cancelText: 'Ir para lista',
+              confirmColor: 'primary'
+            }
+          });
+
+          dialogRef.afterClosed().subscribe((abrir: boolean) => {
+            if (abrir && resp?.id) {
+              this.router.navigate([`/page/pedido/detalhe/${resp.id}`]);
+            } else {
+              this.router.navigate(['/page/pedido']);
+            }
+          });
         },
         error: () => {
           this.toastr.error('Erro ao salvar.');
@@ -450,6 +474,41 @@ export class FormPedidoComponent implements OnInit {
 
   get clienteControl(): FormControl {
     return this.addForm.get('clienteId') as FormControl
+  }
+
+  confirmarClienteSelecionado(): void {
+    const selecionado = this.clienteControl.value;
+    if (!selecionado?.id) {
+      this.toastr.warning('Selecione um cliente antes de salvar no pedido.');
+      return;
+    }
+
+    // mantém o objeto para display do autocomplete, mas garante validade
+    this.clienteControl.setValue(selecionado, { emitEvent: false });
+    this.clienteConfirmado = selecionado;
+    this.trocandoCliente = false;
+    this.clienteControl.markAsDirty();
+    this.clienteControl.updateValueAndValidity({ emitEvent: false });
+    this.toastr.success('Cliente selecionado para o pedido.');
+  }
+
+  iniciarTrocaCliente(): void {
+    this.trocandoCliente = true;
+    this.clienteControl.reset(null, { emitEvent: false });
+  }
+
+  cancelarTrocaCliente(): void {
+    this.trocandoCliente = false;
+    if (this.clienteConfirmado) {
+      this.clienteControl.setValue(this.clienteConfirmado, { emitEvent: false });
+    }
+  }
+
+  confirmarObservacaoLocal(): void {
+    const texto = this.observacoesControl.value ?? '';
+    this.observacaoSalva = texto;
+    this.obsSalvo = true;
+    this.toastr.success('Observação salva.');
   }
 
   get orcamentoControl(): FormControl {

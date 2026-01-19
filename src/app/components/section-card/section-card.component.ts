@@ -30,4 +30,8 @@ export class SectionCardComponent {
   @Input() titulo: string = '';
   @Input() subtitulo?: string;
   @Input() divider: boolean = false;
+
+  get showDivider(): boolean {
+    return !!this.titulo?.trim() && this.divider;
+  }
 }

@@ -31,6 +31,8 @@ export class ItensPedidoSectionComponent {
   @Input() itens: ItemPedidoView[] = [];
   @Input() subtotal: number = 0;
   @Input() permitirAlterarQuantidade: boolean = true;
+  @Input() mostrarAcoes: boolean = true;
+  @Input() inativo = false;
 
   @Output() buscarProdutos = new EventEmitter<void>();
   @Output() descreverItens = new EventEmitter<void>();

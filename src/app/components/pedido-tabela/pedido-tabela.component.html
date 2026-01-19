@@ -1,0 +1,146 @@
+<div class="table-responsive-sm">
+  <table mat-table [dataSource]="data" multiTemplateDataRows class="mat-elevation-z1 no-wrap w-100"
+    matSort
+    [matSortActive]="sortActive"
+    [matSortDirection]="sortDirection"
+    (matSortChange)="onSort($event)">
+
+    <!-- Número do Pedido -->
+    <ng-container matColumnDef="numero">
+      <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-14 p-x-24 p-l-0">Número</th>
+      <td mat-cell *matCellDef="let pedido" class="p-x-24 f-s-14 p-l-0">
+        {{ pedido.numero }}
+      </td>
+    </ng-container>
+
+    <!-- Número do Orçamento -->
+    <ng-container matColumnDef="orcamentoNumero">
+      <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-14 p-x-24 p-l-0">Orçamento</th>
+      <td mat-cell *matCellDef="let pedido" class="p-x-24 f-s-14 p-l-0">
+        {{ pedido.orcamento?.numero || '-' }}
+      </td>
+    </ng-container>
+
+    <!-- Nome do Orçamento -->
+    <ng-container matColumnDef="orcamentoNome">
+      <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-14 p-x-24 p-l-0" mat-sort-header>Nome</th>
+      <td mat-cell *matCellDef="let pedido" class="p-x-24 f-s-14 p-l-0">
+        {{ pedido.orcamento?.nome || '-' }}
+      </td>
+    </ng-container>
+
+    <!-- Vencimento do Orçamento -->
+    <ng-container matColumnDef="vencimento">
+      <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-14 p-x-24 p-l-0" mat-sort-header>Vencimento</th>
+      <td mat-cell *matCellDef="let pedido" class="p-x-24 f-s-14 p-l-0">
+        {{ pedido.orcamento?.vencimento | date:'dd/MM/yyyy' }}
+      </td>
+    </ng-container>
+
+    <!-- Data de criação -->
+    <ng-container matColumnDef="dataCriacao">
+      <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-14 p-x-24 p-l-0" mat-sort-header>Data de criação</th>
+      <td mat-cell *matCellDef="let pedido" class="p-x-24 f-s-14 p-l-0">
+        {{ pedido.dataCriacao | date:'dd/MM/yyyy HH:mm' }}
+      </td>
+    </ng-container>
+
+    <!-- Cliente -->
+    <ng-container matColumnDef="cliente">
+      <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-14 p-x-24 p-l-0" mat-sort-header>Cliente</th>
+      <td mat-cell *matCellDef="let pedido" class="p-x-24 f-s-14 p-l-0">
+        {{ pedido.nomeCliente || '-' }}
+      </td>
+    </ng-container>
+
+    <!-- Status -->
+    <ng-container matColumnDef="status">
+      <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-14 p-x-24 p-l-0" mat-sort-header>Status</th>
+      <td mat-cell *matCellDef="let pedido" class="p-x-24 f-s-14 p-l-0">
+        <app-status-badge [status]="pedido.status || '-'"></app-status-badge>
+      </td>
+    </ng-container>
+
+    <!-- Status do Orçamento -->
+    <ng-container matColumnDef="orcamentoStatus">
+      <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-14 p-x-24 p-l-0" mat-sort-header>Status</th>
+      <td mat-cell *matCellDef="let pedido" class="p-x-24 f-s-14 p-l-0">
+        <app-status-badge [status]="pedido.orcamento?.status || pedido.status || '-'"></app-status-badge>
+      </td>
+    </ng-container>
+
+    <!-- Total -->
+    <ng-container matColumnDef="total">
+      <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-14 p-x-24 p-l-0" mat-sort-header>Total</th>
+      <td mat-cell *matCellDef="let pedido" class="p-x-24 f-s-14 p-l-0">
+        R$ {{ pedido.total | number:'1.2-2' }}
+      </td>
+    </ng-container>
+
+    <!-- Expand Button -->
+    <ng-container matColumnDef="expand">
+      <th mat-header-cell *matHeaderCellDef>&nbsp;</th>
+      <td mat-cell *matCellDef="let pedido">
+        <button mat-icon-button
+          class="expand-btn"
+          (click)="expandedElement = expandedElement === pedido ? null : pedido; $event.stopPropagation()">
+          <mat-icon>{{ expandedElement === pedido ? 'keyboard_arrow_up' : 'keyboard_arrow_down' }}</mat-icon>
+        </button>
+      </td>
+    </ng-container>
+
+    <!-- Detalhes Expandidos -->
+    <ng-container matColumnDef="expandedDetail">
+      <td mat-cell *matCellDef="let pedido" [attr.colspan]="columnsToDisplayWithExpand.length">
+        <div [@detailExpand]="pedido === expandedElement ? 'expanded' : 'collapsed'">
+          <div class="detail-panel">
+            <div class="detail-row">
+              <div class="detail-item">
+                <div class="label">Responsável</div>
+                <div class="value">{{ pedido.nomeResponsavel || '-' }}</div>
+              </div>
+              <div class="detail-item" *ngIf="pedido.status">
+                <div class="label">Status</div>
+                <div class="value">
+                  <app-status-badge [status]="pedido.status"></app-status-badge>
+                </div>
+              </div>
+              <div class="detail-item">
+                <div class="label">Total Pago</div>
+                <div class="value">R$ {{ pedido.valorTotalPago | number:'1.2-2' }}</div>
+              </div>
+              <div class="detail-item">
+                <div class="label">Resta Pagar</div>
+                <div class="value text-danger">R$ {{ pedido.restaPagar | number:'1.2-2' }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </td>
+    </ng-container>
+
+    <!-- Ações -->
+    <ng-container matColumnDef="acoes">
+      <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-14 p-x-24 p-l-0">Ações</th>
+      <td mat-cell *matCellDef="let pedido" class="action-link">
+        <button mat-icon-button [routerLink]="['/page/pedido/detalhe/', pedido.id ]" matTooltip="Visualizar">
+          <mat-icon>visibility</mat-icon>
+        </button>
+      </td>
+    </ng-container>
+
+    <!-- Header e linhas -->
+    <tr mat-header-row *matHeaderRowDef="columnsToDisplayWithExpand"></tr>
+
+    <tr mat-row *matRowDef="let row; columns: columnsToDisplayWithExpand" class="example-element-row"
+      [class.example-expanded-row]="expandedElement === row" (click)="expandedElement = expandedElement === row ? null : row">
+    </tr>
+
+    <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="example-detail-row"
+      [@detailExpand]="row === expandedElement ? 'expanded' : 'collapsed'" [hidden]="expandedElement !== row">
+    </tr>
+  </table>
+
+  <mat-paginator [length]="total" [pageSize]="pageSize" (page)="onPage($event)"
+    showFirstLastButtons></mat-paginator>
+</div>

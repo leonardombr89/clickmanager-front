@@ -1,103 +1,84 @@
-<mat-card class="cardWithShadow">
+<app-page-card titulo="Pedidos" botaoTexto="Novo Pedido" botaoIcone="add" [botaoRota]="['/page/pedido/criar']"
+  permissao="PEDIDOS_CADASTRAR" [mostrarDivisor]="true">
 
-    <app-card-header titulo="Pedidos" botaoTexto="Novo Pedido" botaoIcone="add" [botaoRota]="['/page/pedido/criar']"
-        permissao="PEDIDOS_CADASTRAR" [mostrarDivisor]="true">
-    </app-card-header>
+  <app-section-card [divider]="false">
+    <mat-tab-group (selectedTabChange)="onTabChange($event)">
+      <mat-tab label="Todos">
+        <div class="tab-pane">
+          <app-filtro-pesquisa-card
+            titulo="Pesquisar"
+            placeholder="Ex: cliente ou número do pedido"
+            [statusOptions]="statusOptions"
+            [statusSelecionado]="statusSelecionado"
+            (pesquisar)="onPesquisar($event)"
+            (statusChange)="onStatusChange($event)">
+          </app-filtro-pesquisa-card>
 
-    <mat-card-content>
-        <app-input-pesquisa placeholder="Ex: cliente ou número do pedido" (valorAlterado)="onPesquisar($event)" />
-
-        <div class="table-responsive-sm">
-            <table mat-table [dataSource]="dataSource" multiTemplateDataRows class="mat-elevation-z1 no-wrap w-100">
-
-                <!-- Número do Pedido -->
-                <ng-container matColumnDef="numero">
-                    <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-14 p-x-24 p-l-0">Número</th>
-                    <td mat-cell *matCellDef="let pedido" class="p-x-24 f-s-14 p-l-0">
-                        {{ pedido.numero }}
-                    </td>
-                </ng-container>
-
-                <!-- Cliente -->
-                <ng-container matColumnDef="cliente">
-                    <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-14 p-x-24 p-l-0">Cliente</th>
-                    <td mat-cell *matCellDef="let pedido" class="p-x-24 f-s-14 p-l-0">
-                        {{ pedido.nomeCliente || '-' }}
-                    </td>
-                </ng-container>
-
-                <!-- Status -->
-                <ng-container matColumnDef="status">
-                    <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-14 p-x-24 p-l-0">Status</th>
-                    <td mat-cell *matCellDef="let pedido" class="p-x-24 f-s-14 p-l-0 text-uppercase">
-                        {{ pedido.status || '-' }}
-                    </td>
-                </ng-container>
-
-                <!-- Total -->
-                <ng-container matColumnDef="total">
-                    <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-14 p-x-24 p-l-0">Total</th>
-                    <td mat-cell *matCellDef="let pedido" class="p-x-24 f-s-14 p-l-0">
-                        R$ {{ pedido.total | number:'1.2-2' }}
-                    </td>
-                </ng-container>
-
-                <!-- Expand Button -->
-                <ng-container matColumnDef="expand">
-                    <th mat-header-cell *matHeaderCellDef>&nbsp;</th>
-                    <td mat-cell *matCellDef="let pedido">
-                        <button mat-icon-button
-                            (click)="expandedElement = expandedElement === pedido ? null : pedido; $event.stopPropagation()">
-                            <mat-icon>{{ expandedElement === pedido ? 'keyboard_arrow_up' : 'keyboard_arrow_down'
-                                }}</mat-icon>
-                        </button>
-                    </td>
-                </ng-container>
-
-                <!-- Detalhes Expandidos -->
-                <ng-container matColumnDef="expandedDetail">
-                    <td mat-cell *matCellDef="let pedido" [attr.colspan]="columnsToDisplayWithExpand.length">
-                        <div [@detailExpand]="pedido === expandedElement ? 'expanded' : 'collapsed'">
-                            <div class="p-15 rounded b-1 m-b-16 m-x-18 bg-light">
-                                <div class="f-s-14"><strong>Responsável:</strong> {{ pedido.nomeResponsavel || '-' }}
-                                </div>
-                                <div class="f-s-14"><strong>Total Pago:</strong> R$ {{ pedido.valorTotalPago |
-                                    number:'1.2-2' }}</div>
-                                <div class="f-s-14"><strong>Resta Pagar:</strong> R$ {{ pedido.restaPagar |
-                                    number:'1.2-2' }}</div>
-                            </div>
-                        </div>
-                    </td>
-                </ng-container>
-
-                <!-- Ações -->
-                <ng-container matColumnDef="acoes">
-                    <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-14 p-x-24 p-l-0">Ações</th>
-                    <td mat-cell *matCellDef="let pedido" class="action-link">
-                        <button mat-icon-button [routerLink]="['/page/pedido/detalhe/', pedido.id ]"
-                            matTooltip="Visualizar">
-                            <mat-icon>visibility</mat-icon>
-                        </button>
-                    </td>
-                </ng-container>
-
-                <!-- Header e linhas -->
-                <tr mat-header-row *matHeaderRowDef="columnsToDisplayWithExpand"></tr>
-
-                <tr mat-row *matRowDef="let row; columns: columnsToDisplayWithExpand" class="example-element-row"
-                    [class.example-expanded-row]="expandedElement === row"
-                    (click)="expandedElement = expandedElement === row ? null : row">
-                </tr>
-
-                <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="example-detail-row"
-                    [@detailExpand]="row === expandedElement ? 'expanded' : 'collapsed'"
-                    [hidden]="expandedElement !== row">
-                </tr>
-            </table>
-
-            <mat-paginator [length]="totalPedidos" [pageSize]="tamanhoPagina" (page)="onPaginaAlterada($event)"
-                showFirstLastButtons></mat-paginator>
+          <app-section-card [divider]="false">
+            <app-pedido-tabela
+              [data]="dataSource"
+              [total]="totalPedidos"
+              [pageSize]="tamanhoPagina"
+              [sortActive]="sortActive"
+              [sortDirection]="sortDirection"
+              (sortChange)="onSort($event)"
+              (pageChange)="onPaginaAlterada($event)">
+            </app-pedido-tabela>
+          </app-section-card>
         </div>
-    </mat-card-content>
+      </mat-tab>
 
-</mat-card>
+      <mat-tab label="Orçamentos">
+        <div class="tab-pane">
+          <app-filtro-pesquisa-card
+            titulo="Pesquisar"
+            placeholder="Ex: cliente ou número do pedido"
+            [statusOptions]="[]"
+            [mostrarStatus]="false"
+            (pesquisar)="onPesquisar($event)">
+          </app-filtro-pesquisa-card>
+
+          <app-section-card [divider]="false">
+            <app-pedido-tabela
+              [data]="dataSource"
+              [total]="totalPedidos"
+              [pageSize]="tamanhoPagina"
+              [sortActive]="sortActive"
+              [sortDirection]="sortDirection"
+              [mostrarNumero]="false"
+              [mostrarOrcamento]="true"
+              (sortChange)="onSort($event)"
+              (pageChange)="onPaginaAlterada($event)">
+            </app-pedido-tabela>
+          </app-section-card>
+        </div>
+      </mat-tab>
+
+      <mat-tab label="Rascunhos">
+        <div class="tab-pane">
+          <app-filtro-pesquisa-card
+            titulo="Pesquisar"
+            placeholder="Ex: cliente ou número do pedido"
+            [statusOptions]="[]"
+            [mostrarStatus]="false"
+            (pesquisar)="onPesquisar($event)">
+          </app-filtro-pesquisa-card>
+
+          <app-section-card [divider]="false">
+            <app-pedido-tabela
+              [data]="dataSource"
+              [total]="totalPedidos"
+              [pageSize]="tamanhoPagina"
+              [sortActive]="sortActive"
+              [sortDirection]="sortDirection"
+              [mostrarStatus]="false"
+              (sortChange)="onSort($event)"
+              (pageChange)="onPaginaAlterada($event)">
+            </app-pedido-tabela>
+          </app-section-card>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  </app-section-card>
+
+</app-page-card>

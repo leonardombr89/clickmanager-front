@@ -12,6 +12,7 @@ import { CardHeaderComponent } from '../card-header/card-header.component';
 })
 export class PageCardComponent {
   @Input() titulo: string = '';
+  @Input() subtitulo?: string;
   @Input() botaoTexto?: string;
   @Input() botaoIcone: string = 'arrow_back';
   @Input() botaoCor: 'primary' | 'accent' | 'warn' = 'primary';

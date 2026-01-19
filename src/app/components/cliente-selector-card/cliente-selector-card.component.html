@@ -1,0 +1,108 @@
+<ng-container *ngIf="renderCard; else content">
+  <app-section-card [titulo]="titulo" [divider]="divider">
+    <ng-container [ngTemplateOutlet]="content"></ng-container>
+  </app-section-card>
+</ng-container>
+
+<ng-template #content>
+  <div class="cliente-block" [class.border]="!renderCard" [class.inativo]="inativo">
+    <div *ngIf="cliente; else semCliente" class="cliente-info">
+      <div class="info-grid">
+        <div class="info-column">
+          <div class="info-row">
+            <span class="label">Nome</span>
+            <span class="value">{{ cliente?.nome || '-' }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">E-mail</span>
+            <span class="value">{{ cliente?.email || '-' }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Telefone</span>
+            <span class="value">{{ (cliente?.telefone | telefone) || '-' }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Documento</span>
+            <span class="value">{{ cliente?.documento || '-' }}</span>
+          </div>
+        </div>
+
+        <div class="info-column">
+          <div class="info-row">
+            <span class="label">Logradouro</span>
+            <span class="value">{{ cliente?.endereco?.logradouro || '-' }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Número</span>
+            <span class="value">{{ cliente?.endereco?.numero || '-' }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Bairro</span>
+            <span class="value">{{ cliente?.endereco?.bairro || '-' }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Cidade / UF</span>
+            <span class="value">
+              {{ cliente?.endereco?.cidade || '-' }} <span *ngIf="cliente?.endereco?.estado">/ {{ cliente?.endereco?.estado }}</span>
+            </span>
+          </div>
+          <div class="info-row">
+            <span class="label">CEP</span>
+            <span class="value">{{ cliente?.endereco?.cep || '-' }}</span>
+          </div>
+          <div class="info-row" *ngIf="cliente?.endereco?.complemento">
+            <span class="label">Complemento</span>
+            <span class="value">{{ cliente?.endereco?.complemento }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="actions-row">
+        <div class="actions">
+          <button mat-stroked-button color="primary" (click)="onCancelarEdicao()" *ngIf="editando" [disabled]="inativo">
+            Cancelar
+          </button>
+          <button mat-stroked-button color="primary" (click)="onEditarCliente()" *ngIf="!editando" [disabled]="inativo">
+            Trocar cliente
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <ng-template #semCliente>
+      <div class="empty-alert" *ngIf="showEmptyAlert && emptyMessage">
+        <mat-icon>info</mat-icon>
+        <div>{{ emptyMessage }}</div>
+      </div>
+    </ng-template>
+
+    <div class="editor" *ngIf="(editando || !cliente)">
+      <app-auto-complete
+        [control]="control"
+        [label]="label"
+        [displayWith]="displayWith"
+        [buscarFn]="buscarFn"
+        [minimoCaracteres]="minimoCaracteres"
+        [multiplo]="multiplo">
+      </app-auto-complete>
+
+      <div class="editor-actions">
+        <button
+          mat-flat-button
+          color="primary"
+          (click)="onSalvarCliente()"
+          [disabled]="salvando || inativo">
+          Salvar cliente no pedido
+        </button>
+        <button
+          type="button"
+          mat-stroked-button
+          color="primary"
+          (click)="onCriarCliente()"
+          [disabled]="salvando || inativo">
+          Novo cliente
+        </button>
+      </div>
+    </div>
+  </div>
+</ng-template>
