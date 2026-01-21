@@ -28,8 +28,14 @@ export interface FlowPermissoes {
 }
 
 export interface FlowTransicoes {
-  permitidas: string[];
+  permitidas: Array<string | FlowTransicaoConfig>;
   regras?: FlowRegra[];
+}
+
+export interface FlowTransicaoConfig {
+  status?: string; // destino
+  to?: string;     // alias para destino
+  label?: string;  // texto opcional para botão/ação
 }
 
 export interface FlowRestricoes {

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { FlowConfig, FlowContext, FlowPermissoes, FlowStatus, FlowTransicoes } from './pedido-flow.types';
+import { FlowConfig, FlowContext, FlowPermissoes, FlowStatus, FlowTransicaoConfig, FlowTransicoes } from './pedido-flow.types';
 
 @Injectable({ providedIn: 'root' })
 export class PedidoFlowGuardService {
@@ -20,13 +20,13 @@ export class PedidoFlowGuardService {
       return [];
     }
     const transicoes: FlowTransicoes | undefined = st.transicoes;
-    const permitidas = transicoes?.permitidas ?? [];
+    const permitidas = this.normalizarPermitidas(transicoes);
     return permitidas.map(to => {
-      const destino = this.lookupStatus(config, to);
-      const valida = this.validateRegras(transicoes, to, ctx);
+      const destino = this.lookupStatus(config, to.status);
+      const valida = this.validateRegras(transicoes, to.status, ctx);
       return {
-        status: to,
-        label: destino?.label || to,
+        status: to.status,
+        label: to.label || destino?.label || to.status,
         bloqueado: !valida.ok,
         motivo: valida.message,
         warn: valida.warn
@@ -53,7 +53,7 @@ export class PedidoFlowGuardService {
     }
 
     const transicoes = origem.transicoes;
-    const permitidas = transicoes?.permitidas ?? [];
+    const permitidas = this.normalizarPermitidas(transicoes).map(p => p.status);
     if (!permitidas.includes(to.toUpperCase())) {
       return { ok: false, message: 'Transição não configurada para este status.' };
     }
@@ -103,6 +103,18 @@ export class PedidoFlowGuardService {
       };
     }
     return { ok: true };
+  }
+
+  private normalizarPermitidas(transicoes?: FlowTransicoes): { status: string; label?: string }[] {
+    const lista = transicoes?.permitidas ?? [];
+    return lista.map(p => {
+      if (typeof p === 'string') {
+        const status = p.toUpperCase();
+        return { status };
+      }
+      const status = (p.status || p.to || '').toUpperCase();
+      return { status, label: p.label };
+    }).filter(p => !!p.status);
   }
 
   private lookupStatus(config: FlowConfig | null, status: string): FlowStatus | null {

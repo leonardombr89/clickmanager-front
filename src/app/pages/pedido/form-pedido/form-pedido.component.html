@@ -5,13 +5,8 @@
     <div class="pedido-layout">
       <!-- Coluna esquerda: fluxo principal -->
       <div class="main-column">
-          <div class="flow-hint">Crie o pedido a partir de um orçamento ou cálculo.</div>
 
           <!-- Cliente -->
-          <div class="card-lead">
-            <span class="step-chip">Passo 1</span>
-            <span class="lead-title">Dados do cliente</span>
-          </div>
           <app-cliente-selector-card
             [cliente]="clienteConfirmado"
             [editando]="trocandoCliente || !clienteConfirmado"
@@ -27,10 +22,6 @@
           </app-cliente-selector-card>
 
           <!-- Itens do pedido -->
-          <div class="card-lead">
-            <span class="step-chip">Passo 2</span>
-            <span class="lead-title">Itens do pedido</span>
-          </div>
           <app-itens-pedido-section
             [itens]="pedidoItens"
             [subtotal]="subTotal"
@@ -39,7 +30,6 @@
             (removerItem)="removerItem($event)"
             (alterarQuantidade)="alterarQuantidade($event.index, $event.quantidade)"
           ></app-itens-pedido-section>
-          <p class="hint" *ngIf="!pedidoItens.length">Após adicionar itens, o total será calculado automaticamente.</p>
 
           <!-- Observações -->
           <app-observacoes-card

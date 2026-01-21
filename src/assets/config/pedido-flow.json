@@ -6,23 +6,115 @@
   },
   "status": [
     {
+      "key": "ORCAMENTO",
+      "label": "Orçamento",
+      "descricao": "Documento de orçamento aguardando aprovação.",
+      "ordem": 0,
+      "final": false,
+      "somenteLeitura": false,
+      "permissoes": {
+        "cliente": true,
+        "itens": true,
+        "observacoes": true,
+        "pagamentos": false,
+        "status": true
+      },
+      "transicoes": {
+        "permitidas": [
+          {
+            "status": "AGUARDANDO_PAGAMENTO",
+            "label": "Aguardando Pagamento"
+          },
+          {
+            "status": "CANCELADO",
+            "label": "Cancelado"
+          }
+        ]
+      },
+      "restricoes": {
+        "somenteAvanca": true
+      },
+      "internoBloqueado": [
+        "VENCIDO",
+        "CANCELADO"
+      ]
+    },
+    {
       "key": "RASCUNHO",
       "label": "Rascunho",
       "descricao": "Pedido rascunho vindo do SmartCalc.",
       "ordem": 0,
       "final": false,
       "somenteLeitura": false,
-      "permissoes": { "cliente": true, "itens": true, "observacoes": true, "pagamentos": true, "status": true },
+      "permissoes": {
+        "cliente": true,
+        "itens": true,
+        "observacoes": true,
+        "pagamentos": true,
+        "status": true
+      },
       "transicoes": {
-        "permitidas": ["PENDENTE", "ORCAMENTO", "CANCELADO"],
+        "permitidas": [
+          {
+            "status": "AGUARDANDO_PAGAMENTO",
+            "label": "Aguardando Pagamento"
+          },
+          {
+            "status": "CANCELADO",
+            "label": "Cancelado"
+          }
+        ],
+        "regras": [
+          {
+            "to": "AGUARDANDO_PAGAMENTO",
+            "all": [
+              {
+                "field": "clienteId",
+                "op": "notEmpty",
+                "message": "Selecione um cliente antes de avançar o rascunho."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "key": "AGUARDANDO_PAGAMENTO",
+      "label": "Aguardando pagamento",
+      "descricao": "Aguardando pagamento do cliente.",
+      "ordem": 1,
+      "final": false,
+      "somenteLeitura": false,
+      "permissoes": {
+        "cliente": true,
+        "itens": true,
+        "observacoes": true,
+        "pagamentos": true,
+        "status": true
+      },
+      "transicoes": {
+        "permitidas": [
+          {
+            "status": "PENDENTE",
+            "label": "Pendente"
+          },
+          {
+            "status": "CANCELADO",
+            "label": "Cancelado"
+          }
+        ],
         "regras": [
           {
             "to": "PENDENTE",
-            "all": [{ "field": "clienteId", "op": "notEmpty", "message": "Selecione um cliente antes de avançar o rascunho." }]
-          },
-          {
-            "to": "ORCAMENTO",
-            "all": [{ "field": "clienteId", "op": "notEmpty", "message": "Selecione um cliente antes de gerar orçamento." }]
+            "all": [
+              {
+                "field": "pagoPercent",
+                "op": ">=",
+                "value": 20,
+                "message": "É necessário pagar ao menos 20% para iniciar a produção."
+              }
+            ],
+            "warnOnly": false
           }
         ]
       }
@@ -31,50 +123,37 @@
       "key": "PENDENTE",
       "label": "Pendente",
       "descricao": "Pedido criado aguardando definições iniciais.",
-      "ordem": 1,
-      "final": false,
-      "somenteLeitura": false,
-      "permissoes": { "cliente": true, "itens": true, "observacoes": true, "pagamentos": true, "status": true },
-      "transicoes": {
-        "permitidas": ["AGUARDANDO_PAGAMENTO", "EM_PRODUCAO", "CANCELADO"],
-        "regras": [
-          {
-            "to": "EM_PRODUCAO",
-            "all": [
-              { "field": "pagoPercent", "op": ">=", "value": 20, "message": "É necessário pagar ao menos 20% para iniciar a produção." }
-            ],
-            "warnOnly": false
-          }
-        ]
-      }
-    },
-    {
-      "key": "ORCAMENTO",
-      "label": "Orçamento",
-      "descricao": "Documento de orçamento aguardando aprovação.",
-      "ordem": 1,
-      "final": false,
-      "somenteLeitura": false,
-      "permissoes": { "cliente": true, "itens": true, "observacoes": true, "pagamentos": false, "status": true },
-      "transicoes": { "permitidas": ["AGUARDANDO_PAGAMENTO", "CANCELADO"] },
-      "restricoes": { "somenteAvanca": true },
-      "internoBloqueado": ["VENCIDO", "CANCELADO"]
-    },
-    {
-      "key": "AGUARDANDO_PAGAMENTO",
-      "label": "Aguardando pagamento",
-      "descricao": "Aguardando pagamento do cliente.",
       "ordem": 2,
       "final": false,
       "somenteLeitura": false,
-      "permissoes": { "cliente": true, "itens": true, "observacoes": true, "pagamentos": true, "status": true },
+      "permissoes": {
+        "cliente": true,
+        "itens": true,
+        "observacoes": true,
+        "pagamentos": true,
+        "status": true
+      },
       "transicoes": {
-        "permitidas": ["EM_PRODUCAO", "CANCELADO"],
+        "permitidas": [
+          {
+            "status": "EM_PRODUCAO",
+            "label": "Em Producao"
+          },
+          {
+            "status": "CANCELADO",
+            "label": "Cancelado"
+          }
+        ],
         "regras": [
           {
             "to": "EM_PRODUCAO",
             "all": [
-              { "field": "pagoPercent", "op": ">=", "value": 20, "message": "É necessário pagar ao menos 20% para iniciar a produção." }
+              {
+                "field": "pagoPercent",
+                "op": ">=",
+                "value": 20,
+                "message": "É necessário pagar ao menos 20% para iniciar a produção."
+              }
             ],
             "warnOnly": false
           }
@@ -88,8 +167,25 @@
       "ordem": 3,
       "final": false,
       "somenteLeitura": false,
-      "permissoes": { "cliente": false, "itens": false, "observacoes": true, "pagamentos": true, "status": true },
-      "transicoes": { "permitidas": ["PRONTO", "CANCELADO"] }
+      "permissoes": {
+        "cliente": false,
+        "itens": false,
+        "observacoes": true,
+        "pagamentos": true,
+        "status": true
+      },
+      "transicoes": {
+        "permitidas": [
+          {
+            "status": "PRONTO",
+            "label": "Enviar"
+          },
+          {
+            "status": "CANCELADO",
+            "label": "Cancelado"
+          }
+        ]
+      }
     },
     {
       "key": "PRONTO",
@@ -98,14 +194,34 @@
       "ordem": 4,
       "final": false,
       "somenteLeitura": false,
-      "permissoes": { "cliente": false, "itens": false, "observacoes": true, "pagamentos": true, "status": true },
+      "permissoes": {
+        "cliente": false,
+        "itens": false,
+        "observacoes": true,
+        "pagamentos": true,
+        "status": true
+      },
       "transicoes": {
-        "permitidas": ["ENTREGUE", "CANCELADO"],
+        "permitidas": [
+          {
+            "status": "ENTREGUE",
+            "label": "Entregue"
+          },
+          {
+            "status": "CANCELADO",
+            "label": "Cancelado"
+          }
+        ],
         "regras": [
           {
             "to": "ENTREGUE",
             "all": [
-              { "field": "pagoPercent", "op": ">=", "value": 100, "message": "É necessário quitar o pedido para marcar como entregue." }
+              {
+                "field": "pagoPercent",
+                "op": ">=",
+                "value": 100,
+                "message": "É necessário quitar o pedido para marcar como entregue."
+              }
             ],
             "warnOnly": false
           }
@@ -119,8 +235,21 @@
       "ordem": 5,
       "final": true,
       "somenteLeitura": true,
-      "permissoes": { "cliente": false, "itens": false, "observacoes": false, "pagamentos": true, "status": false },
-      "transicoes": { "permitidas": [] }
+      "permissoes": {
+        "cliente": false,
+        "itens": false,
+        "observacoes": false,
+        "pagamentos": true,
+        "status": true
+      },
+      "transicoes": {
+        "permitidas": [
+          {
+            "status": "CANCELADO",
+            "label": "Cancelado"
+          }
+        ]
+      }
     },
     {
       "key": "CANCELADO",
@@ -129,8 +258,16 @@
       "ordem": 6,
       "final": true,
       "somenteLeitura": true,
-      "permissoes": { "cliente": false, "itens": false, "observacoes": false, "pagamentos": false, "status": false },
-      "transicoes": { "permitidas": [] },
+      "permissoes": {
+        "cliente": false,
+        "itens": false,
+        "observacoes": false,
+        "pagamentos": false,
+        "status": false
+      },
+      "transicoes": {
+        "permitidas": []
+      },
       "limparPagamentosAoCancelar": true
     }
   ]

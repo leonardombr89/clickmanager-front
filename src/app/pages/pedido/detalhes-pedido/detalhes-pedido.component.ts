@@ -157,25 +157,7 @@ export class DetalhesPedidoComponent implements OnInit {
             })
         ).subscribe({
             next: (res) => {
-                this.pedido = res;
-
-                // sincronia com o form
-                this.form.get('clienteId')?.setValue(this.pedido?.cliente?.id ?? null, { emitEvent: false });
-                this.form.get('status')?.setValue(this.pedido?.status ?? null, { emitEvent: false });
-
-                // Observações: inicializa sem disparar auto-save
-                this.observacoesControl.setValue(this.pedido?.observacoes ?? '', { emitEvent: false });
-
-                // (re)assina o auto-save uma única vez
-                this.obsSub?.unsubscribe();
-                this.obsSub = this.observacoesControl.valueChanges.pipe(
-                    debounceTime(800),
-                    distinctUntilChanged(),
-                    switchMap(texto => this.saveObs$(texto ?? ''))
-                ).subscribe();
-
-                this.atualizarPermissoesETransicoes();
-
+                this.sincronizarPedido(res);
                 this.carregando = false;
             },
             error: (err) => {
@@ -229,10 +211,7 @@ export class DetalhesPedidoComponent implements OnInit {
             next: () => {
                 this.toastr.success('Cliente atualizado no pedido.');
                 this.trocandoCliente = false;
-                this.pedidoService.buscarPorId(id).subscribe(p => {
-                    this.pedido = p;
-                    this.atualizarPermissoesETransicoes();
-                });
+                this.pedidoService.buscarPorId(id).subscribe(p => this.sincronizarPedido(p));
             },
             error: (err) => {
                 console.error(err);
@@ -256,10 +235,7 @@ export class DetalhesPedidoComponent implements OnInit {
         this.pedidoService.atualizar(id, { clienteId } as any).subscribe({
             next: () => {
                 this.toastr.success('Cliente atualizado no pedido.');
-                this.pedidoService.buscarPorId(id).subscribe(p => {
-                    this.pedido = p;
-                    this.atualizarPermissoesETransicoes();
-                });
+                this.pedidoService.buscarPorId(id).subscribe(p => this.sincronizarPedido(p));
             },
             error: (err) => {
                 console.error(err);
@@ -408,12 +384,9 @@ export class DetalhesPedidoComponent implements OnInit {
         this.pedidoService.adicionarPagamento(id, novoPagamento).subscribe({
             next: () => {
                 this.toastr.success('Pagamento adicionado com sucesso.');
-                this.pedidoService.buscarPorId(id).subscribe((pedidoAtualizado) => {
-                    this.pedido = pedidoAtualizado;
-                    this.atualizarPermissoesETransicoes();
-                    this.pagamentoValorControl.reset();
-                    this.pagamentoFormaControl.reset();
-                });
+                this.pedidoService.buscarPorId(id).subscribe((pedidoAtualizado) => this.sincronizarPedido(pedidoAtualizado));
+                this.pagamentoValorControl.reset();
+                this.pagamentoFormaControl.reset();
             },
             error: () => this.toastr.error('Erro ao adicionar pagamento.')
         }).add(() => this.adicionandoPagamento = false);
@@ -428,10 +401,7 @@ export class DetalhesPedidoComponent implements OnInit {
         this.pedidoService.removerPagamento(id, pagamento.id).subscribe({
             next: () => {
                 this.toastr.success('Pagamento removido.');
-                this.pedidoService.buscarPorId(id).subscribe(pedidoAtualizado => {
-                    this.pedido = pedidoAtualizado;
-                    this.atualizarPermissoesETransicoes();
-                });
+                this.pedidoService.buscarPorId(id).subscribe(pedidoAtualizado => this.sincronizarPedido(pedidoAtualizado));
             },
             error: () => this.toastr.error('Erro ao remover pagamento.')
         });
@@ -653,7 +623,9 @@ export class DetalhesPedidoComponent implements OnInit {
         return !this.permissoes.status;
     }
     get inativoPagamentos(): boolean {
-        return !this.permissoes.pagamentos;
+        const statusAtual = (this.pedido?.status || '').toUpperCase();
+        const entregaQuitada = statusAtual === 'ENTREGUE' && this.restaPagar <= 0;
+        return !this.permissoes.pagamentos || entregaQuitada;
     }
     get inativoResumo(): boolean {
         return this.inativoCliente && this.inativoItens && this.inativoObservacoes && this.inativoStatus;
@@ -880,9 +852,8 @@ export class DetalhesPedidoComponent implements OnInit {
         this.pedidoService.atualizarStatus(id, novoStatus).subscribe({
             next: (pedidoAtualizado) => {
                 this.toastr.success('Status atualizado.');
-                this.pedido = pedidoAtualizado;
+                this.sincronizarPedido(pedidoAtualizado);
                 this.trocandoStatus = false;
-                this.atualizarPermissoesETransicoes();
             },
             error: (err) => {
                 console.error(err);
@@ -927,5 +898,26 @@ export class DetalhesPedidoComponent implements OnInit {
                 message
             }
         });
+    }
+
+    /**
+     * Sincroniza o estado interno após buscar ou atualizar o pedido.
+     */
+    private sincronizarPedido(pedidoAtualizado: PedidoResponse): void {
+        this.pedido = pedidoAtualizado;
+
+        this.form.get('clienteId')?.setValue(this.pedido?.cliente?.id ?? null, { emitEvent: false });
+        this.form.get('status')?.setValue(this.pedido?.status ?? null, { emitEvent: false });
+
+        this.observacoesControl.setValue(this.pedido?.observacoes ?? '', { emitEvent: false });
+
+        this.obsSub?.unsubscribe();
+        this.obsSub = this.observacoesControl.valueChanges.pipe(
+            debounceTime(800),
+            distinctUntilChanged(),
+            switchMap(texto => this.saveObs$(texto ?? ''))
+        ).subscribe();
+
+        this.atualizarPermissoesETransicoes();
     }
 }

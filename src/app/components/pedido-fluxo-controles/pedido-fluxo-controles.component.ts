@@ -16,7 +16,7 @@ import { ManualLinkComponent } from '../manual-link/manual-link.component';
 import { PedidoTrocarStatusDialogComponent } from './pedido-trocar-status-dialog.component';
 import { StatusBadgeComponent } from '../status-badge/status-badge.component';
 
-const FLOW_STEPS = ['RASCUNHO', 'PENDENTE', 'AGUARDANDO_PAGAMENTO', 'EM_PRODUCAO', 'PRONTO', 'ENTREGUE'];
+const FLOW_STEPS = ['RASCUNHO', 'AGUARDANDO_PAGAMENTO', 'PENDENTE', 'EM_PRODUCAO', 'PRONTO', 'ENTREGUE'];
 
 const STATUS_DESCRICAO: Record<string, string> = {
   RASCUNHO: 'Revise cliente e itens antes de confirmar.',
@@ -104,7 +104,7 @@ export class PedidoFluxoControlesComponent implements OnChanges {
   vm = {
     helperText: '',
     statusLabel: '',
-    nextAction: null as null | { label: string; icon?: string; color?: 'primary' | 'accent' | 'warn' | 'success'; disabled?: boolean; type: string },
+    nextAction: null as null | { label: string; icon?: string; color?: 'primary' | 'accent' | 'warn' | 'success'; disabled?: boolean; type: string; target?: string },
     showCancel: false,
     showAdvanced: true,
     tone: 'gray',
@@ -125,6 +125,11 @@ export class PedidoFluxoControlesComponent implements OnChanges {
     let nextAction: any = null;
     let showCancel = false;
     let showAdvanced = true;
+
+    const transicoesDisponiveis = (this.transicoes?.length
+      ? this.transicoes
+      : (this.statusOptions || []).map(s => ({ status: s, label: this.statusLabel(s), bloqueado: false })));
+    const proximaTransicao = transicoesDisponiveis.length ? transicoesDisponiveis[0] : undefined;
 
     if (this.isOrcamento) {
       helperText = 'Orçamento: aguardando aprovação do cliente.';
@@ -147,8 +152,8 @@ export class PedidoFluxoControlesComponent implements OnChanges {
           showCancel = true;
           break;
         case 'AGUARDANDO_PAGAMENTO':
-          helperText = 'Aguardando pagamento do cliente. Inicie a produção quando estiver ok.';
-          nextAction = { label: 'Iniciar produção', icon: 'play_arrow', color: 'primary' as const, type: 'enviarProducao' };
+          helperText = 'Aguardando pagamento do cliente. Confirme o pedido quando estiver ok.';
+          nextAction = { label: 'Confirmar pedido', icon: 'check', color: 'primary' as const, type: 'confirmarPedido' };
           showCancel = true;
           break;
         case 'EM_PRODUCAO':
@@ -177,6 +182,16 @@ export class PedidoFluxoControlesComponent implements OnChanges {
           helperText = defaultHelper;
           showCancel = true;
       }
+    }
+
+    if (!readonly && proximaTransicao) {
+      nextAction = {
+        label: proximaTransicao.label || this.statusLabel(proximaTransicao.status),
+        icon: 'arrow_forward',
+        color: 'primary' as const,
+        type: 'mudarStatus',
+        target: proximaTransicao.status
+      };
     }
 
     if (readonly) {
@@ -226,6 +241,15 @@ export class PedidoFluxoControlesComponent implements OnChanges {
       case 'irParaPagamentos':
         this.irParaPagamentos.emit();
         break;
+      case 'mudarStatus': {
+        const destino = (this.vm.nextAction as any)?.target;
+        if (destino) {
+          this.statusControl?.setValue(destino);
+          this.trocarStatusSelecionado.emit(destino);
+          this.salvarStatus.emit();
+        }
+        break;
+      }
       case 'enviarProducao':
         this.iniciarProducao.emit();
         break;

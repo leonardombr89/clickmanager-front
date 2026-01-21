@@ -2,9 +2,9 @@ import { Routes } from '@angular/router';
 import { BlankComponent } from './layouts/blank/blank.component';
 import { FullComponent } from './layouts/full/full.component';
 import { AuthGuard } from './pages/authentication/guards/auth.guard';
-import { ImprimirPedidoComponent } from './pages/pedido/pedido-imprimir/imprimir-pedido.component';
+import { ImprimirPedidoPageComponent } from './pages/pedido/pedido-imprimir/imprimir-pedido.page';
 import { PrintComponent } from './layouts/print/print.component';
-import { ImprimirEtiquetasComponent } from './pages/pedido/pedido-imprimir-etiquetas/imprimir-etiquetas.component';
+import { ImprimirEtiquetasPageComponent } from './pages/pedido/pedido-imprimir/etiquetas/imprimir-etiquetas.page';
 import { ImprimirWhatsAppComponent } from './pages/pedido/pedido-imprimir-whatsapp/imprimir-whatsapp.component';
 import { BillingBlockedComponent } from './pages/billing/billing-blocked/billing-blocked.component';
 import { BillingPagamentoComponent } from './pages/billing/billing-pagamento/billing-pagamento.component';
@@ -160,15 +160,15 @@ export const routes: Routes = [
     children: [
       {
         path: 'pedido/imprimir/:id',
-        component: ImprimirPedidoComponent
+        component: ImprimirPedidoPageComponent
       },
       {
         path: 'pedido/imprimir-duas-vias/:id',
-        component: ImprimirPedidoComponent
+        component: ImprimirPedidoPageComponent
       },
       {
         path: 'pedido/imprimir-etiquetas/:id',
-        component: ImprimirEtiquetasComponent
+        component: ImprimirEtiquetasPageComponent
       },
       {
         path: 'pedido/whatsapp/:id',      

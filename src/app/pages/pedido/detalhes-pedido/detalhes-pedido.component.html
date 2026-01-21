@@ -19,7 +19,7 @@
         [restaPagar]="restaPagar"
         [totalPago]="totalPago"
         [temPagamentos]="(pedido?.pagamentos?.length || 0) > 0"
-        [isReadOnly]="['ENTREGUE','CANCELADO'].includes((pedido?.status || '').toUpperCase())"
+        [isReadOnly]="!permissoes.status"
         [orcamentoVencido]="orcamentoVencido"
         [trocandoStatus]="trocandoStatus"
         [carregandoStatus]="carregandoStatus"

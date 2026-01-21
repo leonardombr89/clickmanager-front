@@ -43,6 +43,7 @@ import { ItensPedidoSectionComponent } from "src/app/components/itens-pedido-sec
 import { ClienteSelectorCardComponent } from "src/app/components/cliente-selector-card/cliente-selector-card.component";
 import { ObservacoesCardComponent } from "src/app/components/observacoes-card/observacoes-card.component";
 import { ConfirmDialogComponent } from "src/app/components/dialog/confirm-dialog/confirm-dialog.component";
+import { ClienteService } from "../../cliente/cliente.service";
 
 @Component({
   selector: 'app-form-pedido',
@@ -118,7 +119,8 @@ export class FormPedidoComponent implements OnInit {
     private router: Router,
     private dialog: MatDialog,
     private authService: AuthService,
-    private toastr: ToastrService
+    private toastr: ToastrService,
+    private clienteService: ClienteService
   ) { }
 
   ngOnInit(): void {
@@ -483,13 +485,20 @@ export class FormPedidoComponent implements OnInit {
       return;
     }
 
-    // mantém o objeto para display do autocomplete, mas garante validade
-    this.clienteControl.setValue(selecionado, { emitEvent: false });
-    this.clienteConfirmado = selecionado;
-    this.trocandoCliente = false;
-    this.clienteControl.markAsDirty();
-    this.clienteControl.updateValueAndValidity({ emitEvent: false });
-    this.toastr.success('Cliente selecionado para o pedido.');
+    this.clienteService.buscarPorId(selecionado.id).pipe(take(1)).subscribe({
+      next: (clienteCompleto) => {
+        this.clienteConfirmado = clienteCompleto;
+        // mantém o objeto completo para display e submissão
+        this.clienteControl.setValue(clienteCompleto, { emitEvent: false });
+        this.trocandoCliente = false;
+        this.clienteControl.markAsDirty();
+        this.clienteControl.updateValueAndValidity({ emitEvent: false });
+        this.toastr.success('Cliente selecionado para o pedido.');
+      },
+      error: () => {
+        this.toastr.warning('Não foi possível carregar os dados completos do cliente. Tente novamente.');
+      }
+    });
   }
 
   iniciarTrocaCliente(): void {
