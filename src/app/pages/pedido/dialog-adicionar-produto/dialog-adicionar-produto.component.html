@@ -1,21 +1,31 @@
-<div class="dialog-header d-flex align-items-center justify-content-between">
-  <h2 mat-dialog-title class="m-b-0">Adicionar produto</h2>
-  <button mat-icon-button mat-dialog-close aria-label="Fechar">
-    <mat-icon>close</mat-icon>
-  </button>
-</div>
+<div class="wizard-shell">
+  <div class="dialog-header">
+    <div class="title-stack">
+      <h2 mat-dialog-title class="m-b-0">
+        <span class="title-main">Adicionar produto</span>
+        <span class="title-divider">-</span>
+        <span class="title-step" aria-live="polite">{{ currentStepLabel }}</span>
+      </h2>
+    </div>
+    <button mat-icon-button mat-dialog-close aria-label="Fechar">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
 
-<!-- BODY ROLÁVEL DO MODAL -->
-<mat-dialog-content class="wizard-body">
+  <mat-divider></mat-divider>
+
+  <!-- BODY ROLÁVEL DO MODAL -->
+  <mat-dialog-content class="wizard-body">
     <!-- Stepper com cabeçalho fixo -->
     <mat-horizontal-stepper [linear]="true" #stepper class="wizard-stepper">
 
         <!-- 1) Selecionar Produto -->
         <mat-step [stepControl]="selectForm" label="Selecionar Produto">
-            <form [formGroup]="selectForm" class="step-inner step-wide m-t-8">
-                <app-listar-produtos [showActions]="false" [showSelect]="true" [selectedId]="produtoIdSelecionado"
-                    [hideHeader]="true" (selectedChange)="onSelecionarProduto($event)">
-                </app-listar-produtos>
+            <form [formGroup]="selectForm" class="step-inner step-full m-t-8">
+                <app-selecionar-produto-step
+                    [selectedId]="produtoIdSelecionado"
+                    (selectedChange)="onSelecionarProduto($event)">
+                </app-selecionar-produto-step>
             </form>
         </mat-step>
 
@@ -329,18 +339,19 @@
 
 <!-- RODAPÉ FIXO -->
 <div class="wizard-footer">
-    <div class="left">
-        <button mat-stroked-button class="bg-error text-white" (click)="goPrev()" [disabled]="isFirstStep">
-            Voltar
-        </button>
-    </div>
+  <div class="left">
+    <button mat-stroked-button class="bg-error text-white" (click)="goPrev()" [disabled]="isFirstStep" aria-label="Voltar para o passo anterior">
+      Voltar
+    </button>
+  </div>
 
-    <div class="right">
-        <button mat-stroked-button color="warn" mat-dialog-close *ngIf="isFirstStep">
-            Cancelar
-        </button>
-        <button mat-flat-button color="primary" (click)="goNext()" [disabled]="nextDisabled">
-            {{ nextLabel }}
-        </button>
-    </div>
+  <div class="right">
+    <button mat-stroked-button color="warn" mat-dialog-close aria-label="Cancelar e fechar">
+      Cancelar
+    </button>
+    <button mat-flat-button color="primary" class="primary-action" (click)="goNext()" [disabled]="nextDisabled || isFinishing">
+      <mat-progress-spinner *ngIf="isFinishing" mode="indeterminate" diameter="18" strokeWidth="3"></mat-progress-spinner>
+      <span>{{ nextLabel }}</span>
+    </button>
+  </div>
 </div>

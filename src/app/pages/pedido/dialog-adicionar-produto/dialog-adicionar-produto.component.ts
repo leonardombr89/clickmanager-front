@@ -11,9 +11,10 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
 import { MatDialogClose } from '@angular/material/dialog';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { ProdutoService } from '../../cadastro-tecnico/services/produto.service';
-import { ListarProdutosComponent } from 'src/app/components/tabela/listar-produtos.component';
+import { SelecionarProdutoStepComponent } from './steps/selecionar-produto-step/selecionar-produto-step.component';
 
 import { ProdutoListagem } from 'src/app/models/produto/produto-listagem.model';
 import { Preco } from 'src/app/models/preco/preco-response.model';
@@ -46,17 +47,17 @@ type Variacao = {
     imports: [
         CommonModule, ReactiveFormsModule,
         MatDialogModule, MatStepperModule, MatButtonModule,
-    MatRadioModule, MatDividerModule, MatCheckboxModule, MatTooltipModule, MatIconModule,
-    MatCardModule,
-    MatDialogClose,
+        MatRadioModule, MatDividerModule, MatCheckboxModule, MatTooltipModule, MatIconModule,
+        MatCardModule, MatProgressSpinnerModule, MatDialogClose,
         // filhos
-        ListarProdutosComponent,
+        SelecionarProdutoStepComponent,
         PrecoFixoConfigComponent, PrecoQuantidadeConfigComponent,
         PrecoDemandaConfigComponent, PrecoMetroConfigComponent,
     ],
 })
 export class DialogAdicionarProdutoComponent {
     precoReady = false;
+    isFinishing = false;
 
     // ======= Forms
     readonly selectForm: FormGroup = this.fb.group({
@@ -108,11 +109,17 @@ export class DialogAdicionarProdutoComponent {
     ) { }
 
     // ======= Navegação (footer fixo)
+    // ======= Navegação (footer fixo)
     get isFirstStep(): boolean {
         return (this.stepper?.selectedIndex ?? 0) === 0;
     }
     get isLastStep(): boolean {
         return (this.stepper?.selectedIndex ?? 0) === 4; // 0..4
+    }
+    get currentStepLabel(): string {
+        const labels = ['Selecionar Produto', 'Escolher Variação', 'Configurar Preço', 'Serviços', 'Revisão'];
+        const i = this.stepper?.selectedIndex ?? 0;
+        return labels[i] || '';
     }
     get nextLabel(): 'Próximo' | 'Concluir' {
         return this.isLastStep ? 'Concluir' : 'Próximo';
@@ -132,7 +139,7 @@ export class DialogAdicionarProdutoComponent {
     }
     goNext(): void {
         if (this.isLastStep) {
-            this.finalizar();
+            this.finish();
             return;
         }
         const i = this.stepper?.selectedIndex ?? 0;
@@ -145,6 +152,15 @@ export class DialogAdicionarProdutoComponent {
             return;
         }
         if (!this.nextDisabled) this.stepper.next();
+    }
+    finish(): void {
+        if (this.isFinishing || this.nextDisabled) return;
+        this.isFinishing = true;
+        try {
+            this.finalizar();
+        } finally {
+            this.isFinishing = false;
+        }
     }
 
     // ======= STEP 1
