@@ -17,12 +17,13 @@ import { FormPedidoComponent } from './pedido/form-pedido/form-pedido.component'
 import { ListarPedidoComponent } from './pedido/listar-pedido/listar-pedido.component';
 import { FormClienteComponent } from './cliente/form-cliente/form-cliente.component';
 import { ListarClienteComponent } from './cliente/listar-cliente/listar-cliente.component';
-import { DetalhesPedidoComponent } from './pedido/detalhes-pedido/detalhes-pedido.component';
+import { DetalhesPedidoComponent } from 'src/app/pages/pedido/detalhes-pedido/detalhes-pedido.component';
 import { FormServicoComponent } from './cadastro-tecnico/servicos/form-servico/form-servico.component';
 import { ListarServicoComponent } from './cadastro-tecnico/servicos/listar-servicos/listar-servicos.component';
 import { CalculadoraConfigComponent } from './smart-calc-config/smart-calc-config/smart-calc-config.component';
 import { EmailServidorComponent } from './config/email-servidor/email-servidor.component';
 import { GerenciarPerfilComponent } from './perfil/gerenciar-perfil/gerenciar-perfil.component';
+import { AjudaComponent } from './ajuda/ajuda.component';
 
 export const PagesRoutes: Routes = [
   {
@@ -51,6 +52,17 @@ export const PagesRoutes: Routes = [
       urls: [
         { title: 'Dashboard', url: '/dashboards/dashboard1' },
         { title: 'Gerenciamento de perfil dos usuários' }
+      ]
+    }
+  },
+  {
+    path: 'ajuda',
+    component: AjudaComponent,
+    data: {
+      title: 'Central de ajuda',
+      urls: [
+        { title: 'Dashboard', url: '/dashboards/dashboard1' },
+        { title: 'Ajuda' }
       ]
     }
   },
@@ -311,10 +323,10 @@ export const PagesRoutes: Routes = [
     path: 'pedido/detalhe/:id',
     component: DetalhesPedidoComponent,
     data: {
-      title: 'detalhes Pedido',
+      title: 'Detalhes Pedido',
       urls: [
-        { title: 'detalhes de Pedidos', url: '/page/pedido' },
-        { title: 'detalhes Pedido' }
+        { title: 'Detalhes de Pedidos', url: '/page/pedido' },
+        { title: 'Detalhes Pedido' }
       ]
     }
   },
@@ -355,10 +367,10 @@ export const PagesRoutes: Routes = [
     path: 'calculadora/config/criar',
     component: CalculadoraConfigComponent,
     data: {
-      title: 'Calculadora Config',
+      title: 'Configuração SmartCalc',
       urls: [
-        { title: 'Calculadora Config', url: '/page/calculadora/config' },
-        { title: 'Calculadora Config' }
+        { title: 'Configuração SmartCalc', url: '/page/calculadora/config' },
+        { title: 'Configuração SmartCalc' }
       ]
     }
   },

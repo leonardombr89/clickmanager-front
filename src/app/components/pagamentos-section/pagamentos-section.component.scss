@@ -1,0 +1,107 @@
+.pay-accordion {
+  .mat-expansion-panel-header {
+    padding: 6px 12px;
+  }
+
+  .pay-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    font-weight: 600;
+    width: 100%;
+
+    .pay-title {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .muted {
+      color: #6b7280;
+      font-size: 12px;
+      font-weight: 500;
+    }
+  }
+}
+
+.pay-body {
+  padding: 8px 0 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pay-body.inativo {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.btn-add-pagamento {
+  width: 100%;
+  margin-top: 4px;
+}
+
+.table-wrapper {
+  max-height: 260px;
+  overflow: auto;
+}
+
+.header-cell {
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  font-size: 12px;
+}
+
+.bordered-row td {
+  border-top: 1px solid #e5e7eb;
+}
+
+.total-inline {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0 0;
+}
+
+.total-label {
+  font-weight: 700;
+  color: #4b5563;
+}
+
+.total-value {
+  background: #ecfdf3;
+  color: #166534;
+  padding: 6px 12px;
+  border-radius: 12px;
+  font-weight: 800;
+  min-width: 140px;
+  text-align: right;
+}
+
+.total-value .currency {
+  letter-spacing: 0.2px;
+}
+
+.action-link button {
+  margin-left: auto;
+}
+
+.center-table th,
+.center-table td {
+  text-align: center !important;
+}
+
+.error-text {
+  color: #b91c1c;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+@media (max-width: 767px) {
+  .pay-summary {
+    flex-wrap: wrap;
+  }
+}

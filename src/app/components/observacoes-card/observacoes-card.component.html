@@ -1,0 +1,50 @@
+<ng-container *ngIf="renderCard; else content">
+  <app-section-card [titulo]="titulo" [divider]="divider">
+    <ng-container [ngTemplateOutlet]="content"></ng-container>
+  </app-section-card>
+</ng-container>
+
+<ng-template #content>
+  <div class="obs-block" [class.border]="!renderCard" [class.inativo]="inativo">
+    <div class="empty-alert" *ngIf="!textoSalvo && !editando">
+      <mat-icon>info</mat-icon>
+      <span>{{ emptyMessage }}</span>
+    </div>
+
+    <ng-container *ngIf="editando; else viewMode">
+      <app-input-textarea
+        [control]="control"
+        [label]="''"
+        [rows]="3"
+        [placeholder]="placeholder">
+      </app-input-textarea>
+
+      <div class="obs-actions">
+        <button mat-flat-button color="primary" type="button" (click)="onSalvar()" [disabled]="salvando || !hasTexto || inativo">
+          Salvar observação
+        </button>
+        <button mat-stroked-button type="button" *ngIf="textoSalvo" (click)="cancelar()" [disabled]="salvando || inativo">
+          Cancelar
+        </button>
+      </div>
+    </ng-container>
+
+    <ng-template #viewMode>
+      <ng-container *ngIf="textoSalvo; else addAction">
+        <textarea class="readonly-text" readonly [value]="textoSalvo"></textarea>
+        <div class="obs-actions">
+          <button mat-stroked-button color="primary" type="button" (click)="editar()" [disabled]="inativo">
+            Editar observação
+          </button>
+        </div>
+      </ng-container>
+      <ng-template #addAction>
+        <div class="empty-actions">
+          <button mat-flat-button color="primary" type="button" (click)="iniciarEdicao()" [disabled]="inativo">
+            Adicionar observação
+          </button>
+        </div>
+      </ng-template>
+    </ng-template>
+  </div>
+</ng-template>

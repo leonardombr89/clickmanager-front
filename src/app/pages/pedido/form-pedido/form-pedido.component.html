@@ -1,259 +1,158 @@
-<mat-card class="cardWithShadow">
-  <!-- Cabeçalho Reutilizável fora do mat-card-content -->
-  <app-card-header titulo="Novo Pedido" botaoTexto="Voltar" botaoIcone="arrow_back" botaoCor="primary"
-    [botaoRota]="['/page/pedido']" [mostrarDivisor]="true">
-  </app-card-header>
+<app-page-card titulo="Novo Pedido" botaoTexto="Voltar" botaoIcone="arrow_back" botaoCor="primary"
+  [botaoRota]="['/page/pedido']" [mostrarDivisor]="true">
 
-  <mat-card-content>
-    <form [formGroup]="addForm">
+  <form [formGroup]="addForm">
+    <div class="pedido-layout">
+      <!-- Coluna esquerda: fluxo principal -->
+      <div class="main-column">
 
-      <!-- Cliente e Ações -->
-      <mat-card class="cardWithShadow m-t-30">
-        <mat-card-content>
-          <div class="row cliente-acao-row">
+          <!-- Cliente -->
+          <app-cliente-selector-card
+            [cliente]="clienteConfirmado"
+            [editando]="trocandoCliente || !clienteConfirmado"
+            [showEmptyAlert]="true"
+            [control]="clienteControl"
+            [displayWith]="mostrarCliente"
+            [buscarFn]="buscarClientes"
+            [minimoCaracteres]="3"
+            (salvarCliente)="confirmarClienteSelecionado()"
+            (editarCliente)="iniciarTrocaCliente()"
+            (cancelarEdicao)="cancelarTrocaCliente()"
+            (criarCliente)="onCriarCliente()">
+          </app-cliente-selector-card>
 
-            <!-- Cliente -->
-            <div class="col-md-6 cliente-col">
-              <app-auto-complete [control]="clienteControl" label="Selecione o cliente" [displayWith]="mostrarCliente"
-                [buscarFn]="buscarClientes" [minimoCaracteres]="3" [multiplo]="false">
-              </app-auto-complete>
+          <!-- Itens do pedido -->
+          <app-itens-pedido-section
+            [itens]="pedidoItens"
+            [subtotal]="subTotal"
+            (buscarProdutos)="onBuscarProdutos()"
+            (descreverItens)="onDescreverItens()"
+            (removerItem)="removerItem($event)"
+            (alterarQuantidade)="alterarQuantidade($event.index, $event.quantidade)"
+          ></app-itens-pedido-section>
 
-              <div class="d-flex justify-content-center justify-content-md-start m-t-12">
-                <button type="button" mat-stroked-button color="primary" (click)="onCriarCliente()">
-                  Novo cliente
-                </button>
-              </div>
-            </div>
-
-            <!-- Ações -->
-            <div class="col-md-6 cliente-col">
-              <mat-label class="f-s-14 f-w-600 m-b-8 d-block">
-                Adicione itens ao pedido
-              </mat-label>
-
-              <div class="row align-items-center text-center">
-            <div class="col-md-5 d-grid">
-              <button mat-stroked-button color="primary" (click)="onBuscarProdutos()">
-                Buscar produtos
-              </button>
-            </div>
-
-            <div class="col-md-2">
-              <span class="f-w-500">ou</span>
-            </div>
-
-            <div class="col-md-5 d-grid">
-              <button mat-stroked-button color="accent" (click)="onDescreverItens()">
-                Descrever itens
-              </button>
-            </div>
-          </div>
-            </div>
-
-          </div>
-        </mat-card-content>
-      </mat-card>
-
-      <mat-divider class="m-t-30"></mat-divider>
-
-      <!-- Tabela de Itens -->
-      <div class="table-responsive m-t-24" *ngIf="pedidoItens.length">
-        <table class="table table-hover b-1 no-wrap w-100 rounded text-left table-bg-light">
-          <thead>
-            <tr>
-              <th class="p-16">#</th>
-              <th class="p-16">Descrição</th>
-              <th class="p-16">Quantidade</th>
-              <th class="p-16">Valor Unitário</th>
-              <th class="p-16">Subtotal</th>
-              <th class="p-16 text-right">Ações</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            <tr *ngFor="let item of pedidoItens; let i = index">
-              <td class="p-16">{{ i + 1 }}</td>
-              <td class="p-16">{{ item.descricao }}</td>
-              <td class="p-16">{{ item.quantidade }}</td>
-              <td class="p-16">{{ item.valor | currency:'BRL':'symbol':'1.2-2' }}</td>
-              <td class="p-16">
-                {{ (item.subTotal ?? item.quantidade * item.valor) | currency:'BRL':'symbol':'1.2-2' }}
-              </td>
-              <td class="p-16 text-right action-link">
-                <button mat-icon-button color="warn" (click)="removerItem(i)" matTooltip="Remover item">
-                  <mat-icon>delete</mat-icon>
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="row m-t-16">
-
-        <!-- Informações do Pedido -->
-        <div class="col-md-8">
-          <mat-card class="cardWithShadow">
-            <mat-card-content>
-
-              <mat-card-title class="m-b-16">Informações do Pedido</mat-card-title>
-
-              <app-input-textarea [control]="observacoesControl" label="Observações"
-                placeholder="Insira observações relevantes sobre este pedido..." [rows]="4">
-              </app-input-textarea>
-
-              <div class="m-t-16" *ngIf="usuario$ | async as usuario">
-                <mat-label class="f-s-14 f-w-600 d-block">Responsável:</mat-label>
-                <p class="m-b-0">{{ usuario.nome }}</p>
-              </div>
-
-            </mat-card-content>
-          </mat-card>
-
-          <!-- Pagamentos -->
-          <mat-card *ngIf="!orcamentoControl.value" class="cardWithShadow">
-            <mat-card-content>
-
-              <div class="d-flex align-items-center justify-content-between m-b-16">
-                <mat-card-title class="m-b-0 f-s-16 f-w-600 d-flex align-items-center gap-1">
-                  <mat-icon color="primary">attach_money</mat-icon>
-                  Pagamentos
-                </mat-card-title>
-              </div>
-
-              <!-- Pagamentos - FormArray -->
-              <div formArrayName="pagamentos">
-
-                <div *ngFor="let pg of pagamentosControls; let i = index" class="row align-items-end m-b-16 pagamento-row"
-                  [formGroupName]="i">
-
-                  <div class="col-md-6">
-                    <app-input-options [control]="getFormaPagamentoControl(pg)" label="Forma"
-                      placeholder="Selecione a forma" [options]="formasPagamento">
-                    </app-input-options>
-                  </div>
-
-                  <div class="col-12 col-md-6">
-                    <div class="row align-items-center g-2 pagamento-valor-row">
-                      <div class="col-9 col-sm-9 col-md-9">
-                        <app-input-moeda [control]="getPagamentoValorControl(i)"></app-input-moeda>
-                      </div>
-                      <div class="col-3 col-sm-3 col-md-3 d-flex justify-content-center">
-                        <button mat-icon-button color="warn" class="w-100" (click)="removerPagamento(i)"
-                          matTooltip="Remover pagamento">
-                          <mat-icon>delete</mat-icon>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
-                </div>
-
-              </div>
-
-              <div class="add-btn-wrap m-t-8">
-                <button mat-flat-button color="primary" class="btn-add-pagamento" (click)="addPagamento()">
-                  <mat-icon class="m-r-8">add</mat-icon>
-                  Adicionar
-                </button>
-              </div>
-
-            </mat-card-content>
-          </mat-card>
-
+          <!-- Observações -->
+          <app-observacoes-card
+            class="observacoes-compact"
+            [control]="observacoesControl"
+            [textoSalvo]="observacaoSalva"
+            [salvando]="false"
+            [salvo]="obsSalvo"
+            placeholder="Insira observações relevantes sobre este pedido..."
+            (salvar)="confirmarObservacaoLocal()">
+          </app-observacoes-card>
         </div>
 
-        <!-- Totais -->
-        <div class="col-md-4">
-          <mat-card class="cardWithShadow">
-            <mat-card-content>
+        <!-- Coluna direita: ajustes, resumo, pagamentos, orçamento, ações -->
+        <div class="summary-column">
+          <div class="summary-sticky">
+            <!-- Ajustes -->
+            <app-section-card titulo="Ajustes" [divider]="true">
+              <div class="step-body ajustes-grid">
+                <app-input-moeda [control]="acrescimoControl" label="Acréscimo"></app-input-moeda>
+                <app-input-moeda [control]="freteControl" label="Frete"></app-input-moeda>
+                <app-input-moeda [control]="descontoControl" label="Desconto"></app-input-moeda>
+              </div>
+            </app-section-card>
 
-              <app-input-moeda [control]="acrescimoControl" label="Acréscimo"
-                placeholder="Informe um valor extra (opcional)">
-              </app-input-moeda>
+            <!-- Resumo financeiro -->
+            <app-section-card titulo="Resumo financeiro" [divider]="true" class="summary-card">
+              <div class="summary-row">
+                <span>Subtotal</span>
+                <strong class="value align-right">{{ subTotal | currency:'BRL':'symbol':'1.2-2' }}</strong>
+              </div>
+              <div class="summary-row">
+                <span>Acréscimos</span>
+                <strong class="value align-right">{{ acrescimoControl.value || 0 | currency:'BRL':'symbol':'1.2-2' }}</strong>
+              </div>
+              <div class="summary-row">
+                <span>Frete</span>
+                <strong class="value align-right">{{ freteControl.value || 0 | currency:'BRL':'symbol':'1.2-2' }}</strong>
+              </div>
+              <div class="summary-row">
+                <span>Descontos</span>
+                <strong class="value align-right">{{ descontoControl.value || 0 | currency:'BRL':'symbol':'1.2-2' }}</strong>
+              </div>
+              <mat-divider class="m-t-8 m-b-8"></mat-divider>
+              <div class="summary-row total">
+                <span>Total</span>
+                <strong class="value highlight">{{ grandTotal | currency:'BRL':'symbol':'1.2-2' }}</strong>
+              </div>
+              <div class="summary-row resta">
+                <span>Resta pagar</span>
+                <strong class="value highlight" [class.attention]="restaPagar > 0">{{ restaPagar | currency:'BRL':'symbol':'1.2-2' }}</strong>
+              </div>
+              <div class="microcopy">O total considera ajustes e descontos.</div>
+            </app-section-card>
 
-              <app-input-moeda [control]="freteControl" label="Frete" placeholder="Valor do frete (se houver)">
-              </app-input-moeda>
+            <!-- Pagamentos -->
+            <app-pagamentos-section
+              [pagamentoNovo]="pagamentoNovo"
+              [pagamentosControls]="pagamentosControls"
+              [formasPagamento]="formasPagamento"
+              [pago]="totalPago"
+              [restante]="restaPagar"
+              [mostrarConfirmado]="false"
+              [mostrarData]="false"
+              [expanded]="pagamentosControls.length > 0"
+              (addPagamento)="addPagamento()"
+              (removerPagamento)="removerPagamento($event)">
+            </app-pagamentos-section>
 
-              <app-input-moeda [control]="descontoControl" label="Desconto" placeholder="Desconto aplicado">
-              </app-input-moeda>
-
-              <h5 class="m-b-5 f-w-600 f-s-16">
-                Subtotal: {{ totalAjustado | currency:'BRL' }}
-              </h5>
-
-            </mat-card-content>
-          </mat-card>
-        </div>
-
-        <!-- Orçamento -->
-        <div class="col-md-8">
-          <mat-card class="cardWithShadow">
-            <mat-card-content>
-
-              <mat-checkbox [formControl]="orcamentoControl" class="f-w-600 f-s-16 m-b-8">
-                Salvar como orçamento
-              </mat-checkbox>
-
-              <div *ngIf="orcamentoControl.value" [@expandCollapse]>
-
-                <div class="text-danger f-s-14 m-b-16">
-                  O PEDIDO SÓ SERÁ REGISTRADO APÓS A APROVAÇÃO DO ORÇAMENTO
+            <!-- Orçamento (condicional) -->
+            <app-section-card titulo="Orçamento" [divider]="true" *ngIf="orcamentoControl.value">
+              <div class="step-body" [@expandCollapse]>
+                <div class="alert-soft">
+                  O pedido só será registrado após a aprovação do orçamento.
                 </div>
-
-                <div class="m-b-16">
-                  <app-input-texto-restrito [control]="nomeOrcamentoControl" label="Nome do orçamento"
-                    placeholder="Ex.: Cardápios do restaurante">
-                  </app-input-texto-restrito>
-                  <small class="text-muted">Utilize para facilitar a identificação</small>
-                </div>
-
-                <div>
+                <app-input-texto-restrito [control]="nomeOrcamentoControl" label="Nome do orçamento"
+                  placeholder="Ex.: Cardápios do restaurante">
+                </app-input-texto-restrito>
+                <div class="m-t-8">
                   <app-input-data [control]="vencimentoOrcamentoControl" label="Data de vencimento">
                   </app-input-data>
-                  <small class="text-muted">Após esta data o cliente não poderá aprovar</small>
+                </div>
+              </div>
+            </app-section-card>
+
+            <!-- Ações finais -->
+            <app-section-card>
+              <div class="actions-final">
+                <div class="checklist" *ngIf="addForm.invalid || !pedidoItens.length || !addForm.get('clienteId')?.value || (orcamentoControl.value && (!nomeOrcamentoControl.value || !vencimentoOrcamentoControl.value))">
+                  <div class="check-item" [class.done]="addForm.get('clienteId')?.value">
+                    <span class="icon">{{ addForm.get('clienteId')?.value ? '✓' : '•' }}</span>
+                    <span>Selecione um cliente</span>
+                  </div>
+                  <div class="check-item" [class.done]="pedidoItens.length">
+                    <span class="icon">{{ pedidoItens.length ? '✓' : '•' }}</span>
+                    <span>Adicione ao menos 1 item</span>
+                  </div>
+                  <div class="check-item" *ngIf="orcamentoControl.value" [class.done]="nomeOrcamentoControl.value && vencimentoOrcamentoControl.value">
+                    <span class="icon">{{ nomeOrcamentoControl.value && vencimentoOrcamentoControl.value ? '✓' : '•' }}</span>
+                    <span>Informe nome e vencimento do orçamento</span>
+                  </div>
                 </div>
 
+                <div class="orcamento-opt">
+                  <mat-checkbox [formControl]="orcamentoControl" class="f-w-600 f-s-13">
+                    Salvar como orçamento
+                  </mat-checkbox>
+                  <div class="microcopy">Se marcado, o pedido vira orçamento e precisa ser aprovado.</div>
+                </div>
+
+                <div class="d-flex gap-8 flex-wrap action-buttons">
+                  <a routerLink="/page/pedido" mat-stroked-button color="warn">
+                    Cancelar
+                  </a>
+                  <button mat-flat-button color="primary" (click)="saveDetail($event)"
+                    [disabled]="addForm.invalid || !pedidoItens.length || !addForm.get('clienteId')?.value || (orcamentoControl.value && (!nomeOrcamentoControl.value || !vencimentoOrcamentoControl.value))">
+                    Salvar pedido
+                  </button>
+                </div>
               </div>
-
-            </mat-card-content>
-          </mat-card>
-        </div>
-
-      </div>
-
-      <!-- Botões finais -->
-      <div class="text-right m-t-30">
-
-        <h5 class="f-w-600 f-s-16 m-b-24">
-          Resta pagar: {{ restaPagar | currency:'BRL' }}
-        </h5>
-
-        <mat-divider></mat-divider>
-
-        <div class="row align-items-center justify-content-between m-t-24 actions-row">
-
-          <div class="col-md-6">
-            <div class="d-flex gap-2 flex-wrap">
-              <a routerLink="/page/pedido" mat-flat-button class="bg-error text-white">
-                Cancelar
-              </a>
-
-              <button mat-flat-button color="primary" (click)="saveDetail($event)" [disabled]="addForm.invalid">
-                Salvar Pedido
-              </button>
-            </div>
+            </app-section-card>
           </div>
-
-          <div class="col-md-6 text-md-right m-t-8 m-t-md-0">
-            <h3 class="m-b-0 f-s-18">
-              Total Geral: {{ grandTotal | currency:'BRL' }}
-            </h3>
-          </div>
-
-        </div>
       </div>
-
-    </form>
-  </mat-card-content>
-</mat-card>
+    </div>
+  </form>
+</app-page-card>

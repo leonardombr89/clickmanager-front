@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -9,6 +9,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatTabsModule } from '@angular/material/tabs';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { TablerIconsModule } from 'angular-tabler-icons';
 import { MatDividerModule } from '@angular/material/divider';
 import { ToastrService } from 'ngx-toastr';
@@ -17,6 +18,8 @@ import { ActivatedRoute } from '@angular/router';
 import { ImagemUtil } from 'src/app/utils/imagem-util';
 import { AuthService } from 'src/app/services/auth.service';
 import { Usuario } from 'src/app/models/usuario/usuario.model';
+import { OnboardingWizardComponent } from 'src/app/components/onboarding/onboarding-wizard.component';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-account-setting',
@@ -33,11 +36,13 @@ import { Usuario } from 'src/app/models/usuario/usuario.model';
     MatInputModule,
     MatButtonModule,
     MatDividerModule,
+    MatDialogModule,
     ReactiveFormsModule,
+    OnboardingWizardComponent
   ],
   templateUrl: './account-setting.component.html',
 })
-export class AppAccountSettingComponent implements OnInit {
+export class AppAccountSettingComponent implements OnInit, OnDestroy {
   
   readonly IMAGEM_PADRAO = '/assets/images/profile/user-1.jpg';
   form!: FormGroup;
@@ -45,25 +50,37 @@ export class AppAccountSettingComponent implements OnInit {
   imagemBlob: Blob | null = null;
   imagemOriginal = '/assets/images/profile/user-1.jpg';
   usuarioId?: string;
+  isProprietario = false;
+  usuarioAtual: Usuario | null = null;
+  private usuarioSub?: Subscription;
 
   constructor(
     private fb: FormBuilder,
     private toastr: ToastrService,
     private accountService: AccountSettingService,
     private route: ActivatedRoute,
-    private authService: AuthService
+    private authService: AuthService,
+    private dialog: MatDialog
   ) {}
 
   ngOnInit(): void {
     this.form = this.criarFormulario();
     
     this.imagemOriginal = this.IMAGEM_PADRAO;
-  
+    this.usuarioSub = this.authService.usuario$.subscribe(u => {
+      this.usuarioAtual = u;
+      this.isProprietario = !!u?.proprietario;
+    });
+
     const userId = this.route.snapshot.paramMap.get('id');
     if (userId) {
       this.usuarioId = userId;
       this.carregarDadosUsuario(userId);
     }
+  }
+
+  ngOnDestroy(): void {
+    this.usuarioSub?.unsubscribe();
   }
 
   private criarFormulario(): FormGroup {
@@ -231,19 +248,34 @@ export class AppAccountSettingComponent implements OnInit {
 
     this.accountService.buscarEndereco(cep).subscribe({
       next: (dados) => {
-        if (dados.erro) {
-          this.toastr.warning('CEP não encontrado');
-          return;
-        }
+    if (dados.erro) {
+      this.toastr.warning('CEP não encontrado');
+      return;
+    }
 
-        this.form.get('enderecoRequest')?.patchValue({
-          logradouro: dados.logradouro || '',
-          bairro: dados.bairro || '',
-          cidade: dados.localidade || '',
-          estado: dados.uf || ''
-        });        
-      },
-      error: () => this.toastr.error('Erro ao buscar o endereço')
+    this.form.get('enderecoRequest')?.patchValue({
+      logradouro: dados.logradouro || '',
+      bairro: dados.bairro || '',
+      cidade: dados.localidade || '',
+      estado: dados.uf || ''
+    });        
+  },
+  error: () => this.toastr.error('Erro ao buscar o endereço')
+});
+  }
+
+  abrirOnboarding(): void {
+    const empresaNome = this.usuarioAtual?.empresa?.nome || 'Sua empresa';
+    const naoMostrarMaisDefault = this.usuarioAtual?.onboardingIgnorado ?? this.usuarioAtual?.empresa?.onboardingIgnorado ?? false;
+    this.dialog.open(OnboardingWizardComponent, {
+      width: '96vw',
+      maxWidth: '96vw',
+      maxHeight: '92vh',
+      disableClose: true,
+      data: {
+        empresaNome,
+        naoMostrarMaisDefault
+      }
     });
   }
 }

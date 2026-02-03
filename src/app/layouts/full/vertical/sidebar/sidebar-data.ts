@@ -18,7 +18,7 @@ export const navItems: NavItem[] = [
         requiredPermission: ['PEDIDOS_VER', 'PEDIDOS_CADASTRAR']
     },
     {
-        displayName: 'Calculadora Config',
+        displayName: 'Configuração SmartCalc',
         iconName: 'calculator',
         bgcolor: 'primary',
         route: '/page/calculadora/config/criar',
@@ -120,5 +120,14 @@ export const navItems: NavItem[] = [
                 requiredPermission: ['CONFIG_EMAIL']
             }
         ]
+    },
+    {
+        navCap: 'Ajuda',
+    },
+    {
+        displayName: 'Central de ajuda',
+        iconName: 'help',
+        bgcolor: 'primary',
+        route: '/page/ajuda',
     },
 ];

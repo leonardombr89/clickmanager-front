@@ -1,0 +1,74 @@
+.ajuda-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.ajuda-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.titulo {
+  margin: 0;
+}
+
+.subtitulo {
+  margin: 4px 0 0;
+  color: #4b5563;
+}
+
+.atalhos {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.atalhos button mat-icon {
+  margin-right: 4px;
+}
+
+.pesquisa {
+  min-width: 260px;
+  flex: 1 1 260px;
+}
+
+.secoes {
+  mat-expansion-panel {
+    margin-bottom: 6px;
+  }
+}
+
+.conteudo {
+  padding: 8px 0 4px;
+}
+
+.passos {
+  padding-left: 18px;
+  margin: 0 0 8px;
+}
+
+.itens {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 8px 12px;
+}
+
+.item h4 {
+  margin: 0 0 4px;
+}
+
+.item ul {
+  padding-left: 16px;
+  margin: 0;
+}
+
+.no-results {
+  margin-top: 8px;
+  color: #6b7280;
+  font-size: 13px;
+}

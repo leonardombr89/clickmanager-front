@@ -1,8 +1,9 @@
-<div class="p-24 smartcalc">
+<div class="p-24 smartcalc-shell smartcalc">
   <!-- Cabeçalho -->
-  <div class="sc-header d-flex align-items-center justify-content-between m-b-16">
-    <div class="d-flex align-items-center">
-      <span class="text-primary bg-light-primary rounded icon-40 d-flex align-items-center justify-content-center m-r-12">
+  <div class="sc-header">
+    <div class="sc-header__left">
+      <span
+        class="text-primary bg-light-primary rounded icon-40 d-flex align-items-center justify-content-center m-r-12">
         <mat-icon>calculate</mat-icon>
       </span>
       <div>
@@ -13,10 +14,13 @@
       </div>
     </div>
 
-    <div class="d-flex align-items-center gap-8">
+    <div class="sc-header__right">
       <div *ngIf="!configAtiva" class="sc-alert-badge">
         <mat-icon>block</mat-icon>
         <span>SmartCalc desativado</span>
+      </div>
+      <div *ngIf="needsRecalcular()" class="badge badge--warn subtle">
+        Alterações não calculadas
       </div>
       <button mat-icon-button (click)="fechar()" aria-label="Fechar">
         <mat-icon>close</mat-icon>
@@ -37,220 +41,243 @@
     </div>
   </div>
 
-  <mat-dialog-content class="sc-content p-0">
+  <mat-dialog-content class="sc-main">
     <form class="sc-form" [formGroup]="form" (ngSubmit)="calcular()">
-      <!-- 1) CARTÃO DE PRODUTO – em destaque e primeiro -->
-      <mat-card class="product-card m-b-16">
-        <div class="product-card__header">
-          <div class="title">
-            <mat-icon>inventory_2</mat-icon>
-            <span>Produto</span>
-          </div>
-          <div class="hint">Selecione o produto para habilitar os parâmetros específicos.</div>
-        </div>
+      <div class="sc-grid">
+        <!-- Coluna esquerda -->
+        <div class="sc-col sc-col--left">
 
-        <div class="row">
-          <div class="col-md-8">
-            <mat-form-field appearance="outline" class="w-100">
-              <mat-label>Produto</mat-label>
-              <mat-select formControlName="produtoId" [disabled]="carregandoProdutos || !!erroProdutos">
-                <mat-option [value]="null">Selecione um produto…</mat-option>
-                <mat-option *ngIf="carregandoProdutos" disabled>Carregando…</mat-option>
-                <mat-option *ngIf="erroProdutos" disabled>{{ erroProdutos }}</mat-option>
-
-                @for (p of produtos; track p.id) {
-                  <mat-option [value]="p.id">{{ p.nome }}</mat-option>
-                }
-              </mat-select>
-            </mat-form-field>
-          </div>
-
-          <div class="col-md-4">
-            <mat-form-field appearance="outline" class="w-100">
-              <mat-label>Material</mat-label>
-              <mat-select
-                formControlName="materialId"
-                [disabled]="carregandoProdutos || !!erroProdutos || !materiais?.length"
-              >
-                <mat-option *ngIf="!materiais?.length" disabled>Nenhum material disponível</mat-option>
-
-                @for (m of materiais; track m.id) {
-                  <mat-option [value]="m.id">{{ m.nome }}</mat-option>
-                }
-              </mat-select>
-            </mat-form-field>
-          </div>
-        </div>
-
-        <!-- Meta: agora vem do INIT -->
-        <div class="product-card__meta" *ngIf="produtoInitSelecionado as ps">
-          <div class="meta__name">
-            <mat-icon>label</mat-icon>
-            <span>{{ ps.nome }}</span>
-          </div>
-          <div class="meta__badges">
-            <span class="badge" *ngIf="ps.variacoes?.length">{{ ps.variacoes.length }} variações</span>
-
-            <!-- se quiser mostrar status do init -->
-            <span class="badge badge--ok" *ngIf="init?.ativo">Ativo</span>
-            <span class="badge badge--warn" *ngIf="init && !init?.ativo">Inativo</span>
-          </div>
-        </div>
-      </mat-card>
-
-      <!-- GRID: coluna principal (parâmetros) + coluna lateral (extras) -->
-      <div class="row">
-        <!-- 2) SESSÃO DE PARÂMETROS -->
-        <div class="col-lg-8">
-          <section class="param-section">
-            <header class="param-section__header">
-              <div class="title">
-                <mat-icon>tune</mat-icon>
-                <span>Parâmetros do produto</span>
+          <!-- 1) Selecionar produto/material -->
+          <section class="section-card">
+            <div class="section-card__header">
+              <div class="section-title">
+                <span class="step-badge">1</span>
+                <div>
+                  <div class="title">Selecione</div>
+                  <div class="hint">Produto e material habilitam os parâmetros específicos.</div>
+                </div>
               </div>
-              <div class="subtitle">Os campos abaixo podem mudar conforme o produto selecionado.</div>
-            </header>
+            </div>
 
-            <div class="param-section__body">
-              <div class="row">
-                <div class="col-sm-4">
-                  <app-input-numerico
-                    [control]="form.controls.largura"
-                    label="Largura (cm)"
-                    placeholder="ex: 5"
-                  ></app-input-numerico>
+            <div class="section-card__body select-grid">
+              <app-input-options [control]="form.controls.produtoId" label="Produto"
+                [placeholder]="'Selecione um produto...'" [options]="produtos" labelKey="nome" valueKey="id"
+                [disabled]="carregandoProdutos || !!erroProdutos"
+                [nullLabel]="erroProdutos || 'Selecione um produto...'"></app-input-options>
 
-                  <!-- regra METRO/LINEAR ainda depende de PREÇO no init (por enquanto não vai aparecer) -->
-                  <div class="text-body f-s-12" *ngIf="isMetroLinear()">
-                    Largura fixa: {{ getLinearLarguraMaxima() ?? '—' }} cm (cobrança por metro <b>linear</b>)
-                  </div>
-                </div>
+              <app-input-options [control]="form.controls.materialId" label="Material"
+                [placeholder]="'Selecione um material...'" [options]="materiais" labelKey="nome" valueKey="id"
+                [disabled]="carregandoProdutos || !!erroProdutos || !materiais?.length"
+                [nullLabel]="!materiais?.length ? 'Nenhum material disponível' : '-- Selecione --'"></app-input-options>
+            </div>
 
-                <div class="col-sm-4">
-                  <app-input-numerico
-                    [control]="form.controls.altura"
-                    label="Altura (cm)"
-                    placeholder="ex: 5"
-                  ></app-input-numerico>
-                </div>
-
-                <div class="col-sm-4">
-                  <app-input-numerico
-                    [control]="form.controls.quantidade"
-                    label="Quantidade"
-                    placeholder="ex: 500"
-                  ></app-input-numerico>
-                </div>
+            <div class="product-meta" *ngIf="produtoInitSelecionado as ps">
+              <div class="meta-name">
+                <mat-icon>inventory_2</mat-icon>
+                <span>{{ ps.nome }}</span>
+              </div>
+              <div class="meta-tags">
+                <span class="badge" *ngIf="ps.variacoes?.length">{{ ps.variacoes.length }} variações</span>
               </div>
             </div>
           </section>
 
-          <!-- Resultado -->
-          <section class="results m-t-16">
-            <h4 class="f-s-16 f-w-700 m-b-8">Resultados</h4>
+          <!-- 2) Parâmetros -->
+          <section class="section-card">
+            <div class="section-card__header">
+              <div class="section-title">
+                <span class="step-badge">2</span>
+                <div>
+                  <div class="title">Informe medidas e quantidade</div>
+                  <div class="hint">Ex.: 5 x 6 cm, 89 unidades</div>
+                </div>
+              </div>
+              <div class="subtitle" *ngIf="isMetroLinear()">
+                Largura fixa: {{ getLinearLarguraMaxima() ?? '—' }} cm (cobrança linear)
+              </div>
+            </div>
 
-            @if (carregandoCalculo) {
-              <div class="text-body">Calculando…</div>
-            } @else if (!resultado() || itens().length === 0) {
-              <div class="text-body">Nenhum item calculado com os parâmetros informados.</div>
-            } @else {
-              <div class="results-card simple">
-                <table class="clean-table">
+            <div class="section-card__body param-grid">
+              <app-input-numerico [control]="form.controls.largura" label="Largura (cm)"
+                placeholder="ex: 5"></app-input-numerico>
+
+              <app-input-numerico [control]="form.controls.altura" label="Altura (cm)"
+                placeholder="ex: 5"></app-input-numerico>
+
+              <app-input-numerico [control]="form.controls.quantidade" label="Quantidade"
+                placeholder="ex: 500"></app-input-numerico>
+            </div>
+          </section>
+
+          <!-- 3) Extras colapsáveis -->
+          <section class="section-card extras-scroll">
+            <div class="section-card__header">
+              <div class="section-title">
+                <span class="step-badge optional">3</span>
+                <div>
+                  <div class="title">Extras (opcional)</div>
+                  <div class="hint">Selecione apenas se necessário.</div>
+                </div>
+              </div>
+            </div>
+
+            <mat-accordion class="extras-accordion" multi>
+              <mat-expansion-panel [expanded]="false">
+                <mat-expansion-panel-header>
+                  <mat-panel-title>Acabamentos</mat-panel-title>
+                  <mat-panel-description *ngIf="!(acabamentos?.length)">Nenhuma opção disponível</mat-panel-description>
+                </mat-expansion-panel-header>
+                <div class="extras-panel__body">
+                  <app-input-multi-select [control]="form.controls.acabamentosIds" [label]="'Acabamentos (opcional)'"
+                    [options]="acabamentos" [cardMinHeight]="220" [listHeight]="220"></app-input-multi-select>
+                </div>
+              </mat-expansion-panel>
+
+              <mat-expansion-panel [expanded]="false">
+                <mat-expansion-panel-header>
+                  <mat-panel-title>Serviços</mat-panel-title>
+                  <mat-panel-description *ngIf="!(servicos?.length)">Nenhuma opção disponível</mat-panel-description>
+                </mat-expansion-panel-header>
+                <div class="extras-panel__body">
+                  <app-input-multi-select [control]="form.controls.servicosIds" [label]="'Serviços (opcional)'"
+                    [options]="servicos" [cardMinHeight]="220" [listHeight]="220"></app-input-multi-select>
+                </div>
+              </mat-expansion-panel>
+            </mat-accordion>
+          </section>
+        </div>
+
+        <!-- Coluna direita: resultados -->
+        <div class="sc-col sc-col--right">
+          <mat-card class="results-pane">
+            <div class="results-pane__header">
+              <div>
+                <div class="title">Resultados</div>
+                <div class="hint">Sempre visível após calcular</div>
+              </div>
+              <mat-chip *ngIf="needsRecalcular()" color="warn" selected class="chip-click" (click)="calcular()">
+                Recalcular
+              </mat-chip>
+            </div>
+
+            <div class="results-pane__body">
+              @if (carregandoCalculo) {
+              <div class="loading">
+                <mat-progress-spinner diameter="32" mode="indeterminate"></mat-progress-spinner>
+                <span>Calculando...</span>
+              </div>
+              } @else if (!resultado() || itens().length === 0) {
+              <div class="empty-state">
+                <mat-icon>insights</mat-icon>
+                <div class="title">Pronto para calcular</div>
+                <div class="desc">Selecione produto, informe medidas e quantidade para ver o resultado aqui.</div>
+              </div>
+              } @else {
+              <div class="calc-block calc-scroll">
+                <div class="calc-block__title">Resultado do cálculo</div>
+
+                <table class="result-table">
                   <thead>
                     <tr>
                       <th>Item</th>
-                      <th class="w-num text-right">Qtd</th>
-                      <th class="w-num text-right">Valor</th>
-                      <th class="w-num text-right">Subtotal</th>
+                      <th class="num">Qtd</th>
+                      <th class="num">Valor</th>
+                      <th class="num">Subtotal</th>
                     </tr>
                   </thead>
                   <tbody>
                     @for (it of itens(); track it.id) {
                       <tr>
-                        <td>
-                          <div class="row-title">{{ it.nomeComposto }}</div>
-                          <div class="row-subtitle">{{ it.descricao }}</div>
-                        </td>
-                        <td class="w-num text-right">{{ it.quantidade }}</td>
-                        <td class="w-num text-right">
-                          {{ it.valor | currency:'BRL':'symbol-narrow':'1.2-2' }}
-                        </td>
-                        <td class="w-num text-right">
-                          {{ it.subTotal | currency:'BRL':'symbol-narrow':'1.2-2' }}
-                        </td>
+                        <td>{{ it.nomeComposto }}</td>
+                        <td class="num">{{ it.quantidade }}</td>
+                        <td class="num">{{ it.valor | currency:'BRL':'symbol-narrow':'1.2-2' }}</td>
+                        <td class="num">{{ it.subTotal | currency:'BRL':'symbol-narrow':'1.2-2' }}</td>
                       </tr>
                     }
                   </tbody>
                 </table>
 
-                <div class="d-flex align-items-center justify-content-between m-t-12">
-                  <div class="muted obs-text" *ngIf="observacao()" [innerText]="observacao()"></div>
-                  <div class="f-w-700 total-text">
-                    Total: {{ total() | currency:'BRL':'symbol-narrow':'1.2-2' }}
+                <mat-accordion *ngIf="resultado()?.observacaoResumo as resumo">
+                  <mat-expansion-panel class="dist-accordion" [expanded]="false">
+                    <mat-expansion-panel-header>
+                      <div class="dist-summary">
+                        Distribuição do cálculo:
+                        <span>Solicitado: {{ resumo.solicitado }}</span>
+                        <span>• Produzido: {{ resumo.produzido }}</span>
+                        <span>• Sobra útil: {{ resumo.sobraUtil }}</span>
+                      </div>
+                    </mat-expansion-panel-header>
+
+                    <div class="dist-block dist-scroll">
+
+                      <div class="summary-tiles">
+                        <div class="tile">
+                          <div class="label">O cliente pediu</div>
+                          <div class="value">{{ resumo.solicitado }}</div>
+                          <div class="cost" *ngIf="resumo.custoUnitarioSolicitado != null">
+                            Custo unit.: {{ resumo.custoUnitarioSolicitado | currency:'BRL':'symbol-narrow':'1.2-2' }}
+                          </div>
+                        </div>
+                        <div class="tile">
+                          <div class="label">Cabe no mesmo valor</div>
+                          <div class="value">{{ resumo.produzido }}</div>
+                          <div class="cost" *ngIf="resumo.custoUnitarioProduzido != null">
+                            Custo unit.: {{ resumo.custoUnitarioProduzido | currency:'BRL':'symbol-narrow':'1.2-2' }}
+                          </div>
+                        </div>
+                        <div class="tile highlight">
+                          <div class="label">Ainda cabem sem alterar o custo</div>
+                          <div class="value">{{ resumo.sobraUtil }}</div>
+                        </div>
+                      </div>
+
+                      <div class="folhas-bloco" *ngIf="resumo.distribuicao?.length">
+                        <div class="folhas-title">Folhas utilizadas</div>
+                        <div class="distribution-list">
+                          @for (d of resumo.distribuicao; track $index) {
+                            <div class="row">
+                              <div class="tag">{{ d.formato }} • {{ d.orientacao }}</div>
+                              <div class="detail">{{ d.folhas }} folha(s) × {{ d.porFolha }}/folha</div>
+                            </div>
+                          }
+                        </div>
+                      </div>
+                    </div>
+                  </mat-expansion-panel>
+                </mat-accordion>
+
+                <div class="total-highlight">
+                  <div class="label">Total estimado</div>
+                  <div class="value">
+                    {{ total() | currency:'BRL':'symbol-narrow':'1.2-2' }}
                   </div>
                 </div>
               </div>
-
-              <mat-dialog-actions align="end" class="m-t-12 p-0">
-                <button
-                  mat-flat-button
-                  color="primary"
-                  (click)="adicionarAoPedido()"
-                  [disabled]="carregandoAdd || !melhor()"
-                >
-                  <mat-icon class="m-r-8">shopping_cart</mat-icon>
-                  {{ carregandoAdd ? 'Adicionando...' : 'Enviar para Pedido' }}
-                </button>
-              </mat-dialog-actions>
-            }
-          </section>
-        </div>
-
-        <!-- 3) COLUNA LATERAL — Extras (Acabamentos/Serviços) e Ações -->
-        <div class="col-lg-4">
-          <mat-card class="extras-card">
-            <div class="extras-card__header">
-              <mat-icon>construction</mat-icon>
-              <span>Extras</span>
-            </div>
-
-            <div class="extras-card__body">
-              <app-input-multi-select
-                class="m-b-12"
-                [control]="form.controls.acabamentosIds"
-                [label]="'Acabamentos (opcional)'"
-                [options]="acabamentos"
-                [cardMinHeight]="220"
-                [listHeight]="180"
-              ></app-input-multi-select>
-
-              <app-input-multi-select
-                [control]="form.controls.servicosIds"
-                [label]="'Serviços (opcional)'"
-                [options]="servicos"
-                [cardMinHeight]="220"
-                [listHeight]="180"
-              ></app-input-multi-select>
-            </div>
-
-            <div class="extras-card__actions">
-              <button mat-flat-button color="primary" type="submit" [disabled]="carregandoCalculo || form.invalid">
-                <mat-icon class="m-r-8">refresh</mat-icon>
-                {{ carregandoCalculo ? 'Calculando...' : 'Calcular' }}
-              </button>
-
-              <button mat-stroked-button type="button" (click)="limpar()" [disabled]="carregandoCalculo">
-                Limpar
-              </button>
-
-              <div class="text-body f-s-12 error-text" *ngIf="erroCalculo">
-                {{ erroCalculo }}
-              </div>
+              }
             </div>
           </mat-card>
         </div>
       </div>
-      <!-- /GRID -->
     </form>
   </mat-dialog-content>
+
+  <mat-dialog-actions align="end" class="sc-footer">
+    <div class="footer-left">
+      <div *ngIf="erroCalculo" class="error-text">{{ erroCalculo }}</div>
+      <div *ngIf="needsRecalcular() && !carregandoCalculo" class="muted small">
+        Parâmetros alterados após o último cálculo. Clique em Calcular para atualizar.
+      </div>
+    </div>
+    <div class="actions">
+      <button mat-stroked-button type="button" (click)="limpar()" [disabled]="carregandoCalculo">Limpar</button>
+      <button mat-flat-button color="primary" type="button" (click)="calcular()" [disabled]="!podeCalcular()">
+        {{ carregandoCalculo ? 'Calculando...' : needsRecalcular() ? 'Recalcular' : 'Calcular' }}
+      </button>
+      <button mat-flat-button color="accent" type="button" (click)="adicionarAoPedido()"
+        [disabled]="!temResultado() || carregandoAdd || needsRecalcular()">
+        <mat-icon class="m-r-8">shopping_cart</mat-icon>
+        {{ carregandoAdd ? 'Adicionando...' : 'Criar pedido' }}
+      </button>
+    </div>
+  </mat-dialog-actions>
 </div>

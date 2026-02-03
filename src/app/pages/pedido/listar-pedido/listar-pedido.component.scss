@@ -1,0 +1,28 @@
+.table-responsive-sm {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.table-responsive-sm table {
+  min-width: 760px;
+}
+
+.tab-pane {
+  padding: 16px;
+}
+
+@media (max-width: 640px) {
+  .table-responsive-sm table {
+    min-width: 900px;
+  }
+
+  .table-responsive-sm th:first-child,
+  .table-responsive-sm td:first-child {
+    min-width: 240px;
+  }
+
+  .table-responsive-sm th,
+  .table-responsive-sm td {
+    white-space: nowrap;
+  }
+}

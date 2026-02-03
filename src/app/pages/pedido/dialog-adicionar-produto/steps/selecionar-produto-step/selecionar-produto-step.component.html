@@ -1,0 +1,89 @@
+<div class="sel-produto">
+  <div class="sel-grid">
+    <div class="list-panel">
+      <div class="list-top">
+        <mat-form-field appearance="outline" class="search-field">
+          <mat-label>Pesquisar produto</mat-label>
+          <input matInput placeholder="Ex: nome do item" [formControl]="searchCtrl">
+          <button *ngIf="searchCtrl.value" mat-icon-button matSuffix aria-label="Limpar busca" (click)="searchCtrl.setValue('')">
+            <mat-icon>close</mat-icon>
+          </button>
+          <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
+      </div>
+
+      <div class="list-body" [class.is-loading]="loading">
+        <div class="list-head">
+          <div class="col nome">Nome</div>
+          <div class="col desc">Descrição</div>
+          <div class="col var">Variações</div>
+          <div class="col sel">Selecionar</div>
+        </div>
+
+        <div class="list-rows" *ngIf="produtos.length; else emptyState">
+          <button
+            type="button"
+            class="row-btn"
+            *ngFor="let p of produtos; trackBy: trackById"
+            [class.is-selected]="isSelected(p)"
+            (click)="onSelect(p)"
+          >
+            <div class="col nome">
+              <div class="title">{{ p?.nome }}</div>
+              <div class="subtitle" *ngIf="p?.descricao">{{ p?.descricao }}</div>
+            </div>
+            <div class="col desc">{{ p?.descricao || '—' }}</div>
+            <div class="col var">{{ variacoesResumo(p) }}</div>
+            <div class="col sel">
+              <mat-icon color="primary" *ngIf="isSelected(p)">check_circle</mat-icon>
+              <mat-icon *ngIf="!isSelected(p)">radio_button_unchecked</mat-icon>
+            </div>
+          </button>
+        </div>
+
+        <ng-template #emptyState>
+          <div class="empty">Nenhum produto encontrado.</div>
+        </ng-template>
+
+        <div class="paginator-wrap">
+          <mat-paginator
+            [length]="total"
+            [pageIndex]="pageIndex"
+            [pageSize]="pageSize"
+            [pageSizeOptions]="[pageSize]"
+            aria-label="Paginação de produtos"
+            (page)="onPage($event)">
+          </mat-paginator>
+        </div>
+
+        <div class="loading-overlay" *ngIf="loading">
+          <mat-progress-spinner diameter="32" strokeWidth="4" mode="indeterminate"></mat-progress-spinner>
+        </div>
+      </div>
+    </div>
+
+    <div class="preview-panel">
+      <mat-card class="cardWithShadow preview-card">
+        <mat-card-content>
+          <div class="preview-header">
+            <div>
+              <div class="preview-title">Selecionado</div>
+              <div class="preview-name">{{ selectedProduto?.nome || 'Nenhum produto selecionado' }}</div>
+              <div class="preview-desc" *ngIf="selectedProduto?.descricao">{{ selectedProduto?.descricao }}</div>
+            </div>
+          </div>
+          <mat-divider class="m-y-12"></mat-divider>
+          <div class="preview-meta">
+            <div class="meta-line">
+              <span>Variações</span>
+              <span>{{ selectedProduto?.variacoes?.length || 0 }}</span>
+            </div>
+            <div class="meta-hint" *ngIf="!selectedProduto">
+              Selecione um produto para ver o resumo antes de avançar.
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+</div>

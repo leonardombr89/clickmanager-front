@@ -13,4 +13,5 @@ export interface Empresa {
     dataCriacao?: string;
     ativa?: boolean;
     endereco?: Endereco;
+    onboardingIgnorado?: boolean;
   }

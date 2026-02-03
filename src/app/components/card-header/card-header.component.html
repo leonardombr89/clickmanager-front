@@ -1,26 +1,47 @@
 <div class="d-flex justify-content-between align-items-center flex-wrap p-16 w-100">
-    <div class="f-s-20 f-w-600 text-primary-dark">
-        {{ titulo }}
+    <div>
+        <div class="f-s-20 f-w-600 text-primary-dark">
+            {{ titulo }}
+        </div>
+        <div class="f-s-13 text-muted" *ngIf="subtitulo">
+            {{ subtitulo }}
+        </div>
     </div>
 
-    <!-- Botão à direita -->
-    <ng-container *ngIf="botaoTexto && botaoRota">
-        <!-- Sem permissão: mostra sempre -->
-        <ng-container *ngIf="!permissao; else botaoComPermissao">
-            <button mat-stroked-button [color]="botaoCor" [routerLink]="botaoRota">
-                <mat-icon class="m-r-4">{{ botaoIcone }}</mat-icon>
-                {{ botaoTexto }}
-            </button>
+    <div class="d-flex align-items-center gap-8 flex-wrap">
+        <!-- Botão de ajuda -->
+        <ng-container *ngIf="helpRota">
+            <ng-container *ngIf="helpExterno; else helpInterno">
+                <a mat-stroked-button [href]="helpRota" target="_blank" rel="noopener">
+                    <mat-icon class="m-r-4">{{ helpIcone }}</mat-icon>
+                    {{ helpTexto }}
+                </a>
+            </ng-container>
+            <ng-template #helpInterno>
+                <a mat-stroked-button [routerLink]="helpRota" [fragment]="helpFragment">
+                    <mat-icon class="m-r-4">{{ helpIcone }}</mat-icon>
+                    {{ helpTexto }}
+                </a>
+            </ng-template>
         </ng-container>
 
-        <!-- Com permissão: usa a diretiva -->
-        <ng-template #botaoComPermissao>
-            <button mat-stroked-button [color]="botaoCor" [routerLink]="botaoRota" *temPermissao="permissao">
-                <mat-icon class="m-r-4">{{ botaoIcone }}</mat-icon>
-                {{ botaoTexto }}
-            </button>
-        </ng-template>
-    </ng-container>
+        <!-- Botão de ação -->
+        <ng-container *ngIf="botaoTexto && botaoRota">
+            <ng-container *ngIf="!permissao; else botaoComPermissao">
+                <button mat-stroked-button [color]="botaoCor" [routerLink]="botaoRota">
+                    <mat-icon class="m-r-4">{{ botaoIcone }}</mat-icon>
+                    {{ botaoTexto }}
+                </button>
+            </ng-container>
+
+            <ng-template #botaoComPermissao>
+                <button mat-stroked-button [color]="botaoCor" [routerLink]="botaoRota" *temPermissao="permissao">
+                    <mat-icon class="m-r-4">{{ botaoIcone }}</mat-icon>
+                    {{ botaoTexto }}
+                </button>
+            </ng-template>
+        </ng-container>
+    </div>
 </div>
 
 <mat-divider *ngIf="mostrarDivisor" class="m-b-24"></mat-divider>

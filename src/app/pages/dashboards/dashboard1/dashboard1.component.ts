@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { TablerIconsModule } from 'angular-tabler-icons';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
+import { Subscription } from 'rxjs';
 
 // components
 import { AppCongratulateCardComponent } from '../../../components/dashboard1/congratulate-card/congratulate-card.component';
@@ -10,8 +11,9 @@ import { AppTopProjectsComponent } from '../../../components/dashboard1/top-proj
 import { AppVisitUsaComponent } from '../../../components/dashboard1/visit-usa/visit-usa.component';
 import { AppLatestReviewsComponent } from '../../../components/dashboard1/latest-reviews/latest-reviews.component';
 import { AppReceitaResumoComponent } from "src/app/components/dashboard1/receita-resumo/receita-resumo.component";
-import { OnboardingService, OnboardingStatusResponse } from 'src/app/components/onboarding/onboarding.service';
 import { OnboardingWizardComponent } from 'src/app/components/onboarding/onboarding-wizard.component';
+import { AuthService } from 'src/app/services/auth.service';
+import { Usuario } from 'src/app/models/usuario/usuario.model';
 
 @Component({
   selector: 'app-dashboard1',
@@ -25,46 +27,59 @@ import { OnboardingWizardComponent } from 'src/app/components/onboarding/onboard
     AppLatestDealsComponent,
     AppVisitUsaComponent,
     AppLatestReviewsComponent,
-    AppReceitaResumoComponent
+    AppReceitaResumoComponent,
+    OnboardingWizardComponent
   ],
   templateUrl: './dashboard1.component.html',
 })
-export class AppDashboard1Component implements OnInit {
+export class AppDashboard1Component implements OnInit, OnDestroy {
   private onboardingChecado = false;
+  private usuarioSub?: Subscription;
 
   constructor(
-    private onboardingService: OnboardingService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
-    this.verificarOnboarding();
-  }
-
-  private verificarOnboarding(): void {
-    if (this.onboardingChecado) return;
-
-    this.onboardingService.obterStatus().subscribe({
-      next: (status: OnboardingStatusResponse) => {
-        this.onboardingChecado = true;
-        if (!status.onboardingConcluido) {
-          this.abrirOnboarding(status);
-        }
-      },
-      error: () => {
-        this.onboardingChecado = true;
-      }
+    this.usuarioSub = this.authService.usuario$.subscribe(usuario => {
+      this.verificarOnboarding(usuario);
     });
   }
 
-  private abrirOnboarding(status: OnboardingStatusResponse): void {
+  ngOnDestroy(): void {
+    this.usuarioSub?.unsubscribe();
+  }
+
+  private verificarOnboarding(usuario: Usuario | null): void {
+    if (this.onboardingChecado || !usuario) return;
+
+    if (!usuario.proprietario) {
+      this.onboardingChecado = true;
+      return;
+    }
+
+    const ignorarOnboarding = usuario.onboardingIgnorado ?? usuario.empresa?.onboardingIgnorado;
+    if (ignorarOnboarding) {
+      this.onboardingChecado = true;
+      return;
+    }
+
+    this.onboardingChecado = true;
+    const nomeEmpresa = usuario.empresa?.nome || 'Sua empresa';
+    const naoMostrarMaisDefault = usuario.onboardingIgnorado ?? usuario.empresa?.onboardingIgnorado ?? false;
+    this.abrirOnboarding(nomeEmpresa, naoMostrarMaisDefault);
+  }
+
+  private abrirOnboarding(empresaNome: string, naoMostrarMaisDefault: boolean): void {
     this.dialog.open(OnboardingWizardComponent, {
       width: '96vw',
       maxWidth: '96vw',
       maxHeight: '92vh',
       disableClose: true,
       data: {
-        empresaNome: status.empresaNome,
+        empresaNome,
+        naoMostrarMaisDefault
       },
     });
   }

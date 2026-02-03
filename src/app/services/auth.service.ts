@@ -51,6 +51,9 @@ export class AuthService {
   
     return this.usuarioService.buscarPorId(id).pipe(
       tap(usuario => {
+        if (usuario?.proprietario && usuario.empresa) {
+          usuario.onboardingIgnorado = usuario.onboardingIgnorado ?? usuario.empresa.onboardingIgnorado;
+        }
         this.carregarPermissoes(usuario);
         this.usuarioSubject.next(usuario);
       }),

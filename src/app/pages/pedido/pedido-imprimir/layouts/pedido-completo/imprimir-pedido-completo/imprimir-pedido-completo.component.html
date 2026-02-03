@@ -1,0 +1,145 @@
+<div class="print-container pedido-completo" *ngIf="pedido as p">
+  <div class="pedido-via">
+    <div class="via">
+      <header class="empresa-box" *ngIf="empresa">
+        <div class="empresa-header">
+          <div class="empresa-logo" *ngIf="empresa?.logoPath">
+            <img [src]="empresa?.logoPath" alt="Logo {{ empresa?.nome }}" />
+          </div>
+          <div class="empresa-info">
+            <div class="empresa-nome">{{ empresa?.nome }}</div>
+            <div class="empresa-contatos">
+              <span *ngIf="empresa?.cnpj">CNPJ: {{ empresa?.cnpj }}</span>
+              <span *ngIf="empresa?.telefone">Tel: {{ empresa?.telefone }}</span>
+              <span *ngIf="empresa?.email">Email: {{ empresa?.email }}</span>
+              <span *ngIf="formatEnderecoEmpresa()">{{ formatEnderecoEmpresa() }}</span>
+            </div>
+          </div>
+          <div class="pedido-numero">
+            <div class="label">{{ getDocTitulo(p) | uppercase }}</div>
+            <div class="valor">#{{ displayNumero(p) }}</div>
+          </div>
+        </div>
+      </header>
+
+      <section class="p-section">
+        <h4 class="p-section-title">Dados do cliente</h4>
+        <div class="p-row striped">
+          <div class="p-grid cols-2">
+            <div class="p-field">
+            <div class="p-label">Nome</div>
+            <div class="p-value">{{ nomeCliente }}</div>
+          </div>
+          <div class="p-field">
+            <div class="p-label">Endereço</div>
+            <div class="p-value">
+              {{ enderecoCliente }}
+            </div>
+          </div>
+        </div>
+      </div>
+      </section>
+
+      <section class="p-section">
+        <h4 class="p-section-title">Dados do pedido</h4>
+        <div class="p-row striped">
+          <div class="p-grid cols-4">
+            <div class="p-field">
+              <div class="p-label">Status</div>
+              <div class="p-value">{{ p.status || '—' }}</div>
+            </div>
+            <div class="p-field">
+              <div class="p-label">Data</div>
+              <div class="p-value">{{ p.dataCriacao | date:'dd/MM/yyyy HH:mm' }}</div>
+            </div>
+            <div class="p-field">
+              <div class="p-label">Validade</div>
+              <div class="p-value">
+                {{
+                  (p.status || '').toUpperCase() === 'ORCAMENTO'
+                    ? ((validadeOrcamento(p) || p.vencimentoOrcamento) | date:'dd/MM/yyyy')
+                    : '—'
+                }}
+              </div>
+            </div>
+            <div class="p-field">
+              <div class="p-label">Responsável</div>
+              <div class="p-value">{{ p.responsavel?.nome || '—' }}</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="bloco itens-bloco">
+        <h4>Itens</h4>
+        <table class="items-table">
+          <thead>
+            <tr>
+              <th class="descricao">Descrição</th>
+              <th class="qty">Qtd</th>
+              <th class="valor">Valor</th>
+              <th class="valor">Subtotal</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of (p.itens || []); trackBy: trackByItem">
+              <td class="descricao">{{ item?.descricao || 'Item' }}</td>
+              <td class="qty">{{ item?.quantidade ?? 0 }}</td>
+              <td class="valor">{{ (item?.valor ?? 0) | currency:'BRL':'symbol':'1.2-2' }}</td>
+              <td class="valor">{{ (item?.subTotal ?? 0) | currency:'BRL':'symbol':'1.2-2' }}</td>
+            </tr>
+            <tr *ngIf="!(p.itens?.length)">
+              <td colspan="4" class="empty">Sem itens</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="p-section resumo-financeiro">
+        <h4 class="p-section-title">Resumo financeiro</h4>
+
+        <div class="p-row">
+          <div class="p-grid cols-6">
+            <div class="p-field">
+              <div class="p-label">Frete</div>
+              <div class="p-value">{{ (p.frete ?? 0) | currency:'BRL':'symbol':'1.2-2' }}</div>
+            </div>
+            <div class="p-field">
+              <div class="p-label">Acréscimo</div>
+              <div class="p-value">{{ (p.acrescimo ?? 0) | currency:'BRL':'symbol':'1.2-2' }}</div>
+            </div>
+            <div class="p-field">
+              <div class="p-label">Desconto</div>
+              <div class="p-value">{{ (p.desconto ?? 0) | currency:'BRL':'symbol':'1.2-2' }}</div>
+            </div>
+            <div class="p-field is-pago">
+              <div class="p-label">Pago</div>
+              <div class="p-value">
+                {{ p.valorTotalPago === undefined ? '—' : ((p.valorTotalPago ?? 0) | currency:'BRL':'symbol':'1.2-2') }}
+              </div>
+            </div>
+            <div class="p-field is-restante">
+              <div class="p-label">Restante</div>
+              <div class="p-value">
+                {{ p.restaPagar === undefined ? '—' : ((p.restaPagar ?? 0) | currency:'BRL':'symbol':'1.2-2') }}
+              </div>
+            </div>
+            <div class="p-field is-total">
+              <div class="p-label">Total</div>
+              <div class="p-value">{{ (p.total ?? 0) | currency:'BRL':'symbol':'1.2-2' }}</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="p-section">
+        <div class="p-section-title">Observações</div>
+        <div class="p-note">{{ p.observacoes || '—' }}</div>
+      </section>
+
+      <footer class="rodape">
+        Impresso em {{ agora | date:'dd/MM/yyyy HH:mm' }}
+      </footer>
+    </div>
+  </div>
+</div>

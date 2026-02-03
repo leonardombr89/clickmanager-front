@@ -22,11 +22,17 @@ import { MatDivider } from "@angular/material/divider";
 })
 export class CardHeaderComponent {
   @Input() titulo!: string;
+  @Input() subtitulo?: string;
 
   @Input() botaoTexto?: string;
   @Input() botaoIcone: string = 'add';
   @Input() botaoRota?: string | any[];
   @Input() mostrarDivisor: boolean = false;
+  @Input() helpTexto: string = 'Ajuda';
+  @Input() helpIcone: string = 'help_outline';
+  @Input() helpRota?: string | any[];
+  @Input() helpFragment?: string;
+  @Input() helpExterno: boolean = false;
 
   // cor do botão, default = 'primary'
   @Input() botaoCor: 'primary' | 'accent' | 'warn' = 'primary';

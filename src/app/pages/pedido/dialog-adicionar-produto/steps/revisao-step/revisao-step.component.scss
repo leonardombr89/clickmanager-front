@@ -1,0 +1,136 @@
+.rev-section {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 12px 14px;
+  background: #fff;
+  margin-bottom: 12px;
+}
+
+.rev-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px 12px;
+}
+
+.rev-field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.rev-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .2px;
+  color: #6b7280;
+}
+
+.rev-value {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.2;
+  word-break: break-word;
+}
+
+.rev-subtle {
+  font-size: 12px;
+  color: #6b7280;
+  line-height: 1.2;
+}
+
+.rev-chipline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.rev-chip {
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #f1f5f9;
+  border: 1px solid #e5e7eb;
+  font-size: 12px;
+  color: #0f172a;
+}
+
+.rev-table {
+  margin-top: 8px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.rev-row {
+  display: grid;
+  grid-template-columns: 1.5fr 0.45fr 0.6fr 0.6fr;
+  align-items: center;
+  padding: 8px 10px;
+  font-size: 13px;
+  gap: 8px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.rev-row.rev-head {
+  background: #f8fafc;
+  font-weight: 700;
+  border-top: none;
+}
+
+.rev-row:not(.rev-head):nth-child(even) {
+  background: #fafafa;
+}
+
+.rev-item {
+  font-weight: 600;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.rev-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.rev-line,
+.rev-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+}
+
+.rev-total {
+  font-weight: 800;
+  margin-top: 4px;
+}
+
+.rev-note {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 6px;
+}
+
+@media print {
+  .rev-section {
+    padding: 10px 12px;
+    margin-bottom: 10px;
+  }
+
+  .rev-row {
+    padding: 6px 8px;
+  }
+
+  .rev-value { font-size: 13px; }
+}

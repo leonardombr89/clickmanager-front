@@ -29,7 +29,7 @@ export const navItems: NavItem[] = [
         ]
     },
     {
-        displayName: 'Calculadora Config',
+        displayName: 'Configuração SmartCalc',
         iconName: 'calculator',
         bgcolor: 'primary',
         route: '/page/calculadora/config/criar',
@@ -180,6 +180,15 @@ export const navItems: NavItem[] = [
         iconName: 'chart-bar',
         bgcolor: 'accent',
         route: '/dashboards/dashboard2',
+    },
+    {
+        navCap: 'Ajuda',
+    },
+    {
+        displayName: 'Central de ajuda',
+        iconName: 'help',
+        bgcolor: 'primary',
+        route: '/page/ajuda',
     },
     {
         navCap: 'Apps',

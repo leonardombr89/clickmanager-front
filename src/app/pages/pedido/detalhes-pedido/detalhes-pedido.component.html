@@ -1,344 +1,139 @@
-<mat-card class="cardWithShadow">
-    <mat-card-content>
+<app-page-card
+  [titulo]="(pedido?.status === 'ORCAMENTO' ? pedido?.numeroOrcamento : pedido?.numero) || '—'"
+  botaoTexto="Voltar"
+  botaoIcone="arrow_back"
+  botaoCor="primary"
+  [botaoRota]="['/page/pedido']"
+  [mostrarDivisor]="true"
+>
+    @if (pedido) {
 
-        <!-- Cabeçalho com ações -->
-        <div class="row m-b-24">
-            <div class="col-sm-4 d-flex align-items-center">
-                <h4 class="f-s-18 f-w-600">#{{ (pedido?.status === 'ORCAMENTO' ? pedido?.numeroOrcamento :
-                    pedido?.numero) || '—' }}</h4>
-            </div>
-  <div class="col-sm-8 text-right d-inline-flex align-items-center justify-content-end">
-                <a routerLink="/page/pedido" mat-stroked-button class="m-r-10">Voltar</a>
+    <div class="top-grid">
+      <app-pedido-fluxo-controles
+        [titulo]="'Fluxo do pedido'"
+        [renderCard]="true"
+        [divider]="true"
+        [inativo]="inativoStatus"
+        [isOrcamento]="pedido?.status === 'ORCAMENTO'"
+        [statusAtual]="pedido?.status || ''"
+        [restaPagar]="restaPagar"
+        [totalPago]="totalPago"
+        [temPagamentos]="(pedido?.pagamentos?.length || 0) > 0"
+        [isReadOnly]="!permissoes.status"
+        [orcamentoVencido]="orcamentoVencido"
+        [trocandoStatus]="trocandoStatus"
+        [carregandoStatus]="carregandoStatus"
+        [statusControl]="statusControl"
+        [statusOptions]="statusOptions"
+        [transicoes]="transicoesUI"
+        [hints]="flowHints"
+        (confirmarPedido)="confirmarPedido()"
+        (irParaPagamentos)="scrollParaPagamentosEExpandir()"
+        (iniciarProducao)="mudarStatusDireto('EM_PRODUCAO')"
+        (marcarPronto)="mudarStatusDireto('PRONTO')"
+        (marcarEntregue)="mudarStatusDireto('ENTREGUE')"
+        (solicitarProducaoSemPagamento)="confirmarProducaoSemPagamento()"
+        (editarStatus)="iniciarTrocaStatus()"
+        (cancelarStatus)="cancelarTrocaStatus()"
+        (salvarStatus)="salvarStatus()"
+        (aprovarOrcamento)="confirmarAprovarOrcamento()"
+        (cancelarPedido)="confirmarCancelarPedido()"
+        (finalizarPedido)="confirmarFinalizarPedido()">
+      </app-pedido-fluxo-controles>
 
-                <button mat-flat-button color="primary" class="m-r-10" *ngIf="pedido?.status === 'ORCAMENTO'"
-                    (click)="aprovarOrcamento()" [disabled]="aprovando || orcamentoVencido">
-                    <mat-icon class="m-r-4">check_circle</mat-icon>
-                    Aprovar orçamento
-                </button>
+      <app-resumo-financeiro-card
+        [total]="pedido?.total ?? 0"
+        [subtotal]="pedido?.subTotal ?? 0"
+        [pago]="pedido?.valorTotalPago ?? 0"
+        [frete]="pedido?.frete ?? 0"
+        [restaPagar]="pedido?.restaPagar ?? 0"
+        [desconto]="pedido?.desconto ?? 0"
+        [divider]="true"
+        [inativo]="inativoResumo">
+      </app-resumo-financeiro-card>
+    </div>
 
+    <div class="detalhes-grid">
+        <div class="main-column">
+            <app-pedido-info-card
+                titulo="Dados do pedido"
+                [renderCard]="true"
+                [pedido]="pedido"
+                [inativo]="inativoStatus">
+            </app-pedido-info-card>
 
-                <button mat-icon-button [matMenuTriggerFor]="printMenu" matTooltip="Imprimir"
-                    class="m-r-10 d-inline-flex align-items-center justify-content-center"
-                    style="height: 36px; width: 36px;">
-                    <mat-icon>print</mat-icon>
-                </button>
+            <app-cliente-selector-card
+                [cliente]="pedido?.cliente || null"
+                [control]="clienteControl"
+                [displayWith]="mostrarCliente"
+                [buscarFn]="buscarClientes"
+                [editando]="trocandoCliente || !pedido?.cliente"
+                [salvando]="salvandoCliente"
+                [inativo]="inativoCliente"
+                (editarCliente)="trocarCliente()"
+                (cancelarEdicao)="trocandoCliente = false"
+                (salvarCliente)="salvarClienteDoControle()"
+                (criarCliente)="onCriarCliente()">
+            </app-cliente-selector-card>
 
-                <mat-menu #printMenu="matMenu">
-                    <button mat-menu-item (click)="imprimirPedidoCompleto()">
-                        <mat-icon>description</mat-icon>
-                        <span>Pedido Completo</span>
-                    </button>
-                    <button mat-menu-item (click)="imprimirPedidoDuasVias()">
-                        <mat-icon>description</mat-icon>
-                        <span>Pedido 2 Vias</span>
-                    </button>
-                    <button mat-menu-item (click)="imprimirEtiqueta()">
-                        <mat-icon>label</mat-icon>
-                        <span>Etiqueta</span>
-                    </button>
-                    <button mat-menu-item (click)="abrirWhatsApp()">
-                        <mat-icon>chat</mat-icon>
-                        <span>WhatsApp</span>
-                    </button>
-                </mat-menu>
-            </div>
+            <app-itens-pedido-section
+                [itens]="pedido?.itens ?? []"
+                [subtotal]="pedido?.subTotal ?? 0"
+                [permitirAlterarQuantidade]="(pedido?.status || '').toUpperCase() === 'RASCUNHO'"
+                [inativo]="inativoItens"
+                [mostrarAcoes]="['RASCUNHO','PENDENTE','ORCAMENTO'].includes((pedido?.status || '').toUpperCase())"
+                (buscarProdutos)="onBuscarProdutos()"
+                (descreverItens)="onDescreverItens()"
+                (removerItem)="removerItemPedido($event)">
+            </app-itens-pedido-section>
+
+            <app-observacoes-card
+                [control]="observacoesControl"
+                [textoSalvo]="pedido?.observacoes || ''"
+                [salvando]="salvandoObs"
+                [salvo]="obsOk"
+                [inativo]="inativoObservacoes"
+                (salvar)="salvarObservacoes()">
+            </app-observacoes-card>
         </div>
 
-        <!-- Informacoes do pedido -->
-        <div class="row">
-            <div class="col-md-7">
-                <mat-card class="cardWithShadow">
-                    <mat-card-content>
-                        <h6 class="f-s-18 f-w-600 m-b-16">Dados do pedido</h6>
-
-                        <div *ngIf="pedido?.status === 'ORCAMENTO'" class="m-b-12">
-                            <div class="alert" [ngClass]="orcamentoVencido ? 'alert-danger' : 'alert-info'">
-                                <div class="d-flex align-items-center">
-                                    <mat-icon class="m-r-8">{{ orcamentoVencido ? 'error' : 'info' }}</mat-icon>
-                                    <div>
-                                        <div class="f-w-600">Orçamento {{ pedido?.numeroOrcamento || '—' }}</div>
-                                        <div *ngIf="pedido?.nomeOrcamento">Nome: {{ pedido?.nomeOrcamento }}</div>
-                                        <div *ngIf="pedido?.vencimentoOrcamento as v">
-                                            Vencimento: {{ v | date:'dd/MM/yyyy' }}
-                                            <span *ngIf="orcamentoVencido" class="m-l-8 f-w-600">(VENCIDO)</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Linha de status com ação -->
-                        <div class="d-flex align-items-center m-b-8">
-                            <h6 class="m-0 f-w-500 f-s-14">Status: {{ pedido?.status || '—' }}</h6>
-
-                            <button mat-stroked-button color="primary" class="m-l-12" (click)="iniciarTrocaStatus()"
-                                *ngIf="!trocandoStatus">
-                                Trocar status
-                            </button>
-                        </div>
-
-                        <!-- Editor de status -->
-                        <div *ngIf="trocandoStatus" class="row m-b-8">
-                            <div class="col-12 col-md-8">
-                                <mat-form-field appearance="outline" class="w-100">
-                                    <mat-label>Novo status</mat-label>
-
-                                    <mat-select [formControl]="statusControl" [disabled]="carregandoStatus">
-                                        <mat-option *ngIf="carregandoStatus"
-                                            [disabled]="true">Carregando...</mat-option>
-                                        <mat-option *ngFor="let s of statusOptions" [value]="s">{{ s }}</mat-option>
-                                    </mat-select>
-                                </mat-form-field>
-                            </div>
-
-                            <div class="col-12 col-md-4 d-flex align-items-center m-t-8 m-t-md-0">
-                                <button mat-flat-button color="primary" (click)="salvarStatus()" class="m-r-8"
-                                    [disabled]="carregandoStatus">
-                                    Salvar
-                                </button>
-                                <button mat-stroked-button (click)="cancelarTrocaStatus()"
-                                    [disabled]="carregandoStatus">
-                                    Cancelar
-                                </button>
-                            </div>
-                        </div>
-
-
-                        <h6 class="m-t-5 f-w-500 f-s-14">Criado por: {{ pedido?.responsavel?.nome || '-' }}</h6>
-                        <h6 class="m-t-5 f-w-500 f-s-14">
-                            Data de Criação: {{ pedido?.dataCriacao | date:'dd/MM/yyyy' }} às {{ pedido?.dataCriacao |
-                            date:'HH:mm' }}
-                        </h6>
-
-                        <mat-divider class="m-b-16 m-t-16"></mat-divider>
-                        <h6 class="f-s-18 f-w-600 m-b-16">Dados do cliente</h6>
-
-                        <!-- Quando já houver cliente -->
-                        <div *ngIf="pedido?.cliente; else blocoSelecionarCliente">
-                            <h6 class="m-t-5 f-w-500 f-s-14">Nome: {{ pedido?.cliente?.nome || '-' }}</h6>
-                            <h6 class="m-t-5 f-w-500 f-s-14">E-mail: {{ pedido?.cliente?.email || '-' }}</h6>
-                            <h6 class="m-t-5 f-w-500 f-s-14">Telefone: {{ (pedido?.cliente?.telefone | telefone) || '-'
-                                }}</h6>
-
-                            <div class="m-t-12">
-                                <button mat-stroked-button color="primary" (click)="trocandoCliente = !trocandoCliente">
-                                    {{ trocandoCliente ? 'Cancelar' : 'Trocar cliente' }}
-                                </button>
-                            </div>
-
-                            <div class="m-t-12" *ngIf="trocandoCliente">
-                                <app-auto-complete [control]="clienteControl" label="Selecione o cliente"
-                                    [displayWith]="mostrarCliente" [buscarFn]="buscarClientes" [minimoCaracteres]="3"
-                                    [multiplo]="false"></app-auto-complete>
-
-                                <div class="m-t-12">
-                                    <button mat-flat-button color="primary" (click)="salvarClienteDoControle()"
-                                        [disabled]="salvandoCliente">
-                                        Salvar cliente no pedido
-                                    </button>
-                                    <button type="button" mat-stroked-button color="primary" class="m-l-8"
-                                        (click)="onCriarCliente()">
-                                        Novo cliente
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Quando NÃO houver cliente -->
-                        <ng-template #blocoSelecionarCliente>
-                            <div class="alert alert-warning m-b-12">
-                                Nenhum cliente definido para este pedido.
-                            </div>
-
-                            <app-auto-complete [control]="clienteControl" label="Selecione o cliente"
-                                [displayWith]="mostrarCliente" [buscarFn]="buscarClientes" [minimoCaracteres]="3"
-                                [multiplo]="false"></app-auto-complete>
-
-                            <div class="m-t-12">
-                                <button mat-flat-button color="primary" (click)="salvarClienteDoControle()"
-                                    [disabled]="salvandoCliente">
-                                    Salvar cliente no pedido
-                                </button>
-                                <button type="button" mat-stroked-button color="primary" class="m-l-8"
-                                    (click)="onCriarCliente()">
-                                    Novo cliente
-                                </button>
-                            </div>
-                        </ng-template>
-
-                    </mat-card-content>
-                </mat-card>
-            </div>
-            <div class="col-md-5" *ngIf="pedido?.status !== 'ORCAMENTO'">
-                <mat-card class="cardWithShadow">
-                    <mat-card-content>
-                        <h6 class="f-s-18 f-w-600 m-b-16">Inserir pagamento</h6>
-
-                        <!-- Formulário de pagamento -->
-                        <div class="row">
-                            <div class="col-md-6">
-                                <app-input-moeda [control]="pagamentoValorControl" label="Valor"
-                                    placeholder="Digite o valor">
-                                </app-input-moeda>
-                            </div>
-                            <div class="col-md-6">
-                                <app-input-options [control]="pagamentoFormaControl" label="Forma"
-                                    placeholder="Selecione a forma" [options]="formasPagamento">
-                                </app-input-options>
-                            </div>
-                        </div>
-
-                        <!-- Botão de adicionar -->
-                        <div class="text-right m-t-16">
-                            <button mat-flat-button color="primary" (click)="adicionarPagamento()">
-                                <mat-icon>add</mat-icon>
-                                Adicionar Pagamento
-                            </button>
-                        </div>
-
-                        <!-- Tabela de pagamentos -->
-                        <div class="b-1 table-responsive m-t-24">
-                            <h3 class="f-s-16 f-w-600 m-16">Pagamentos</h3>
-
-                            <table mat-table [dataSource]="pedido?.pagamentos || []"
-                                class="no-wrap v-middle f-s-14 w-100">
-
-                                <ng-container matColumnDef="forma">
-                                    <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">Forma</th>
-                                    <td mat-cell *matCellDef="let p">{{ p.forma }}</td>
-                                </ng-container>
-
-                                <ng-container matColumnDef="valor">
-                                    <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">Valor</th>
-                                    <td mat-cell *matCellDef="let p">R$ {{ p.valor | number: '1.2-2' }}</td>
-                                </ng-container>
-
-                                <ng-container matColumnDef="confirmado">
-                                    <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">Confirmado</th>
-                                    <td mat-cell *matCellDef="let p">{{ p.confirmado ? 'Sim' : 'Não' }}</td>
-                                </ng-container>
-
-                                <ng-container matColumnDef="data">
-                                    <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">Data</th>
-                                    <td mat-cell *matCellDef="let p">
-                                        {{ p.data | date: 'dd/MM/yyyy' }} às {{ p.data | date: 'HH:mm' }}
-                                    </td>
-                                </ng-container>
-
-                                <tr mat-header-row *matHeaderRowDef="['forma', 'valor', 'confirmado', 'data']"></tr>
-                                <tr mat-row *matRowDef="let row; columns: ['forma', 'valor', 'confirmado', 'data']">
-                                </tr>
-                            </table>
-                        </div>
-
-                    </mat-card-content>
-
-                </mat-card>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-12">
-                <mat-card class="cardWithShadow">
-                    <mat-card-content>
-                        <h6 class="f-s-18 f-w-600 m-b-16">Itens do Pedido</h6>
-
-                        <!-- Ações: Adicionar Itens -->
-                        <div class="row m-b-16">
-                            <div class="col-md-6">
-                                <label class="f-s-14 f-w-600 m-b-8 d-block">
-                                    Adicione itens ao pedido
-                                </label>
-
-                                <div class="row align-items-center text-center">
-                                    <div class="col-md-5 d-grid">
-                                        <button mat-stroked-button color="primary" (click)="onBuscarProdutos()">
-                                            Buscar produtos
-                                        </button>
-                                    </div>
-                                    <div class="col-md-2">
-                                        <span class="f-w-500">ou</span>
-                                    </div>
-                                    <div class="col-md-5 d-grid">
-                                        <button mat-stroked-button color="accent" (click)="onDescreverItens()">
-                                            Descrever itens
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Tabela de itens -->
-                        <div class="b-1 table-responsive m-t-16">
-                            <table mat-table [dataSource]="pedido?.itens || []" class="no-wrap v-middle f-s-14 w-100">
-
-                                <ng-container matColumnDef="descricao">
-                                    <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">Descrição</th>
-                                    <td mat-cell *matCellDef="let item">{{ item.descricao }}</td>
-                                </ng-container>
-
-                                <ng-container matColumnDef="quantidade">
-                                    <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">Qtd</th>
-                                    <td mat-cell *matCellDef="let item">{{ item.quantidade }}</td>
-                                </ng-container>
-
-                                <ng-container matColumnDef="valor">
-                                    <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">Valor</th>
-                                    <td mat-cell *matCellDef="let item">R$ {{ item.valor | number:'1.2-2' }}</td>
-                                </ng-container>
-
-                                <ng-container matColumnDef="subTotal">
-                                    <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">Subtotal</th>
-                                    <td mat-cell *matCellDef="let item">R$ {{ item.subTotal | number:'1.2-2' }}</td>
-                                </ng-container>
-
-                                <tr mat-header-row *matHeaderRowDef="['descricao', 'quantidade', 'valor', 'subTotal']">
-                                </tr>
-                                <tr mat-row
-                                    *matRowDef="let row; columns: ['descricao', 'quantidade', 'valor', 'subTotal']">
-                                </tr>
-                            </table>
-                        </div>
-                    </mat-card-content>
-                </mat-card>
-            </div>
-        </div>
-
-        @if(pedido) {
-        <div class="row m-t-30 align-items-start">
-            <!-- Observações -->
-            <div class="col-md-7">
-                <mat-form-field appearance="outline" class="w-100">
-                    <mat-label>Observações</mat-label>
-                    <textarea matInput rows="5" [formControl]="observacoesControl"
-                        placeholder="Observações internas do pedido (ex.: instruções de produção, resultado do SmartCalc, etc.)">
-        </textarea>
-                </mat-form-field>
-
-                <div class="d-flex align-items-center">
-                    <!-- <button mat-stroked-button color="primary" (click)="salvarObservacoes()"
-                        [disabled]="salvandoObs || !pedido?.id || observacoesControl.value === (pedido?.observacoes || '')">
-                        Salvar observações
-                    </button> -->
-
-                    <span class="m-l-8 f-s-13" *ngIf="salvandoObs">Salvando...</span>
-                    <span class="m-l-8 f-s-13" style="color:#2e7d32" *ngIf="obsOk">Salvo ✓</span>
+        <div class="side-column">
+            <app-section-card titulo="Ações de impressão" [divider]="true">
+                <div class="print-actions vertical">
+                    <button mat-flat-button color="primary" type="button" (click)="imprimirPedidoCompleto()">
+                        <mat-icon class="m-r-4">description</mat-icon>
+                        Pedido completo
+                    </button>
+                    <button mat-stroked-button color="primary" type="button" (click)="imprimirPedidoDuasVias()">
+                        <mat-icon class="m-r-4">description</mat-icon>
+                        Duas vias
+                    </button>
+                    <button mat-stroked-button color="accent" type="button" (click)="imprimirEtiqueta()">
+                        <mat-icon class="m-r-4">label</mat-icon>
+                        Etiqueta
+                    </button>
+                    <button mat-flat-button class="btn-whatsapp" type="button" (click)="abrirWhatsApp()">
+                        <mat-icon class="m-r-4">chat</mat-icon>
+                        WhatsApp
+                    </button>
                 </div>
-            </div>
+            </app-section-card>
 
-            <!-- Totais -->
-            <div class="col-md-5">
-                <div class="text-right">
-                    <h5 class="f-w-600 f-s-16 m-b-4">Subtotal: R$ {{ pedido.subTotal | number:'1.2-2' }}</h5>
-                    <h5 class="f-w-600 f-s-16 m-b-4">Frete: R$ {{ pedido.frete | number:'1.2-2' }}</h5>
-                    <h5 class="f-w-600 f-s-16 m-b-4">Desconto: R$ {{ pedido.desconto | number:'1.2-2' }}</h5>
-                    <h5 class="f-w-600 f-s-16 m-b-4">Acréscimo: R$ {{ pedido.acrescimo | number:'1.2-2' }}</h5>
-                    <h3 class="f-s-18 f-w-700 m-t-24">Total: R$ {{ pedido.total | number:'1.2-2' }}</h3>
-                    <h5 class="f-s-16 f-w-600 m-t-12">Valor Pago: R$ {{ pedido.valorTotalPago | number:'1.2-2' }}</h5>
-                    <h5 class="f-s-16 f-w-600 m-t-4">Resta Pagar: R$ {{ pedido.restaPagar | number:'1.2-2' }}</h5>
-                </div>
-            </div>
+      <div id="pagamentos-section">
+        <app-pagamentos-section
+                [pagamentoNovo]="pagamentoForm"
+                [pagamentosLista]="pedido?.pagamentos || []"
+                [formasPagamento]="formasPagamento"
+                [pago]="totalPago"
+                [restante]="restaPagar"
+                [expanded]="expandirPagamentos"
+                [mostrarAcoes]="true"
+                [inativo]="inativoPagamentos"
+                (addPagamento)="adicionarPagamento()"
+                (removerPagamento)="removerPagamento($event)"
+              ></app-pagamentos-section>
+      </div>
         </div>
-        }
-
-    </mat-card-content>
-</mat-card>
+    </div>
+    }
+</app-page-card>

@@ -1,0 +1,30 @@
+<ng-container *ngIf="pedido as p; else loading">
+  <div class="print-shell">
+    <div class="page-preview" [ngClass]="{ 'duas-vias': isDuasVias, 'layout-completo': !isDuasVias, 'layout-2vias': isDuasVias }">
+      <app-imprimir-pedido-duas-vias
+        *ngIf="isDuasVias; else umaVia"
+        [pedido]="p"
+        [empresa]="empresa">
+      </app-imprimir-pedido-duas-vias>
+    </div>
+
+    <ng-template #umaVia>
+      <div class="page-preview">
+        <app-imprimir-pedido-completo
+          [pedido]="p"
+          [empresa]="empresa">
+        </app-imprimir-pedido-completo>
+      </div>
+    </ng-template>
+
+    <div class="no-print actions-bottom">
+      <button mat-stroked-button color="primary" (click)="onPrint()">Imprimir</button>
+    </div>
+  </div>
+</ng-container>
+
+<ng-template #loading>
+  <div class="loading">
+    Carregando...
+  </div>
+</ng-template>

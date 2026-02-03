@@ -1,6 +1,9 @@
 <div class="auth-body">
-    <div class="m-t-12 m-b-16 text-center">
+    <div class="m-t-12 m-b-16 text-center" style="position: relative;">
         <app-branding></app-branding>
+        <button mat-icon-button aria-label="Fechar" (click)="fechar()" style="position: absolute; top: 0; right: 0;">
+            <mat-icon>close</mat-icon>
+        </button>
     </div>
 
     <h4 class="f-w-700 f-s-22 lh-base m-0 text-center">
@@ -39,14 +42,27 @@
 
                     <mat-card-content>
 
+                        <mat-slide-toggle
+                          color="primary"
+                          class="m-b-8 f-w-700 f-s-14"
+                          [checked]="selecionadosAcabamentos.size === acabamentosPadrao.length && acabamentosPadrao.length > 0"
+                          (change)="selecionarTodosAcabamentos($event.checked)">
+                          Marcar todos
+                        </mat-slide-toggle>
+
                         <div *ngIf="carregandoAcabamentos" class="text-center m-t-16">
                             <mat-spinner diameter="40"></mat-spinner>
                         </div>
 
                         <div class="row" *ngIf="!carregandoAcabamentos">
                             <div class="col-md-4" *ngFor="let a of acabamentosPadrao">
-                                <mat-checkbox (change)="toggleAcabamento($event.checked, a.id)"
-                                    class="m-r-8 f-w-600 f-s-14">{{ a.nome }}</mat-checkbox>
+                                <mat-checkbox
+                                  [checked]="selecionadosAcabamentos.has(a.id)"
+                                  (change)="toggleAcabamento($event.checked, a.id)"
+                                  class="m-r-8 f-w-600 f-s-14"
+                                >
+                                  {{ a.nome }}
+                                </mat-checkbox>
                             </div>
                         </div>
                     </mat-card-content>
@@ -77,14 +93,26 @@
                     </app-card-header>
 
                     <mat-card-content>
+                        <mat-slide-toggle
+                          color="primary"
+                          class="m-b-8 f-w-700 f-s-14"
+                          [checked]="selecionadosCores.size === coresPadrao.length && coresPadrao.length > 0"
+                          (change)="selecionarTodasCores($event.checked)">
+                          Marcar todos
+                        </mat-slide-toggle>
+
                         <div *ngIf="carregandoCores" class="text-center m-t-16">
                             <mat-spinner diameter="40"></mat-spinner>
                         </div>
 
                         <div class="row" *ngIf="!carregandoCores">
                             <div class="col-md-4" *ngFor="let cor of coresPadrao">
-                                <mat-checkbox (change)="toggleCor($event.checked, cor.id)"
-                                    class="m-r-8 f-w-600 f-s-14">{{ cor.nome }}</mat-checkbox>
+                                <mat-checkbox
+                                    [checked]="selecionadosCores.has(cor.id)"
+                                    (change)="toggleCor($event.checked, cor.id)"
+                                    class="m-r-8 f-w-600 f-s-14">
+                                    {{ cor.nome }} <span *ngIf="cor.descricao">({{ cor.descricao }})</span>
+                                </mat-checkbox>
                             </div>
                         </div>
                     </mat-card-content>
@@ -115,13 +143,23 @@
                     </app-card-header>
 
                     <mat-card-content>
+                        <mat-slide-toggle
+                          color="primary"
+                          class="m-b-8 f-w-700 f-s-14"
+                          [checked]="selecionadosFormatos.size === formatosPadrao.length && formatosPadrao.length > 0"
+                          (change)="selecionarTodosFormatos($event.checked)">
+                          Marcar todos
+                        </mat-slide-toggle>
+
                         <div *ngIf="carregandoFormatos" class="text-center m-t-16">
                             <mat-spinner diameter="40"></mat-spinner>
                         </div>
 
                         <div class="row" *ngIf="!carregandoFormatos">
                             <div class="col-md-4" *ngFor="let formato of formatosPadrao">
-                                <mat-checkbox (change)="toggleFormato($event.checked, formato.id)"
+                                <mat-checkbox
+                                    [checked]="selecionadosFormatos.has(formato.id)"
+                                    (change)="toggleFormato($event.checked, formato.id)"
                                     class="m-r-8 f-w-600 f-s-14">{{ formato.nome }}</mat-checkbox>
                             </div>
                         </div>
@@ -153,13 +191,23 @@
                     </app-card-header>
 
                     <mat-card-content>
+                        <mat-slide-toggle
+                          color="primary"
+                          class="m-b-8 f-w-700 f-s-14"
+                          [checked]="selecionadosMateriais.size === materiaisPadrao.length && materiaisPadrao.length > 0"
+                          (change)="selecionarTodosMateriais($event.checked)">
+                          Marcar todos
+                        </mat-slide-toggle>
+
                         <div *ngIf="carregandoMateriais" class="text-center m-t-16">
                             <mat-spinner diameter="40"></mat-spinner>
                         </div>
 
                         <div class="row" *ngIf="!carregandoMateriais">
                             <div class="col-md-4" *ngFor="let material of materiaisPadrao">
-                                <mat-checkbox (change)="toggleMaterial($event.checked, material.id)"
+                                <mat-checkbox
+                                    [checked]="selecionadosMateriais.has(material.id)"
+                                    (change)="toggleMaterial($event.checked, material.id)"
                                     class="m-r-8 f-w-600 f-s-14">{{ material.nome }}</mat-checkbox>
                             </div>
                         </div>
@@ -192,13 +240,23 @@
 
                     <mat-card-content>
 
+                        <mat-slide-toggle
+                          color="primary"
+                          class="m-b-8 f-w-700 f-s-14"
+                          [checked]="selecionadosServicos.size === servicosPadrao.length && servicosPadrao.length > 0"
+                          (change)="selecionarTodosServicos($event.checked)">
+                          Marcar todos
+                        </mat-slide-toggle>
+
                         <div *ngIf="carregandoServicos" class="text-center m-t-16">
                             <mat-spinner diameter="40"></mat-spinner>
                         </div>
 
                         <div class="row" *ngIf="!carregandoServicos">
                             <div class="col-md-4" *ngFor="let servico of servicosPadrao">
-                                <mat-checkbox (change)="toggleServico($event.checked, servico.id)"
+                                <mat-checkbox
+                                    [checked]="selecionadosServicos.has(servico.id)"
+                                    (change)="toggleServico($event.checked, servico.id)"
                                     class="m-r-8 f-w-600 f-s-14">{{ servico.nome }}</mat-checkbox>
                             </div>
                         </div>

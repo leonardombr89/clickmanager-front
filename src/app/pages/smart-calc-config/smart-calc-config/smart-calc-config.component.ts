@@ -14,6 +14,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
+import { RouterModule } from '@angular/router';
 
 
 type ProdutoOption = { id: number; nome: string };
@@ -33,6 +34,7 @@ import { extrairMensagemErro } from 'src/app/utils/mensagem.util';
     MatCardModule, MatTabsModule, MatFormFieldModule, MatInputModule,
     MatSlideToggleModule, MatSelectModule, MatButtonModule,
     MatProgressSpinnerModule, MatIconModule,
+    RouterModule,
     CardHeaderComponent,
     MatDivider
 ],

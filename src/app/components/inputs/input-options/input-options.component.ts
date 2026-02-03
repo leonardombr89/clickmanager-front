@@ -21,10 +21,27 @@ export class InputOptionsComponent {
   @Input() control!: FormControl;
   @Input() label: string = 'Selecione uma opção';
   @Input() placeholder: string = '- Selecione -';
-  @Input() options: string[] = [];
+  @Input() options: any[] = [];
+  @Input() labelKey: string = 'nome';
+  @Input() valueKey: string = 'id';
+  @Input() showNull: boolean = true;
+  @Input() nullLabel: string = '-- Selecione --';
+  @Input() disabled: boolean = false;
 
   get isRequired(): boolean {
     return this.control?.validator?.({} as any)?.['required'] ?? false;
+  }
+
+  asLabel(opt: any): string {
+    if (opt == null) return '';
+    if (typeof opt === 'string' || typeof opt === 'number') return String(opt);
+    return opt?.[this.labelKey] ?? '';
+  }
+
+  asValue(opt: any): any {
+    if (opt == null) return null;
+    if (typeof opt === 'string' || typeof opt === 'number') return opt;
+    return opt?.[this.valueKey] ?? opt;
   }
 
   errorMessage(): string {

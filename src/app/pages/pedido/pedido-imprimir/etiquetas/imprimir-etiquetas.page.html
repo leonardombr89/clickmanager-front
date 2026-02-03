@@ -1,0 +1,15 @@
+<ng-container *ngIf="pedido as p; else loading">
+  <div class="print-shell">
+    <div class="page-preview">
+      <app-imprimir-etiquetas-layout [pedido]="p"></app-imprimir-etiquetas-layout>
+    </div>
+
+    <div class="no-print actions-bottom">
+      <button mat-stroked-button color="primary" (click)="onPrint()">Imprimir</button>
+    </div>
+  </div>
+</ng-container>
+
+<ng-template #loading>
+  <div class="loading">Carregando...</div>
+</ng-template>

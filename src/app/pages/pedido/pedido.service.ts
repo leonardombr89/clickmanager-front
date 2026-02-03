@@ -18,7 +18,13 @@ export class PedidoService {
 
   constructor(private api: ApiService, private produtoService: ProdutoService, private clienteService: ClienteService) { }
 
-  listar(page: number = 0, size: number = 10, textoPesquisa?: string, status?: string): Observable<PaginaResponse<PedidoListagem>> {
+  listar(
+    page: number = 0,
+    size: number = 10,
+    textoPesquisa?: string,
+    status?: string,
+    sort?: string[]
+  ): Observable<PaginaResponse<PedidoListagem>> {
     let url = `${this.endpoint}?page=${page}&size=${size}`;
     if (textoPesquisa) {
       url += `&textoPesquisa=${encodeURIComponent(textoPesquisa)}`;
@@ -26,6 +32,9 @@ export class PedidoService {
     if (status && status !== 'TODOS') {
       url += `&status=${encodeURIComponent(status)}`;
     }
+    (sort || []).forEach(s => {
+      url += `&sort=${encodeURIComponent(s)}`;
+    });
     return this.api.get<PaginaResponse<PedidoListagem>>(url);
   }
 
@@ -65,6 +74,10 @@ export class PedidoService {
     return this.api.post<void>(`${this.endpoint}/${pedidoId}/pagamentos`, pagamento);
   }
 
+  removerPagamento(pedidoId: number, pagamentoId: number): Observable<void> {
+    return this.api.delete<void>(`${this.endpoint}/${pedidoId}/pagamentos/${pagamentoId}`);
+  }
+
   adicionarItens(pedidoId: number, itens: PedidoItemRequest[]): Observable<void> {
     return this.api.post<void>(`${this.endpoint}/${pedidoId}/itens`, itens);
   }
@@ -85,4 +98,3 @@ export class PedidoService {
   return this.api.post<PedidoResponse>(`${this.endpoint}/${id}/aprovar-orcamento`, {});
 }
 }
-

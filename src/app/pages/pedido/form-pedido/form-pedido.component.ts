@@ -19,6 +19,7 @@ import { map, Observable, take } from 'rxjs';
 import { DialogAdicionarProdutoComponent } from '../dialog-adicionar-produto/dialog-adicionar-produto.component';
 import { DialogDescreverItemComponent } from '../dialog-descrever-item/dialog-descrever-item.component';
 import { PedidoRequest } from 'src/app/models/pedido/pedido-request.model';
+import { PedidoListagem } from 'src/app/models/pedido/pedido-listagem.model';
 import { PedidoItemRequest } from 'src/app/models/pedido/pedido-item-request.model';
 import { AuthService } from 'src/app/services/auth.service';
 import { InputTextareaComponent } from "../../../components/inputs/input-textarea/input-textarea.component";
@@ -26,6 +27,7 @@ import { FormaPagamento } from 'src/app/utils/forma-pagamento.enum';
 import { InputOptionsComponent } from "../../../components/inputs/input-options/input-options.component";
 import { ToastrService } from 'ngx-toastr';
 import { InputDataComponent } from "../../../components/inputs/input-data/input-data.component";
+import { SectionCardComponent } from "../../../components/section-card/section-card.component";
 import {
   trigger,
   state,
@@ -35,6 +37,13 @@ import {
 } from '@angular/animations';
 import { ItemTipo } from 'src/app/models/pedido/item-tipo.enum';
 import { CardHeaderComponent } from "src/app/components/card-header/card-header.component";
+import { PageCardComponent } from "src/app/components/page-card/page-card.component";
+import { PagamentosSectionComponent } from "src/app/components/pagamentos-section/pagamentos-section.component";
+import { ItensPedidoSectionComponent } from "src/app/components/itens-pedido-section/itens-pedido-section.component";
+import { ClienteSelectorCardComponent } from "src/app/components/cliente-selector-card/cliente-selector-card.component";
+import { ObservacoesCardComponent } from "src/app/components/observacoes-card/observacoes-card.component";
+import { ConfirmDialogComponent } from "src/app/components/dialog/confirm-dialog/confirm-dialog.component";
+import { ClienteService } from "../../cliente/cliente.service";
 
 @Component({
   selector: 'app-form-pedido',
@@ -50,7 +59,14 @@ import { CardHeaderComponent } from "src/app/components/card-header/card-header.
     InputTextareaComponent,
     InputOptionsComponent,
     InputDataComponent,
-    CardHeaderComponent
+    CardHeaderComponent,
+    SectionCardComponent,
+    PageCardComponent,
+    PagamentosSectionComponent,
+    ItensPedidoSectionComponent,
+    ClienteSelectorCardComponent,
+    ObservacoesCardComponent,
+    ConfirmDialogComponent
   ],
   templateUrl: './form-pedido.component.html',
   styleUrls: ['./form-pedido.component.scss'],
@@ -78,8 +94,16 @@ export class FormPedidoComponent implements OnInit {
   addForm!: FormGroup;
   rows!: FormArray;
   pedidoItens: PedidoItemRequest[] = [];
+  clienteConfirmado: any | null = null;
+  trocandoCliente = true;
+  observacaoSalva = '';
+  obsSalvo = false;
 
   produtoControl = new FormControl();
+  pagamentoNovo = this.fb.group({
+    forma: ['', Validators.required],
+    valor: [0, [Validators.required]]
+  });
 
   subTotal = 0;
   totalAjustado = 0;
@@ -95,7 +119,8 @@ export class FormPedidoComponent implements OnInit {
     private router: Router,
     private dialog: MatDialog,
     private authService: AuthService,
-    private toastr: ToastrService
+    private toastr: ToastrService,
+    private clienteService: ClienteService
   ) { }
 
   ngOnInit(): void {
@@ -114,39 +139,46 @@ export class FormPedidoComponent implements OnInit {
     this.rows = this.fb.array([]);
     this.rows.push(this.createItemFormGroup());
 
-    this.addPagamento()
-
     this.addForm.valueChanges.subscribe(() => this.recalcularTotais());
 
-    this.clienteControl.valueChanges.subscribe(cliente => {
-      if (cliente?.id) {
-        this.addForm.get('clienteId')?.setValue(cliente.id);
-      }
-    });
+    this.observacoesControl.valueChanges.subscribe(() => this.obsSalvo = false);
   }
 
   addPagamento(): void {
-    const pagamentosArray = this.addForm.get('pagamentos') as FormArray;
+    const forma = this.pagamentoNovo.get('forma')?.value;
+    const valor = Number(this.pagamentoNovo.get('valor')?.value || 0);
+    if (!forma || !valor || valor <= 0) {
+      this.toastr.warning('Informe forma e valor para adicionar o pagamento.');
+      return;
+    }
 
-    // Verifica se já atingiu o número máximo de formas de pagamento
+    const pagamentosArray = this.pagamentos;
     if (pagamentosArray.length >= this.formasPagamento.length) {
       this.toastr.warning('Você já adicionou todas as formas de pagamento disponíveis.');
       return;
     }
 
     pagamentosArray.push(this.fb.group({
-      forma: [''],
-      valor: [0]
+      forma: [forma],
+      valor: [valor]
     }));
+
+    this.pagamentoNovo.reset({ forma: null, valor: null });
+    // limpa estado visual de erro
+    Object.values(this.pagamentoNovo.controls).forEach(control => {
+      control.markAsPristine();
+      control.markAsUntouched();
+      control.updateValueAndValidity({ emitEvent: false });
+    });
+    this.pagamentoNovo.markAsPristine();
+    this.pagamentoNovo.markAsUntouched();
+    this.pagamentoNovo.updateValueAndValidity({ emitEvent: false });
+    this.recalcularTotais();
   }
 
   removerPagamento(index: number): void {
-    const pagamentosArray = this.pagamentos;
-    pagamentosArray.removeAt(index);
-
-    if (pagamentosArray.length === 0) {
-      this.addPagamento();
-    }
+    this.pagamentos.removeAt(index);
+    this.recalcularTotais();
   }
 
   recalcularTotais(): void {
@@ -200,6 +232,15 @@ export class FormPedidoComponent implements OnInit {
 
   mostrarCliente = (cliente: any): string =>
     cliente ? `${cliente.nome}${cliente.telefone ? ' - ' + cliente.telefone : ''}` : '';
+
+  alterarQuantidade(index: number, valor: any): void {
+    const qtd = Math.max(1, Number(valor) || 1);
+    const item = this.pedidoItens[index];
+    if (!item) return;
+    item.quantidade = qtd;
+    item.subTotal = Number(item.valor ?? 0) * qtd;
+    this.recalcularTotais();
+  }
 
   onBuscarProdutos(): void {
     const dialogRef = this.dialog.open(DialogAdicionarProdutoComponent, {
@@ -363,9 +404,26 @@ export class FormPedidoComponent implements OnInit {
       };
 
       this.pedidoService.salvar(pedido).subscribe({
-        next: () => {
+        next: (resp: PedidoListagem) => {
           this.toastr.success(isOrcamento ? 'Orçamento salvo com sucesso!' : 'Pedido salvo com sucesso!');
-          this.router.navigate(['/page/pedido']);
+
+          const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+            data: {
+              title: 'Abrir detalhes',
+              message: 'Deseja abrir o detalhe do pedido agora?',
+              confirmText: 'Abrir detalhe',
+              cancelText: 'Ir para lista',
+              confirmColor: 'primary'
+            }
+          });
+
+          dialogRef.afterClosed().subscribe((abrir: boolean) => {
+            if (abrir && resp?.id) {
+              this.router.navigate([`/page/pedido/detalhe/${resp.id}`]);
+            } else {
+              this.router.navigate(['/page/pedido']);
+            }
+          });
         },
         error: () => {
           this.toastr.error('Erro ao salvar.');
@@ -420,6 +478,48 @@ export class FormPedidoComponent implements OnInit {
     return this.addForm.get('clienteId') as FormControl
   }
 
+  confirmarClienteSelecionado(): void {
+    const selecionado = this.clienteControl.value;
+    if (!selecionado?.id) {
+      this.toastr.warning('Selecione um cliente antes de salvar no pedido.');
+      return;
+    }
+
+    this.clienteService.buscarPorId(selecionado.id).pipe(take(1)).subscribe({
+      next: (clienteCompleto) => {
+        this.clienteConfirmado = clienteCompleto;
+        // mantém o objeto completo para display e submissão
+        this.clienteControl.setValue(clienteCompleto, { emitEvent: false });
+        this.trocandoCliente = false;
+        this.clienteControl.markAsDirty();
+        this.clienteControl.updateValueAndValidity({ emitEvent: false });
+        this.toastr.success('Cliente selecionado para o pedido.');
+      },
+      error: () => {
+        this.toastr.warning('Não foi possível carregar os dados completos do cliente. Tente novamente.');
+      }
+    });
+  }
+
+  iniciarTrocaCliente(): void {
+    this.trocandoCliente = true;
+    this.clienteControl.reset(null, { emitEvent: false });
+  }
+
+  cancelarTrocaCliente(): void {
+    this.trocandoCliente = false;
+    if (this.clienteConfirmado) {
+      this.clienteControl.setValue(this.clienteConfirmado, { emitEvent: false });
+    }
+  }
+
+  confirmarObservacaoLocal(): void {
+    const texto = this.observacoesControl.value ?? '';
+    this.observacaoSalva = texto;
+    this.obsSalvo = true;
+    this.toastr.success('Observação salva.');
+  }
+
   get orcamentoControl(): FormControl {
     return this.addForm.get('orcamento') as FormControl;
   }
@@ -440,6 +540,11 @@ export class FormPedidoComponent implements OnInit {
     return this.pagamentosControls[index].get('valor') as FormControl;
   }
 
+  get totalPago(): number {
+    return this.pagamentosControls.reduce((acc, pg) => {
+      const valor = Number(pg.get('valor')?.value || 0);
+      return acc + valor;
+    }, 0);
+  }
+
 }
-
-

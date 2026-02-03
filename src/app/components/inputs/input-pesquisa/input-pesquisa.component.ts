@@ -19,6 +19,7 @@ import { debounceTime } from 'rxjs/operators';
 })
 export class InputPesquisaComponent {
   @Input() placeholder = 'Digite para pesquisar...';
+  @Input() showLabel = true;
   @Output() valorAlterado = new EventEmitter<string>();
 
   pesquisaControl = new FormControl('');

@@ -1,20 +1,22 @@
 <mat-card class="cardWithShadow">
 
   <!-- Cabeçalho padrão sem botão -->
-  <app-card-header titulo="Configurações do SmartCalc" [mostrarDivisor]="true">
+  <app-card-header
+    titulo="Configurações do SmartCalc"
+    [mostrarDivisor]="true"
+    [helpRota]="['/page/ajuda']"
+    helpFragment="smartcalc"
+    helpTexto="Manual do SmartCalc"
+    helpIcone="help_outline">
   </app-card-header>
 
   <mat-card-content>
 
     <!-- Texto explicativo em uma linha só -->
-    <div class="row">
-      <div class="col-12">
-        <p class="f-s-18 f-w-600 text-muted m-t-8 m-b-16">
-          Use as opções abaixo para ativar o SmartCalc e definir quais produtos poderão
-          utilizar o cálculo automático no momento do orçamento/pedido.
-        </p>
-      </div>
-    </div>
+    <p class="f-s-18 f-w-600 text-muted m-t-8 m-b-16">
+      Use as opções abaixo para ativar o SmartCalc e definir quais produtos poderão
+      utilizar o cálculo automático no momento do orçamento/pedido.
+    </p>
 
     <mat-divider class="m-b-24"></mat-divider>
 

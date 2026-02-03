@@ -34,13 +34,13 @@ export class EnderecoFormComponent implements OnInit {
 
   ngOnInit(): void {
     this.enderecoForm = this.fb.group({
-      cep: ['', Validators.required],
-      logradouro: ['', Validators.required],
-      numero: ['', Validators.required],
+      cep: [''],
+      logradouro: [''],
+      numero: [''],
       complemento: [''],
-      bairro: ['', Validators.required],
-      cidade: ['', Validators.required],
-      estado: ['', Validators.required],
+      bairro: [''],
+      cidade: [''],
+      estado: [''],
     });
 
     this.formReady.emit(this.enderecoForm);

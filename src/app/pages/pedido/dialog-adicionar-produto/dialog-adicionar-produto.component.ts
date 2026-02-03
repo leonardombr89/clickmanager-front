@@ -1,4 +1,4 @@
-import { Component, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
@@ -11,21 +11,20 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
 import { MatDialogClose } from '@angular/material/dialog';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { ProdutoService } from '../../cadastro-tecnico/services/produto.service';
-import { ListarProdutosComponent } from 'src/app/components/tabela/listar-produtos.component';
+import { SelecionarProdutoStepComponent } from './steps/selecionar-produto-step/selecionar-produto-step.component';
+import { EscolherVariacaoStepComponent } from './steps/escolher-variacao-step/escolher-variacao-step.component';
+import { ServicosStepComponent } from './steps/servicos-step/servicos-step.component';
+import { RevisaoStepComponent } from './steps/revisao-step/revisao-step.component';
 
 import { ProdutoListagem } from 'src/app/models/produto/produto-listagem.model';
 import { Preco } from 'src/app/models/preco/preco-response.model';
 import { ServicoResponse } from 'src/app/models/servico/servico-response.model';
 
-import { PrecoFixoConfigComponent } from './preco-fixo-component/preco-fixo-config.component';
-import { PrecoQuantidadeConfigComponent } from './preco-quantidade-component/preco-quantidade-config.component';
-import { PrecoDemandaConfigComponent } from './preco-demanda-component/preco-demanda-config.component';
-import { PrecoMetroConfigComponent } from './preco-metro-component/preco-metro-config.component';
+import { ConfigurarPrecoStepComponent } from './steps/configurar-preco-step/configurar-preco-step.component';
 import { AcabamentoVariacaoResponse } from 'src/app/models/acabamento/acabamento-variacao-response.model';
-
-type IdNome = { id: number | null; nome: string };
 
 type Variacao = {
     id: number;
@@ -46,17 +45,19 @@ type Variacao = {
     imports: [
         CommonModule, ReactiveFormsModule,
         MatDialogModule, MatStepperModule, MatButtonModule,
-    MatRadioModule, MatDividerModule, MatCheckboxModule, MatTooltipModule, MatIconModule,
-    MatCardModule,
-    MatDialogClose,
+        MatRadioModule, MatDividerModule, MatCheckboxModule, MatTooltipModule, MatIconModule,
+        MatCardModule, MatProgressSpinnerModule, MatDialogClose,
         // filhos
-        ListarProdutosComponent,
-        PrecoFixoConfigComponent, PrecoQuantidadeConfigComponent,
-        PrecoDemandaConfigComponent, PrecoMetroConfigComponent,
+        SelecionarProdutoStepComponent,
+        EscolherVariacaoStepComponent,
+        ServicosStepComponent,
+        RevisaoStepComponent,
+        ConfigurarPrecoStepComponent,
     ],
 })
 export class DialogAdicionarProdutoComponent {
     precoReady = false;
+    isFinishing = false;
 
     // ======= Forms
     readonly selectForm: FormGroup = this.fb.group({
@@ -80,15 +81,6 @@ export class DialogAdicionarProdutoComponent {
     loadingVariacoes = false;
     variacoes: Variacao[] = [];
 
-    // opções (dimensões)
-    formatos: IdNome[] = [];
-    materiais: IdNome[] = [];
-    cores: IdNome[] = [];
-
-    // seleção corrente
-    selFormatoId: number | null = null;
-    selMaterialId: number | null = null;
-    selCorId: number | null = null;
     selectedVariacao: Variacao | null = null;
 
     // preço
@@ -104,15 +96,22 @@ export class DialogAdicionarProdutoComponent {
     constructor(
         private readonly dialogRef: MatDialogRef<DialogAdicionarProdutoComponent>,
         private readonly fb: FormBuilder,
-        private readonly produtoService: ProdutoService
+        private readonly produtoService: ProdutoService,
+        private readonly cdr: ChangeDetectorRef,
     ) { }
 
+    // ======= Navegação (footer fixo)
     // ======= Navegação (footer fixo)
     get isFirstStep(): boolean {
         return (this.stepper?.selectedIndex ?? 0) === 0;
     }
     get isLastStep(): boolean {
         return (this.stepper?.selectedIndex ?? 0) === 4; // 0..4
+    }
+    get currentStepLabel(): string {
+        const labels = ['Selecionar Produto', 'Escolher Variação', 'Configurar Preço', 'Serviços', 'Revisão'];
+        const i = this.stepper?.selectedIndex ?? 0;
+        return labels[i] || '';
     }
     get nextLabel(): 'Próximo' | 'Concluir' {
         return this.isLastStep ? 'Concluir' : 'Próximo';
@@ -132,7 +131,7 @@ export class DialogAdicionarProdutoComponent {
     }
     goNext(): void {
         if (this.isLastStep) {
-            this.finalizar();
+            this.finish();
             return;
         }
         const i = this.stepper?.selectedIndex ?? 0;
@@ -144,7 +143,23 @@ export class DialogAdicionarProdutoComponent {
             if (!this.nextDisabled) this.irParaConfig(this.stepper);
             return;
         }
-        if (!this.nextDisabled) this.stepper.next();
+        if (!this.nextDisabled) {
+            // garante que serviços/acabamentos acompanhem a variação ao avançar
+            if (this.selectedVariacao) {
+                this.servicosDisponiveis = Array.isArray(this.selectedVariacao.servicos) ? this.selectedVariacao.servicos : [];
+                this.acabamentosDisponiveis = Array.isArray(this.selectedVariacao.acabamentos) ? this.selectedVariacao.acabamentos : [];
+            }
+            this.stepper.next();
+        }
+    }
+    finish(): void {
+        if (this.isFinishing || this.nextDisabled) return;
+        this.isFinishing = true;
+        try {
+            this.finalizar();
+        } finally {
+            this.isFinishing = false;
+        }
     }
 
     // ======= STEP 1
@@ -164,162 +179,39 @@ export class DialogAdicionarProdutoComponent {
 
                 this.produtoBase = { id: res.id, nome: res.nome, descricao: res.descricao ?? null };
                 this.variacoes = Array.isArray(res.variacoes) ? (res.variacoes as Variacao[]) : [];
+                this.debug('Variacoes carregadas', this.variacoes?.length ?? 0);
 
                 // reset seleção
-                this.selFormatoId = this.selMaterialId = this.selCorId = null;
                 this.selectedVariacao = null;
+                this.servicosDisponiveis = [];
+                this.acabamentosDisponiveis = [];
                 this.variacaoForm.reset({ variacaoId: null, acabamentoIds: [] });
+                this.servicosForm.reset({ servicoIds: [] });
 
-                // popula opções iniciais + auto-escolhas se únicas
-                this.rebuildMateriais();
                 stepper.next();
             },
             error: () => (this.loadingVariacoes = false),
         });
     }
 
-    // ======= STEP 2
-    private uniq<T extends IdNome>(arr: T[]): T[] {
-        const seen = new Set<string>();
-        return arr.filter(x => {
-            const key = String(x?.id ?? 'null');
-            if (!x || seen.has(key)) return false;
-            seen.add(key);
-            return true;
+    onVariacaoSelecionada(evt: { variacao: Variacao | null; servicos: ServicoResponse[]; acabamentos: AcabamentoVariacaoResponse[] }) {
+        this.selectedVariacao = evt?.variacao ?? null;
+        this.servicosDisponiveis = evt?.servicos ?? [];
+        this.acabamentosDisponiveis = evt?.acabamentos ?? [];
+        this.variacaoForm.get('variacaoId')?.setValue(this.selectedVariacao?.id ?? null);
+
+        // Sempre reseta seleções dependentes ao trocar variação
+        this.servicosForm.patchValue({ servicoIds: [] }, { emitEvent: false });
+        this.variacaoForm.patchValue({ acabamentoIds: [] }, { emitEvent: false });
+        this.debug('Variacao selecionada', {
+            variacaoId: this.selectedVariacao?.id ?? null,
+            servicos: this.servicosDisponiveis.length,
+            acabamentos: this.acabamentosDisponiveis.length
         });
+        this.cdr.detectChanges();
     }
 
-    private rebuildMateriais(): void {
-        // Materiais vêm primeiro; se nenhum selecionado ainda, lista todos os disponíveis
-        const raw = this.variacoes
-            .filter(v => v.materialId != null)
-            .map(v => ({ id: v.materialId, nome: v.materialNome ?? String(v.materialId) }));
-
-        this.materiais = this.uniq(raw);
-        this.selMaterialId = this.materiais.length === 1 ? this.materiais[0].id : null;
-
-        if (this.selMaterialId != null) {
-            this.rebuildFormatos();
-        } else {
-            this.formatos = [];
-            this.cores = [];
-            this.selFormatoId = null;
-            this.selCorId = null;
-            this.updateSelectedVariacao();
-        }
-    }
-
-    private rebuildFormatos(): void {
-        if (this.selMaterialId == null) {
-            this.formatos = [];
-            this.selFormatoId = null;
-            this.cores = [];
-            this.selCorId = null;
-            this.updateSelectedVariacao();
-            return;
-        }
-
-        const base = this.variacoes.filter(v => this.materialMatches(v));
-
-        const raw = base.map(v => ({
-            id: v.formatoId ?? null,
-            nome: v.formatoId == null ? 'Sem formato' : (v.formatoNome ?? String(v.formatoId))
-        }));
-
-        this.formatos = this.uniq(raw);
-        this.selFormatoId = this.formatos.length === 1 ? this.formatos[0].id : null;
-
-        if (this.selFormatoId !== undefined) {
-            this.rebuildCores();
-        } else {
-            this.cores = [];
-            this.selCorId = null;
-            this.updateSelectedVariacao();
-        }
-    }
-
-    private rebuildCores(): void {
-        if (this.selMaterialId == null) {
-            this.cores = [];
-            this.selCorId = null;
-            this.updateSelectedVariacao();
-            return;
-        }
-
-        const base = this.variacoes.filter(
-            v =>
-                this.formatoMatches(v) &&
-                this.materialMatches(v)
-        );
-
-        const raw = base
-            .map(v => v.corId != null
-                ? { id: v.corId!, nome: v.corNome ?? String(v.corId) }
-                : { id: null, nome: 'Sem cor' });
-
-        this.cores = this.uniq(raw);
-        this.selCorId = this.cores.length === 1 ? this.cores[0].id : null;
-
-        this.updateSelectedVariacao();
-    }
-
-    onSelectMaterial(id: number) {
-        this.selMaterialId = id ?? null;
-        this.selFormatoId = null;
-        this.selCorId = null;
-        this.rebuildFormatos();
-    }
-
-    onSelectFormato(id: number) {
-        this.selFormatoId = id ?? null;
-        this.selCorId = null;
-        this.rebuildCores();
-    }
-
-    onSelectCor(id: number) {
-        this.selCorId = id ?? null;
-        this.updateSelectedVariacao();
-    }
-
-    private updateSelectedVariacao(): void {
-        const matches = this.variacoes.filter(v =>
-            this.materialMatches(v) &&
-            this.formatoMatches(v) &&
-            (this.selCorId == null ? v.corId == null : +(<any>v.corId) === this.selCorId)
-        );
-
-        if (matches.length === 1) {
-            this.selectedVariacao = matches[0];
-            this.variacaoForm.get('variacaoId')?.setValue(this.selectedVariacao.id);
-
-            // Disponíveis
-            this.servicosDisponiveis = Array.isArray(this.selectedVariacao.servicos) ? this.selectedVariacao.servicos : [];
-            this.acabamentosDisponiveis = Array.isArray(this.selectedVariacao.acabamentos) ? this.selectedVariacao.acabamentos : [];
-
-            // reset seleções
-            this.servicosForm.patchValue({ servicoIds: [] }, { emitEvent: false });
-            const auto = this.acabamentosDisponiveis.length === 1 ? [this.acabamentosDisponiveis[0].id] : [];
-            this.variacaoForm.patchValue({ acabamentoIds: auto }, { emitEvent: false });
-        } else {
-            this.selectedVariacao = null;
-            this.variacaoForm.patchValue({ variacaoId: null, acabamentoIds: [] }, { emitEvent: false });
-            this.servicosForm.patchValue({ servicoIds: [] }, { emitEvent: false });
-            this.servicosDisponiveis = [];
-            this.acabamentosDisponiveis = [];
-        }
-    }
-
-    private formatoMatches(v: Variacao): boolean {
-        return this.selFormatoId == null
-            ? true
-            : Number(v.formatoId) === this.selFormatoId;
-    }
-
-    private materialMatches(v: Variacao): boolean {
-        return this.selMaterialId == null
-            ? true
-            : Number(v.materialId) === this.selMaterialId;
-    }
+    // ======= STEP 2 handled in app-escolher-variacao-step
 
     resumoVariacao(v: Variacao): string {
         const cor = v?.corNome ?? '—';
@@ -342,6 +234,8 @@ export class DialogAdicionarProdutoComponent {
 
         this.precoReady = false;
         this.resumoPreco = null;
+        this.servicosDisponiveis = Array.isArray(this.selectedVariacao.servicos) ? this.selectedVariacao.servicos : [];
+        this.acabamentosDisponiveis = Array.isArray(this.selectedVariacao.acabamentos) ? this.selectedVariacao.acabamentos : [];
 
         this.produtoAtual = {
             id: this.produtoBase.id,
@@ -351,13 +245,20 @@ export class DialogAdicionarProdutoComponent {
             ativo: true,
             categoria: '',
             grupo: '',
+            variacaoId: this.selectedVariacao.id,
+            produtoVariacaoId: this.selectedVariacao.id,
         } as unknown as ProdutoListagem;
+        this.debug('Ir para config', {
+            variacaoId: this.selectedVariacao.id,
+            servicos: this.servicosDisponiveis.length,
+            acabamentos: this.acabamentosDisponiveis.length
+        });
 
         stepper.next();
     }
 
     onConfigConcluida(payload: any) {
-        this.resumoPreco = payload;
+        this.resumoPreco = { ...payload, produtoVariacaoId: this.selectedVariacao?.id };
         this.precoReady = true;
     }
 
@@ -368,6 +269,12 @@ export class DialogAdicionarProdutoComponent {
     // ======= STEP 4 (serviços) + helpers de seleção
     get servicoIdsCtrl(): FormControl<number[]> { return this.servicosForm.get('servicoIds') as FormControl<number[]>; }
     get acabamentoIdsCtrl(): FormControl<number[]> { return this.variacaoForm.get('acabamentoIds') as FormControl<number[]>; }
+    get isSelectedWrapper(): (id: number) => boolean {
+        return (id: number) => this.isSelected(this.acabamentoIdsCtrl, id);
+    }
+    onAcabamentoToggle(evt: { id: number; checked: boolean }): void {
+        this.toggle(this.acabamentoIdsCtrl, evt.id, evt.checked);
+    }
 
     isSelected(ctrl: FormControl<number[]>, id: number): boolean {
         return (ctrl.value ?? []).includes(id);
@@ -615,6 +522,7 @@ export class DialogAdicionarProdutoComponent {
 
         itens.push({
             produtoVariacaoId: v.id,
+            produtoId: this.produtoBase?.id ?? v.id,
             nome: nomeComposto,
             quantidade: qtd,
             valor: unit,
@@ -629,4 +537,9 @@ export class DialogAdicionarProdutoComponent {
     }
 
     trackById(_: number, item: { id: number | null }) { return item.id ?? 'null'; }
+
+    private debug(label: string, payload?: any): void {
+        // eslint-disable-next-line no-console
+        console.log(`[DialogAdicionarProduto] ${label}`, payload ?? '');
+    }
 }
