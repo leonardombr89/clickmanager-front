@@ -1,0 +1,115 @@
+<ng-container *ngIf="!loadingVariacoes; else loadingTpl">
+  <div class="top-panels">
+    <section class="panel">
+      <div class="panel-head">
+        <span class="sec-title">Material</span>
+        <span class="counter" *ngIf="materiais?.length">({{ materiais.length }})</span>
+      </div>
+      <ng-container *ngIf="materiais.length; else noMaterialTpl">
+        <mat-radio-group [value]="selMaterialId ?? null" (change)="onSelectMaterial($event.value ?? null)" class="list-group">
+          <label class="radio-row" *ngFor="let m of materiais; trackBy: trackById" (click)="onSelectMaterial(m.id ?? null)">
+            <mat-radio-button [value]="m.id"></mat-radio-button>
+            <span class="radio-label">{{ m.nome }}</span>
+          </label>
+        </mat-radio-group>
+      </ng-container>
+      <ng-template #noMaterialTpl>
+        <div class="empty-card">
+          <mat-icon>category</mat-icon>
+          <div>Sem opções de material.</div>
+        </div>
+      </ng-template>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <span class="sec-title">Formato</span>
+        <span class="counter" *ngIf="formatos?.length">({{ formatos.length }})</span>
+      </div>
+      <ng-container *ngIf="formatos.length; else noFormatoTpl">
+        <mat-radio-group [value]="selFormatoId ?? null" (change)="onSelectFormato($event.value ?? null)" class="list-group">
+          <label class="radio-row" *ngFor="let f of formatos; trackBy: trackById" (click)="onSelectFormato(f.id ?? null)">
+            <mat-radio-button [value]="f.id"></mat-radio-button>
+            <span class="radio-label">{{ f.nome }}</span>
+          </label>
+        </mat-radio-group>
+      </ng-container>
+      <ng-template #noFormatoTpl>
+        <div class="empty-card">
+          <mat-icon>layers</mat-icon>
+          <div>Sem opções de formato.</div>
+        </div>
+      </ng-template>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <span class="sec-title">Cor</span>
+        <span class="counter" *ngIf="cores?.length">({{ cores.length }})</span>
+      </div>
+      <ng-container *ngIf="cores.length; else noColorTpl">
+        <mat-radio-group [value]="selCorId ?? null" (change)="onSelectCor($event.value ?? null)" class="list-group">
+          <label class="radio-row" *ngFor="let c of cores; trackBy: trackById" (click)="onSelectCor(c.id ?? null)">
+            <mat-radio-button [value]="c.id"></mat-radio-button>
+            <span class="radio-label">{{ c.nome }}</span>
+          </label>
+        </mat-radio-group>
+      </ng-container>
+      <ng-template #noColorTpl>
+        <div class="empty-card">
+          <mat-icon>color_lens</mat-icon>
+          <div>Sem opções de cor.</div>
+        </div>
+      </ng-template>
+    </section>
+  </div>
+
+  <ng-container *ngIf="selectedVariacao">
+    <div class="summary-bar">
+      <mat-icon color="primary">info</mat-icon>
+      <div>
+        <div class="summary-title">Variação selecionada</div>
+        <div class="summary-text">{{ resumoVariacaoComAcab }}</div>
+      </div>
+    </div>
+
+    <h4 class="sec-title m-t-16">Acabamentos</h4>
+
+    <ng-container *ngIf="acabamentosDisponiveis?.length; else noAcab">
+      <div class="opt-grid">
+        <label class="opt-card" *ngFor="let a of acabamentosDisponiveis; trackBy: trackById"
+          (click)="acabamentoToggle.emit({ id: a.id, checked: !isSelectedFn?.(a.id) })">
+
+          <mat-checkbox class="opt-check" [checked]="isSelectedFn?.(a.id)"
+            (click)="$event.stopPropagation()"
+            (change)="acabamentoToggle.emit({ id: a.id, checked: $event.checked })">
+          </mat-checkbox>
+
+          <div class="opt-body">
+            <div class="opt-name">{{ a.nome }}</div>
+            <div class="opt-desc">{{ a.descricao || '—' }}</div>
+          </div>
+
+          <div class="opt-pill" [matTooltip]="precoResumoFn?.(a.preco)">
+            {{ precoResumoFn?.(a.preco) }}
+          </div>
+        </label>
+
+      </div>
+    </ng-container>
+
+    <ng-template #noAcab>
+      <div class="empty-card">
+        <mat-icon>style</mat-icon>
+        <div>Nenhum acabamento disponível para esta variação.</div>
+      </div>
+    </ng-template>
+  </ng-container>
+</ng-container>
+
+<ng-template #loadingTpl>
+  <div class="loading">
+    <mat-progress-spinner mode="indeterminate" diameter="32" strokeWidth="4"></mat-progress-spinner>
+    <span>Carregando variações...</span>
+  </div>
+</ng-template>
