@@ -46,6 +46,8 @@
           },
           "configurations": {
             "production": {
+              "baseHref": "/app/",
+              "deployUrl": "/app/",
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.ts",
@@ -77,6 +79,9 @@
         },
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
+          "options": {
+            "prebundle": false
+          },
           "configurations": {
             "production": {
               "buildTarget": "Spike:build:production"

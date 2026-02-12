@@ -13,7 +13,7 @@ RUN npm ci --legacy-peer-deps
 COPY . .
 
 # build de produção
-RUN npm run build
+RUN npm run build:prod
 
 # Stage 2: Nginx servindo o build
 FROM nginx:alpine
@@ -21,9 +21,8 @@ FROM nginx:alpine
 # remove qualquer arquivo padrão do nginx
 RUN rm -rf /usr/share/nginx/html/*
 
-# ⚠️ AQUI É O PONTO IMPORTANTE:
-# copie o conteúdo de dist/Spike/browser para a raiz do html
-COPY --from=build /app/dist/Spike/browser /usr/share/nginx/html
+# copie o build para /app dentro do Nginx (baseHref/deployUrl = /app/)
+COPY --from=build /app/dist/Spike/browser /usr/share/nginx/html/app
 
 # Copia config SPA customizada
 COPY nginx.conf /etc/nginx/conf.d/default.conf
