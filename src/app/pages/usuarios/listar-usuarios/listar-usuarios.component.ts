@@ -114,7 +114,14 @@ export class ListarUsuariosComponent implements OnInit {
   
 
   usarImagemPadrao(event: Event): void {
-    (event.target as HTMLImageElement).src = '/assets/images/profile/user-1.jpg';
+    const imagem = event.target as HTMLImageElement | null;
+    if (!imagem || imagem.dataset['fallbackApplied'] === 'true') {
+      return;
+    }
+
+    imagem.dataset['fallbackApplied'] = 'true';
+    imagem.onerror = null;
+    imagem.src = '/assets/images/profile/user-1.jpg';
   }
 
   aplicarFiltro(status: boolean): void {
