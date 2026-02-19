@@ -21,6 +21,7 @@ export class InputTextoRestritoComponent implements OnInit {
   @Input() label: string = '';
   @Input() placeholder: string = '';
   @Input() maxlength: number = 200;
+  @Input() bloquearNumeros: boolean = false;
 
   ngOnInit(): void {
     if (!this.control) {
@@ -46,17 +47,21 @@ export class InputTextoRestritoComponent implements OnInit {
     return this.control?.validator?.({} as any)?.['required'] ?? false;
   }
 
-  permitirSomenteLetrasENumeros(event: KeyboardEvent): void {
-    const allowedKeys = ['Backspace', 'Tab', 'ArrowLeft', 'ArrowRight', 'Delete'];
-    const isValidChar = /^[a-zA-Z0-9À-ÿ .]$/.test(event.key);
-    if (!isValidChar && !allowedKeys.includes(event.key)) {
+  onKeydown(event: KeyboardEvent): void {
+    if (!this.bloquearNumeros) return;
+    if (/^\d$/.test(event.key)) {
       event.preventDefault();
     }
   }
 
-  atualizarValor(event: Event): void {
-    const input = (event.target as HTMLInputElement).value;
-    const filtrado = input.replace(/[^a-zA-Z0-9À-ÿ .]/g, '');
-    this.control.setValue(filtrado);
+  onInput(event: Event): void {
+    if (!this.bloquearNumeros) return;
+    const input = event.target as HTMLInputElement;
+    const semNumeros = input.value.replace(/\d/g, '');
+    if (semNumeros !== input.value) {
+      input.value = semNumeros;
+      this.control.setValue(semNumeros);
+    }
   }
+
 }
