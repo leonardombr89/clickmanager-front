@@ -41,7 +41,7 @@ export class BillingService {
   }
 
   listarPlanosPublicos(): Observable<PlanoPublico[]> {
-    return this.api.get<PlanoPublico[]>('api/planos/publicos');
+    return this.api.get<PlanoPublico[]>('api/public/planos');
   }
 
   private normalizeUrl(url: string): string {

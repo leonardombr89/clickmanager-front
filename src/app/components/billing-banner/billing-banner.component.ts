@@ -37,6 +37,24 @@ export class BillingBannerComponent {
     return this.hasCheckout;
   }
 
+  get shouldShowGlobalWarning(): boolean {
+    const b = this.billingState.snapshot;
+    if (!b) return false;
+    return b.warning === true || b.allowed === false || b.type === 'PRE_DUE' || b.type === 'POST_DUE' || b.type === 'BLOCKED';
+  }
+
+  get isMinhaAssinaturaPage(): boolean {
+    return this.router.url.includes('/billing/minha-assinatura');
+  }
+
+  get globalMessage(): string {
+    return this.billingState.snapshot?.message || 'Sua assinatura requer atenção para evitar bloqueio de acesso.';
+  }
+
+  get dueLabel(): string | null {
+    return this.billingState.formatDaysLabel(this.billingState.snapshot?.days);
+  }
+
   irParaPagamento(): void {
     this.router.navigate(['/billing/pagamento'], { queryParams: { from: 'banner' } });
   }

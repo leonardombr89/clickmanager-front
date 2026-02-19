@@ -1,8 +1,17 @@
-<mat-card class="cardWithShadow pricing-card selectable h-100" [class.active]="ativo" (click)="onEscolher()">
+<mat-card
+  class="cardWithShadow pricing-card selectable h-100"
+  [class.active]="ativo"
+  [class.featured]="isDestaque"
+  (click)="onEscolher()"
+>
   <mat-card-content class="p-y-24 position-relative">
 
-    <span class="popular-badge text-uppercase bg-light-warning text-warning p-x-8 p-y-4 f-s-12 f-w-500 rounded"
-      *ngIf="popular">Popular</span>
+    <span
+      class="popular-badge text-uppercase bg-light-warning text-warning p-x-8 p-y-4 f-s-12 f-w-600 rounded"
+      *ngIf="isDestaque || popular"
+    >
+      {{ destaqueLabel || 'Popular' }}
+    </span>
 
     <span class="d-block text-uppercase f-s-12 m-b-16">
       {{ plano?.nome || 'Plano' }}
@@ -24,6 +33,11 @@
     <ng-template #freeLabel>
       <h2 class="plan-title m-b-24">Free</h2>
     </ng-template>
+
+    <div class="vantagem-highlight m-b-16" *ngIf="vantagem as destaque">
+      <div class="vantagem-label">Vantagem</div>
+      <div class="vantagem-text">{{ destaque }}</div>
+    </div>
 
     <div class="m-b-12">
       @for (beneficio of beneficios; track beneficio) {

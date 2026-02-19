@@ -58,4 +58,22 @@ export class PricingCardComponent {
   get isFree(): boolean {
     return !this.preco(this.plano);
   }
+
+  get vantagem(): string | null {
+    const raw = this.plano?.vantagem ?? (this.plano as any)?.vantagem;
+    if (!raw || typeof raw !== 'string') return null;
+    const trimmed = raw.trim();
+    return trimmed.length ? trimmed : null;
+  }
+
+  get destaqueLabel(): string | null {
+    const raw = this.plano?.destaque ?? (this.plano as any)?.destaque;
+    if (!raw || typeof raw !== 'string') return null;
+    const trimmed = raw.trim();
+    return trimmed.length ? trimmed : null;
+  }
+
+  get isDestaque(): boolean {
+    return !!this.destaqueLabel;
+  }
 }

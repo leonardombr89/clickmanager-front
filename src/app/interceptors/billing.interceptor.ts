@@ -39,7 +39,7 @@ export class BillingInterceptor implements HttpInterceptor {
     return next.handle(req).pipe(
       tap(event => {
         if (event instanceof HttpResponse) {
-          this.billingState.setFromHeaders(event.headers);
+          this.billingState.setFromHttpResponse(event.body, event.headers);
         }
       }),
       catchError((error: HttpErrorResponse) => {
@@ -47,10 +47,10 @@ export class BillingInterceptor implements HttpInterceptor {
           return throwError(() => error);
         }
 
-        if (error.status === 402 && error.error?.billing) {
+        if (error.status === 402) {
           const returnUrl = this.router.url;
           this.billingState.setReturnUrl(returnUrl);
-          this.billingState.setFromErrorBody(error, returnUrl);
+          this.billingState.setFromHttpError(error, returnUrl);
           sessionStorage.setItem('billing_return_url', returnUrl);
           const inBillingFlow = this.router.url.includes('/billing/blocked') || this.router.url.includes('/billing/pagamento') || this.router.url.includes('/billing/return');
           if (!inBillingFlow) {

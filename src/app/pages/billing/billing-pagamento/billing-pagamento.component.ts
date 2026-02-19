@@ -3,10 +3,8 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { ToastrService } from 'ngx-toastr';
 import { BillingStateService } from 'src/app/pages/billing/services/billing-state.service';
 import { BillingService } from 'src/app/pages/billing/services/billing.service';
@@ -22,7 +20,7 @@ import { CheckoutResponse } from 'src/app/models/billing-access.model';
 @Component({
   selector: 'app-billing-pagamento',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatButtonModule, MatProgressSpinnerModule, MatIconModule, MatCardModule, MatSlideToggleModule, CardHeaderComponent, TablerIconsModule, PricingCardComponent],
+  imports: [CommonModule, MatButtonModule, MatProgressSpinnerModule, MatIconModule, MatCardModule, CardHeaderComponent, TablerIconsModule, PricingCardComponent],
   templateUrl: './billing-pagamento.component.html',
   styleUrls: ['./billing-pagamento.component.scss']
 })
@@ -33,7 +31,6 @@ export class BillingPagamentoComponent implements OnInit {
   returnUrl: string | null = null;
   planos: PlanoPublico[] = [];
   planoSelecionado: PlanoPublico | null = null;
-  mostrarAnual = false;
   checkoutIndisponivel = false;
   usuario?: Usuario | null;
   private readonly fallbackCheckoutEndpoint = 'api/assinaturas/checkout';
@@ -92,8 +89,9 @@ export class BillingPagamentoComponent implements OnInit {
           beneficios_json: plano.beneficios_json ?? (plano as any).beneficiosJson,
           limites_json: plano.limites_json ?? (plano as any).limitesJson,
           periodicidade: plano.periodicidade ?? (plano as any).periodicidade,
+          destaque: plano.destaque ?? (plano as any).destaque ?? null,
           imgSrc: plano.imgSrc || this.fallbackImg(idx),
-          popular: plano.popular ?? idx === 1,
+          popular: plano.popular ?? (!!((plano as any).destaque) ? true : idx === 1),
         }));
         this.planos = comDefaults.sort((a, b) => (a.ordem_exibicao || 0) - (b.ordem_exibicao || 0));
         if (this.billing?.planoId) {
