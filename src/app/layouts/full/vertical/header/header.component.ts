@@ -105,7 +105,7 @@ export class HeaderComponent implements OnInit {
 
     imagem.dataset['fallbackApplied'] = 'true';
     imagem.onerror = null;
-    imagem.src = '/assets/images/profile/user-1.jpg';
+    imagem.src = 'assets/images/profile/user-1.jpg';
   }
 
   abrirSmartCalc(): void {
@@ -130,31 +130,31 @@ export class HeaderComponent implements OnInit {
   notifications: notifications[] = [
     {
       id: 1,
-      img: '/assets/images/profile/user-1.jpg',
+      img: 'assets/images/profile/user-1.jpg',
       title: 'Roman Joined the Team!',
       subtitle: 'Congratulate him sf',
     },
     {
       id: 2,
-      img: '/assets/images/profile/user-2.jpg',
+      img: 'assets/images/profile/user-2.jpg',
       title: 'New message received',
       subtitle: 'Salma sent you new message',
     },
     {
       id: 3,
-      img: '/assets/images/profile/user-3.jpg',
+      img: 'assets/images/profile/user-3.jpg',
       title: 'New Payment received',
       subtitle: 'Check your earnings',
     },
     {
       id: 4,
-      img: '/assets/images/profile/user-4.jpg',
+      img: 'assets/images/profile/user-4.jpg',
       title: 'Jolly completed tasks',
       subtitle: 'Assign her new tasks',
     },
     {
       id: 5,
-      img: '/assets/images/profile/user-5.jpg',
+      img: 'assets/images/profile/user-5.jpg',
       title: 'Hitesh Joined thed Team!',
       subtitle: 'Congratulate him',
     },

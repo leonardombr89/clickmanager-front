@@ -121,7 +121,7 @@ export class ListarUsuariosComponent implements OnInit {
 
     imagem.dataset['fallbackApplied'] = 'true';
     imagem.onerror = null;
-    imagem.src = '/assets/images/profile/user-1.jpg';
+    imagem.src = 'assets/images/profile/user-1.jpg';
   }
 
   aplicarFiltro(status: boolean): void {

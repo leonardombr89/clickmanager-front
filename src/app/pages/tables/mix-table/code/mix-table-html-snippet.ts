@@ -25,7 +25,7 @@ export const MIX_TABLE_HTML_SNIPPET = `  <div class="table-responsive m-t-30">
           </mat-header-cell>
           <mat-cell *matCellDef="let row">
             <div class="d-flex align-items-center gap-12 p-y-16">
-              <img src="/assets/images/profile/user-1.jpg" alt="profile" class="rounded-circle" width="40" />
+              <img src="assets/images/profile/user-1.jpg" alt="profile" class="rounded-circle" width="40" />
               <span class="f-s-16 f-w-600">{{ row.name }}</span>
             </div>
           </mat-cell>

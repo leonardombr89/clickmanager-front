@@ -114,42 +114,42 @@ export class AppCardsComponent {
     {
       id: 1,
       color: 'primary',
-      img: '/assets/images/svgs/icon-user-male.svg',
+      img: 'assets/images/svgs/icon-user-male.svg',
       title: 'Profile',
       subtitle: '3,685',
     },
     {
       id: 2,
       color: 'warning',
-      img: '/assets/images/svgs/icon-briefcase.svg',
+      img: 'assets/images/svgs/icon-briefcase.svg',
       title: 'Blog',
       subtitle: '256',
     },
     {
       id: 3,
       color: 'secondary',
-      img: '/assets/images/svgs/icon-mailbox.svg',
+      img: 'assets/images/svgs/icon-mailbox.svg',
       title: 'Calendar',
       subtitle: '932',
     },
     {
       id: 4,
       color: 'error',
-      img: '/assets/images/svgs/icon-favorites.svg',
+      img: 'assets/images/svgs/icon-favorites.svg',
       title: 'Email',
       subtitle: '$348K',
     },
     {
       id: 5,
       color: 'success',
-      img: '/assets/images/svgs/icon-speech-bubble.svg',
+      img: 'assets/images/svgs/icon-speech-bubble.svg',
       title: 'Chats',
       subtitle: '96',
     },
     {
       id: 6,
       color: 'secondary',
-      img: '/assets/images/svgs/icon-connect.svg',
+      img: 'assets/images/svgs/icon-connect.svg',
       title: 'Contacts',
       subtitle: '48',
     },
@@ -160,8 +160,8 @@ export class AppCardsComponent {
     {
       id: 1,
       time: '2 mins Read',
-      imgSrc: '/assets/images/blog/blog-img1.jpg',
-      user: '/assets/images/profile/user-1.jpg',
+      imgSrc: 'assets/images/blog/blog-img1.jpg',
+      user: 'assets/images/profile/user-1.jpg',
       title: 'As yen tumbles, gadget-loving Japan goes for secondhand iPhones',
       views: '9,125',
       category: 'Social',
@@ -171,8 +171,8 @@ export class AppCardsComponent {
     {
       id: 2,
       time: '2 mins Read',
-      imgSrc: '/assets/images/blog/blog-img2.jpg',
-      user: '/assets/images/profile/user-2.jpg',
+      imgSrc: 'assets/images/blog/blog-img2.jpg',
+      user: 'assets/images/profile/user-2.jpg',
       title:
         'Intel loses bid to revive antitrust case against patent foe Fortress',
       views: '9,125',
@@ -183,8 +183,8 @@ export class AppCardsComponent {
     {
       id: 3,
       time: '2 mins Read',
-      imgSrc: '/assets/images/blog/blog-img3.jpg',
-      user: '/assets/images/profile/user-3.jpg',
+      imgSrc: 'assets/images/blog/blog-img3.jpg',
+      user: 'assets/images/profile/user-3.jpg',
       title: 'COVID outbreak deepens as more lockdowns loom in China',
       views: '9,125',
       category: 'Health',
@@ -197,28 +197,28 @@ export class AppCardsComponent {
   productcards: productcards[] = [
     {
       id: 1,
-      imgSrc: '/assets/images/products/s4.jpg',
+      imgSrc: 'assets/images/products/s4.jpg',
       title: 'Boat Headphone',
       price: '285',
       rprice: '375',
     },
     {
       id: 2,
-      imgSrc: '/assets/images/products/s5.jpg',
+      imgSrc: 'assets/images/products/s5.jpg',
       title: 'MacBook Air Pro',
       price: '285',
       rprice: '375',
     },
     {
       id: 3,
-      imgSrc: '/assets/images/products/s7.jpg',
+      imgSrc: 'assets/images/products/s7.jpg',
       title: 'Red Valvet Dress',
       price: '285',
       rprice: '375',
     },
     {
       id: 4,
-      imgSrc: '/assets/images/products/s11.jpg',
+      imgSrc: 'assets/images/products/s11.jpg',
       title: 'Cute Soft Teddybear',
       price: '285',
       rprice: '375',
@@ -229,19 +229,19 @@ export class AppCardsComponent {
   musiccards: musiccards[] = [
     {
       id: 1,
-      imgSrc: '/assets/images/blog/blog-img5.jpg',
+      imgSrc: 'assets/images/blog/blog-img5.jpg',
       title: 'Uptown Funk',
       subtext: 'Jon Bon Jovi',
     },
     {
       id: 2,
-      imgSrc: '/assets/images/blog/blog-img4.jpg',
+      imgSrc: 'assets/images/blog/blog-img4.jpg',
       title: 'Blank Space',
       subtext: 'Madonna',
     },
     {
       id: 3,
-      imgSrc: '/assets/images/blog/blog-img3.jpg',
+      imgSrc: 'assets/images/blog/blog-img3.jpg',
       title: 'Lean On',
       subtext: 'Jennifer Lopez',
     },
@@ -251,19 +251,19 @@ export class AppCardsComponent {
   followercards: followercards[] = [
     {
       id: 1,
-      imgSrc: '/assets/images/profile/user-1.jpg',
+      imgSrc: 'assets/images/profile/user-1.jpg',
       title: 'Andrew Grant',
       subtext: 'El Salvador',
     },
     {
       id: 2,
-      imgSrc: '/assets/images/profile/user-2.jpg',
+      imgSrc: 'assets/images/profile/user-2.jpg',
       title: 'Leo Pratt',
       subtext: 'Bulgaria',
     },
     {
       id: 3,
-      imgSrc: '/assets/images/profile/user-3.jpg',
+      imgSrc: 'assets/images/profile/user-3.jpg',
       title: 'Charles Nunez',
       subtext: 'Nepal',
     },
@@ -273,22 +273,22 @@ export class AppCardsComponent {
   friendcards: friendcards[] = [
     {
       id: 1,
-      imgSrc: '/assets/images/profile/user-1.jpg',
+      imgSrc: 'assets/images/profile/user-1.jpg',
       title: 'Andrew Grant',
     },
     {
       id: 2,
-      imgSrc: '/assets/images/profile/user-2.jpg',
+      imgSrc: 'assets/images/profile/user-2.jpg',
       title: 'Leo Pratt',
     },
     {
       id: 3,
-      imgSrc: '/assets/images/profile/user-3.jpg',
+      imgSrc: 'assets/images/profile/user-3.jpg',
       title: 'Charles Nunez',
     },
     {
       id: 4,
-      imgSrc: '/assets/images/profile/user-4.jpg',
+      imgSrc: 'assets/images/profile/user-4.jpg',
       title: 'Lora Powers',
     },
   ];
@@ -297,19 +297,19 @@ export class AppCardsComponent {
   socialcards: socialcards[] = [
     {
       id: 1,
-      imgSrc: '/assets/images/profile/user-1.jpg',
+      imgSrc: 'assets/images/profile/user-1.jpg',
       username: 'Andrew Grant',
       post: 'Technology Director',
     },
     {
       id: 2,
-      imgSrc: '/assets/images/profile/user-2.jpg',
+      imgSrc: 'assets/images/profile/user-2.jpg',
       username: 'Andrew Grant',
       post: 'Technology Director',
     },
     {
       id: 3,
-      imgSrc: '/assets/images/profile/user-3.jpg',
+      imgSrc: 'assets/images/profile/user-3.jpg',
       username: 'Andrew Grant',
       post: 'Technology Director',
     },
@@ -319,17 +319,17 @@ export class AppCardsComponent {
   giftcards: giftcards[] = [
     {
       id: 1,
-      imgSrc: '/assets/images/products/s1.jpg',
+      imgSrc: 'assets/images/products/s1.jpg',
       username: 'Andrew Grant',
     },
     {
       id: 2,
-      imgSrc: '/assets/images/products/s2.jpg',
+      imgSrc: 'assets/images/products/s2.jpg',
       username: 'Leo Pratt',
     },
     {
       id: 3,
-      imgSrc: '/assets/images/products/s3.jpg',
+      imgSrc: 'assets/images/products/s3.jpg',
       username: 'Charles Nunez',
     },
   ];
