@@ -27,7 +27,6 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatCardModule } from '@angular/material/card';
 import { MatTable, MatTableDataSource, MatTableModule } from '@angular/material/table';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 
 import { ToastrService } from 'ngx-toastr';
 
@@ -66,7 +65,6 @@ export interface AcabamentoVariacaoForm {
     MatOptionModule,
     MatCardModule,
     MatTableModule,
-    MatSlideToggleModule,
     MatExpansionModule,
     MatAccordion,
     AutoCompleteComponent,
@@ -90,7 +88,7 @@ export class VariacoesAcabamentoComponent {
   formVariacaoAtual!: FormGroup;
 
   dataSource = new MatTableDataSource<AcabamentoVariacaoForm>([]);
-  displayedColumns: string[] = ['material', 'formato', 'tipoAplicacao', 'preco', 'ativo', 'acoes'];
+  displayedColumns: string[] = ['material', 'formato', 'tipoAplicacao', 'preco', 'acoes'];
 
   TipoAplicacaoAcabamento = TipoAplicacaoAcabamento;
 
