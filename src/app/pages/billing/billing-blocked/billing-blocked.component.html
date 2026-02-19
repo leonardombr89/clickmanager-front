@@ -7,8 +7,8 @@
     <p class="f-s-14 m-b-8">
       {{ billing?.message || 'Assinatura bloqueada. Regularize para continuar.' }}
     </p>
-    <p class="text-muted f-s-13" *ngIf="billing?.days !== undefined">
-      Dias desde o vencimento: {{ billing?.days }}
+    <p class="text-muted f-s-13" *ngIf="dueLabel">
+      {{ dueLabel }}
     </p>
     <div class="m-t-16 d-flex gap-10 flex-wrap">
       <button mat-flat-button color="primary" *ngIf="podeMostrarPagamento" (click)="abrirPagamento()">

@@ -44,6 +44,10 @@ export class BillingBlockedComponent implements OnInit {
     return this.hasCheckout;
   }
 
+  get dueLabel(): string | null {
+    return this.billingState.formatDaysLabel(this.billing?.days);
+  }
+
   abrirPagamento(): void {
     const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') || this.router.url;
     this.router.navigate(['/billing/pagamento'], { queryParams: { returnUrl } });

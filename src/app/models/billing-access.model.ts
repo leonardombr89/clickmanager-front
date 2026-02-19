@@ -2,6 +2,8 @@ export interface BillingAccessResponse {
   allowed: boolean;
   warning?: boolean;
   type?: 'NONE' | 'PRE_DUE' | 'POST_DUE' | 'BLOCKED' | string;
+  diasVencimento?: number;
+  diasVencidos?: number;
   days?: number;
   message?: string;
   expiresAt?: string | null;

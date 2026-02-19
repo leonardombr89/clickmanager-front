@@ -10,6 +10,8 @@ export interface PlanoPublico {
   ordem_exibicao?: number;
   limites_json?: string;
   beneficios_json?: string[] | string;
+  vantagem?: string;
+  destaque?: string | null;
   mercado_pago_plan_id?: string;
   imgSrc?: string;
   popular?: boolean;

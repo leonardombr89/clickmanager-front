@@ -19,12 +19,25 @@
 .popular-badge {
   position: absolute;
   top: 16px;
-  right: 16px;
+  left: 16px;
   letter-spacing: 0.5px;
+  z-index: 2;
 }
 
 .pricing-card {
   min-height: 360px;
+}
+
+.pricing-card.featured {
+  border: 1px solid #8fb1ff;
+  background: linear-gradient(180deg, #ffffff 0%, #f3f7ff 100%);
+  box-shadow: 0 10px 24px rgba(59, 110, 219, 0.16);
+}
+
+.pricing-card.featured .popular-badge {
+  background: #2f6fed !important;
+  color: #ffffff !important;
+  border-radius: 999px;
 }
 
 .plan-title {
@@ -42,6 +55,37 @@
   margin-left: 6px;
 }
 
+.vantagem-highlight {
+  border: 1px solid #d7e3ff;
+  background: linear-gradient(180deg, #f7faff 0%, #eef4ff 100%);
+  border-radius: 12px;
+  padding: 10px 12px;
+  text-align: left;
+}
+
+.vantagem-label {
+  font-size: 11px;
+  line-height: 1.2;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #3b6edb;
+  margin-bottom: 4px;
+}
+
+.vantagem-text {
+  font-size: 13px;
+  line-height: 1.35;
+  font-weight: 600;
+  color: #1f2937;
+}
+
 .btn-selected {
   box-shadow: 0 6px 18px rgba(93, 135, 255, 0.25);
+}
+
+@media (min-width: 992px) {
+  .pricing-card.featured {
+    transform: scale(1.03);
+  }
 }
