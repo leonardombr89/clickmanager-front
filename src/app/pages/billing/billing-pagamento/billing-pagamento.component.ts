@@ -167,9 +167,9 @@ export class BillingPagamentoComponent implements OnInit {
 
   private fallbackImg(idx: number): string {
     const assets = [
-      '/assets/images/backgrounds/silver.png',
-      '/assets/images/backgrounds/bronze.png',
-      '/assets/images/backgrounds/gold.png',
+      'assets/images/backgrounds/silver.png',
+      'assets/images/backgrounds/bronze.png',
+      'assets/images/backgrounds/gold.png',
     ];
     return assets[idx % assets.length];
   }

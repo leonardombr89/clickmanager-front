@@ -96,7 +96,7 @@ export class FullComponent implements OnInit {
   apps: apps[] = [
     {
       id: 1,
-      img: '/assets/images/svgs/icon-connect.svg',
+      img: 'assets/images/svgs/icon-connect.svg',
       title: 'SmartCalc',
       subtitle: 'Calculadora Inteligente',
       link: '/apps/smart-calc',

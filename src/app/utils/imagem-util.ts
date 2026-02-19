@@ -68,7 +68,7 @@ export class ImagemUtil {
         const baseUrl = environment.apiUrl;
         return nomeImagem
             ? `${baseUrl}/api/imagens/perfil/${nomeImagem}`
-            : '/assets/images/profile/user-1.jpg';
+            : 'assets/images/profile/user-1.jpg';
     }
 
     /**

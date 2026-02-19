@@ -31,7 +31,7 @@ export class AppKanbanDialogComponent {
     if (data.action === 'Add') {
       this.local_data.date = this.datePipe.transform(new Date(), 'd MMMM')!;
       this.local_data.taskProperty = 'Design';
-      this.local_data.imageUrl = '/assets/images/taskboard/kanban-img-1.jpg';
+      this.local_data.imageUrl = 'assets/images/taskboard/kanban-img-1.jpg';
     } else if (data.action === 'Edit') {
       this.local_data.imageUrl = data.imageUrl;
     }

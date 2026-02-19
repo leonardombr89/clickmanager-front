@@ -44,11 +44,11 @@ import { Subscription } from 'rxjs';
 })
 export class AppAccountSettingComponent implements OnInit, OnDestroy {
   
-  readonly IMAGEM_PADRAO = '/assets/images/profile/user-1.jpg';
+  readonly IMAGEM_PADRAO = 'assets/images/profile/user-1.jpg';
   form!: FormGroup;
   imagemPreview: string | null = null;
   imagemBlob: Blob | null = null;
-  imagemOriginal = '/assets/images/profile/user-1.jpg';
+  imagemOriginal = 'assets/images/profile/user-1.jpg';
   usuarioId?: string;
   isProprietario = false;
   usuarioAtual: Usuario | null = null;
@@ -245,7 +245,7 @@ export class AppAccountSettingComponent implements OnInit, OnDestroy {
 
     imagem.dataset['fallbackApplied'] = 'true';
     imagem.onerror = null;
-    imagem.src = '/assets/images/profile/user-1.jpg';
+    imagem.src = 'assets/images/profile/user-1.jpg';
   }
 
   buscarEnderecoPorCep(): void {

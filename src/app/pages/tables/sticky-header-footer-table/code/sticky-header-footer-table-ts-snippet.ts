@@ -23,12 +23,12 @@ export const STICKY_FOOTER_TABLE_TS_SNIPPET = `  import { Component, OnInit } fr
 
       displayedColumns = ['item', 'cost'];
         transactions: Transaction[] = [
-          { img: '/assets/images/products/s1.jpg', item: 'Beach ball', cost: 4 },
-          { img: '/assets/images/products/s2.jpg', item: 'Towel', cost: 5 },
-          { img: '/assets/images/products/s3.jpg', item: 'Frisbee', cost: 2 },
-          { img: '/assets/images/products/s4.jpg', item: 'Sunscreen', cost: 4 },
-          { img: '/assets/images/products/s5.jpg', item: 'Cooler', cost: 25 },
-          { img: '/assets/images/products/s6.jpg', item: 'Swim suit', cost: 15 },
+          { img: 'assets/images/products/s1.jpg', item: 'Beach ball', cost: 4 },
+          { img: 'assets/images/products/s2.jpg', item: 'Towel', cost: 5 },
+          { img: 'assets/images/products/s3.jpg', item: 'Frisbee', cost: 2 },
+          { img: 'assets/images/products/s4.jpg', item: 'Sunscreen', cost: 4 },
+          { img: 'assets/images/products/s5.jpg', item: 'Cooler', cost: 25 },
+          { img: 'assets/images/products/s6.jpg', item: 'Swim suit', cost: 15 },
         ];
       
         /** Gets the total cost of all transactions. */

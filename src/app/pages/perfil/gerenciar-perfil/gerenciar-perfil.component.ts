@@ -236,7 +236,7 @@ export class GerenciarPerfilComponent implements OnInit {
 
     imagem.dataset['fallbackApplied'] = 'true';
     imagem.onerror = null;
-    imagem.src = '/assets/images/profile/user-1.jpg';
+    imagem.src = 'assets/images/profile/user-1.jpg';
   }
 
   private exibirErro(err: any, fallback: string): void {

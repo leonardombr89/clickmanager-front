@@ -7,7 +7,7 @@ export const todos: Todos[] = [
     description: '',
     date: '4 july',
     taskProperty: 'Design',
-    imageUrl: '/assets/images/taskboard/kanban-img-1.jpg',
+    imageUrl: 'assets/images/taskboard/kanban-img-1.jpg',
   },
   {
     id: 2,
@@ -44,7 +44,7 @@ export const inprogress: Todos[] = [
     class: 'task-status-danger',
     date: '24 july',
     taskProperty: 'Data Science',
-    imageUrl: '/assets/images/taskboard/kanban-img-2.jpg',
+    imageUrl: 'assets/images/taskboard/kanban-img-2.jpg',
   },
   {
     id: 203,
@@ -64,7 +64,7 @@ export const completed: Todos[] = [
     description:'',
     date: '11 july',
     taskProperty: 'Data Science',
-    imageUrl: '/assets/images/taskboard/kanban-img-3.jpg',
+    imageUrl: 'assets/images/taskboard/kanban-img-3.jpg',
   },
   {
     id: 302,
@@ -110,6 +110,6 @@ export const onhold: Todos[] = [
     class: 'task-status-danger',
     date: '11 july',
     taskProperty: 'Mobile',
-    imageUrl: '/assets/images/taskboard/kanban-img-4.jpg',
+    imageUrl: 'assets/images/taskboard/kanban-img-4.jpg',
   },
 ];
