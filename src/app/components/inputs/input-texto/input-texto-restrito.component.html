@@ -8,8 +8,8 @@
       [placeholder]="placeholder"
       [maxlength]="maxlength"
       [formControl]="control"
-      (input)="atualizarValor($event)"
-      (keydown)="permitirSomenteLetrasENumeros($event)"
+      (keydown)="onKeydown($event)"
+      (input)="onInput($event)"
       (blur)="updateErrorMessage()" />
 
     @if (control.invalid && control.touched) {
