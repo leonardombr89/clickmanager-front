@@ -9,6 +9,10 @@
         <mat-icon>calculate</mat-icon>
         SmartCalc
       </button>
+      <button mat-stroked-button color="primary" (click)="rolarPara('funcionarios')">
+        <mat-icon>badge</mat-icon>
+        Funcionários
+      </button>
       <button mat-stroked-button color="primary" (click)="rolarPara('status-pedido')">
         <mat-icon>sync_alt</mat-icon>
         Fluxo do Pedido
@@ -37,7 +41,10 @@
     <mat-accordion multi>
       <mat-expansion-panel *ngFor="let secao of filteredSecoes" [id]="secao.id" [expanded]="expandedId === secao.id">
         <mat-expansion-panel-header>
-          <mat-panel-title>{{ secao.titulo }}</mat-panel-title>
+          <mat-panel-title>
+            <mat-icon class="secao-icon" *ngIf="secao.icon">{{ secao.icon }}</mat-icon>
+            {{ secao.titulo }}
+          </mat-panel-title>
           <mat-panel-description>{{ secao.descricao }}</mat-panel-description>
         </mat-expansion-panel-header>
 

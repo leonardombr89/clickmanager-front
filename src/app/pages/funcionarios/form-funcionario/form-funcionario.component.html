@@ -1,0 +1,121 @@
+<app-page-card
+  [titulo]="funcionarioId ? 'Editar funcionário' : 'Novo funcionário'"
+  subtitulo="Cadastro base para gestão de colaboradores (MVP)"
+  botaoTexto="Voltar"
+  botaoIcone="arrow_back"
+  [botaoRota]="['/page/funcionarios']"
+  [helpRota]="['/page/ajuda']"
+  helpFragment="funcionarios"
+  helpTexto=""
+  helpIcone="help_outline"
+  [mostrarDivisor]="true"
+>
+  <app-section-card titulo="Dados pessoais" [divider]="true">
+    <form class="row g-3" [formGroup]="form">
+      <div class="col-12 col-md-6">
+        <app-input-texto-restrito
+          [control]="nomeControl"
+          label="Nome"
+          placeholder="Digite o nome do funcionário"
+          [maxlength]="120"
+        ></app-input-texto-restrito>
+      </div>
+
+      <div class="col-12 col-md-3">
+        <app-input-documento
+          [control]="cpfControl"
+          label="CPF"
+          placeholder="Digite o CPF"
+        ></app-input-documento>
+      </div>
+
+      <div class="col-12 col-md-3">
+        <app-input-telefone
+          [control]="telefoneControl"
+          label="Telefone"
+          placeholder="Digite o telefone"
+        ></app-input-telefone>
+      </div>
+    </form>
+  </app-section-card>
+
+  <app-section-card titulo="Vínculo e dados funcionais" [divider]="true">
+    <form class="row g-3" [formGroup]="form">
+      <div class="col-12 col-md-6">
+        <app-input-email
+          [control]="emailControl"
+          label="E-mail"
+          placeholder="Digite o e-mail"
+          [maxlength]="120"
+        ></app-input-email>
+      </div>
+
+      <div class="col-12 col-md-3">
+        <app-input-texto-restrito
+          [control]="cargoControl"
+          label="Cargo"
+          placeholder="Digite o cargo"
+          [maxlength]="80"
+        ></app-input-texto-restrito>
+      </div>
+
+      <div class="col-12 col-md-3">
+        <app-input-texto-restrito
+          [control]="setorControl"
+          label="Setor"
+          placeholder="Digite o setor"
+          [maxlength]="80"
+        ></app-input-texto-restrito>
+      </div>
+
+      <div class="col-12 col-md-3">
+        <app-input-data
+          [control]="dataAdmissaoControl"
+          label="Admissão"
+          placeholder="Selecione a data"
+        ></app-input-data>
+      </div>
+
+      <div class="col-12 col-md-3">
+        <app-input-options
+          [control]="tipoContratoControl"
+          label="Tipo de contrato"
+          [options]="tiposContrato"
+          labelKey="nome"
+          valueKey="id"
+          [showNull]="false"
+        ></app-input-options>
+      </div>
+
+      <div class="col-12 col-md-3">
+        <app-input-options
+          [control]="statusControl"
+          label="Status"
+          [options]="statusOpcoes"
+          [showNull]="false"
+        ></app-input-options>
+      </div>
+
+      <div class="col-12 col-md-3">
+        <app-input-moeda
+          [control]="salarioControl"
+          label="Salário"
+        ></app-input-moeda>
+      </div>
+
+      <div class="col-12 col-md-3">
+        <app-input-moeda
+          [control]="valorPassagemControl"
+          label="Valor da passagem"
+        ></app-input-moeda>
+      </div>
+    </form>
+  </app-section-card>
+
+  <app-endereco-form (formReady)="setEnderecoGroup($event)"></app-endereco-form>
+
+  <div class="d-flex gap-8 m-t-8">
+    <button mat-flat-button color="primary" (click)="salvar()" *temPermissao="funcionarioId ? ['FUNCIONARIO_EDITAR'] : ['FUNCIONARIO_CRIAR']">Salvar</button>
+    <button mat-stroked-button color="primary" (click)="voltar()">Voltar</button>
+  </div>
+</app-page-card>

@@ -24,6 +24,10 @@ import { CalculadoraConfigComponent } from './smart-calc-config/smart-calc-confi
 import { EmailServidorComponent } from './config/email-servidor/email-servidor.component';
 import { GerenciarPerfilComponent } from './perfil/gerenciar-perfil/gerenciar-perfil.component';
 import { AjudaComponent } from './ajuda/ajuda.component';
+import { ListarFuncionariosComponent } from './funcionarios/listar-funcionarios/listar-funcionarios.component';
+import { FormFuncionarioComponent } from './funcionarios/form-funcionario/form-funcionario.component';
+import { DetalheFuncionarioComponent } from './funcionarios/detalhe-funcionario/detalhe-funcionario.component';
+import { featureModuleGuard } from '../guards/feature-module.guard';
 
 export const PagesRoutes: Routes = [
   {
@@ -63,6 +67,58 @@ export const PagesRoutes: Routes = [
       urls: [
         { title: 'Dashboard', url: '/dashboards/dashboard1' },
         { title: 'Ajuda' }
+      ]
+    }
+  },
+  {
+    path: 'funcionarios',
+    component: ListarFuncionariosComponent,
+    canActivate: [featureModuleGuard],
+    data: {
+      featureKey: 'funcionarios',
+      title: 'Gestão de Funcionários',
+      urls: [
+        { title: 'Dashboard', url: '/dashboards/dashboard1' },
+        { title: 'Funcionários' }
+      ]
+    }
+  },
+  {
+    path: 'funcionarios/novo',
+    component: FormFuncionarioComponent,
+    canActivate: [featureModuleGuard],
+    data: {
+      featureKey: 'funcionarios',
+      title: 'Novo Funcionário',
+      urls: [
+        { title: 'Funcionários', url: '/page/funcionarios' },
+        { title: 'Novo Funcionário' }
+      ]
+    }
+  },
+  {
+    path: 'funcionarios/editar/:id',
+    component: FormFuncionarioComponent,
+    canActivate: [featureModuleGuard],
+    data: {
+      featureKey: 'funcionarios',
+      title: 'Editar Funcionário',
+      urls: [
+        { title: 'Funcionários', url: '/page/funcionarios' },
+        { title: 'Editar Funcionário' }
+      ]
+    }
+  },
+  {
+    path: 'funcionarios/detalhe/:id',
+    component: DetalheFuncionarioComponent,
+    canActivate: [featureModuleGuard],
+    data: {
+      featureKey: 'funcionarios',
+      title: 'Detalhe do Funcionário',
+      urls: [
+        { title: 'Funcionários', url: '/page/funcionarios' },
+        { title: 'Detalhe' }
       ]
     }
   },

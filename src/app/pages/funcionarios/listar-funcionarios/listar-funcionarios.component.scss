@@ -1,0 +1,29 @@
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.kpi {
+  border: 1px solid #e6ebf2;
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: #fafcff;
+}
+
+.kpi span {
+  display: block;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.kpi strong {
+  font-size: 18px;
+  color: #0f172a;
+}
+
+@media (max-width: 992px) {
+  .kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

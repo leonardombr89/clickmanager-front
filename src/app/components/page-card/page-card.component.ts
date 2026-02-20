@@ -17,6 +17,12 @@ export class PageCardComponent {
   @Input() botaoIcone: string = 'arrow_back';
   @Input() botaoCor: 'primary' | 'accent' | 'warn' = 'primary';
   @Input() botaoRota?: string | any[];
+  @Input() permissao: string | string[] = '';
   @Input() mostrarDivisor: boolean = true;
   @Input() contentPadding: boolean = true;
+  @Input() helpTexto: string = 'Ajuda';
+  @Input() helpIcone: string = 'help_outline';
+  @Input() helpRota?: string | any[];
+  @Input() helpFragment?: string;
+  @Input() helpExterno: boolean = false;
 }

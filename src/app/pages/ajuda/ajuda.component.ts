@@ -13,6 +13,7 @@ type AjudaSecao = {
   id: string;
   titulo: string;
   descricao: string;
+  icon?: string;
   passos?: string[];
   itens?: { titulo: string; detalhes: string[] }[];
 };
@@ -33,6 +34,7 @@ export class AjudaComponent implements OnInit, OnDestroy {
       id: 'smartcalc',
       titulo: 'SmartCalc (cálculo de preços)',
       descricao: 'Como configurar e usar o SmartCalc para montar itens no pedido.',
+      icon: 'calculate',
       passos: [
         'Cadastre o produto e as variações (material, formato, cor) com o tipo de preço: fixo (peça), metro (m²), quantidade/faixas ou demanda.',
         'No pedido, clique em “Adicionar produto”, selecione produto e variação; o SmartCalc mostra serviços/acabamentos compatíveis.',
@@ -46,6 +48,7 @@ export class AjudaComponent implements OnInit, OnDestroy {
       id: 'pedidos',
       titulo: 'Cadastro de Produtos (variações e preços)',
       descricao: 'Como o sistema organiza produtos e variações para o SmartCalc.',
+      icon: 'inventory_2',
       passos: [
         'Produto = modelo base. Variação = combinação de material, formato e cor com um tipo de preço. Cada variação define como o SmartCalc calcula (fixo por peça, m², faixa de quantidade ou demanda).',
         'No cadastro do produto, crie uma ou mais variações. Exemplo: “Adesivo Vinil” com material Vinil, formato A4, cor Brilho e preço por m². Outra variação pode ser A3, ou cor Fosco, etc.',
@@ -56,6 +59,7 @@ export class AjudaComponent implements OnInit, OnDestroy {
       id: 'fluxo-pedido',
       titulo: 'Montar Pedido/Orçamento',
       descricao: 'Como usar o catálogo e o SmartCalc dentro do pedido.',
+      icon: 'assignment',
       passos: [
         'Selecione o cliente (ou crie um novo) antes de adicionar itens.',
         'Clique em “Adicionar produto”, escolha produto e variação; SmartCalc mostra preço e opcionais compatíveis.',
@@ -68,6 +72,7 @@ export class AjudaComponent implements OnInit, OnDestroy {
       id: 'catalogo',
       titulo: 'Catálogo técnico',
       descricao: 'Produtos, variações, serviços e acabamentos.',
+      icon: 'category',
       itens: [
         {
           titulo: 'Produtos e variações',
@@ -89,15 +94,115 @@ export class AjudaComponent implements OnInit, OnDestroy {
       id: 'clientes',
       titulo: 'Clientes',
       descricao: 'Cadastro e uso de clientes nos pedidos.',
+      icon: 'groups',
       passos: [
         'Cadastre nome, e-mail, telefone e documento. Endereço é opcional.',
         'Use a busca para selecionar o cliente no pedido; é obrigatório para fechar o pedido.',
       ],
     },
     {
+      id: 'funcionarios',
+      titulo: 'Funcionários (cadastro e gestão)',
+      descricao: 'Manual completo para cadastrar, editar e controlar o ciclo de vida do funcionário.',
+      icon: 'badge',
+      itens: [
+        {
+          titulo: '1) Permissões necessárias',
+          detalhes: [
+            'FUNCIONARIO_VER: ver lista e detalhe.',
+            'FUNCIONARIO_CRIAR: criar funcionário e readmitir funcionário desligado.',
+            'FUNCIONARIO_EDITAR: editar dados de funcionário ativo/afastado.',
+            'FUNCIONARIO_AFASTAR: afastar e retornar funcionário afastado.',
+            'FUNCIONARIO_DESLIGAR: desligar funcionário ativo ou afastado.',
+          ],
+        },
+        {
+          titulo: '2) Estados possíveis',
+          detalhes: [
+            'ATIVO: funcionário em atividade normal.',
+            'AFASTADO: funcionário temporariamente afastado.',
+            'DESLIGADO: vínculo encerrado; dados ficam em histórico.',
+          ],
+        },
+        {
+          titulo: '3) Como cadastrar um novo funcionário',
+          detalhes: [
+            'Vá em Funcionários > Novo funcionário.',
+            'Preencha dados pessoais: nome, CPF, telefone e e-mail.',
+            'Preencha vínculo: cargo, setor, data de admissão, tipo de contrato, salário e valor da passagem.',
+            'Preencha endereço no bloco de endereço.',
+            'Clique em Salvar. O funcionário entra na listagem e pode ser detalhado.',
+          ],
+        },
+        {
+          titulo: '4) Como funciona o tipo de contrato',
+          detalhes: [
+            'Opções disponíveis: CLT, PJ, Estágio, Temporário e Sem registro.',
+            '“Sem registro” pode ser usado para colaboradores sem vínculo formal no momento.',
+          ],
+        },
+        {
+          titulo: '5) Fluxo de status e ações disponíveis',
+          detalhes: [
+            'Se ATIVO: ações disponíveis são Afastar e Desligar.',
+            'Se AFASTADO: ações disponíveis são Retornar ao trabalho e Desligar.',
+            'Se DESLIGADO: ação disponível é Readmitir.',
+            'Botão Editar não aparece para DESLIGADO.',
+          ],
+        },
+        {
+          titulo: '6) Regras de transição (o que pode e o que não pode)',
+          detalhes: [
+            'Permitido: ATIVO -> AFASTADO.',
+            'Permitido: AFASTADO -> ATIVO (retorno ao trabalho).',
+            'Permitido: ATIVO -> DESLIGADO.',
+            'Permitido: AFASTADO -> DESLIGADO.',
+            'Permitido: DESLIGADO -> ATIVO (readmissão).',
+            'Transições fora dessas regras são bloqueadas.',
+          ],
+        },
+        {
+          titulo: '7) Afastar, desligar, retornar e readmitir (passo a passo)',
+          detalhes: [
+            'Ao clicar em uma ação de status, o sistema abre modal com motivo e data efetiva.',
+            'Motivo é obrigatório para registrar contexto da movimentação.',
+            'Data efetiva é obrigatória em afastamento, retorno e desligamento; na readmissão pode ser opcional.',
+            'Após confirmar, a tela recarrega automaticamente com status e histórico atualizados.',
+          ],
+        },
+        {
+          titulo: '8) Histórico do funcionário (o que fica salvo)',
+          detalhes: [
+            'Movimentações: mostra eventos como admissão, alterações, afastamentos e desligamentos.',
+            'Histórico salarial: exibe vigência, valor e motivo de alterações.',
+            'Histórico de passagem: exibe vigência, valor e motivo de alterações.',
+            'Snapshots: mostram cargo, setor, status, contrato, salário e passagem no momento de cada movimentação.',
+          ],
+        },
+        {
+          titulo: '9) Quando não é possível editar',
+          detalhes: [
+            'Funcionário DESLIGADO não pode ter dados editados.',
+            'Se tentar acessar URL de edição diretamente, o sistema redireciona para a tela de detalhe com aviso.',
+            'Para voltar a editar, faça primeiro a Readmissão.',
+          ],
+        },
+        {
+          titulo: '10) Boas práticas para uso no dia a dia',
+          detalhes: [
+            'Use motivos claros e curtos nas mudanças de status (ex.: “Afastamento INSS”, “Retorno após licença”).',
+            'Mantenha salário e passagem atualizados para histórico confiável.',
+            'Evite desligar antes de registrar a data efetiva correta.',
+            'Use Readmissão em vez de criar cadastro duplicado para a mesma pessoa.',
+          ],
+        },
+      ],
+    },
+    {
       id: 'billing',
       titulo: 'Assinatura e pagamentos',
       descricao: 'Resumo da assinatura e histórico de cobranças.',
+      icon: 'payments',
       passos: [
         'Tela “Minha assinatura”: status, periodicidade, valor e próxima cobrança.',
         'Pagamentos listados com status; link para boleto/fatura aparece apenas quando pendente.',
@@ -108,6 +213,7 @@ export class AjudaComponent implements OnInit, OnDestroy {
       id: 'onboarding',
       titulo: 'Onboarding da empresa',
       descricao: 'Configuração inicial guiada.',
+      icon: 'rocket_launch',
       passos: [
         'Dados da empresa e seleção de cores, formatos, materiais, serviços e acabamentos padrão.',
         'Pode ser reaberto em Conta > Preferências (proprietário) ou no primeiro acesso se não ignorado.',
@@ -117,6 +223,7 @@ export class AjudaComponent implements OnInit, OnDestroy {
       id: 'conta',
       titulo: 'Conta e permissões',
       descricao: 'Perfil, senha e controle de acesso.',
+      icon: 'manage_accounts',
       passos: [
         'Altere nome, telefone, foto e senha em Conta.',
         'Proprietário controla perfis e permissões; onboarding aparece apenas para proprietário com flag ativa.',
@@ -126,6 +233,7 @@ export class AjudaComponent implements OnInit, OnDestroy {
       id: 'faq',
       titulo: 'Dúvidas rápidas',
       descricao: 'Respostas rápidas para mensagens comuns.',
+      icon: 'help_outline',
       itens: [
         {
           titulo: 'Erro ao adicionar item (produtoVariacaoId obrigatório)',
@@ -145,6 +253,7 @@ export class AjudaComponent implements OnInit, OnDestroy {
       id: 'status-pedido',
       titulo: 'Fluxo do Pedido e Status (do início ao fim)',
       descricao: 'Entenda as diferenças entre Pedido e Orçamento, mudanças permitidas e o que cada status libera ou bloqueia.',
+      icon: 'sync_alt',
       itens: [
         {
           titulo: 'Visão geral do fluxo',

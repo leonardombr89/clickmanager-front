@@ -3,6 +3,7 @@ import { RouterLink } from '@angular/router';
 import { NgIf } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { TemPermissaoDirective } from 'src/app/diretivas/tem-permissao.directive';
 import { MatDivider } from "@angular/material/divider";
 
@@ -14,6 +15,7 @@ import { MatDivider } from "@angular/material/divider";
     NgIf,
     MatButtonModule,
     MatIconModule,
+    MatTooltipModule,
     TemPermissaoDirective,
     MatDivider
 ],

@@ -1,0 +1,250 @@
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 16px;
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 12px;
+  border: 1px solid #e5ebf3;
+  border-radius: 10px;
+  background: #fbfdff;
+}
+
+.detail-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: #64748b;
+  font-weight: 700;
+}
+
+.detail-value {
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.detail-item--full {
+  grid-column: 1 / -1;
+}
+
+.mov-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.mov-item {
+  position: relative;
+  padding-left: 18px;
+}
+
+.mov-item::before {
+  content: '';
+  position: absolute;
+  left: 7px;
+  top: 16px;
+  bottom: -14px;
+  width: 1px;
+  background: #d9e1ec;
+}
+
+.mov-item:last-child::before {
+  display: none;
+}
+
+.mov-marker {
+  position: absolute;
+  left: 2px;
+  top: 18px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #64748b;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 2px #eaf0f7;
+}
+
+.mov-marker--admissao {
+  background: #0f766e;
+}
+
+.mov-marker--alteracao {
+  background: #2563eb;
+}
+
+.mov-marker--afastamento {
+  background: #d97706;
+}
+
+.mov-marker--desligamento {
+  background: #dc2626;
+}
+
+.mov-card {
+  border: 1px solid #e5ebf3;
+  border-radius: 12px;
+  padding: 12px 14px;
+  background: #fbfdff;
+}
+
+.mov-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.mov-type {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  border-radius: 999px;
+  padding: 4px 10px;
+  background: #eef2f7;
+  color: #334155;
+}
+
+.mov-type--admissao {
+  background: #e6f6f3;
+  color: #0f766e;
+}
+
+.mov-type--alteracao {
+  background: #e9f1ff;
+  color: #1d4ed8;
+}
+
+.mov-type--afastamento {
+  background: #fff4e8;
+  color: #b45309;
+}
+
+.mov-type--desligamento {
+  background: #feecec;
+  color: #b91c1c;
+}
+
+.mov-date {
+  font-size: 13px;
+  color: #64748b;
+}
+
+.mov-description {
+  margin: 0;
+  color: #1e293b;
+  font-size: 15px;
+}
+
+.mov-change-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.mov-change-item {
+  background: #eef2ff;
+  color: #3730a3;
+  border-radius: 8px;
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
+.mov-snapshot {
+  margin-top: 10px;
+  border-top: 1px dashed #dbe4ef;
+  padding-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+}
+
+.snapshot-item {
+  min-width: 140px;
+}
+
+.snapshot-item span {
+  display: block;
+  font-size: 11px;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.snapshot-item strong {
+  color: #0f172a;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.history-card {
+  border: 1px solid #e5ebf3;
+  border-radius: 12px;
+  padding: 12px;
+  background: #fbfdff;
+}
+
+.history-card--passagem {
+  background: #f9fcff;
+}
+
+.history-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.history-badge {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  border-radius: 999px;
+  background: #e8efff;
+  color: #1d4ed8;
+  padding: 3px 8px;
+}
+
+.history-badge--passagem {
+  background: #e8f5ff;
+  color: #0369a1;
+}
+
+.history-period {
+  color: #64748b;
+  font-size: 12px;
+}
+
+.history-value {
+  color: #0f172a;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 4px;
+}
+
+.history-reason {
+  color: #475467;
+  font-size: 13px;
+}
+
+@media (max-width: 991px) {
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+}

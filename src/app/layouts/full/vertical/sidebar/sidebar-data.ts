@@ -32,6 +32,13 @@ export const navItems: NavItem[] = [
         requiredPermission: ['USUARIOS_VER', 'USUARIO_CADASTRAR', 'USUARIO_EDITAR', 'USUARIO_EXCLUIR']
     },
     {
+        displayName: 'Funcionários',
+        iconName: 'users',
+        bgcolor: 'primary',
+        route: '/page/funcionarios',
+        requiredPermission: ['FUNCIONARIO_VER']
+    },
+    {
         displayName: 'Perfis e Permissões',
         iconName: 'users-group',
         bgcolor: 'primary',
