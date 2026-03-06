@@ -27,6 +27,10 @@ export class StatusBadgeComponent {
     PRONTO: { icon: 'check_circle', label: 'PRONTO', className: 'chip-pronto' },
     ENTREGUE: { icon: 'local_shipping', label: 'ENTREGUE', className: 'chip-entregue' },
     CANCELADO: { icon: 'close', label: 'CANCELADO', className: 'chip-cancelado' },
+    ABERTO: { icon: 'schedule', label: 'ABERTO', className: 'chip-pendente' },
+    FECHADO: { icon: 'task_alt', label: 'FECHADO', className: 'chip-producao' },
+    PARCIAL: { icon: 'payments', label: 'PARCIAL', className: 'chip-aguardando' },
+    PAGO: { icon: 'check_circle', label: 'PAGO', className: 'chip-pronto' },
   };
 
   get config(): StatusConfig {

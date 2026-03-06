@@ -35,6 +35,7 @@ export interface MovimentacaoFuncionario {
 
 export interface Funcionario {
   id: number;
+  usuarioId?: number | null;
   nome: string;
   cpf: string;
   email: string;
@@ -44,6 +45,7 @@ export interface Funcionario {
   dataAdmissao: string;
   tipoContrato: TipoContrato;
   status: StatusFuncionario;
+  salarioBase?: number | null;
   salario?: number | null;
   valorPassagem?: number | null;
   endereco?: string;
@@ -54,6 +56,7 @@ export interface Funcionario {
 }
 
 export interface FuncionarioFormValue {
+  usuarioId?: number | null;
   nome: string;
   cpf: string;
   email: string;
@@ -63,6 +66,7 @@ export interface FuncionarioFormValue {
   dataAdmissao: string;
   tipoContrato: TipoContrato;
   status: StatusFuncionario;
+  salarioBase?: number | null;
   salario?: number | null;
   valorPassagem?: number | null;
   endereco?: string;

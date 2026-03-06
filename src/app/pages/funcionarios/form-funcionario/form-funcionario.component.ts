@@ -2,8 +2,11 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Observable, of } from 'rxjs';
+import { catchError, map, tap } from 'rxjs/operators';
 import { MatButtonModule } from '@angular/material/button';
 import { ToastrService } from 'ngx-toastr';
+import { extrairMensagemErro } from 'src/app/utils/mensagem.util';
 import { PageCardComponent } from 'src/app/components/page-card/page-card.component';
 import { SectionCardComponent } from 'src/app/components/section-card/section-card.component';
 import { TemPermissaoDirective } from 'src/app/diretivas/tem-permissao.directive';
@@ -17,6 +20,9 @@ import { InputDataComponent } from 'src/app/components/inputs/input-data/input-d
 import { InputOptionsComponent } from 'src/app/components/inputs/input-options/input-options.component';
 import { InputMoedaComponent } from 'src/app/components/inputs/input-moeda/input-moeda.component';
 import { EnderecoFormComponent } from 'src/app/components/endereco-form/endereco-form.component';
+import { AutoCompleteComponent } from 'src/app/components/inputs/auto-complete/auto-complete.component';
+import { Usuario } from 'src/app/models/usuario/usuario.model';
+import { UsuarioService } from 'src/app/pages/usuarios/services/usuario.service';
 
 @Component({
   selector: 'app-form-funcionario',
@@ -35,7 +41,8 @@ import { EnderecoFormComponent } from 'src/app/components/endereco-form/endereco
     InputDataComponent,
     InputOptionsComponent,
     InputMoedaComponent,
-    EnderecoFormComponent
+    EnderecoFormComponent,
+    AutoCompleteComponent
   ],
   templateUrl: './form-funcionario.component.html',
   styleUrl: './form-funcionario.component.scss'
@@ -43,6 +50,7 @@ import { EnderecoFormComponent } from 'src/app/components/endereco-form/endereco
 export class FormFuncionarioComponent implements OnInit {
   funcionarioId: number | null = null;
   carregando = false;
+  carregandoUsuarios = false;
   private enderecoPendente: any | null = null;
   tiposContrato: Array<{ id: TipoContrato; nome: string }> = [
     { id: 'CLT', nome: 'CLT' },
@@ -54,6 +62,8 @@ export class FormFuncionarioComponent implements OnInit {
   statusOpcoes: StatusFuncionario[] = ['ATIVO', 'AFASTADO', 'DESLIGADO'];
 
   form = this.fb.group({
+    usuarioBusca: [null as Usuario | string | null],
+    usuarioId: [null as number | null],
     nome: ['', [Validators.required, Validators.maxLength(120)]],
     cpf: ['', [Validators.required, Validators.maxLength(18)]],
     email: ['', [Validators.required, Validators.email, Validators.maxLength(120)]],
@@ -68,11 +78,15 @@ export class FormFuncionarioComponent implements OnInit {
     endereco: this.fb.group({})
   });
 
+  readonly buscarUsuariosFn = (termo: string): Observable<Usuario[]> => this.buscarUsuarios$(termo);
+  readonly displayUsuario = (usuario: any): string => this.formatarUsuarioDisplay(usuario);
+
   constructor(
     private readonly fb: FormBuilder,
     private readonly route: ActivatedRoute,
     private readonly router: Router,
     private readonly service: FuncionariosService,
+    private readonly usuarioService: UsuarioService,
     private readonly toastr: ToastrService
   ) {}
 
@@ -93,6 +107,7 @@ export class FormFuncionarioComponent implements OnInit {
           return;
         }
         this.form.patchValue({
+          usuarioId: f.usuarioId ?? null,
           nome: f.nome,
           cpf: f.cpf,
           email: f.email,
@@ -110,6 +125,9 @@ export class FormFuncionarioComponent implements OnInit {
         if (enderecoGroup && this.enderecoPendente) {
           enderecoGroup.patchValue(this.enderecoPendente);
         }
+        if (f.usuarioId) {
+          this.carregarUsuarioVinculado(f.usuarioId);
+        }
         this.carregando = false;
       });
     }
@@ -124,22 +142,33 @@ export class FormFuncionarioComponent implements OnInit {
       ...formValue,
       endereco: this.formatarEndereco(formValue.endereco)
     };
+    delete (payload as any).usuarioBusca;
     if (this.funcionarioId) {
-      this.service.atualizar$(this.funcionarioId, payload).subscribe(() => {
-        this.toastr.success('Funcionário atualizado com sucesso.');
-        this.voltar();
+      this.service.atualizar$(this.funcionarioId, payload).subscribe({
+        next: () => {
+          this.toastr.success('Funcionário atualizado com sucesso.');
+          this.redirecionarParaLista();
+        },
+        error: (err) => {
+          this.toastr.error(extrairMensagemErro(err, 'Não foi possível atualizar o funcionário.'));
+        }
       });
       return;
     }
 
-    this.service.criar$(payload).subscribe(() => {
-      this.toastr.success('Funcionário criado com sucesso.');
-      this.voltar();
+    this.service.criar$(payload).subscribe({
+      next: () => {
+        this.toastr.success('Funcionário criado com sucesso.');
+        this.redirecionarParaLista();
+      },
+      error: (err) => {
+        this.toastr.error(extrairMensagemErro(err, 'Não foi possível criar o funcionário.'));
+      }
     });
   }
 
   voltar(): void {
-    this.router.navigate(['/page/funcionarios']);
+    this.redirecionarParaLista();
   }
 
   setEnderecoGroup(group: FormGroup): void {
@@ -151,6 +180,14 @@ export class FormFuncionarioComponent implements OnInit {
 
   get nomeControl(): FormControl {
     return this.form.get('nome') as FormControl;
+  }
+
+  get usuarioBuscaControl(): FormControl {
+    return this.form.get('usuarioBusca') as FormControl;
+  }
+
+  get usuarioIdControl(): FormControl {
+    return this.form.get('usuarioId') as FormControl;
   }
 
   get cpfControl(): FormControl {
@@ -193,6 +230,24 @@ export class FormFuncionarioComponent implements OnInit {
     return this.form.get('valorPassagem') as FormControl;
   }
 
+  onUsuarioSelecionado(usuario: Usuario): void {
+    if (!usuario || !usuario.id) return;
+
+    this.form.patchValue({
+      usuarioId: usuario.id,
+      nome: (usuario.nome || this.nomeControl.value || '').toString(),
+      email: (usuario.email || usuario.username || this.emailControl.value || '').toString(),
+      telefone: (usuario.telefone || this.telefoneControl.value || '').toString()
+    });
+  }
+
+  limparVinculoUsuario(): void {
+    this.form.patchValue({
+      usuarioBusca: null,
+      usuarioId: null
+    });
+  }
+
   private formatarEndereco(endereco: any): string {
     if (!endereco || typeof endereco !== 'object') return '';
 
@@ -226,5 +281,66 @@ export class FormFuncionarioComponent implements OnInit {
       cidade: '',
       estado: ''
     };
+  }
+
+  private carregarUsuarioVinculado(id: number): void {
+    this.usuarioService.buscarPorId(id).subscribe({
+      next: (usuario) => {
+        if (!usuario) return;
+        this.form.patchValue({ usuarioBusca: usuario }, { emitEvent: false });
+      },
+      error: () => {
+        // Se falhar, o formulário continua funcional sem bloquear edição.
+      }
+    });
+  }
+
+  // Compatibilidade com ambientes onde o endpoint novo ainda não subiu.
+  private normalizarListaUsuarios(res: any, termo: string): Usuario[] {
+    const lista: Usuario[] = Array.isArray(res) ? res : Array.isArray(res?.content) ? res.content : [];
+    return this.filtrarUsuarios(lista, termo);
+  }
+
+  private buscarUsuarios$(termo: string): Observable<Usuario[]> {
+    const t = (termo || '').trim().toLowerCase();
+    if (t.length < 2) return of([]);
+
+    this.carregandoUsuarios = true;
+    return this.usuarioService.listarVinculaveis(t, 30).pipe(
+      // endpoint novo
+      catchError(() => this.usuarioService.listar(0, 200, true)),
+      // fallback antigo + filtro local
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      map((res: any) => this.normalizarListaUsuarios(res, t)),
+      // evita travar autocomplete em erro transitório
+      catchError(() => {
+        this.carregandoUsuarios = false;
+        return of([]);
+      }),
+      tap(() => (this.carregandoUsuarios = false))
+    );
+  }
+
+  private filtrarUsuarios(lista: Usuario[], termo: string): Usuario[] {
+    return (lista || [])
+      .filter((u) => {
+        const nome = (u?.nome || '').toLowerCase();
+        const email = (u?.email || '').toLowerCase();
+        const username = (u?.username || '').toLowerCase();
+        return nome.includes(termo) || email.includes(termo) || username.includes(termo);
+      })
+      .slice(0, 30);
+  }
+
+  private formatarUsuarioDisplay(usuario: any): string {
+    if (!usuario) return '';
+    if (typeof usuario === 'string') return usuario;
+    const nome = (usuario?.nome || '').toString();
+    const login = (usuario?.email || usuario?.username || '').toString();
+    return login ? `${nome} • ${login}` : nome;
+  }
+
+  private redirecionarParaLista(): void {
+    this.router.navigateByUrl('/page/funcionarios', { replaceUrl: true });
   }
 }

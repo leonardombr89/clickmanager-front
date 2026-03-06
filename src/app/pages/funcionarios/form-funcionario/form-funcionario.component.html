@@ -12,6 +12,26 @@
 >
   <app-section-card titulo="Dados pessoais" [divider]="true">
     <form class="row g-3" [formGroup]="form">
+      <div class="col-12">
+        <app-auto-complete
+          [control]="usuarioBuscaControl"
+          label="Vincular com usuário (opcional)"
+          placeholder="Busque por nome ou e-mail do usuário"
+          [buscarFn]="buscarUsuariosFn"
+          [displayWith]="displayUsuario"
+          [minimoCaracteres]="2"
+          (selecionado)="onUsuarioSelecionado($event)"
+        ></app-auto-complete>
+        <div class="d-flex align-items-center gap-8 m-t-4" *ngIf="usuarioIdControl.value">
+          <small class="text-muted">
+            Usuário vinculado. Nome, e-mail e telefone foram preenchidos automaticamente.
+          </small>
+          <button mat-button type="button" color="warn" (click)="limparVinculoUsuario()">
+            Desvincular
+          </button>
+        </div>
+      </div>
+
       <div class="col-12 col-md-6">
         <app-input-texto-restrito
           [control]="nomeControl"

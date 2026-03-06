@@ -32,11 +32,27 @@ export const navItems: NavItem[] = [
         requiredPermission: ['USUARIOS_VER', 'USUARIO_CADASTRAR', 'USUARIO_EDITAR', 'USUARIO_EXCLUIR']
     },
     {
-        displayName: 'Funcionários',
-        iconName: 'users',
+        displayName: 'Gestão de Pessoas',
+        iconName: 'briefcase',
         bgcolor: 'primary',
         route: '/page/funcionarios',
-        requiredPermission: ['FUNCIONARIO_VER']
+        requiredPermission: ['FUNCIONARIO_VER', 'FOLHA_VER'],
+        children: [
+            {
+                displayName: 'Funcionários',
+                iconName: 'point',
+                bgcolor: 'transparent',
+                route: '/page/funcionarios',
+                requiredPermission: ['FUNCIONARIO_VER']
+            },
+            {
+                displayName: 'Folha de Pagamento',
+                iconName: 'point',
+                bgcolor: 'transparent',
+                route: '/page/folha-pagamento',
+                requiredPermission: ['FOLHA_VER']
+            }
+        ]
     },
     {
         displayName: 'Perfis e Permissões',
@@ -117,7 +133,7 @@ export const navItems: NavItem[] = [
         iconName: 'settings-automation',
         bgcolor: 'primary',
         route: '/config',
-        requiredPermission: ['CONFIG_EMAIL'],
+        requiredPermission: ['CONFIG_EMAIL', 'FOLHA_CONFIGURAR'],
         children: [
             {
                 displayName: 'Servidor de E-mail',
@@ -125,6 +141,13 @@ export const navItems: NavItem[] = [
                 bgcolor: 'transparent',
                 route: '/page/config/email-servidor',
                 requiredPermission: ['CONFIG_EMAIL']
+            },
+            {
+                displayName: 'Folha (Gestão de Pessoas)',
+                iconName: 'point',
+                bgcolor: 'transparent',
+                route: '/page/config/folha-pagamento',
+                requiredPermission: ['FOLHA_CONFIGURAR']
             }
         ]
     },

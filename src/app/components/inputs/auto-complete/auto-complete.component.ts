@@ -1,6 +1,8 @@
 import {
   Component,
   Input,
+  Output,
+  EventEmitter,
   OnInit,
   ViewChild,
   ChangeDetectionStrategy
@@ -40,6 +42,7 @@ export class AutoCompleteComponent implements OnInit {
   @Input() displayWith: (item: any) => string = () => '';
   @Input() minimoCaracteres = 1;
   @Input() multiplo = false;
+  @Output() selecionado = new EventEmitter<any>();
 
   @ViewChild(MatAutocompleteTrigger) trigger!: MatAutocompleteTrigger;
 
@@ -80,6 +83,7 @@ export class AutoCompleteComponent implements OnInit {
     if (!this.multiplo) {
       this.reabrirBloqueado = true;
       this.control.setValue(item, { emitEvent: false });
+      this.selecionado.emit(item);
       this.onChange(item.id);
 
       setTimeout(() => {

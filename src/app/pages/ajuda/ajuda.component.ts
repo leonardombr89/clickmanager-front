@@ -199,6 +199,157 @@ export class AjudaComponent implements OnInit, OnDestroy {
       ],
     },
     {
+      id: 'folha-pagamento',
+      titulo: 'Folha de pagamento',
+      descricao: 'Guia simples para abrir competência, lançar valores, registrar pagamentos e fechar sem erro.',
+      icon: 'payments',
+      itens: [
+        {
+          titulo: '1) Visão geral da tela de Folha',
+          detalhes: [
+            'A competência (ex.: 2026-02) mostra um mês da folha.',
+            'Se não existir competência aberta, o sistema cria automaticamente a competência do mês vigente.',
+            'No topo você vê contexto, status da competência, pagamento previsto e saldo pendente total.',
+            'A tabela lista cada colaborador com bruto, descontos, líquido, pago e pendente.',
+          ],
+        },
+        {
+          titulo: '2) Status que você vai ver',
+          detalhes: [
+            'Competência: ABERTA ou FECHADA.',
+            'Folha do colaborador: ABERTO, PARCIAL, PAGO ou FECHADO.',
+            'PARCIAL significa que já houve pagamento, mas ainda existe saldo pendente.',
+          ],
+        },
+        {
+          titulo: '3) Fluxo recomendado do mês (passo a passo)',
+          detalhes: [
+            '1. Selecione a competência do mês.',
+            '2. Revise os valores dos colaboradores.',
+            '3. Faça lançamentos de provento/desconto quando necessário.',
+            '4. Registre adiantamentos e empréstimos quando necessário.',
+            '5. Registre pagamentos (pode ser parcial).',
+            '6. Feche a competência somente quando o pendente total for R$ 0,00.',
+          ],
+        },
+        {
+          titulo: '4) Lançamentos (o que altera o valor)',
+          detalhes: [
+            'Provento: aumenta o líquido (ex.: hora extra, comissão, bônus).',
+            'Desconto manual: reduz o líquido (ex.: falta).',
+            'Lançamentos só podem ser feitos em folha aberta.',
+          ],
+        },
+        {
+          titulo: '5) Adiantamento e empréstimo (diferença)',
+          detalhes: [
+            'Adiantamento: use o botão “Registrar adiantamento” (fluxo separado do desconto manual).',
+            'Empréstimo: use o botão “Novo empréstimo parcelado” para criar parcelamento.',
+            'Você pode usar “Renegociar acordos” para reorganizar descontos futuros.',
+            'As regras respeitam a configuração da empresa (permissão, limite percentual, parcelas e carência).',
+          ],
+        },
+        {
+          titulo: '6) Pagamentos',
+          detalhes: [
+            'O pagamento padrão é PIX, mas o registro guarda forma e observação.',
+            'É possível pagar em partes; o sistema atualiza para PARCIAL automaticamente.',
+            'Quando o total pago atingir o líquido, a folha passa para PAGO.',
+          ],
+        },
+        {
+          titulo: '7) Fechar e reabrir competência',
+          detalhes: [
+            'Fechar competência bloqueia novos lançamentos naquele mês.',
+            'Se houver pendência, o botão de fechar fica desabilitado e mostra o motivo.',
+            'Ao fechar uma competência, o sistema já prepara a próxima automaticamente.',
+            'Se necessário, reabra a competência para ajustes (com permissão de edição).',
+          ],
+        },
+        {
+          titulo: '8) Comunicação e documento do colaborador',
+          detalhes: [
+            'No detalhe da folha, use “Resumo WhatsApp” para gerar um texto claro do pagamento.',
+            'O texto inclui ganhos, descontos, valor pago, pendente e situação dos acordos.',
+            'Use “Gerar contracheque” para CLT e “Gerar comprovante de pagamento” para os demais contratos.',
+          ],
+        },
+        {
+          titulo: '9) Exportação',
+          detalhes: [
+            'Na lista da folha você pode exportar CSV da competência atual.',
+            'Também é possível exportar CSV consolidado com todas as competências.',
+          ],
+        },
+        {
+          titulo: '10) Configurações que impactam a folha',
+          detalhes: [
+            'Regra de pagamento padrão: dia fixo ou 5º dia útil.',
+            'Política de acordos: permitir adiantamento/empréstimo, limite percentual, máximo de parcelas e carência.',
+            'Política de passagem: não aplicar, lançar como provento ou lançar como desconto.',
+            'Essas configurações ficam em Configuração da Folha.',
+          ],
+        },
+        {
+          titulo: '11) Erros comuns e como evitar',
+          detalhes: [
+            'Não consegue fechar competência: confira o saldo pendente total e quite os valores.',
+            'Não consegue lançar ajuste: verifique se a competência está FECHADA.',
+            'Competência não encontrada: volte para a lista de competências e selecione uma válida.',
+          ],
+        },
+      ],
+    },
+    {
+      id: 'folha-configuracao',
+      titulo: 'Configuração da folha',
+      descricao: 'Defina a regra padrão de pagamento e políticas de acordos e passagem da empresa.',
+      icon: 'tune',
+      itens: [
+        {
+          titulo: '1) Para que serve esta tela',
+          detalhes: [
+            'Esta tela define as regras padrão da folha para toda a empresa.',
+            'O que você configurar aqui afeta criação de competências, acordos e cálculo automático de passagem.',
+          ],
+        },
+        {
+          titulo: '2) Regra padrão de pagamento',
+          detalhes: [
+            'QUINTO_DIA_UTIL: o sistema calcula automaticamente a data de pagamento no 5º dia útil.',
+            'DIA_FIXO: você escolhe um dia entre 1 e 31 para pagamento mensal.',
+            'Essa regra é usada por padrão ao abrir competência, salvo quando houver override manual.',
+          ],
+        },
+        {
+          titulo: '3) Política de passagem',
+          detalhes: [
+            'NAO_APLICAR: passagem não entra no cálculo da folha.',
+            'PROVENTO: passagem entra somando no bruto/líquido.',
+            'DESCONTO: passagem entra reduzindo o líquido.',
+          ],
+        },
+        {
+          titulo: '4) Política de adiantamento e empréstimo',
+          detalhes: [
+            'Permitir adiantamento: habilita ou bloqueia o botão “Registrar adiantamento”.',
+            'Permitir empréstimo: habilita ou bloqueia o botão “Novo empréstimo parcelado”.',
+            'Limite percentual do salário: trava acordos acima do percentual definido.',
+            'Máximo de parcelas: limita quantas parcelas podem ser escolhidas no empréstimo.',
+            'Carência mínima: define a quantidade mínima de competências antes do primeiro desconto.',
+          ],
+        },
+        {
+          titulo: '5) Boas práticas',
+          detalhes: [
+            'Defina a regra de pagamento antes de começar a operar a folha do mês.',
+            'Revise limite percentual e máximo de parcelas para evitar descontos excessivos.',
+            'Após salvar, valide no detalhe da folha se os valores estão sendo calculados conforme a política.',
+          ],
+        },
+      ],
+    },
+    {
       id: 'billing',
       titulo: 'Assinatura e pagamentos',
       descricao: 'Resumo da assinatura e histórico de cobranças.',

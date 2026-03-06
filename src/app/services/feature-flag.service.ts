@@ -8,7 +8,8 @@ type FeatureMap = Record<string, boolean>;
 export class FeatureFlagService {
   private readonly storageKey = 'feature_flags_mock';
   private readonly defaults: FeatureMap = {
-    funcionarios: true
+    funcionarios: true,
+    folhaPagamento: true
   };
 
   isEnabled(featureKey: string): boolean {
@@ -40,4 +41,3 @@ export class FeatureFlagService {
     }
   }
 }
-

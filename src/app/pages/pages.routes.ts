@@ -22,12 +22,16 @@ import { FormServicoComponent } from './cadastro-tecnico/servicos/form-servico/f
 import { ListarServicoComponent } from './cadastro-tecnico/servicos/listar-servicos/listar-servicos.component';
 import { CalculadoraConfigComponent } from './smart-calc-config/smart-calc-config/smart-calc-config.component';
 import { EmailServidorComponent } from './config/email-servidor/email-servidor.component';
+import { FolhaConfigComponent } from './config/folha-config/folha-config.component';
 import { GerenciarPerfilComponent } from './perfil/gerenciar-perfil/gerenciar-perfil.component';
 import { AjudaComponent } from './ajuda/ajuda.component';
 import { ListarFuncionariosComponent } from './funcionarios/listar-funcionarios/listar-funcionarios.component';
 import { FormFuncionarioComponent } from './funcionarios/form-funcionario/form-funcionario.component';
 import { DetalheFuncionarioComponent } from './funcionarios/detalhe-funcionario/detalhe-funcionario.component';
+import { ListarFolhaPagamentoComponent } from './pessoas/folha/listar-folha/listar-folha-pagamento.component';
+import { DetalheFolhaPagamentoComponent } from './pessoas/folha/detalhe-folha/detalhe-folha-pagamento.component';
 import { featureModuleGuard } from '../guards/feature-module.guard';
+import { permissionGuard } from '../guards/permission.guard';
 
 export const PagesRoutes: Routes = [
   {
@@ -119,6 +123,45 @@ export const PagesRoutes: Routes = [
       urls: [
         { title: 'Funcionários', url: '/page/funcionarios' },
         { title: 'Detalhe' }
+      ]
+    }
+  },
+  {
+    path: 'folha-pagamento',
+    component: ListarFolhaPagamentoComponent,
+    canActivate: [featureModuleGuard],
+    data: {
+      featureKey: 'folhaPagamento',
+      title: 'Folha de Pagamento',
+      urls: [
+        { title: 'Gestão de Pessoas', url: '/page/funcionarios' },
+        { title: 'Folha de Pagamento' }
+      ]
+    }
+  },
+  {
+    path: 'folha-pagamento/detalhe/:competencia/:funcionarioId',
+    component: DetalheFolhaPagamentoComponent,
+    canActivate: [featureModuleGuard],
+    data: {
+      featureKey: 'folhaPagamento',
+      title: 'Detalhe da Folha',
+      urls: [
+        { title: 'Folha de Pagamento', url: '/page/folha-pagamento' },
+        { title: 'Detalhe da Folha' }
+      ]
+    }
+  },
+  {
+    path: 'config/folha-pagamento',
+    component: FolhaConfigComponent,
+    canActivate: [permissionGuard],
+    data: {
+      requiredPermission: ['FOLHA_CONFIGURAR'],
+      title: 'Configuração da Folha',
+      urls: [
+        { title: 'Configurações', url: '/page/config/email-servidor' },
+        { title: 'Configuração da Folha' }
       ]
     }
   },

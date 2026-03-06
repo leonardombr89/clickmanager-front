@@ -17,7 +17,7 @@ export const navItems: NavItem[] = [
         iconName: 'settings-automation',
         bgcolor: 'primary',
         route: '/config',
-        requiredPermission: ['CONFIG_EMAIL'],
+        requiredPermission: ['CONFIG_EMAIL', 'FOLHA_CONFIGURAR'],
         children: [
             {
                 displayName: 'Servidor de E-mail',
@@ -25,6 +25,13 @@ export const navItems: NavItem[] = [
                 bgcolor: 'transparent',
                 route: '/page/config/email-servidor',
                 requiredPermission: ['CONFIG_EMAIL']
+            },
+            {
+                displayName: 'Folha (Gestão de Pessoas)',
+                iconName: 'point',
+                bgcolor: 'transparent',
+                route: '/page/config/folha-pagamento',
+                requiredPermission: ['FOLHA_CONFIGURAR']
             }
         ]
     },
