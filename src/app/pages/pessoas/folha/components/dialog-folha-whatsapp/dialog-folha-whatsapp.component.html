@@ -1,0 +1,40 @@
+<h2 mat-dialog-title>Resumo da folha para WhatsApp</h2>
+
+<mat-dialog-content class="dialog-content" [formGroup]="form">
+  <div class="hint-card">
+    Revise a mensagem, confirme o telefone e envie o resumo da competência para o funcionário.
+  </div>
+
+  <div class="row g-3">
+    <div class="col-12">
+      <p class="text-muted m-0">
+        <strong>{{ data.funcionarioNome }}</strong> • Competência {{ data.competencia }}
+      </p>
+    </div>
+
+    <div class="col-12">
+      <app-input-telefone
+        [control]="telefoneControl"
+        label="Telefone (WhatsApp)"
+        placeholder="Digite o telefone"
+      ></app-input-telefone>
+    </div>
+
+    <div class="col-12">
+      <label class="preview-label">Mensagem</label>
+      <textarea class="wa-preview" rows="16" [value]="data.mensagem" readonly></textarea>
+    </div>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Cancelar</button>
+  <button mat-stroked-button color="primary" (click)="copiar()">
+    <mat-icon>content_copy</mat-icon>
+    Copiar
+  </button>
+  <button mat-flat-button color="primary" (click)="abrirWhatsApp()">
+    <mat-icon>chat</mat-icon>
+    Abrir no WhatsApp
+  </button>
+</mat-dialog-actions>

@@ -1,0 +1,22 @@
+.dialog-content {
+  min-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.hint-card {
+  border: 1px solid #dbeafe;
+  border-radius: 8px;
+  padding: 8px 10px;
+  background: #eff6ff;
+  color: #1e3a8a;
+  font-size: 12px;
+  margin-bottom: 10px;
+}
+
+@media (max-width: 640px) {
+  .dialog-content {
+    min-width: 0;
+  }
+}

@@ -12,15 +12,28 @@
         <!-- Botão de ajuda -->
         <ng-container *ngIf="helpRota">
             <ng-container *ngIf="helpExterno; else helpInterno">
-                <a mat-stroked-button [href]="helpRota" target="_blank" rel="noopener">
-                    <mat-icon class="m-r-4">{{ helpIcone }}</mat-icon>
-                    {{ helpTexto }}
+                <a
+                  mat-icon-button
+                  class="help-icon-btn"
+                  [href]="helpRota"
+                  target="_blank"
+                  rel="noopener"
+                  [matTooltip]="helpTexto || 'Ajuda'"
+                  [attr.aria-label]="helpTexto || 'Ajuda'"
+                >
+                    <mat-icon>{{ helpIcone }}</mat-icon>
                 </a>
             </ng-container>
             <ng-template #helpInterno>
-                <a mat-stroked-button [routerLink]="helpRota" [fragment]="helpFragment">
-                    <mat-icon class="m-r-4">{{ helpIcone }}</mat-icon>
-                    {{ helpTexto }}
+                <a
+                  mat-icon-button
+                  class="help-icon-btn"
+                  [routerLink]="helpRota"
+                  [fragment]="helpFragment"
+                  [matTooltip]="helpTexto || 'Ajuda'"
+                  [attr.aria-label]="helpTexto || 'Ajuda'"
+                >
+                    <mat-icon>{{ helpIcone }}</mat-icon>
                 </a>
             </ng-template>
         </ng-container>

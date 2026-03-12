@@ -1,73 +1,55 @@
-<mat-card class="cardWithShadow">
-    <mat-card-content [formGroup]="enderecoForm">
-      <mat-card-title>Endereço</mat-card-title>
-  
-      <div class="row g-3 m-t-32">
-        <!-- CEP -->
-        <div class="col-md-4">
-          <mat-label class="f-s-14 f-w-600 m-b-8 d-block">
-            CEP: <span *ngIf="isCampoObrigatorio('cep')" style="color: #ff110094">*</span>
-          </mat-label>
-          <mat-form-field appearance="outline" class="w-100" color="primary">
-            <input matInput
-                   placeholder="Digite o CEP"
-                   formControlName="cep"
-                   mask="00000-000"
-                   (blur)="buscarEnderecoPorCep()" />
-            <mat-error *ngIf="getControl('cep').hasError('required') && getControl('cep').touched">
-              CEP é obrigatório
-            </mat-error>
-          </mat-form-field>
-        </div>
-  
-        <!-- LOGRADOURO -->
-        <div class="col-md-8">
+<app-section-card titulo="Endereço" [divider]="true">
+  <div class="row m-t-16" [formGroup]="enderecoForm">
+    <div class="col-lg-6">
+      <app-input-cep
+        [control]="getControl('cep')"
+        label="CEP"
+        (enderecoEncontrado)="onEnderecoEncontrado($event)"
+      ></app-input-cep>
+
+      <app-input-texto-restrito
+        [control]="getControl('complemento')"
+        label="Complemento"
+        placeholder="Sala, bloco..."
+      ></app-input-texto-restrito>
+
+      <app-input-texto-restrito
+        [control]="getControl('cidade')"
+        label="Cidade"
+        placeholder="Informe a cidade"
+      ></app-input-texto-restrito>
+    </div>
+
+    <div class="col-lg-6">
+      <div class="row">
+        <div class="col-sm-8">
           <app-input-texto-restrito
             [control]="getControl('logradouro')"
             label="Logradouro"
-            placeholder="Digite o logradouro" />
+            placeholder="Rua, avenida..."
+          ></app-input-texto-restrito>
         </div>
-  
-        <!-- NÚMERO -->
-        <div class="col-md-3">
+
+        <div class="col-sm-4">
           <app-input-texto-restrito
             [control]="getControl('numero')"
             label="Número"
-            placeholder="Digite o número" />
-        </div>
-  
-        <!-- COMPLEMENTO -->
-        <div class="col-md-5">
-          <app-input-texto-restrito
-            [control]="getControl('complemento')"
-            label="Complemento"
-            placeholder="Complemento (opcional)" />
-        </div>
-  
-        <!-- BAIRRO -->
-        <div class="col-md-4">
-          <app-input-texto-restrito
-            [control]="getControl('bairro')"
-            label="Bairro"
-            placeholder="Digite o bairro" />
-        </div>
-  
-        <!-- CIDADE -->
-        <div class="col-md-6">
-          <app-input-texto-restrito
-            [control]="getControl('cidade')"
-            label="Cidade"
-            placeholder="Digite a cidade" />
-        </div>
-  
-        <!-- ESTADO -->
-        <div class="col-md-6">
-          <app-input-texto-restrito
-            [control]="getControl('estado')"
-            label="Estado"
-            placeholder="Digite o estado" />
+            placeholder="Informe o número"
+          ></app-input-texto-restrito>
         </div>
       </div>
-    </mat-card-content>
-  </mat-card>
-  
+
+      <app-input-texto-restrito
+        [control]="getControl('bairro')"
+        label="Bairro"
+        placeholder="Informe o bairro"
+      ></app-input-texto-restrito>
+
+      <app-input-texto-restrito
+        [control]="getControl('estado')"
+        label="Estado"
+        placeholder="UF"
+      ></app-input-texto-restrito>
+    </div>
+  </div>
+</app-section-card>

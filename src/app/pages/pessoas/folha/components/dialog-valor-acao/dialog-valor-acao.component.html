@@ -1,0 +1,39 @@
+<h2 mat-dialog-title>{{ data.titulo }}</h2>
+
+<mat-dialog-content [formGroup]="form" class="dialog-content">
+  <div class="hint-card" *ngIf="data.subtitulo">{{ data.subtitulo }}</div>
+
+  <div class="row g-3">
+    <div class="col-12" *ngIf="hasTipo">
+      <app-input-options
+        [control]="tipoControl"
+        [label]="data.labelTipo || 'Tipo'"
+        [options]="data.tipoOptions || []"
+        labelKey="label"
+        valueKey="value"
+        [showNull]="false"
+      ></app-input-options>
+    </div>
+
+    <div class="col-12">
+      <app-input-moeda
+        [control]="valorControl"
+        [label]="data.labelValor || 'Valor (R$)'"
+      ></app-input-moeda>
+    </div>
+
+    <div class="col-12">
+      <app-input-textarea
+        [control]="descricaoControl"
+        [label]="data.descricaoObrigatoria ? (data.labelDescricao || 'Descrição') : ((data.labelDescricao || 'Descrição') + ' (opcional)')"
+        placeholder="Descreva o lançamento"
+        [rows]="3"
+      ></app-input-textarea>
+    </div>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Cancelar</button>
+  <button mat-flat-button color="primary" (click)="confirmar()" [disabled]="form.invalid">{{ data.botaoConfirmar || 'Confirmar' }}</button>
+</mat-dialog-actions>
