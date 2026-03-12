@@ -46,6 +46,18 @@ export const DEFINICOES: PermissaoDefinicao[] = [
   { chave: 'CLIENTE_EDITAR', titulo: 'Editar cliente', grupo: 'Clientes' },
   { chave: 'CLIENTE_EXCLUIR', titulo: 'Excluir cliente', grupo: 'Clientes' },
 
+  // 🧑‍💼 Funcionários
+  { chave: 'FUNCIONARIO_VER', titulo: 'Visualizar funcionários (lista e detalhe)', grupo: 'Funcionários' },
+  { chave: 'FUNCIONARIO_CRIAR', titulo: 'Cadastrar funcionário', grupo: 'Funcionários' },
+  { chave: 'FUNCIONARIO_EDITAR', titulo: 'Editar funcionário', grupo: 'Funcionários' },
+  { chave: 'FUNCIONARIO_AFASTAR', titulo: 'Afastar funcionário', grupo: 'Funcionários' },
+  { chave: 'FUNCIONARIO_DESLIGAR', titulo: 'Desligar funcionário', grupo: 'Funcionários' },
+
+  // 💰 Folha de pagamento
+  { chave: 'FOLHA_VER', titulo: 'Visualizar folha de pagamento', grupo: 'Folha de Pagamento' },
+  { chave: 'FOLHA_EDITAR', titulo: 'Lançar ajustes e registrar pagamentos', grupo: 'Folha de Pagamento' },
+  { chave: 'FOLHA_CONFIGURAR', titulo: 'Configurar políticas da folha de pagamento', grupo: 'Folha de Pagamento' },
+
   // 🧮 Calculadoras
   { chave: 'CONFIG_CALCULADORAS', titulo: 'Configurar calculadoras', grupo: 'Calculadoras' },
   { chave: 'USAR_CALCULADORAS', titulo: 'Utilizar calculadoras', grupo: 'Calculadoras' },

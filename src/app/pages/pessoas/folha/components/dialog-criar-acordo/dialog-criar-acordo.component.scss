@@ -1,0 +1,55 @@
+.dialog-content {
+  min-width: 420px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.hint-card {
+  border: 1px solid #dbeafe;
+  border-radius: 8px;
+  padding: 8px 10px;
+  background: #eff6ff;
+  color: #1e3a8a;
+  font-size: 12px;
+  margin-bottom: 10px;
+}
+
+.blocked-card {
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  padding: 8px 10px;
+  background: #fff1f2;
+  color: #991b1b;
+  font-size: 12px;
+}
+
+.text-muted {
+  display: block;
+  color: #64748b;
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+.field-error {
+  display: block;
+  color: #b91c1c;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.inline-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+@media (max-width: 640px) {
+  .dialog-content {
+    min-width: 0;
+  }
+
+  .inline-grid {
+    grid-template-columns: 1fr;
+  }
+}

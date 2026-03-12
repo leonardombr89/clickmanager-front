@@ -1,0 +1,23 @@
+<h2 mat-dialog-title>Criar competência</h2>
+<mat-dialog-content [formGroup]="form" class="dialog-content">
+  <div class="ano-chip">Ano vigente: {{ anoAtual }}</div>
+  <div class="hint-card">
+    A competência será criada usando a regra padrão configurada em
+    <strong>Configurações &gt; Gestão de Pessoas</strong>.
+  </div>
+
+  <mat-form-field appearance="outline" class="w-100">
+    <mat-label>Mês(es)</mat-label>
+    <mat-select formControlName="meses" multiple>
+      <mat-option *ngFor="let m of meses" [value]="m.id">{{ m.nome }}</mat-option>
+    </mat-select>
+    <mat-error *ngIf="form.get('meses')?.touched && form.get('meses')?.invalid">
+      Selecione ao menos um mês
+    </mat-error>
+  </mat-form-field>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Cancelar</button>
+  <button mat-flat-button color="primary" (click)="confirmar()">Criar</button>
+</mat-dialog-actions>

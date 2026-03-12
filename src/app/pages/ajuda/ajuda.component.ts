@@ -13,6 +13,7 @@ type AjudaSecao = {
   id: string;
   titulo: string;
   descricao: string;
+  icon?: string;
   passos?: string[];
   itens?: { titulo: string; detalhes: string[] }[];
 };
@@ -33,6 +34,7 @@ export class AjudaComponent implements OnInit, OnDestroy {
       id: 'smartcalc',
       titulo: 'SmartCalc (cálculo de preços)',
       descricao: 'Como configurar e usar o SmartCalc para montar itens no pedido.',
+      icon: 'calculate',
       passos: [
         'Cadastre o produto e as variações (material, formato, cor) com o tipo de preço: fixo (peça), metro (m²), quantidade/faixas ou demanda.',
         'No pedido, clique em “Adicionar produto”, selecione produto e variação; o SmartCalc mostra serviços/acabamentos compatíveis.',
@@ -46,6 +48,7 @@ export class AjudaComponent implements OnInit, OnDestroy {
       id: 'pedidos',
       titulo: 'Cadastro de Produtos (variações e preços)',
       descricao: 'Como o sistema organiza produtos e variações para o SmartCalc.',
+      icon: 'inventory_2',
       passos: [
         'Produto = modelo base. Variação = combinação de material, formato e cor com um tipo de preço. Cada variação define como o SmartCalc calcula (fixo por peça, m², faixa de quantidade ou demanda).',
         'No cadastro do produto, crie uma ou mais variações. Exemplo: “Adesivo Vinil” com material Vinil, formato A4, cor Brilho e preço por m². Outra variação pode ser A3, ou cor Fosco, etc.',
@@ -56,6 +59,7 @@ export class AjudaComponent implements OnInit, OnDestroy {
       id: 'fluxo-pedido',
       titulo: 'Montar Pedido/Orçamento',
       descricao: 'Como usar o catálogo e o SmartCalc dentro do pedido.',
+      icon: 'assignment',
       passos: [
         'Selecione o cliente (ou crie um novo) antes de adicionar itens.',
         'Clique em “Adicionar produto”, escolha produto e variação; SmartCalc mostra preço e opcionais compatíveis.',
@@ -68,6 +72,7 @@ export class AjudaComponent implements OnInit, OnDestroy {
       id: 'catalogo',
       titulo: 'Catálogo técnico',
       descricao: 'Produtos, variações, serviços e acabamentos.',
+      icon: 'category',
       itens: [
         {
           titulo: 'Produtos e variações',
@@ -89,15 +94,266 @@ export class AjudaComponent implements OnInit, OnDestroy {
       id: 'clientes',
       titulo: 'Clientes',
       descricao: 'Cadastro e uso de clientes nos pedidos.',
+      icon: 'groups',
       passos: [
         'Cadastre nome, e-mail, telefone e documento. Endereço é opcional.',
         'Use a busca para selecionar o cliente no pedido; é obrigatório para fechar o pedido.',
       ],
     },
     {
+      id: 'funcionarios',
+      titulo: 'Funcionários (cadastro e gestão)',
+      descricao: 'Manual completo para cadastrar, editar e controlar o ciclo de vida do funcionário.',
+      icon: 'badge',
+      itens: [
+        {
+          titulo: '1) Permissões necessárias',
+          detalhes: [
+            'FUNCIONARIO_VER: ver lista e detalhe.',
+            'FUNCIONARIO_CRIAR: criar funcionário e readmitir funcionário desligado.',
+            'FUNCIONARIO_EDITAR: editar dados de funcionário ativo/afastado.',
+            'FUNCIONARIO_AFASTAR: afastar e retornar funcionário afastado.',
+            'FUNCIONARIO_DESLIGAR: desligar funcionário ativo ou afastado.',
+          ],
+        },
+        {
+          titulo: '2) Estados possíveis',
+          detalhes: [
+            'ATIVO: funcionário em atividade normal.',
+            'AFASTADO: funcionário temporariamente afastado.',
+            'DESLIGADO: vínculo encerrado; dados ficam em histórico.',
+          ],
+        },
+        {
+          titulo: '3) Como cadastrar um novo funcionário',
+          detalhes: [
+            'Vá em Funcionários > Novo funcionário.',
+            'Preencha dados pessoais: nome, CPF, telefone e e-mail.',
+            'Preencha vínculo: cargo, setor, data de admissão, tipo de contrato, salário e valor da passagem.',
+            'Preencha endereço no bloco de endereço.',
+            'Clique em Salvar. O funcionário entra na listagem e pode ser detalhado.',
+          ],
+        },
+        {
+          titulo: '4) Como funciona o tipo de contrato',
+          detalhes: [
+            'Opções disponíveis: CLT, PJ, Estágio, Temporário e Sem registro.',
+            '“Sem registro” pode ser usado para colaboradores sem vínculo formal no momento.',
+          ],
+        },
+        {
+          titulo: '5) Fluxo de status e ações disponíveis',
+          detalhes: [
+            'Se ATIVO: ações disponíveis são Afastar e Desligar.',
+            'Se AFASTADO: ações disponíveis são Retornar ao trabalho e Desligar.',
+            'Se DESLIGADO: ação disponível é Readmitir.',
+            'Botão Editar não aparece para DESLIGADO.',
+          ],
+        },
+        {
+          titulo: '6) Regras de transição (o que pode e o que não pode)',
+          detalhes: [
+            'Permitido: ATIVO -> AFASTADO.',
+            'Permitido: AFASTADO -> ATIVO (retorno ao trabalho).',
+            'Permitido: ATIVO -> DESLIGADO.',
+            'Permitido: AFASTADO -> DESLIGADO.',
+            'Permitido: DESLIGADO -> ATIVO (readmissão).',
+            'Transições fora dessas regras são bloqueadas.',
+          ],
+        },
+        {
+          titulo: '7) Afastar, desligar, retornar e readmitir (passo a passo)',
+          detalhes: [
+            'Ao clicar em uma ação de status, o sistema abre modal com motivo e data efetiva.',
+            'Motivo é obrigatório para registrar contexto da movimentação.',
+            'Data efetiva é obrigatória em afastamento, retorno e desligamento; na readmissão pode ser opcional.',
+            'Após confirmar, a tela recarrega automaticamente com status e histórico atualizados.',
+          ],
+        },
+        {
+          titulo: '8) Histórico do funcionário (o que fica salvo)',
+          detalhes: [
+            'Movimentações: mostra eventos como admissão, alterações, afastamentos e desligamentos.',
+            'Histórico salarial: exibe vigência, valor e motivo de alterações.',
+            'Histórico de passagem: exibe vigência, valor e motivo de alterações.',
+            'Snapshots: mostram cargo, setor, status, contrato, salário e passagem no momento de cada movimentação.',
+          ],
+        },
+        {
+          titulo: '9) Quando não é possível editar',
+          detalhes: [
+            'Funcionário DESLIGADO não pode ter dados editados.',
+            'Se tentar acessar URL de edição diretamente, o sistema redireciona para a tela de detalhe com aviso.',
+            'Para voltar a editar, faça primeiro a Readmissão.',
+          ],
+        },
+        {
+          titulo: '10) Boas práticas para uso no dia a dia',
+          detalhes: [
+            'Use motivos claros e curtos nas mudanças de status (ex.: “Afastamento INSS”, “Retorno após licença”).',
+            'Mantenha salário e passagem atualizados para histórico confiável.',
+            'Evite desligar antes de registrar a data efetiva correta.',
+            'Use Readmissão em vez de criar cadastro duplicado para a mesma pessoa.',
+          ],
+        },
+      ],
+    },
+    {
+      id: 'folha-pagamento',
+      titulo: 'Folha de pagamento',
+      descricao: 'Guia simples para abrir competência, lançar valores, registrar pagamentos e fechar sem erro.',
+      icon: 'payments',
+      itens: [
+        {
+          titulo: '1) Visão geral da tela de Folha',
+          detalhes: [
+            'A competência (ex.: 2026-02) mostra um mês da folha.',
+            'Se não existir competência aberta, o sistema cria automaticamente a competência do mês vigente.',
+            'No topo você vê contexto, status da competência, pagamento previsto e saldo pendente total.',
+            'A tabela lista cada colaborador com bruto, descontos, líquido, pago e pendente.',
+          ],
+        },
+        {
+          titulo: '2) Status que você vai ver',
+          detalhes: [
+            'Competência: ABERTA ou FECHADA.',
+            'Folha do colaborador: ABERTO, PARCIAL, PAGO ou FECHADO.',
+            'PARCIAL significa que já houve pagamento, mas ainda existe saldo pendente.',
+          ],
+        },
+        {
+          titulo: '3) Fluxo recomendado do mês (passo a passo)',
+          detalhes: [
+            '1. Selecione a competência do mês.',
+            '2. Revise os valores dos colaboradores.',
+            '3. Faça lançamentos de provento/desconto quando necessário.',
+            '4. Registre adiantamentos e empréstimos quando necessário.',
+            '5. Registre pagamentos (pode ser parcial).',
+            '6. Feche a competência somente quando o pendente total for R$ 0,00.',
+          ],
+        },
+        {
+          titulo: '4) Lançamentos (o que altera o valor)',
+          detalhes: [
+            'Provento: aumenta o líquido (ex.: hora extra, comissão, bônus).',
+            'Desconto manual: reduz o líquido (ex.: falta).',
+            'Lançamentos só podem ser feitos em folha aberta.',
+          ],
+        },
+        {
+          titulo: '5) Adiantamento e empréstimo (diferença)',
+          detalhes: [
+            'Adiantamento: use o botão “Registrar adiantamento” (fluxo separado do desconto manual).',
+            'Empréstimo: use o botão “Novo empréstimo parcelado” para criar parcelamento.',
+            'Você pode usar “Renegociar acordos” para reorganizar descontos futuros.',
+            'As regras respeitam a configuração da empresa (permissão, limite percentual, parcelas e carência).',
+          ],
+        },
+        {
+          titulo: '6) Pagamentos',
+          detalhes: [
+            'O pagamento padrão é PIX, mas o registro guarda forma e observação.',
+            'É possível pagar em partes; o sistema atualiza para PARCIAL automaticamente.',
+            'Quando o total pago atingir o líquido, a folha passa para PAGO.',
+          ],
+        },
+        {
+          titulo: '7) Fechar e reabrir competência',
+          detalhes: [
+            'Fechar competência bloqueia novos lançamentos naquele mês.',
+            'Se houver pendência, o botão de fechar fica desabilitado e mostra o motivo.',
+            'Ao fechar uma competência, o sistema já prepara a próxima automaticamente.',
+            'Se necessário, reabra a competência para ajustes (com permissão de edição).',
+          ],
+        },
+        {
+          titulo: '8) Comunicação e documento do colaborador',
+          detalhes: [
+            'No detalhe da folha, use “Resumo WhatsApp” para gerar um texto claro do pagamento.',
+            'O texto inclui ganhos, descontos, valor pago, pendente e situação dos acordos.',
+            'Use “Gerar contracheque” para CLT e “Gerar comprovante de pagamento” para os demais contratos.',
+          ],
+        },
+        {
+          titulo: '9) Exportação',
+          detalhes: [
+            'Na lista da folha você pode exportar CSV da competência atual.',
+            'Também é possível exportar CSV consolidado com todas as competências.',
+          ],
+        },
+        {
+          titulo: '10) Configurações que impactam a folha',
+          detalhes: [
+            'Regra de pagamento padrão: dia fixo ou 5º dia útil.',
+            'Política de acordos: permitir adiantamento/empréstimo, limite percentual, máximo de parcelas e carência.',
+            'Política de passagem: não aplicar, lançar como provento ou lançar como desconto.',
+            'Essas configurações ficam em Configuração da Folha.',
+          ],
+        },
+        {
+          titulo: '11) Erros comuns e como evitar',
+          detalhes: [
+            'Não consegue fechar competência: confira o saldo pendente total e quite os valores.',
+            'Não consegue lançar ajuste: verifique se a competência está FECHADA.',
+            'Competência não encontrada: volte para a lista de competências e selecione uma válida.',
+          ],
+        },
+      ],
+    },
+    {
+      id: 'folha-configuracao',
+      titulo: 'Configuração da folha',
+      descricao: 'Defina a regra padrão de pagamento e políticas de acordos e passagem da empresa.',
+      icon: 'tune',
+      itens: [
+        {
+          titulo: '1) Para que serve esta tela',
+          detalhes: [
+            'Esta tela define as regras padrão da folha para toda a empresa.',
+            'O que você configurar aqui afeta criação de competências, acordos e cálculo automático de passagem.',
+          ],
+        },
+        {
+          titulo: '2) Regra padrão de pagamento',
+          detalhes: [
+            'QUINTO_DIA_UTIL: o sistema calcula automaticamente a data de pagamento no 5º dia útil.',
+            'DIA_FIXO: você escolhe um dia entre 1 e 31 para pagamento mensal.',
+            'Essa regra é usada por padrão ao abrir competência, salvo quando houver override manual.',
+          ],
+        },
+        {
+          titulo: '3) Política de passagem',
+          detalhes: [
+            'NAO_APLICAR: passagem não entra no cálculo da folha.',
+            'PROVENTO: passagem entra somando no bruto/líquido.',
+            'DESCONTO: passagem entra reduzindo o líquido.',
+          ],
+        },
+        {
+          titulo: '4) Política de adiantamento e empréstimo',
+          detalhes: [
+            'Permitir adiantamento: habilita ou bloqueia o botão “Registrar adiantamento”.',
+            'Permitir empréstimo: habilita ou bloqueia o botão “Novo empréstimo parcelado”.',
+            'Limite percentual do salário: trava acordos acima do percentual definido.',
+            'Máximo de parcelas: limita quantas parcelas podem ser escolhidas no empréstimo.',
+            'Carência mínima: define a quantidade mínima de competências antes do primeiro desconto.',
+          ],
+        },
+        {
+          titulo: '5) Boas práticas',
+          detalhes: [
+            'Defina a regra de pagamento antes de começar a operar a folha do mês.',
+            'Revise limite percentual e máximo de parcelas para evitar descontos excessivos.',
+            'Após salvar, valide no detalhe da folha se os valores estão sendo calculados conforme a política.',
+          ],
+        },
+      ],
+    },
+    {
       id: 'billing',
       titulo: 'Assinatura e pagamentos',
       descricao: 'Resumo da assinatura e histórico de cobranças.',
+      icon: 'payments',
       passos: [
         'Tela “Minha assinatura”: status, periodicidade, valor e próxima cobrança.',
         'Pagamentos listados com status; link para boleto/fatura aparece apenas quando pendente.',
@@ -108,6 +364,7 @@ export class AjudaComponent implements OnInit, OnDestroy {
       id: 'onboarding',
       titulo: 'Onboarding da empresa',
       descricao: 'Configuração inicial guiada.',
+      icon: 'rocket_launch',
       passos: [
         'Dados da empresa e seleção de cores, formatos, materiais, serviços e acabamentos padrão.',
         'Pode ser reaberto em Conta > Preferências (proprietário) ou no primeiro acesso se não ignorado.',
@@ -117,6 +374,7 @@ export class AjudaComponent implements OnInit, OnDestroy {
       id: 'conta',
       titulo: 'Conta e permissões',
       descricao: 'Perfil, senha e controle de acesso.',
+      icon: 'manage_accounts',
       passos: [
         'Altere nome, telefone, foto e senha em Conta.',
         'Proprietário controla perfis e permissões; onboarding aparece apenas para proprietário com flag ativa.',
@@ -126,6 +384,7 @@ export class AjudaComponent implements OnInit, OnDestroy {
       id: 'faq',
       titulo: 'Dúvidas rápidas',
       descricao: 'Respostas rápidas para mensagens comuns.',
+      icon: 'help_outline',
       itens: [
         {
           titulo: 'Erro ao adicionar item (produtoVariacaoId obrigatório)',
@@ -145,6 +404,7 @@ export class AjudaComponent implements OnInit, OnDestroy {
       id: 'status-pedido',
       titulo: 'Fluxo do Pedido e Status (do início ao fim)',
       descricao: 'Entenda as diferenças entre Pedido e Orçamento, mudanças permitidas e o que cada status libera ou bloqueia.',
+      icon: 'sync_alt',
       itens: [
         {
           titulo: 'Visão geral do fluxo',

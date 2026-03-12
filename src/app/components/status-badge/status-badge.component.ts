@@ -16,6 +16,9 @@ export class StatusBadgeComponent {
   @Input() status: string | null | undefined;
 
   private readonly map: Record<string, StatusConfig> = {
+    ATIVO: { icon: 'check_circle', label: 'ATIVO', className: 'chip-pronto' },
+    AFASTADO: { icon: 'pause_circle', label: 'AFASTADO', className: 'chip-aguardando' },
+    DESLIGADO: { icon: 'block', label: 'DESLIGADO', className: 'chip-cancelado' },
     RASCUNHO: { icon: 'edit', label: 'RASCUNHO', className: 'chip-rascunho' },
     PENDENTE: { icon: 'schedule', label: 'PENDENTE', className: 'chip-pendente' },
     ORCAMENTO: { icon: 'assignment', label: 'ORCAMENTO', className: 'chip-orcamento' },
@@ -24,6 +27,10 @@ export class StatusBadgeComponent {
     PRONTO: { icon: 'check_circle', label: 'PRONTO', className: 'chip-pronto' },
     ENTREGUE: { icon: 'local_shipping', label: 'ENTREGUE', className: 'chip-entregue' },
     CANCELADO: { icon: 'close', label: 'CANCELADO', className: 'chip-cancelado' },
+    ABERTO: { icon: 'schedule', label: 'ABERTO', className: 'chip-pendente' },
+    FECHADO: { icon: 'task_alt', label: 'FECHADO', className: 'chip-producao' },
+    PARCIAL: { icon: 'payments', label: 'PARCIAL', className: 'chip-aguardando' },
+    PAGO: { icon: 'check_circle', label: 'PAGO', className: 'chip-pronto' },
   };
 
   get config(): StatusConfig {

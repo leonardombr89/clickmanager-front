@@ -1,0 +1,83 @@
+<h2 mat-dialog-title>Renegociar acordos</h2>
+
+<mat-dialog-content [formGroup]="form" class="dialog-content">
+  <div class="hint-card">
+    Selecione os acordos em aberto, defina o período e o sistema recalcula as parcelas para distribuir o saldo.
+  </div>
+
+  <div class="selection-header">
+    <label class="selection-label">Acordos em aberto</label>
+    <div class="selection-actions">
+      <button mat-button type="button" (click)="selecionarTodos()">Selecionar todos</button>
+      <button mat-button type="button" (click)="limparSelecao()">Limpar</button>
+    </div>
+  </div>
+
+  <div class="agreements-list">
+    <div class="agreement-item" *ngFor="let a of data.acordos">
+      <mat-checkbox [checked]="isSelecionado(a.id)" (change)="toggleAcordo(a.id, $event.checked)">
+        <span class="agreement-title">{{ a.tipo }} #{{ a.id }}</span>
+      </mat-checkbox>
+      <div class="agreement-desc">{{ a.descricao || 'Sem descrição' }}</div>
+      <div class="agreement-meta">
+        Em aberto: {{ a.saldoEmAberto | currency:'BRL':'symbol':'1.2-2':'pt-BR' }} • Parcelas em aberto: {{ a.parcelasEmAberto }}
+      </div>
+    </div>
+  </div>
+  <div class="field-error" *ngIf="acordoIdsControl.touched && acordoIdsControl.invalid">
+    Selecione ao menos um acordo.
+  </div>
+
+  <div class="row g-3">
+    <div class="col-12 col-md-6">
+      <app-input-options
+        [control]="competenciaInicioControl"
+        label="Iniciar em"
+        [options]="competenciaOptions"
+        [showNull]="false"
+      ></app-input-options>
+    </div>
+
+    <div class="col-12 col-md-6">
+      <app-input-options
+        [control]="competenciaFimControl"
+        label="Reparcelar até"
+        [options]="competenciasFim"
+        [showNull]="false"
+      ></app-input-options>
+    </div>
+
+    <div class="col-12">
+      <div class="preview-grid">
+        <div class="preview-item">
+          <span>Total em aberto</span>
+          <strong>{{ totalAbertoSelecionado | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}</strong>
+        </div>
+        <div class="preview-item">
+          <span>Parcelas previstas</span>
+          <strong>{{ parcelasPrevistas }}</strong>
+        </div>
+        <div class="preview-item">
+          <span>Parcela estimada</span>
+          <strong>{{ valorParcelaEstimado | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}</strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12">
+      <app-input-textarea
+        [control]="descricaoControl"
+        label="Descrição (opcional)"
+        placeholder="Ex.: Consolidação de acordos para distribuir os descontos até dezembro"
+        [rows]="3"
+      ></app-input-textarea>
+    </div>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Cancelar</button>
+  <button mat-flat-button color="primary" (click)="confirmar()" [disabled]="form.invalid || parcelasPrevistas <= 0">
+    Renegociar acordos
+  </button>
+</mat-dialog-actions>
