@@ -24,19 +24,32 @@ export class AuthInterceptor implements HttpInterceptor {
   ) {}
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    const token = this.tokenStorage.getAccessToken();
+    const isAuthRequest = this.isAuthEndpoint(req.url);
+    const token = isAuthRequest ? null : this.tokenStorage.getToken();
     const authReq = token ? this.addTokenHeader(req, token) : req;
 
     return next.handle(authReq).pipe(
       catchError((error: HttpErrorResponse) => {
-        if (error.status === 401 && !this.isAuthEndpoint(req.url)) {
-          return this.handle401Error(authReq, next);
+        // Não tratar endpoints de autenticação como sessão expirada.
+        if (isAuthRequest) {
+          return throwError(() => error);
         }
 
-        if (error.status === 403) {
-          this.toastrService.warning('Sua sessão expirou. Faça login novamente.', 'Sessão Expirada');
-          this.authService.logout();
-          return throwError(() => error);
+        if (error.status === 401) {
+          const accessToken = this.tokenStorage.getToken();
+          const authAny = this.authService as any;
+          const isExpired =
+            accessToken && typeof authAny?.isAccessTokenExpired === 'function'
+              ? Boolean(authAny.isAccessTokenExpired(accessToken))
+              : true;
+
+          // Se o token não está expirado, 401 não é por sessão expirada.
+          // Ex.: permissão/endpoint bloqueado. Não tentar refresh em loop.
+          if (accessToken && !isExpired) {
+            return throwError(() => error);
+          }
+
+          return this.handle401Error(authReq, next);
         }
 
         return throwError(() => error);
@@ -45,24 +58,36 @@ export class AuthInterceptor implements HttpInterceptor {
   }
 
   private handle401Error(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    if (!this.authService.hasValidRefreshToken()) {
-      this.toastrService.warning('Sua sessão expirou. Faça login novamente.', 'Sessão Expirada');
-      this.authService.logout();
-      return throwError(() => new Error('Sessão expirada'));
-    }
-
     if (!this.isRefreshing) {
       this.isRefreshing = true;
       this.refreshTokenSubject.next(null);
+      const refreshFn = (this.authService as any)?.refreshToken;
+      if (typeof refreshFn !== 'function') {
+        this.isRefreshing = false;
+        this.toastrService.warning('Sua sessão expirou. Faça login novamente.', 'Sessão Expirada');
+        this.authService.logout();
+        return throwError(() => new Error('Sessão expirada'));
+      }
 
-      return this.authService.refreshToken().pipe(
-        switchMap(tokens => {
+      return refreshFn.call(this.authService).pipe(
+        switchMap((tokens: any) => {
+          const accessToken = String(tokens?.accessToken || '');
+          if (!accessToken) {
+            throw new Error('Token de acesso inválido');
+          }
           this.isRefreshing = false;
-          this.refreshTokenSubject.next(tokens.accessToken);
-          return next.handle(this.addTokenHeader(request, tokens.accessToken));
+          this.refreshTokenSubject.next(accessToken);
+          return next.handle(this.addTokenHeader(request, accessToken));
         }),
         catchError(err => {
           this.isRefreshing = false;
+
+          // Se o refresh funcionou mas a requisição original continuou 401,
+          // não forçar logout global aqui.
+          if (err instanceof HttpErrorResponse && err.status === 401 && !this.isAuthEndpoint(err.url || '')) {
+            return throwError(() => err);
+          }
+
           this.toastrService.warning('Sua sessão expirou. Faça login novamente.', 'Sessão Expirada');
           this.authService.logout();
           return throwError(() => err);

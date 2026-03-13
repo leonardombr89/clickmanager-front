@@ -11,7 +11,106 @@ html .topbar {
 }
 
 .topbar-dd {
-  min-width: 360px !important;
+  min-width: 420px !important;
+  max-width: 420px !important;
+
+  .mat-mdc-menu-content {
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+
+  .notification-menu-item {
+    height: auto !important;
+    min-height: 78px;
+    white-space: normal;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.24);
+    align-items: flex-start;
+
+    &:last-of-type {
+      border-bottom: 0;
+    }
+
+    .icon-40 {
+      width: 36px;
+      height: 36px;
+      min-width: 36px;
+    }
+  }
+
+  .notification-menu-row {
+    width: 100%;
+  }
+
+  .notification-menu-content {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .notification-menu-head {
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .notification-menu-title {
+    color: #0f172a;
+    font-size: 14px;
+    line-height: 1.3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+    flex: 1;
+  }
+
+  .notification-menu-badge {
+    flex-shrink: 0;
+    text-transform: uppercase;
+    font-size: 11px;
+  }
+
+  .notification-menu-summary {
+    display: block;
+    overflow: hidden;
+    color: #5b6573;
+    line-height: 1.35;
+    margin-top: 2px;
+    max-width: 100%;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-size: 13px;
+  }
+
+  .notification-menu-time {
+    margin-top: 4px;
+    font-size: 12px;
+  }
+
+  .notification-actions {
+    display: grid;
+    gap: 8px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    border-top: 1px solid rgba(148, 163, 184, 0.24);
+    background: #fff;
+  }
+
+  .notification-action-btn {
+    min-height: 40px;
+    justify-content: center;
+    text-align: center;
+    line-height: 1.2;
+    white-space: nowrap;
+    padding-inline: 12px;
+
+    &.mdc-button,
+    &.mat-mdc-stroked-button,
+    &.mat-mdc-unelevated-button {
+      width: 100%;
+    }
+  }
+
+  .notification-actions > .notification-action-btn:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
 }
 
 .apps-dd {
@@ -43,6 +142,21 @@ html .topbar {
   position: relative;
   top: -15px;
   right: -8px;
+
+  &.pulse-critical {
+    .heartbit {
+      animation-duration: 0.8s;
+    }
+
+    .point {
+      width: 6px;
+      height: 6px;
+      right: 4px;
+      top: -11px;
+      box-shadow: 0 0 0 3px rgba($error, 0.18);
+    }
+  }
+
   .heartbit {
     position: absolute;
     top: -17px;
@@ -70,6 +184,14 @@ html .topbar {
     position: absolute;
     right: 5px;
     top: -10px;
+  }
+}
+
+.notification-trigger--critical {
+  color: $error !important;
+
+  i-tabler {
+    filter: drop-shadow(0 0 6px rgba($error, 0.18));
   }
 }
 

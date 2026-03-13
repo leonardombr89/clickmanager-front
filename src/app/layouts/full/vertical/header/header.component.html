@@ -84,12 +84,19 @@
   @if(isCollapse){
   <div class="header-collpase p-y-10 p-x-15">
     <div class="d-flex align-items-center justify-content-center gap-10">
-      <button mat-icon-button [matMenuTriggerFor]="msgMenu" aria-label="Mensagens">
+      <button
+        mat-icon-button
+        [matMenuTriggerFor]="msgMenu"
+        (menuOpened)="onOpenNotificacoesMenu()"
+        aria-label="Notificações"
+        [class.notification-trigger--critical]="possuiNotificacaoCriticaNaoLida()">
         <i-tabler class="d-flex" name="message-2"></i-tabler>
-        <div class="pulse">
-          <span class="heartbit border-primary"></span>
-          <span class="point bg-primary"></span>
+        @if(notificacoesNaoLidas > 0) {
+        <div class="pulse" [class.pulse-critical]="possuiNotificacaoCriticaNaoLida()">
+          <span class="heartbit" [class.border-error]="possuiNotificacaoCriticaNaoLida()" [class.border-primary]="!possuiNotificacaoCriticaNaoLida()"></span>
+          <span class="point" [class.bg-error]="possuiNotificacaoCriticaNaoLida()" [class.bg-primary]="!possuiNotificacaoCriticaNaoLida()"></span>
         </div>
+        }
       </button>
 
       <button mat-fab extended color="inherit" [matMenuTriggerFor]="profileMenu" class="profile-btn"
@@ -107,39 +114,92 @@
   </div>
   }
 
-  <button mat-icon-button [matMenuTriggerFor]="msgMenu" aria-label="Mensagens"
+  <button mat-icon-button [matMenuTriggerFor]="msgMenu" aria-label="Notificações"
+    (menuOpened)="onOpenNotificacoesMenu()"
+    [class.notification-trigger--critical]="possuiNotificacaoCriticaNaoLida()"
     class="d-none d-lg-block align-items-center justify-content-center">
     <i-tabler class="d-flex" name="message-2"></i-tabler>
-    <div class="pulse">
-      <span class="heartbit border-primary"></span>
-      <span class="point bg-primary"></span>
+    @if(notificacoesNaoLidas > 0) {
+    <div class="pulse" [class.pulse-critical]="possuiNotificacaoCriticaNaoLida()">
+      <span class="heartbit" [class.border-error]="possuiNotificacaoCriticaNaoLida()" [class.border-primary]="!possuiNotificacaoCriticaNaoLida()"></span>
+      <span class="point" [class.bg-error]="possuiNotificacaoCriticaNaoLida()" [class.bg-primary]="!possuiNotificacaoCriticaNaoLida()"></span>
     </div>
+    }
   </button>
 
   <mat-menu #msgMenu="matMenu" xPosition="before" class="topbar-dd cardWithShadow">
     <div class="d-flex align-items-center p-x-32 p-y-16">
-      <h6 class="f-s-16 f-w-600 m-0">Mensagens</h6>
+      <h6 class="f-s-16 f-w-600 m-0">Notificações</h6>
       <span class="m-l-16">
-        <span class="bg-warning text-white p-x-8 p-y-4 f-w-500 rounded f-s-12">5 novas</span>
+        @if(notificacoesNaoLidas > 0) {
+        <span class="bg-warning text-white p-x-8 p-y-4 f-w-500 rounded f-s-12">{{ notificacaoLabelNova() }}</span>
+        } @else {
+        <span class="bg-light-primary text-primary p-x-8 p-y-4 f-w-500 rounded f-s-12">Sem novas</span>
+        }
       </span>
     </div>
 
-    @for(notification of notifications; track notification.title) {
-    <button mat-menu-item class="p-x-32 p-y-16">
-      <div class="d-flex align-items-center">
-        <img [src]="ImagemUtil.montarUrlImagemPerfil(usuarioLogado?.fotoPerfil)" (error)="usarImagemPadrao($event)"
-          class="rounded-circle object-cover" width="40" />
-        <div class="m-l-16">
-          <h5 class="f-s-14 f-w-600 m-0">{{ notification.title }}</h5>
-          <span>{{ notification.subtitle }}</span>
+    @if(carregandoNotificacoes) {
+    <div class="p-x-32 p-y-16 text-body">Carregando notificações...</div>
+    } @else if(notificacoes.length === 0) {
+    <div class="p-x-32 p-y-16 text-body">Nenhuma notificação disponível.</div>
+    } @else {
+    @for(notification of notificacoes; track notification.id) {
+    <button
+      mat-menu-item
+      class="p-x-32 p-y-16 notification-menu-item"
+      (click)="abrirNotificacao(notification)"
+      [matTooltip]="notification.titulo + ' - ' + resumoNotificacao(notification)"
+      matTooltipPosition="left"
+    >
+      <div class="d-flex align-items-start notification-menu-row">
+        <span class="icon-40 rounded d-flex align-items-center justify-content-center"
+          [ngClass]="{
+            'bg-light-primary text-primary': notification.nivel === 'INFO',
+            'bg-light-success text-success': notification.nivel === 'SUCESSO',
+            'bg-light-warning text-warning': notification.nivel === 'ATENCAO',
+            'bg-light-error text-error': notification.nivel === 'CRITICO'
+          }">
+          <i-tabler [name]="iconeNotificacao(notification)" class="icon-18 d-flex"></i-tabler>
+        </span>
+        <div class="m-l-16 notification-menu-content">
+          <div class="d-flex align-items-center gap-8 notification-menu-head">
+            <h5 class="f-s-14 f-w-600 m-0 notification-menu-title">{{ notification.titulo }}</h5>
+            @if(!notification.lida) {
+            <span class="f-s-12 text-primary f-w-600 notification-menu-badge">nova</span>
+            }
+          </div>
+          <span class="d-block notification-menu-summary">{{ resumoNotificacao(notification) }}</span>
+          <span class="d-block text-muted f-s-12 notification-menu-time">{{ formatarTempoNotificacao(notification.criadaEm) }}</span>
         </div>
       </div>
     </button>
     }
+    }
 
-    <div class="p-y-12 p-x-32">
-      <button mat-flat-button color="primary" class="w-100">
-        Ver todas as mensagens
+    <div class="p-y-12 p-x-16 notification-actions">
+      @if(podeEnviarNotificacao) {
+      <button
+        mat-stroked-button
+        color="primary"
+        class="w-100 notification-action-btn"
+        (click)="abrirDialogEnvioNotificacao()"
+      >
+        Enviar notificação
+      </button>
+      }
+      @if(notificacoesNaoLidas > 0) {
+      <button
+        mat-stroked-button
+        color="primary"
+        class="w-100 notification-action-btn"
+        (click)="marcarTodasNotificacoesComoLidas()"
+      >
+        Marcar todas como lidas
+      </button>
+      }
+      <button mat-flat-button color="primary" class="w-100 notification-action-btn" (click)="abrirTodasNotificacoes()">
+        Ver todas as notificações
       </button>
     </div>
   </mat-menu>

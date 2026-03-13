@@ -58,6 +58,9 @@ export const DEFINICOES: PermissaoDefinicao[] = [
   { chave: 'FOLHA_EDITAR', titulo: 'Lançar ajustes e registrar pagamentos', grupo: 'Folha de Pagamento' },
   { chave: 'FOLHA_CONFIGURAR', titulo: 'Configurar políticas da folha de pagamento', grupo: 'Folha de Pagamento' },
 
+  // 🔔 Notificações
+  { chave: 'NOTIFICACAO_ENVIAR', titulo: 'Enviar notificações', grupo: 'Notificações' },
+
   // 🧮 Calculadoras
   { chave: 'CONFIG_CALCULADORAS', titulo: 'Configurar calculadoras', grupo: 'Calculadoras' },
   { chave: 'USAR_CALCULADORAS', titulo: 'Utilizar calculadoras', grupo: 'Calculadoras' },

@@ -1,0 +1,72 @@
+<h2 mat-dialog-title>Enviar notificação</h2>
+
+<mat-dialog-content class="dialog-content">
+  <form [formGroup]="form" class="dialog-form">
+    <mat-form-field appearance="outline" class="w-100">
+      <mat-label>Título</mat-label>
+      <input matInput formControlName="titulo" maxlength="180" />
+      <mat-hint align="end">{{ form.controls.titulo.value?.length || 0 }}/180</mat-hint>
+      <mat-error *ngIf="form.controls.titulo.hasError('required')">Título é obrigatório.</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="w-100">
+      <mat-label>Resumo (opcional)</mat-label>
+      <textarea matInput rows="2" formControlName="resumo" maxlength="280"></textarea>
+      <mat-hint align="end">{{ form.controls.resumo.value?.length || 0 }}/280</mat-hint>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="w-100">
+      <mat-label>Conteúdo</mat-label>
+      <textarea matInput rows="5" formControlName="conteudo"></textarea>
+      <mat-error *ngIf="form.controls.conteudo.hasError('required')">Conteúdo é obrigatório.</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="w-100">
+      <mat-label>Destino</mat-label>
+      <mat-select formControlName="tipoDestino">
+        <mat-option *ngFor="let destino of destinos" [value]="destino.value">
+          {{ destino.label }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <div class="destinatarios-wrapper" *ngIf="form.controls.tipoDestino.value === 'USUARIOS_ESPECIFICOS'">
+      <mat-form-field appearance="outline" class="w-100">
+        <mat-label>Usuários destinatários</mat-label>
+        <mat-select formControlName="usuarioIds" multiple>
+          <mat-option *ngFor="let usuario of usuarios" [value]="usuario.id">
+            {{ labelUsuario(usuario) }}
+          </mat-option>
+        </mat-select>
+        <mat-hint *ngIf="!carregandoUsuarios">
+          {{ form.controls.usuarioIds.value?.length || 0 }} selecionado(s)
+        </mat-hint>
+        <mat-hint *ngIf="carregandoUsuarios">Carregando usuários...</mat-hint>
+        <mat-error *ngIf="form.controls.usuarioIds.hasError('minArrayLength')">
+          Selecione ao menos um usuário.
+        </mat-error>
+      </mat-form-field>
+    </div>
+
+    <div class="row-fields">
+      <mat-form-field appearance="outline">
+        <mat-label>Nível</mat-label>
+        <mat-select formControlName="nivel">
+          <mat-option *ngFor="let nivel of niveis" [value]="nivel.value">{{ nivel.label }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Link (opcional)</mat-label>
+        <input matInput formControlName="link" maxlength="400" />
+      </mat-form-field>
+    </div>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-stroked-button type="button" (click)="cancelar()" [disabled]="salvando">Cancelar</button>
+  <button mat-flat-button color="primary" type="button" (click)="enviar()" [disabled]="salvando || form.invalid">
+    {{ salvando ? 'Enviando...' : 'Enviar' }}
+  </button>
+</mat-dialog-actions>
