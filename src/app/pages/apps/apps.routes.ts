@@ -21,6 +21,7 @@ import { AppInvoiceViewComponent } from './invoice/invoice-view/invoice-view.com
 import { AppEditInvoiceComponent } from './invoice/edit-invoice/edit-invoice.component';
 import { AppContactListComponent } from './contact-list/contact-list.component';
 import { GerenciarPerfilComponent } from '../perfil/gerenciar-perfil/gerenciar-perfil.component';
+import { AppNotificacoesComponent } from '../notificacoes/notificacoes.component';
 
 export const AppsRoutes: Routes = [
   {
@@ -80,6 +81,29 @@ export const AppsRoutes: Routes = [
           urls: [
             { title: 'Dashboard', url: '/dashboards/dashboard1' },
             { title: 'Notes' },
+          ],
+        },
+      },
+      {
+        path: 'notificacoes',
+        component: AppNotificacoesComponent,
+        data: {
+          title: 'Notificações',
+          urls: [
+            { title: 'Dashboard', url: '/dashboards/dashboard1' },
+            { title: 'Notificações' },
+          ],
+        },
+      },
+      {
+        path: 'notificacoes/:id',
+        component: AppNotificacoesComponent,
+        data: {
+          title: 'Detalhe da Notificação',
+          urls: [
+            { title: 'Dashboard', url: '/dashboards/dashboard1' },
+            { title: 'Notificações', url: '/apps/notificacoes' },
+            { title: 'Detalhe' },
           ],
         },
       },

@@ -350,6 +350,81 @@ export class AjudaComponent implements OnInit, OnDestroy {
       ],
     },
     {
+      id: 'notificacoes',
+      titulo: 'Notificações',
+      descricao: 'Como visualizar, enviar e acompanhar notificações dentro do sistema.',
+      icon: 'notifications',
+      itens: [
+        {
+          titulo: '1) Onde aparecem as notificações',
+          detalhes: [
+            'No topo do sistema, o sino mostra um resumo rápido com as notificações mais recentes.',
+            'Ao clicar em uma notificação no sino, o sistema abre Meu Perfil > aba Notificações com o detalhe já selecionado.',
+            'Na aba Notificações você consegue ver a lista completa, o detalhe e o status de leitura.',
+          ],
+        },
+        {
+          titulo: '2) Quem pode visualizar',
+          detalhes: [
+            'Todos os usuários autenticados da empresa podem visualizar as notificações recebidas.',
+            'A tela mostra apenas notificações destinadas ao usuário logado.',
+            'Você pode usar o filtro “Mostrar apenas não lidas” para focar no que ainda precisa ver.',
+          ],
+        },
+        {
+          titulo: '3) Como funciona a leitura',
+          detalhes: [
+            'Quando você abre uma notificação, ela é marcada como lida automaticamente.',
+            'No sino e na listagem, itens ainda não lidos aparecem com destaque visual.',
+            'O botão “Marcar todas como lidas” limpa rapidamente os avisos pendentes.',
+          ],
+        },
+        {
+          titulo: '4) Como enviar uma notificação',
+          detalhes: [
+            'É necessário ter a permissão “Enviar notificações”.',
+            'Na tela de notificações, clique em “Enviar notificação”.',
+            'Preencha título, conteúdo, nível e, se quiser, resumo e link relacionado.',
+          ],
+        },
+        {
+          titulo: '5) Tipos de destino disponíveis',
+          detalhes: [
+            'Empresa inteira: envia para todos os usuários ativos da empresa.',
+            'Usuários específicos: permite escolher um ou mais destinatários manualmente.',
+            'O envio global para todas as empresas não faz parte do uso normal da empresa e fica reservado para módulo administrativo futuro.',
+          ],
+        },
+        {
+          titulo: '6) Níveis da notificação',
+          detalhes: [
+            'Informação: aviso neutro do dia a dia.',
+            'Sucesso: confirmações e retornos positivos.',
+            'Atenção: algo que exige acompanhamento.',
+            'Crítico: situação urgente ou que pode impactar a operação.',
+            'Na lista e no detalhe, cada nível usa destaque visual próprio para facilitar a leitura rápida.',
+          ],
+        },
+        {
+          titulo: '7) Link relacionado',
+          detalhes: [
+            'Se a notificação tiver um link, o botão “Abrir link relacionado” aparece no detalhe.',
+            'Use esse campo para levar o usuário direto para um pedido, tela ou recurso específico.',
+            'Se não houver link, a notificação continua funcionando normalmente apenas como comunicado.',
+          ],
+        },
+        {
+          titulo: '8) Boas práticas para enviar',
+          detalhes: [
+            'Use títulos curtos e claros.',
+            'No resumo, destaque a informação principal em uma frase rápida.',
+            'No conteúdo, explique a ação esperada ou o contexto da mensagem.',
+            'Prefira nível Atenção ou Crítico apenas quando realmente houver urgência.',
+          ],
+        },
+      ],
+    },
+    {
       id: 'billing',
       titulo: 'Assinatura e pagamentos',
       descricao: 'Resumo da assinatura e histórico de cobranças.',

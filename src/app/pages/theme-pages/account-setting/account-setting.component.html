@@ -1,5 +1,5 @@
 <mat-card class="cardWithShadow">
-  <mat-tab-group mat-stretch-tabs="false" animationDuration="0ms">
+  <mat-tab-group class="account-setting-tabs" mat-stretch-tabs="false" animationDuration="0ms" [selectedIndex]="selectedTabIndex">
 
     <!-- Aba Conta -->
     <mat-tab label="Conta">
@@ -222,17 +222,7 @@
     <!-- Aba Notificações -->
     <mat-tab label="Notificações">
       <mat-card-content class="p-y-24">
-        <mat-card class="cardWithShadow">
-          <mat-card-content class="p-y-24">
-            <mat-card-title>Notificação</mat-card-title>
-            <mat-card-subtitle class="f-s-14">
-              Aqui vc recebe as notificacoes
-            </mat-card-subtitle>
-
-            Ainda vou fazer
-
-          </mat-card-content>
-        </mat-card>
+        <app-notificacoes [embedded]="true" [selectedNotificacaoId]="notificacaoSelecionadaId"></app-notificacoes>
       </mat-card-content>
     </mat-tab>
   </mat-tab-group>
