@@ -1,0 +1,22 @@
+.dialog-hint {
+  margin: 0 0 16px;
+  color: #64748b;
+  line-height: 1.45;
+}
+
+.dialog-form {
+  display: grid;
+  gap: 16px;
+}
+
+.grid-two {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+@media (max-width: 767px) {
+  .grid-two {
+    grid-template-columns: 1fr;
+  }
+}
