@@ -30,6 +30,7 @@ import { FormFuncionarioComponent } from './funcionarios/form-funcionario/form-f
 import { DetalheFuncionarioComponent } from './funcionarios/detalhe-funcionario/detalhe-funcionario.component';
 import { ListarFolhaPagamentoComponent } from './pessoas/folha/listar-folha/listar-folha-pagamento.component';
 import { DetalheFolhaPagamentoComponent } from './pessoas/folha/detalhe-folha/detalhe-folha-pagamento.component';
+import { SuporteComponent } from './suporte/suporte.component';
 import { featureModuleGuard } from '../guards/feature-module.guard';
 import { permissionGuard } from '../guards/permission.guard';
 
@@ -122,6 +123,29 @@ export const PagesRoutes: Routes = [
       title: 'Detalhe do Funcionário',
       urls: [
         { title: 'Funcionários', url: '/page/funcionarios' },
+        { title: 'Detalhe' }
+      ]
+    }
+  },
+  {
+    path: 'suporte',
+    component: SuporteComponent,
+    data: {
+      title: 'Suporte',
+      urls: [
+        { title: 'Dashboard', url: '/dashboards/dashboard1' },
+        { title: 'Suporte' }
+      ]
+    }
+  },
+  {
+    path: 'suporte/:id',
+    component: SuporteComponent,
+    data: {
+      title: 'Detalhe do chamado',
+      urls: [
+        { title: 'Dashboard', url: '/dashboards/dashboard1' },
+        { title: 'Suporte', url: '/page/suporte' },
         { title: 'Detalhe' }
       ]
     }
