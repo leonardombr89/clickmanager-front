@@ -122,10 +122,18 @@ export class AppNotificacoesComponent implements OnInit, OnChanges {
   abrirLink(link?: string | null): void {
     const destino = String(link || '').trim();
     if (!destino) return;
-    if (destino.startsWith('/')) {
-      this.router.navigateByUrl(destino);
+
+    if (this.isAbsoluteUrl(destino)) {
+      window.location.href = destino;
       return;
     }
+
+    const rotaInterna = this.normalizarRotaInterna(destino);
+    if (rotaInterna) {
+      this.router.navigateByUrl(rotaInterna);
+      return;
+    }
+
     window.open(destino, '_blank', 'noopener');
   }
 
@@ -219,6 +227,21 @@ export class AppNotificacoesComponent implements OnInit, OnChanges {
     }
 
     this.selecionarPrimeiraDisponivel();
+  }
+
+  private isAbsoluteUrl(destino: string): boolean {
+    return /^https?:\/\//i.test(destino);
+  }
+
+  private normalizarRotaInterna(destino: string): string | null {
+    if (!destino.startsWith('/')) return null;
+    if (destino.startsWith('/app/')) {
+      return destino.substring('/app'.length);
+    }
+    if (destino === '/app') {
+      return '/';
+    }
+    return destino;
   }
 
   private aplicarSelecaoPorInput(): void {
