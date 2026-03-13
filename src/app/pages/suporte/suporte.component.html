@@ -1,0 +1,168 @@
+<app-page-card
+  titulo="Suporte"
+  subtitulo="Abra chamados e acompanhe o histórico de atendimento"
+  [mostrarDivisor]="true"
+>
+  <app-section-card [divider]="false">
+    <div class="toolbar">
+      <div class="toolbar-summary">
+        <div class="summary-pill">
+          <span class="summary-number">{{ chamados.length }}</span>
+          <span class="summary-label">chamado(s)</span>
+        </div>
+        <div class="summary-pill active">
+          <span class="summary-number">{{ totalAbertos }}</span>
+          <span class="summary-label">em andamento</span>
+        </div>
+      </div>
+
+      <div class="toolbar-actions">
+        <button mat-flat-button color="primary" (click)="abrirNovoChamado()">
+          <mat-icon>add</mat-icon>
+          Novo chamado
+        </button>
+      </div>
+    </div>
+  </app-section-card>
+
+  <app-section-card [divider]="false">
+    <div class="support-layout">
+      <aside class="support-sidebar">
+        <div class="sidebar-top">
+          <mat-form-field appearance="outline" class="w-100 compact-field">
+            <mat-label>Buscar chamados</mat-label>
+            <input matInput type="text" (keyup)="aplicarFiltroBusca($event)" />
+            <mat-icon matSuffix>search</mat-icon>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="w-100 compact-field">
+            <mat-label>Status</mat-label>
+            <mat-select [(value)]="statusFiltro" (selectionChange)="aplicarFiltroStatus()">
+              <mat-option value="TODOS">Todos</mat-option>
+              <mat-option value="ABERTO">Aberto</mat-option>
+              <mat-option value="EM_ANALISE">Em análise</mat-option>
+              <mat-option value="AGUARDANDO_CLIENTE">Aguardando cliente</mat-option>
+              <mat-option value="RESPONDIDO">Respondido</mat-option>
+              <mat-option value="RESOLVIDO">Resolvido</mat-option>
+              <mat-option value="FECHADO">Fechado</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div class="sidebar-list">
+          @if(carregandoLista) {
+          <div class="empty-state">Carregando chamados...</div>
+          } @else if(chamadosFiltrados.length > 0) {
+          @for(item of chamadosFiltrados; track item.id) {
+          <button
+            type="button"
+            class="ticket-item"
+            [class.selected]="item.id === chamadoSelecionado?.id"
+            (click)="selecionarChamado(item)"
+          >
+            <div class="ticket-item-top">
+              <span class="ticket-subject">{{ item.assunto }}</span>
+              <span class="ticket-updated">{{ dataRelativa(item.atualizadoEm) }}</span>
+            </div>
+
+            <div class="ticket-meta">
+              <app-status-badge [status]="item.status"></app-status-badge>
+              <span class="priority-chip" [ngClass]="prioridadeClass(item.prioridade)">
+                {{ prioridadeLabel(item.prioridade) }}
+              </span>
+            </div>
+
+            <div class="ticket-footer">
+              <span>{{ categoriaLabel(item.categoria) }}</span>
+              <span>#{{ item.id }}</span>
+            </div>
+          </button>
+          }
+          } @else {
+          <div class="empty-state">
+            Nenhum chamado encontrado. Abra um novo chamado para falar com o suporte.
+          </div>
+          }
+        </div>
+      </aside>
+
+      <section class="support-detail">
+        @if(carregandoDetalhe) {
+        <div class="empty-state">Carregando detalhe do chamado...</div>
+        } @else if(chamadoSelecionado) {
+        <div class="detail-card">
+          <div class="detail-header">
+            <div>
+              <span class="detail-label">Chamado #{{ chamadoSelecionado.id }}</span>
+              <h3>{{ chamadoSelecionado.assunto }}</h3>
+              <div class="detail-meta">
+                <span>{{ categoriaLabel(chamadoSelecionado.categoria) }}</span>
+                <span>•</span>
+                <span>Criado em {{ chamadoSelecionado.criadoEm | date:'dd/MM/yyyy HH:mm' }}</span>
+                <span *ngIf="chamadoSelecionado.fechadoEm">• Fechado em {{ chamadoSelecionado.fechadoEm | date:'dd/MM/yyyy HH:mm' }}</span>
+              </div>
+            </div>
+
+            <div class="detail-badges">
+              <span class="priority-chip" [ngClass]="prioridadeClass(chamadoSelecionado.prioridade)">
+                {{ prioridadeLabel(chamadoSelecionado.prioridade) }}
+              </span>
+              <app-status-badge [status]="chamadoSelecionado.status"></app-status-badge>
+            </div>
+          </div>
+
+          <div class="timeline">
+            @for(msg of chamadoSelecionado.mensagens; track msg.id) {
+            <div class="message-card" [ngClass]="autorMensagemClass(msg.autorTipo)">
+              <div class="message-head">
+                <strong>{{ msg.autorNome || 'Usuário' }}</strong>
+                <span>{{ msg.criadaEm | date:'dd/MM/yyyy HH:mm' }}</span>
+              </div>
+              <div class="message-type">{{ msg.autorTipo === 'CLIENTE' ? 'Você' : 'Suporte' }}</div>
+              <div class="message-body">{{ msg.mensagem }}</div>
+            </div>
+            }
+          </div>
+
+          @if(!naoPodeResponder) {
+          <div class="reply-box">
+            <h4>Responder chamado</h4>
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Mensagem</mat-label>
+              <textarea matInput rows="4" maxlength="3000" [formControl]="respostaForm.controls.mensagem"></textarea>
+              <mat-hint align="end">{{ respostaForm.controls.mensagem.value?.length || 0 }}/3000</mat-hint>
+            </mat-form-field>
+
+            <div class="reply-actions">
+              <button mat-stroked-button color="primary" (click)="fecharChamado()">
+                Fechar chamado
+              </button>
+              <button
+                mat-flat-button
+                color="primary"
+                (click)="responderChamado()"
+                [disabled]="salvandoResposta"
+              >
+                {{ salvandoResposta ? 'Enviando...' : 'Enviar resposta' }}
+              </button>
+            </div>
+          </div>
+          } @else {
+          <div class="closed-box">
+            <mat-icon>task_alt</mat-icon>
+            <div>
+              <strong>Chamado encerrado</strong>
+              <span>Este chamado foi fechado e não aceita novas mensagens.</span>
+            </div>
+          </div>
+          }
+        </div>
+        } @else {
+        <div class="empty-state">
+          Selecione um chamado da lista para ver o histórico ou abra um novo atendimento.
+        </div>
+        }
+      </section>
+    </div>
+  </app-section-card>
+</app-page-card>

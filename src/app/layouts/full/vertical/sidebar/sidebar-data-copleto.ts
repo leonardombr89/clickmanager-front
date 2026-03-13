@@ -192,6 +192,12 @@ export const navItems: NavItem[] = [
         navCap: 'Ajuda',
     },
     {
+        displayName: 'Suporte',
+        iconName: 'lifebuoy',
+        bgcolor: 'primary',
+        route: '/page/suporte',
+    },
+    {
         displayName: 'Central de ajuda',
         iconName: 'help',
         bgcolor: 'primary',
