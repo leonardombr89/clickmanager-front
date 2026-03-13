@@ -1,0 +1,150 @@
+<mat-card class="mat-card-top cardWithShadow overflow-hidden notificacoes-app" [class.embedded]="embedded">
+  <mat-sidenav-container
+    [ngClass]="{
+      'side-panel-opened': sidePanelOpened(),
+      'side-panel-closed': !sidePanelOpened()
+    }"
+    class="h-100 bg-white notifications-shell"
+  >
+    <mat-sidenav
+      #notificacoesList
+      [mode]="isOver() ? 'over' : 'side'"
+      [opened]="!isOver()"
+      (open)="sidePanelOpened.set(true)"
+      (close)="sidePanelOpened.set(false)"
+      style="width: 330px"
+      class="bg-white notifications-sidenav"
+    >
+      <div class="p-16 notifications-sidebar-top">
+        <div class="manual-access manual-access--top">
+          <div class="counter-group">
+            <span class="counter">{{ naoLidas }} não lida(s)</span>
+            <span class="counter-hint">Acompanhe os avisos mais recentes.</span>
+          </div>
+          <app-manual-link
+            [routerLink]="['/page/ajuda']"
+            fragment="notificacoes"
+            label="Manual de notificações"
+            ariaLabel="Abrir manual de notificações"
+            [onlyIcon]="true"
+          />
+        </div>
+
+        <div class="sidebar-search-group">
+          <mat-form-field appearance="outline" class="w-100 hide-hint">
+            <input matInput type="text" (keyup)="aplicarFiltro($event)" placeholder="Buscar notificações" />
+            <mat-icon matSuffix>
+              <i-tabler name="search" class="icon-20 d-flex m-t-2"></i-tabler>
+            </mat-icon>
+          </mat-form-field>
+
+          <button mat-stroked-button color="primary" class="w-100 filter-btn" (click)="toggleSomenteNaoLidas()">
+            {{ somenteNaoLidas ? 'Mostrar todas' : 'Mostrar apenas não lidas' }}
+          </button>
+        </div>
+      </div>
+
+      <div class="position-relative list-scroll">
+        <div class="list-section-header p-x-16">
+          <h4 class="f-s-16 f-w-700 m-0">Notificações</h4>
+          <span class="list-section-count">{{ notificacoesFiltradas().length }}</span>
+        </div>
+        <mat-nav-list class="p-x-16 notifications-list">
+          @if(carregandoLista) {
+          <div class="empty-state">Carregando...</div>
+          } @else if(notificacoesFiltradas().length > 0) {
+          @for(n of notificacoesFiltradas(); track n.id) {
+          <mat-list-item
+            class="notify-item rounded m-b-8"
+            (click)="selecionarNotificacao(n)"
+            [ngClass]="statusNivelClass(n.nivel)"
+            [class.selected]="n.id === selecionada()?.id"
+            [class.unread]="!n.lida"
+            [class.read]="n.lida"
+          >
+            <div class="notify-line">
+              <span class="level-dot" [ngClass]="statusNivelClass(n.nivel)"></span>
+              <div class="notify-main">
+                <span class="notify-title">{{ n.titulo }}</span>
+                <span class="notify-badge" *ngIf="!n.lida">Nova</span>
+              </div>
+              <span class="notify-time">{{ dataRelativa(n.criadaEm) }}</span>
+            </div>
+            <div class="notify-resumo">{{ n.resumo || n.conteudo || 'Sem resumo' }}</div>
+          </mat-list-item>
+          }
+          } @else {
+          <div class="empty-state">Nenhuma notificação encontrada.</div>
+          }
+        </mat-nav-list>
+      </div>
+    </mat-sidenav>
+
+    <mat-toolbar class="b-b-1 bg-white">
+      <div class="d-flex align-items-center justify-content-between w-100">
+        <button (click)="notificacoesList.toggle()" class="d-flex" mat-icon-button>
+          <i-tabler name="menu-2" class="icon-20"></i-tabler>
+        </button>
+
+        <div class="toolbar-actions">
+          <button
+            mat-flat-button
+            color="primary"
+            class="send-btn"
+            *ngIf="podeEnviarNotificacao"
+            (click)="abrirDialogEnvio()"
+            type="button"
+          >
+            Enviar notificação
+          </button>
+          <button
+            mat-stroked-button
+            color="primary"
+            (click)="marcarTodasComoLidas()"
+            [disabled]="!naoLidas || processandoLeitura"
+          >
+            Marcar todas como lidas
+          </button>
+        </div>
+      </div>
+    </mat-toolbar>
+
+    <div class="position-relative detail-panel">
+      <mat-card-content>
+        @if(carregandoDetalhe) {
+        <div class="empty-state">Carregando detalhe...</div>
+        } @else {
+          @if(selecionada(); as item) {
+          <div class="notify-detail" [ngClass]="statusNivelClass(item.nivel)">
+            <div class="detail-top">
+              <h3 class="f-s-24 f-w-700 m-0">{{ item.titulo }}</h3>
+              <mat-chip class="status-chip" [ngClass]="statusNivelClass(item.nivel)">
+                {{ statusNivelLabel(item.nivel) }}
+              </mat-chip>
+            </div>
+
+            <div class="detail-meta">
+              <span>{{ item.criadaEm | date:'dd/MM/yyyy HH:mm' }}</span>
+              <span *ngIf="item.lida && item.lidaEm">• Lida em {{ item.lidaEm | date:'dd/MM/yyyy HH:mm' }}</span>
+            </div>
+
+            <p class="detail-resumo" *ngIf="item.resumo">{{ item.resumo }}</p>
+
+            <div class="detail-conteudo">
+              {{ item.conteudo || 'Sem conteúdo detalhado.' }}
+            </div>
+
+            <div class="detail-actions" *ngIf="item.link">
+              <button mat-flat-button color="primary" (click)="abrirLink(item.link)">
+                Abrir link relacionado
+              </button>
+            </div>
+          </div>
+          } @else {
+          <div class="empty-state">Selecione uma notificação para ver o detalhe.</div>
+          }
+        }
+      </mat-card-content>
+    </div>
+  </mat-sidenav-container>
+</mat-card>

@@ -35,7 +35,7 @@ import { PedidoService } from '../../pedido/pedido.service';
 import { ItemTipo } from 'src/app/models/pedido/item-tipo.enum';
 import { PedidoResponse } from 'src/app/models/pedido/pedido-response.model';
 
-import { CalculadoraConfigService } from '../../smart-calc-config/calculadora-config.service';
+import { CalculadoraConfigService } from 'src/app/pages/smart-calc-config/calculadora-config.service';
 import { CalculadoraConfigResponse } from 'src/app/models/calculadora/calculadora-config-response.model';
 import { extrairMensagemErro } from 'src/app/utils/mensagem.util';
 

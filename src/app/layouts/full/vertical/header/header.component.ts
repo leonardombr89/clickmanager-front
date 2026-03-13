@@ -3,42 +3,25 @@ import {
   Output,
   EventEmitter,
   Input,
-  signal,
   ViewEncapsulation,
   OnInit,
+  OnDestroy,
 } from '@angular/core';
 import { CoreService } from 'src/app/services/core.service';
 import { MatDialog } from '@angular/material/dialog';
 import { TablerIconsModule } from 'angular-tabler-icons';
 import { MaterialModule } from 'src/app/material.module';
-import { RouterModule } from '@angular/router';
+import { NavigationEnd, Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { NgScrollbarModule } from 'ngx-scrollbar';
-import { AppSettings } from 'src/app/config';
 import { AuthService } from 'src/app/services/auth.service';
 import { Usuario } from 'src/app/models/usuario/usuario.model';
 import { ImagemUtil } from 'src/app/utils/imagem-util';
-import { CalculadoraConfigListResponse } from 'src/app/models/calculadora/calculadora-config-list-response.model';
-import { CalculadoraConfigService } from 'src/app/pages/smart-calc-config/calculadora-config.service';
 import { SmartCalcComponent } from 'src/app/pages/apps/smart-calc/smart-calc.component';
-import { CalculadoraConfigResponse } from 'src/app/models/calculadora/calculadora-config-response.model';
-
-interface notifications {
-  id: number;
-  img: string;
-  title: string;
-  subtitle: string;
-}
-
-interface profiledd {
-  id: number;
-  img: string;
-  title: string;
-  subtitle: string;
-  link: string;
-  color: string;
-}
+import { NotificacaoItem } from 'src/app/pages/notificacoes/models/notificacao.model';
+import { NotificacaoService } from 'src/app/pages/notificacoes/services/notificacao.service';
+import { NotificacaoEnviarDialogComponent } from 'src/app/pages/notificacoes/components/notificacao-enviar-dialog.component';
+import { Subject, filter, takeUntil } from 'rxjs';
 
 interface quicklinks {
   id: number;
@@ -58,7 +41,7 @@ interface quicklinks {
   templateUrl: './header.component.html',
   encapsulation: ViewEncapsulation.None,
 })
-export class HeaderComponent implements OnInit {
+export class HeaderComponent implements OnInit, OnDestroy {
   @Input() showToggle = true;
   @Input() toggleChecked = false;
   @Output() toggleMobileNav = new EventEmitter<void>();
@@ -72,21 +55,53 @@ export class HeaderComponent implements OnInit {
   usuarioLogado: Usuario | null = null;
 
   options = this.settings.getOptions();
-
-  calculadoraConfig: CalculadoraConfigResponse | null = null;
+  notificacoes: NotificacaoItem[] = [];
+  notificacoesNaoLidas = 0;
+  carregandoNotificacoes = false;
+  podeEnviarNotificacao = false;
+  private readonly permissoesEnviarNotificacao = ['NOTIFICACAO_ENVIAR', 'NOTIFICACAO_ENVIAR_EMPRESA'];
+  private readonly destroy$ = new Subject<void>();
+  private ultimaCargaResumoAt = 0;
+  private readonly intervaloMinimoResumoMs = 5000;
 
   constructor(
     private settings: CoreService,
     private vsidenav: CoreService,
     public dialog: MatDialog,
     private authService: AuthService,
-    private calculadoraService: CalculadoraConfigService
+    private notificacaoService: NotificacaoService,
+    private router: Router
   ) { }
 
   ngOnInit() {
-    this.authService.usuario$.subscribe(usuario => {
+    this.authService.usuario$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(usuario => {
       this.usuarioLogado = usuario;
+      this.atualizarPermissaoEnvio();
+      if (usuario?.id) {
+        this.carregarResumoNotificacoes(true);
+      } else {
+        this.notificacoes = [];
+        this.notificacoesNaoLidas = 0;
+        this.ultimaCargaResumoAt = 0;
+      }
     });
+
+    this.router.events
+      .pipe(
+        filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+        takeUntil(this.destroy$)
+      )
+      .subscribe(() => {
+        if (!this.usuarioLogado?.id) return;
+        this.carregarResumoNotificacoes();
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   toggleCollpase() {
@@ -127,36 +142,127 @@ export class HeaderComponent implements OnInit {
     }
   ];
 
-  notifications: notifications[] = [
-    {
-      id: 1,
-      img: 'assets/images/profile/user-1.jpg',
-      title: 'Roman Joined the Team!',
-      subtitle: 'Congratulate him sf',
-    },
-    {
-      id: 2,
-      img: 'assets/images/profile/user-2.jpg',
-      title: 'New message received',
-      subtitle: 'Salma sent you new message',
-    },
-    {
-      id: 3,
-      img: 'assets/images/profile/user-3.jpg',
-      title: 'New Payment received',
-      subtitle: 'Check your earnings',
-    },
-    {
-      id: 4,
-      img: 'assets/images/profile/user-4.jpg',
-      title: 'Jolly completed tasks',
-      subtitle: 'Assign her new tasks',
-    },
-    {
-      id: 5,
-      img: 'assets/images/profile/user-5.jpg',
-      title: 'Hitesh Joined thed Team!',
-      subtitle: 'Congratulate him',
-    },
-  ];
+  onOpenNotificacoesMenu(): void {
+    this.atualizarPermissaoEnvio();
+    this.carregarResumoNotificacoes(true);
+  }
+
+  abrirNotificacao(item: NotificacaoItem): void {
+    if (!item?.id) return;
+    this.notificacaoService.marcarComoLida$(item.id).subscribe({
+      next: () => {
+        this.notificacoesNaoLidas = Math.max(0, this.notificacoesNaoLidas - (item.lida ? 0 : 1));
+        this.notificacoes = this.notificacoes.map((n) => (n.id === item.id ? { ...n, lida: true } : n));
+      },
+      error: () => {}
+    });
+    this.abrirCentralNotificacoes(item.id);
+  }
+
+  abrirTodasNotificacoes(): void {
+    this.abrirCentralNotificacoes();
+  }
+
+  abrirDialogEnvioNotificacao(): void {
+    this.atualizarPermissaoEnvio();
+    if (!this.podeEnviarNotificacao) return;
+    const dialogRef = this.dialog.open(NotificacaoEnviarDialogComponent, {
+      width: '720px',
+      maxWidth: '95vw',
+      disableClose: true
+    });
+
+    dialogRef.afterClosed().subscribe((enviou) => {
+      if (!enviou) return;
+      this.carregarResumoNotificacoes(true);
+      this.abrirCentralNotificacoes();
+    });
+  }
+
+  marcarTodasNotificacoesComoLidas(): void {
+    if (!this.notificacoesNaoLidas) return;
+    this.notificacaoService.marcarTodasComoLidas$().subscribe({
+      next: () => {
+        this.notificacoesNaoLidas = 0;
+        this.notificacoes = this.notificacoes.map((n) => ({ ...n, lida: true }));
+      },
+      error: () => {}
+    });
+  }
+
+  notificacaoLabelNova(): string {
+    return `${this.notificacoesNaoLidas} nova(s)`;
+  }
+
+  possuiNotificacaoCriticaNaoLida(): boolean {
+    return this.notificacoes.some(
+      (item) => !item.lida && String(item?.nivel || '').toUpperCase() === 'CRITICO'
+    );
+  }
+
+  formatarTempoNotificacao(iso?: string | null): string {
+    if (!iso) return 'Agora';
+    const date = new Date(iso);
+    const diffMs = Date.now() - date.getTime();
+    const min = Math.floor(diffMs / 60000);
+    if (min < 1) return 'Agora';
+    if (min < 60) return `${min} min`;
+    const h = Math.floor(min / 60);
+    if (h < 24) return `${h}h`;
+    const d = Math.floor(h / 24);
+    return `${d}d`;
+  }
+
+  resumoNotificacao(item: NotificacaoItem): string {
+    return String(item.resumo || item.conteudo || 'Sem resumo');
+  }
+
+  iconeNotificacao(item: NotificacaoItem): string {
+    const nivel = String(item?.nivel || 'INFO').toUpperCase();
+    if (nivel === 'CRITICO') return 'alert-octagon';
+    if (nivel === 'ATENCAO') return 'alert-triangle';
+    if (nivel === 'SUCESSO') return 'circle-check';
+    return 'info-circle';
+  }
+
+  private carregarResumoNotificacoes(force = false): void {
+    if (!force) {
+      const agora = Date.now();
+      if (agora - this.ultimaCargaResumoAt < this.intervaloMinimoResumoMs) {
+        return;
+      }
+    }
+
+    this.carregandoNotificacoes = true;
+    this.notificacaoService.obterResumo$(5).subscribe({
+      next: (resumo) => {
+        this.notificacoes = resumo.itens || [];
+        this.notificacoesNaoLidas = Number(resumo.naoLidas || 0);
+        this.carregandoNotificacoes = false;
+        this.ultimaCargaResumoAt = Date.now();
+      },
+      error: () => {
+        this.carregandoNotificacoes = false;
+      }
+    });
+  }
+
+  private atualizarPermissaoEnvio(): void {
+    this.podeEnviarNotificacao = this.authService.temAlgumaPermissao(this.permissoesEnviarNotificacao);
+  }
+
+  private abrirCentralNotificacoes(notificacaoId?: number): void {
+    const usuarioId = this.usuarioLogado?.id ?? this.authService.getJwtId();
+    if (!usuarioId) {
+      this.router.navigate(notificacaoId ? ['/apps/notificacoes', notificacaoId] : ['/apps/notificacoes']);
+      return;
+    }
+
+    const queryParams: Record<string, any> = { tab: 'notificacoes' };
+    if (notificacaoId) {
+      queryParams['notificacaoId'] = notificacaoId;
+    }
+
+    this.router.navigate(['/theme-pages/account-setting', usuarioId], { queryParams });
+  }
 }

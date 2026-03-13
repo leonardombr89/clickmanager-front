@@ -89,6 +89,13 @@ export class AuthService {
     return Object.prototype.hasOwnProperty.call(permissoes, permissao);
   }
 
+  temAlgumaPermissao(permissoes: string[]): boolean {
+    if (!Array.isArray(permissoes) || permissoes.length === 0) {
+      return false;
+    }
+    return permissoes.some((permissao) => this.temPermissao(permissao));
+  }
+
   isAuthenticated(): boolean {
     return !!this.tokenStorage.getToken();
   }

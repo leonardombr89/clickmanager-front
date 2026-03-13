@@ -20,6 +20,7 @@ import { AuthService } from 'src/app/services/auth.service';
 import { Usuario } from 'src/app/models/usuario/usuario.model';
 import { OnboardingWizardComponent } from 'src/app/components/onboarding/onboarding-wizard.component';
 import { Subscription } from 'rxjs';
+import { AppNotificacoesComponent } from '../../notificacoes/notificacoes.component';
 
 @Component({
   selector: 'app-account-setting',
@@ -38,9 +39,11 @@ import { Subscription } from 'rxjs';
     MatDividerModule,
     MatDialogModule,
     ReactiveFormsModule,
-    OnboardingWizardComponent
+    OnboardingWizardComponent,
+    AppNotificacoesComponent
   ],
   templateUrl: './account-setting.component.html',
+  styleUrl: './account-setting.component.scss',
 })
 export class AppAccountSettingComponent implements OnInit, OnDestroy {
   
@@ -52,7 +55,10 @@ export class AppAccountSettingComponent implements OnInit, OnDestroy {
   usuarioId?: string;
   isProprietario = false;
   usuarioAtual: Usuario | null = null;
+  selectedTabIndex = 0;
+  notificacaoSelecionadaId: number | null = null;
   private usuarioSub?: Subscription;
+  private queryParamsSub?: Subscription;
 
   constructor(
     private fb: FormBuilder,
@@ -72,6 +78,21 @@ export class AppAccountSettingComponent implements OnInit, OnDestroy {
       this.isProprietario = !!u?.proprietario;
     });
 
+    this.queryParamsSub = this.route.queryParamMap.subscribe((params) => {
+      const tab = String(params.get('tab') || '').toLowerCase();
+      if (tab === 'notificacoes') {
+        this.selectedTabIndex = 2;
+      } else if (tab === 'preferencias') {
+        this.selectedTabIndex = 1;
+      } else {
+        this.selectedTabIndex = 0;
+      }
+
+      const notificacaoIdRaw = params.get('notificacaoId');
+      const notificacaoId = notificacaoIdRaw ? Number(notificacaoIdRaw) : NaN;
+      this.notificacaoSelecionadaId = Number.isFinite(notificacaoId) && notificacaoId > 0 ? notificacaoId : null;
+    });
+
     const userId = this.route.snapshot.paramMap.get('id');
     if (userId) {
       this.usuarioId = userId;
@@ -81,6 +102,7 @@ export class AppAccountSettingComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.usuarioSub?.unsubscribe();
+    this.queryParamsSub?.unsubscribe();
   }
 
   private criarFormulario(): FormGroup {
