@@ -4,6 +4,18 @@ import { Observable } from 'rxjs';
 import { EmpresaComUsuarioCreateRequest } from 'src/app/models/empresa/empresa.usuario.create.request';
 import { ApiService } from 'src/app/services/api.service';
 
+export interface OnboardingCadastroResponse {
+  cadastroConcluido: boolean;
+  eventoConversao: string;
+  empresaId: number;
+  empresaNome: string;
+  usuarioId: number;
+  usuarioNome: string;
+  usuarioUsername: string;
+  onboardingConcluido: boolean;
+  trialInicio: string;
+  trialFim: string;
+}
 
 @Injectable({ providedIn: 'root' })
 export class OnboardingService {
@@ -14,7 +26,7 @@ export class OnboardingService {
 
   registrarEmpresaComGestor(
     payload: EmpresaComUsuarioCreateRequest
-  ): Observable<void> {
-    return this.api.post<void>(`${this.endpoint}/register-empresa`, payload);
+  ): Observable<OnboardingCadastroResponse> {
+    return this.api.post<OnboardingCadastroResponse>(`${this.endpoint}/register-empresa`, payload);
   }
 }
