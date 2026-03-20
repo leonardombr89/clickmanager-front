@@ -10,6 +10,7 @@ import { AppSideForgotPasswordComponent } from './side-forgot-password/side-forg
 import { AppSideLoginComponent } from './side-login/side-login.component';
 import { AppSideTwoStepsComponent } from './side-two-steps/side-two-steps.component';
 import { AppBoxedResetPasswordComponent } from './boxed-reset-password/boxed-reset-password.component';
+import { AppCadastroConcluidoComponent } from './cadastro-concluido/cadastro-concluido.component';
 
 
 export const AuthenticationRoutes: Routes = [
@@ -31,6 +32,10 @@ export const AuthenticationRoutes: Routes = [
       {
         path: 'registro-gestor',
         component: AppBoxedRegisterComponent,
+      },
+      {
+        path: 'cadastro-concluido',
+        component: AppCadastroConcluidoComponent,
       },
       {
         path: 'boxed-two-steps',
