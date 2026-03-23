@@ -286,7 +286,7 @@
     </section>
 
     <!-- 5. Contato rápido (oculto) -->
-    <section class="spacer bg-white" id="lead-rapido" *ngIf="false">
+    <section class="spacer bg-white" id="lead-rapido" #leadFormSection>
       <div class="container">
         <div class="row justify-content-center">
           <div class="col-lg-8 text-center">
@@ -299,29 +299,47 @@
         </div>
         <div class="row justify-content-center m-t-16">
           <div class="col-lg-8">
-            <div class="cardWithShadow p-20">
-              <form class="row g-3">
+            <div class="cardWithShadow p-20 lead-form-card">
+              @if (leadEnviado) {
+                <div class="lead-success-banner m-b-16">
+                  <i-tabler name="circle-check" class="icon-20"></i-tabler>
+                  Recebemos seu contato. Nossa equipe vai falar com você em breve.
+                </div>
+              }
+              <form class="row g-3" [formGroup]="leadForm" (ngSubmit)="submitLead()">
                 <div class="col-md-4">
                   <mat-form-field appearance="outline" class="w-100">
                     <mat-label>Nome</mat-label>
-                    <input matInput placeholder="Seu nome">
+                    <input matInput placeholder="Seu nome" formControlName="nome" (focus)="onLeadFieldFocus()">
                   </mat-form-field>
                 </div>
                 <div class="col-md-4">
                   <mat-form-field appearance="outline" class="w-100">
                     <mat-label>E-mail</mat-label>
-                    <input matInput type="email" placeholder="email@empresa.com">
+                    <input matInput type="email" placeholder="email@empresa.com" formControlName="email" (focus)="onLeadFieldFocus()">
                   </mat-form-field>
                 </div>
                 <div class="col-md-4">
                   <mat-form-field appearance="outline" class="w-100">
                     <mat-label>Telefone</mat-label>
-                    <input matInput type="tel" placeholder="(00) 00000-0000">
+                    <input matInput type="tel" placeholder="(00) 00000-0000" formControlName="celular" (focus)="onLeadFieldFocus()">
+                  </mat-form-field>
+                </div>
+                <div class="col-12">
+                  <mat-form-field appearance="outline" class="w-100">
+                    <mat-label>Mensagem</mat-label>
+                    <textarea
+                      matInput
+                      rows="4"
+                      placeholder="Conte rapidamente qual é o seu cenário."
+                      formControlName="mensagem"
+                      (focus)="onLeadFieldFocus()"
+                    ></textarea>
                   </mat-form-field>
                 </div>
                 <div class="col-12 text-center">
-                  <button mat-flat-button color="primary" type="button">
-                    Quero contato rápido
+                  <button mat-flat-button color="primary" type="submit" [disabled]="enviandoLead">
+                    {{ enviandoLead ? 'Enviando...' : 'Quero contato rápido' }}
                   </button>
                 </div>
               </form>
@@ -363,6 +381,10 @@
             </p>
           </div>
           <div class="hstack m-t-16 cta-buttons">
+            <button mat-flat-button color="accent" type="button" (click)="scrollToLeadForm()" class="btn-custom sm btn-ghost-light">
+              <i-tabler name="message-circle" class="icon-18 m-r-6"></i-tabler>
+              Quero falar com a equipe
+            </button>
             <a mat-flat-button color="primary" [routerLink]="['/authentication/registro-gestor']" class="btn-custom btn-primary-glow">
               <i-tabler name="edit" class="icon-18 m-r-6"></i-tabler>
               Cadastre-se
