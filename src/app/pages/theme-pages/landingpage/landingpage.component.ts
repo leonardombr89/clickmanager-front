@@ -1,10 +1,27 @@
-import { Component, Output, EventEmitter, Input, OnInit, OnDestroy } from '@angular/core';
+import { CommonModule, ViewportScroller } from '@angular/common';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  EventEmitter,
+  Input,
+  OnDestroy,
+  OnInit,
+  Output,
+  ViewChild,
+} from '@angular/core';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CoreService } from 'src/app/services/core.service';
-import { ViewportScroller } from '@angular/common';
 import { MaterialModule } from 'src/app/material.module';
 import { TablerIconsModule } from 'angular-tabler-icons';
 import { RouterLink } from '@angular/router';
+import { ToastrService } from 'ngx-toastr';
 import { BrandingComponent } from '../../../layouts/full/vertical/sidebar/branding.component';
+import {
+  LandingEtapaFunil,
+  LandingpagePublicService,
+  PublicContatoRequest,
+} from './landingpage-public.service';
 
 interface Feature {
   icon: string;
@@ -58,11 +75,12 @@ interface CaseStudy {
 @Component({
   selector: 'app-landingpage',
   standalone: true,
-  imports: [MaterialModule, TablerIconsModule, RouterLink, BrandingComponent],
+  imports: [CommonModule, MaterialModule, TablerIconsModule, RouterLink, BrandingComponent, ReactiveFormsModule],
   templateUrl: './landingpage.component.html',
   styleUrls: ['./landingpage.component.scss'],
 })
-export class AppLandingpageComponent implements OnInit, OnDestroy {
+export class AppLandingpageComponent implements OnInit, AfterViewInit, OnDestroy {
+  @ViewChild('leadFormSection') private leadFormSection?: ElementRef<HTMLElement>;
   @Input() showToggle = true;
   @Output() toggleMobileNav = new EventEmitter<void>();
   @Output() toggleMobileFilterNav = new EventEmitter<void>();
@@ -70,14 +88,36 @@ export class AppLandingpageComponent implements OnInit, OnDestroy {
 
   options = this.settings.getOptions();
   currentYear: number = new Date().getFullYear();
+  enviandoLead = false;
+  leadEnviado = false;
+
+  readonly leadForm = new FormGroup({
+    nome: new FormControl('', [Validators.required]),
+    email: new FormControl('', [Validators.required, Validators.email]),
+    celular: new FormControl('', [Validators.required]),
+    mensagem: new FormControl('Quero conhecer o ClickManager e entender como ele pode ajudar minha empresa.'),
+  });
+
+  private readonly pageTitle = 'Landing Principal';
+  private readonly landingSessionStorageKey = 'clickmanager:landing:session-id';
+  private readonly landingStageStoragePrefix = 'clickmanager:landing:stage';
+  private sessionId = '';
+  private leadFormObserver?: IntersectionObserver;
 
   constructor(
     private settings: CoreService,
-    private scroller: ViewportScroller
+    private scroller: ViewportScroller,
+    private readonly landingpagePublicService: LandingpagePublicService,
+    private readonly toastr: ToastrService
   ) {}
 
   scrollTo(anchor: string) {
     this.scroller.scrollToAnchor(anchor);
+  }
+
+  scrollToLeadForm(): void {
+    this.scroller.scrollToAnchor('lead-rapido');
+    this.registrarEtapaFunil('FORMULARIO_VISUALIZADO');
   }
 
   timeWins: TimeWin[] = [
@@ -270,11 +310,18 @@ export class AppLandingpageComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.sessionId = this.ensureSessionId();
+    this.registrarEtapaFunil('LANDING_VISUALIZADA');
     this.startCarousel();
+  }
+
+  ngAfterViewInit(): void {
+    this.observeLeadFormSection();
   }
 
   ngOnDestroy(): void {
     this.stopCarousel();
+    this.leadFormObserver?.disconnect();
   }
 
   pauseCarousel(): void {
@@ -283,6 +330,56 @@ export class AppLandingpageComponent implements OnInit, OnDestroy {
 
   resumeCarousel(): void {
     this.startCarousel();
+  }
+
+  onLeadFieldFocus(): void {
+    this.registrarEtapaFunil('FORMULARIO_VISUALIZADO');
+  }
+
+  submitLead(): void {
+    if (this.leadForm.invalid) {
+      this.leadForm.markAllAsTouched();
+      this.toastr.error('Preencha os campos obrigatórios para enviar seu contato.');
+      return;
+    }
+
+    this.registrarEtapaFunil('FORMULARIO_VISUALIZADO');
+    this.enviandoLead = true;
+
+    const payload: PublicContatoRequest = {
+      nome: this.leadForm.controls.nome.value?.trim() || '',
+      email: this.leadForm.controls.email.value?.trim() || '',
+      celular: this.leadForm.controls.celular.value?.trim() || '',
+      mensagem:
+        this.leadForm.controls.mensagem.value?.trim() ||
+        'Quero conhecer o ClickManager e entender como ele pode ajudar minha empresa.',
+      pagina: this.pageTitle,
+      path: this.getCurrentPath(),
+      referrer: document.referrer || '',
+      utmSource: this.getUtmParam('utm_source'),
+      utmMedium: this.getUtmParam('utm_medium'),
+      utmCampaign: this.getUtmParam('utm_campaign'),
+      sessionId: this.sessionId,
+    };
+
+    this.landingpagePublicService.enviarContato(payload).subscribe({
+      next: () => {
+        this.enviandoLead = false;
+        this.leadEnviado = true;
+        this.leadForm.reset({
+          nome: '',
+          email: '',
+          celular: '',
+          mensagem: 'Quero conhecer o ClickManager e entender como ele pode ajudar minha empresa.',
+        });
+        this.toastr.success('Recebemos seu contato. Vamos falar com você em breve.');
+      },
+      error: (err) => {
+        this.enviandoLead = false;
+        const message = err?.error?.message || 'Nao foi possivel enviar seu contato agora.';
+        this.toastr.error(message);
+      },
+    });
   }
 
   private startCarousel(): void {
@@ -295,5 +392,66 @@ export class AppLandingpageComponent implements OnInit, OnDestroy {
       clearInterval(this.testimonialInterval);
       this.testimonialInterval = null;
     }
+  }
+
+  private observeLeadFormSection(): void {
+    if (!this.leadFormSection || typeof IntersectionObserver === 'undefined') {
+      return;
+    }
+
+    this.leadFormObserver = new IntersectionObserver(
+      entries => {
+        const isVisible = entries.some(entry => entry.isIntersecting);
+        if (!isVisible) {
+          return;
+        }
+
+        this.registrarEtapaFunil('FORMULARIO_VISUALIZADO');
+        this.leadFormObserver?.disconnect();
+      },
+      { threshold: 0.35 }
+    );
+
+    this.leadFormObserver.observe(this.leadFormSection.nativeElement);
+  }
+
+  private registrarEtapaFunil(etapaFunil: LandingEtapaFunil): void {
+    const stageStorageKey = `${this.landingStageStoragePrefix}:${etapaFunil}:${this.getCurrentPath()}`;
+    if (sessionStorage.getItem(stageStorageKey)) {
+      return;
+    }
+
+    this.landingpagePublicService.registrarEtapa({
+      pagina: this.pageTitle,
+      path: this.getCurrentPath(),
+      sessionId: this.sessionId,
+      etapaFunil,
+    }).subscribe({
+      next: () => sessionStorage.setItem(stageStorageKey, '1'),
+      error: () => undefined,
+    });
+  }
+
+  private ensureSessionId(): string {
+    const existing = localStorage.getItem(this.landingSessionStorageKey);
+    if (existing) {
+      return existing;
+    }
+
+    const generated =
+      typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+        ? crypto.randomUUID()
+        : `landing-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+
+    localStorage.setItem(this.landingSessionStorageKey, generated);
+    return generated;
+  }
+
+  private getCurrentPath(): string {
+    return window.location.pathname || '/';
+  }
+
+  private getUtmParam(key: 'utm_source' | 'utm_medium' | 'utm_campaign'): string {
+    return new URLSearchParams(window.location.search).get(key) || '';
   }
 }
