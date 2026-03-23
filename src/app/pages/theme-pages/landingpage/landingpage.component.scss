@@ -32,3 +32,20 @@
   background: #f6f8fb;
   color: #1d2a3b;
 }
+
+.lead-form-card {
+  border-radius: 20px;
+  box-shadow: 0 18px 56px rgba(15, 23, 42, 0.08);
+}
+
+.lead-success-banner {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: rgba(25, 135, 84, 0.1);
+  color: #157347;
+  font-weight: 600;
+}
