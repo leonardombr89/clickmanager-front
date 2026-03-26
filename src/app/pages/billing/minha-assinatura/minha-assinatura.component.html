@@ -122,7 +122,10 @@
   <mat-card class="card m-t-16">
     <mat-card-content>
       <div class="card-heading m-b-8">
-        <h3 class="f-w-700 m-0">Pagamentos</h3>
+        <div>
+          <h3 class="f-w-700 m-0">Histórico de pagamentos</h3>
+          <p class="text-muted f-s-13 m-t-4 m-b-0">Use esta tabela apenas para consulta das cobranças já geradas.</p>
+        </div>
       </div>
       <div class="table-responsive">
         <table mat-table [dataSource]="pagamentos" class="w-100">
@@ -169,7 +172,7 @@
                 *ngIf="p.invoiceUrl && statusPendente(p.status)"
                 (click)="abrirLink(p.invoiceUrl)"
               >
-                Pagar agora
+                Abrir cobrança
               </button>
               <span *ngIf="!(p.invoiceUrl && statusPendente(p.status))">—</span>
             </td>

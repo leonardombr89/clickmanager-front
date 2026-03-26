@@ -22,7 +22,7 @@
       <div class="col-sm-6 col-lg-4 m-b-16">
         <app-pricing-card
           [plano]="plano"
-          [popular]="plano.popular || false"
+          [popular]="false"
           [imgSrc]="plano.imgSrc"
           [ativo]="planoSelecionado?.id === plano.id"
           [mostrarAnual]="false"
@@ -31,6 +31,28 @@
         </app-pricing-card>
       </div>
       }
+    </div>
+
+    <div class="selected-plan-summary m-t-24" *ngIf="planoSelecionado as plano">
+      <div class="selected-plan-summary__label">Plano selecionado</div>
+      <div class="selected-plan-summary__badge" *ngIf="benefitCodeSelecionado as code">
+        Benefício aplicado: {{ code }}
+      </div>
+      <div class="selected-plan-summary__title">
+        {{ plano.nome }}
+        <span class="selected-plan-summary__price">
+          {{ precoMensal(plano) | currency:(plano.moeda || 'BRL'):'symbol-narrow':'1.2-2':'pt-BR' }}/mês
+        </span>
+      </div>
+      <div class="selected-plan-summary__original" *ngIf="temDesconto(plano)">
+        De {{ precoOriginal(plano) | currency:(plano.moeda || 'BRL'):'symbol-narrow':'1.2-2':'pt-BR' }}/{{ periodicidadeLabel(plano) }}
+      </div>
+      <div class="selected-plan-summary__billing" *ngIf="exibeValorCheio(plano)">
+        Cobrança de {{ preco(plano) | currency:(plano.moeda || 'BRL'):'symbol-narrow':'1.2-2':'pt-BR' }}/{{ periodicidadeLabel(plano) }}
+      </div>
+      <div class="selected-plan-summary__description" *ngIf="descricaoPlano(plano) as descricao">
+        {{ descricao }}
+      </div>
     </div>
 
     <div class="m-t-16 d-flex flex-wrap gap-10 align-items-center">

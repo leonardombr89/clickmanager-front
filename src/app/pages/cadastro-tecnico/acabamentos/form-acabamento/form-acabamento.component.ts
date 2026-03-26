@@ -14,8 +14,6 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 
 import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
-import { MatTabsModule } from '@angular/material/tabs';
 
 import { Observable } from 'rxjs';
 
@@ -27,9 +25,11 @@ import { AcabamentoVariacaoRequest } from 'src/app/models/acabamento/acabamento-
 import { PrecoRequest } from 'src/app/models/preco/preco.model';
 
 import { InputTextoRestritoComponent } from '../../../../components/inputs/input-texto/input-texto-restrito.component';
-import { CardHeaderComponent } from 'src/app/components/card-header/card-header.component';
 import { AcabamentoVariacaoForm, VariacoesAcabamentoComponent } from '../variacoes-acabamento/variacoes-acabamento.component';
 import { extrairMensagemErro } from 'src/app/utils/mensagem.util';
+import { PageCardComponent } from 'src/app/components/page-card/page-card.component';
+import { SectionCardComponent } from 'src/app/components/section-card/section-card.component';
+import { InputTextareaComponent } from 'src/app/components/inputs/input-textarea/input-textarea.component';
 
 @Component({
   selector: 'app-form-acabamento',
@@ -38,12 +38,12 @@ import { extrairMensagemErro } from 'src/app/utils/mensagem.util';
     CommonModule,
     RouterModule,
     ReactiveFormsModule,
-    MatCardModule,
     MatButtonModule,
-    MatTabsModule,
     InputTextoRestritoComponent,
-    CardHeaderComponent,
-    VariacoesAcabamentoComponent
+    VariacoesAcabamentoComponent,
+    PageCardComponent,
+    SectionCardComponent,
+    InputTextareaComponent
   ],
   templateUrl: './form-acabamento.component.html',
   styleUrl: './form-acabamento.component.scss'

@@ -1,64 +1,237 @@
-<!-- Nova Variação (acordeon) -->
 <mat-accordion [multi]="false" #accordion="matAccordion">
   <mat-expansion-panel #novaVarPanel class="cardWithShadow" [expanded]="false">
     <mat-expansion-panel-header>
-      <mat-panel-title class="f-w-600">Nova Variação</mat-panel-title>
+      <mat-panel-title class="f-w-600">Gerar variações</mat-panel-title>
       <mat-panel-description class="f-s-14">
-        Clique para preencher os campos
+        Selecione grupos e gere várias combinações de uma vez
       </mat-panel-description>
     </mat-expansion-panel-header>
 
-    <div *ngIf="formVariacaoAtual" class="p-16">
-
-      <div class="row g-3 m-b-16">
-        <div class="col-md-4">
-          <app-auto-complete [control]="getFormControl(formVariacaoAtual.get('materialId'))" label="Material (opcional)"
-            [displayWith]="mostrarDescricaoMaterial" [buscarFn]="buscarMateriais" [minimoCaracteres]="0"
-            [multiplo]="false">
-          </app-auto-complete>
+    <div *ngIf="formVariacaoAtual" class="builder-shell p-16">
+      <div class="builder-intro">
+        <div>
+          <div class="builder-title">Selecione os grupos e defina o preço base</div>
+          <div class="builder-copy">
+            Monte várias combinações de uma vez. Deixe materiais ou formatos em branco quando a regra precisar valer para todos.
+          </div>
         </div>
+      </div>
 
-        <div class="col-md-4">
-          <app-auto-complete [control]="getFormControl(formVariacaoAtual.get('formatoId'))" label="Formato (opcional)"
-            [displayWith]="mostrarDescricaoFormato" [buscarFn]="buscarFormatos" [minimoCaracteres]="0"
-            [multiplo]="false">
-          </app-auto-complete>
-        </div>
-
-        <div class="col-md-4">
-          <app-auto-complete [control]="getFormControl(formVariacaoAtual.get('tipoAplicacao'))"
-            label="Tipo de Aplicação" [displayWith]="mostrarTipoAplicacao" [buscarFn]="buscarTiposAplicacao"
-            [minimoCaracteres]="0" [multiplo]="false">
-          </app-auto-complete>
-        </div>
-
+      <div class="builder-status">
+        <span class="builder-status-item">
+          {{ materiaisSelecionadosCount || 'Todos' }} materiais
+        </span>
+        <span class="builder-status-divider">•</span>
+        <span class="builder-status-item">
+          {{ formatosSelecionadosCount || 'Todos' }} formatos
+        </span>
+        <span class="builder-status-divider">•</span>
+        <span class="builder-status-item">
+          {{ tiposAplicacaoSelecionadosCount }} aplicações
+        </span>
+        <span class="builder-status-divider">→</span>
+        <span class="builder-status-item builder-status-item--highlight">
+          {{ totalCombinacoes }} combinações
+        </span>
       </div>
 
       <div class="row g-3 m-b-16">
-        <div class="col-md-12">
-          <app-preco-selector [formGroup]="getFormGroup(formVariacaoAtual.get('preco')!)"
-            [tiposDisponiveis]="['FIXO', 'QUANTIDADE', 'DEMANDA', 'METRO', 'HORA']">
-          </app-preco-selector>
+        <div class="col-md-4">
+          <app-input-multi-select
+            [control]="getFormControl(formVariacaoAtual.get('materiaisIds'))"
+            [label]="'Materiais (opcional)'"
+            [options]="materiaisOptions"
+            [cardMinHeight]="280"
+            [listHeight]="220"
+            [searchPlaceholder]="'Buscar material'"
+            [showSelectedCount]="false"
+            [visualStyle]="'subtle'">
+          </app-input-multi-select>
         </div>
+
+        <div class="col-md-4">
+          <app-input-multi-select
+            [control]="getFormControl(formVariacaoAtual.get('formatosIds'))"
+            [label]="'Formatos (opcional)'"
+            [options]="formatosOptions"
+            [cardMinHeight]="280"
+            [listHeight]="220"
+            [searchPlaceholder]="'Buscar formato'"
+            [showSelectedCount]="false"
+            [visualStyle]="'subtle'">
+          </app-input-multi-select>
+        </div>
+
+        <div class="col-md-4">
+          <app-input-multi-select
+            [control]="getFormControl(formVariacaoAtual.get('tiposAplicacao'))"
+            [label]="'Tipos de aplicação'"
+            [options]="tiposAplicacaoOptions"
+            [cardMinHeight]="280"
+            [listHeight]="220"
+            [searchPlaceholder]="'Buscar aplicação'"
+            [showSelectedCount]="false"
+            [visualStyle]="'subtle'">
+          </app-input-multi-select>
+        </div>
+
       </div>
 
-      <div class="text-end">
-        <button type="button" mat-flat-button color="primary" (click)="addVariacao()"
-          [disabled]="formVariacaoAtual?.invalid || formVariacaoAtual.get('preco')?.invalid">
-          <mat-icon>add</mat-icon>
-          Adicionar Variação
-        </button>
-      </div>
+      <div class="builder-pricing-card">
+        <div class="builder-pricing-head">
+          <div>
+            <div class="builder-pricing-title">Preço base das combinações</div>
+            <div class="builder-pricing-copy">
+              Defina o valor que será aplicado nas combinações geradas. Depois você pode ajustar exceções individualmente ou em lote.
+            </div>
+          </div>
 
+          <div class="builder-footer">
+            <div class="generation-preview">
+              {{ resumoGeracao }}
+            </div>
+
+            <button type="button" mat-flat-button color="primary" (click)="gerarVariacoes()"
+              [disabled]="!podeGerarCombinacoes">
+              <mat-icon>auto_awesome</mat-icon>
+              {{ totalCombinacoes ? 'Gerar ' + totalCombinacoes + ' combinações' : 'Gerar combinações' }}
+            </button>
+          </div>
+        </div>
+
+        <app-preco-selector [formGroup]="getFormGroup(formVariacaoAtual.get('preco')!)"
+          [tiposDisponiveis]="['FIXO', 'QUANTIDADE', 'DEMANDA', 'METRO', 'HORA']">
+        </app-preco-selector>
+      </div>
     </div>
   </mat-expansion-panel>
 </mat-accordion>
 
-<!-- Tabela com variações salvas -->
 <mat-card class="p-16 m-t-16 cardWithShadow">
   <mat-card-title class="f-s-16 f-w-600 m-b-16">Variações Salvas</mat-card-title>
 
+  <div class="saved-toolbar" *ngIf="dataSource.data.length">
+    <div>
+      <div class="saved-summary">
+        {{ dataSource.data.length }} variação(ões) prontas para salvar.
+      </div>
+      <div class="saved-hint">
+        Selecione linhas para aplicar o mesmo preço em lote ou use editar para tratar exceções.
+      </div>
+    </div>
+
+    <div class="saved-actions">
+      <div class="selected-counter" *ngIf="selectedCount">
+        {{ selectedCount }} selecionada(s)
+      </div>
+      <button type="button" mat-stroked-button color="primary" (click)="abrirEditorLote()" [disabled]="!selectedCount">
+        <mat-icon>layers</mat-icon>
+        Aplicar preço em lote
+      </button>
+    </div>
+  </div>
+
+  <mat-card class="inline-editor-card m-b-16" *ngIf="mostrarEditorLote">
+    <mat-card-title class="f-s-16 f-w-600">Aplicar preço em lote</mat-card-title>
+    <div class="inline-editor-copy">
+      O preço configurado abaixo será aplicado nas {{ selectedCount }} variação(ões) selecionadas.
+    </div>
+
+    <app-preco-selector [formGroup]="getFormGroup(formPrecoEmLote.get('preco')!)"
+      [tiposDisponiveis]="['FIXO', 'QUANTIDADE', 'DEMANDA', 'METRO', 'HORA']">
+    </app-preco-selector>
+
+    <div class="inline-editor-actions">
+      <button type="button" mat-stroked-button (click)="cancelarEditorLote()">Cancelar</button>
+      <button type="button" mat-flat-button color="primary" (click)="aplicarPrecoEmLote()">Aplicar preço</button>
+    </div>
+  </mat-card>
+
+  <mat-card class="inline-editor-card m-b-16" *ngIf="editandoIndex !== null">
+    <mat-card-title class="f-s-16 f-w-600">Editar preço da variação</mat-card-title>
+    <div class="inline-editor-copy">
+      Ajuste apenas esta combinação sem alterar as demais.
+    </div>
+
+    <app-preco-selector [formGroup]="getFormGroup(formEdicaoRapida.get('preco')!)"
+      [tiposDisponiveis]="['FIXO', 'QUANTIDADE', 'DEMANDA', 'METRO', 'HORA']">
+    </app-preco-selector>
+
+    <div class="inline-editor-actions">
+      <button type="button" mat-stroked-button (click)="cancelarEdicaoRapida()">Cancelar</button>
+      <button type="button" mat-flat-button color="primary" (click)="salvarEdicaoRapida()">Salvar ajuste</button>
+    </div>
+  </mat-card>
+
+  <mat-card class="inline-editor-card m-b-16" *ngIf="duplicandoIndex !== null" [formGroup]="formDuplicarVariacao">
+    <mat-card-title class="f-s-16 f-w-600">Duplicar com ajustes</mat-card-title>
+    <div class="inline-editor-copy">
+      Crie uma nova variação a partir da linha escolhida. A cópia só é salva se a combinação final ainda não existir.
+    </div>
+
+    <div class="row g-3 m-b-16">
+      <div class="col-md-4">
+        <app-auto-complete [control]="getFormControl(formDuplicarVariacao.get('materialId'))"
+          label="Material (opcional)" [displayWith]="mostrarDescricaoMaterial" [buscarFn]="buscarMateriais"
+          [minimoCaracteres]="0">
+        </app-auto-complete>
+      </div>
+
+      <div class="col-md-4">
+        <app-auto-complete [control]="getFormControl(formDuplicarVariacao.get('formatoId'))"
+          label="Formato (opcional)" [displayWith]="mostrarDescricaoFormato" [buscarFn]="buscarFormatos"
+          [minimoCaracteres]="0">
+        </app-auto-complete>
+      </div>
+
+      <div class="col-md-4">
+        <mat-label class="f-s-14 f-w-600 m-b-8 d-block">
+          Tipo de Aplicação
+          <span style="color: #ff110094">*</span>
+        </mat-label>
+        <mat-form-field appearance="outline" class="w-100">
+          <mat-select formControlName="tipoAplicacao">
+            <mat-option *ngFor="let tipo of TipoAplicacaoAcabamento.options()" [value]="tipo.value">
+              {{ tipo.label }}
+            </mat-option>
+          </mat-select>
+          <mat-error *ngIf="formDuplicarVariacao.get('tipoAplicacao')?.invalid && formDuplicarVariacao.get('tipoAplicacao')?.touched">
+            Campo obrigatório
+          </mat-error>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <app-preco-selector [formGroup]="getFormGroup(formDuplicarVariacao.get('preco')!)"
+      [tiposDisponiveis]="['FIXO', 'QUANTIDADE', 'DEMANDA', 'METRO', 'HORA']">
+    </app-preco-selector>
+
+    <div class="inline-editor-actions">
+      <button type="button" mat-stroked-button (click)="cancelarDuplicarVariacao()">Cancelar</button>
+      <button type="button" mat-flat-button color="primary" (click)="salvarDuplicarVariacao()">Criar cópia</button>
+    </div>
+  </mat-card>
+
+  <ng-container *ngIf="dataSource.data.length; else emptyVariacoes">
   <table mat-table [dataSource]="dataSource" class="w-100 f-s-14">
+
+    <ng-container matColumnDef="selecionar">
+      <th mat-header-cell *matHeaderCellDef>
+        <mat-checkbox
+          [checked]="allSelected"
+          [indeterminate]="someSelected"
+          (change)="toggleSelecionarTodos($event.checked)"
+          aria-label="Selecionar todas as variações">
+        </mat-checkbox>
+      </th>
+      <td mat-cell *matCellDef="let _v; let i = index">
+        <mat-checkbox
+          [checked]="indicesSelecionados.has(i)"
+          (change)="toggleSelecionarLinha(i, $event.checked)"
+          aria-label="Selecionar variação">
+        </mat-checkbox>
+      </td>
+    </ng-container>
 
     <!-- Material -->
     <ng-container matColumnDef="material">
@@ -96,6 +269,12 @@
     <ng-container matColumnDef="acoes">
       <th mat-header-cell *matHeaderCellDef></th>
       <td mat-cell *matCellDef="let v; let i = index">
+        <button type="button" mat-icon-button color="accent" (click)="abrirDuplicarVariacao(i)">
+          <mat-icon>content_copy</mat-icon>
+        </button>
+        <button type="button" mat-icon-button color="primary" (click)="abrirEdicaoRapida(i)">
+          <mat-icon>edit</mat-icon>
+        </button>
         <button type="button" mat-icon-button color="warn" (click)="removerVariacao(i)">
           <mat-icon>delete</mat-icon>
         </button>
@@ -106,4 +285,20 @@
     <tr mat-row *matRowDef="let row; columns: displayedColumns; trackBy: trackByIndex">
     </tr>
   </table>
+  </ng-container>
+
+  <ng-template #emptyVariacoes>
+    <div class="variacoes-empty-state">
+      <div class="variacoes-empty-icon">
+        <mat-icon>auto_awesome</mat-icon>
+      </div>
+      <div class="variacoes-empty-title">Nenhuma variação gerada ainda</div>
+      <div class="variacoes-empty-copy">
+        Selecione materiais, formatos e tipos de aplicação no gerador acima para criar as primeiras combinações.
+      </div>
+      <button type="button" mat-stroked-button color="primary" (click)="abrirGerador()">
+        Abrir gerador
+      </button>
+    </div>
+  </ng-template>
 </mat-card>

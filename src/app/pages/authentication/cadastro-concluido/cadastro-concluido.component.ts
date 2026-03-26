@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { MaterialModule } from 'src/app/material.module';
 import { BrandingComponent } from 'src/app/layouts/full/vertical/sidebar/branding.component';
 
@@ -32,13 +32,20 @@ declare global {
   styleUrl: './cadastro-concluido.component.scss',
 })
 export class AppCadastroConcluidoComponent implements OnInit {
-  cadastro = this.buildMockData();
+  private readonly cadastroConcluidoStorageKey = 'clickmanager:onboarding:cadastro-concluido';
+  cadastro!: CadastroConcluidoViewModel;
   private cameFromRealFlow = false;
 
-  constructor(private route: ActivatedRoute) {}
+  constructor(private router: Router) {}
 
   ngOnInit(): void {
-    this.cadastro = this.resolveCadastro();
+    const cadastro = this.resolveCadastro();
+    if (!cadastro) {
+      this.router.navigate(['/authentication/registro-gestor']);
+      return;
+    }
+
+    this.cadastro = cadastro;
     this.trackConversionIfNeeded();
   }
 
@@ -58,40 +65,17 @@ export class AppCadastroConcluidoComponent implements OnInit {
     return Math.max(0, Math.round(diffInMs / 86400000));
   }
 
-  private resolveCadastro(): CadastroConcluidoViewModel {
-    const stateCadastro = history.state?.cadastro as Partial<CadastroConcluidoViewModel> | undefined;
-    const queryParams = this.route.snapshot.queryParamMap;
-    this.cameFromRealFlow = !!stateCadastro;
+  private resolveCadastro(): CadastroConcluidoViewModel | null {
+    const stateCadastro = history.state?.cadastro as CadastroConcluidoViewModel | undefined;
+    const storedCadastro = this.readStoredCadastro();
+    const cadastro = stateCadastro || storedCadastro;
+    this.cameFromRealFlow = !!cadastro;
 
-    return {
-      ...this.buildMockData(),
-      ...stateCadastro,
-      cadastroConcluido: this.parseBoolean(queryParams.get('cadastroConcluido'), stateCadastro?.cadastroConcluido ?? true),
-      eventoConversao: queryParams.get('eventoConversao') || stateCadastro?.eventoConversao || 'cadastro_empresa_concluido',
-      empresaId: this.parseNumber(queryParams.get('empresaId'), stateCadastro?.empresaId ?? 123),
-      empresaNome: queryParams.get('empresaNome') || stateCadastro?.empresaNome || 'Grafica Exemplo',
-      usuarioId: this.parseNumber(queryParams.get('usuarioId'), stateCadastro?.usuarioId ?? 456),
-      usuarioNome: queryParams.get('usuarioNome') || stateCadastro?.usuarioNome || 'Leonardo Barros',
-      usuarioUsername: queryParams.get('usuarioUsername') || stateCadastro?.usuarioUsername || 'leo@email.com',
-      onboardingConcluido: this.parseBoolean(queryParams.get('onboardingConcluido'), stateCadastro?.onboardingConcluido ?? false),
-      trialInicio: queryParams.get('trialInicio') || stateCadastro?.trialInicio || '2026-03-20',
-      trialFim: queryParams.get('trialFim') || stateCadastro?.trialFim || '2026-03-27',
-    };
-  }
+    if (cadastro) {
+      sessionStorage.removeItem(this.cadastroConcluidoStorageKey);
+    }
 
-  private buildMockData(): CadastroConcluidoViewModel {
-    return {
-      cadastroConcluido: true,
-      eventoConversao: 'cadastro_empresa_concluido',
-      empresaId: 123,
-      empresaNome: 'Grafica Exemplo',
-      usuarioId: 456,
-      usuarioNome: 'Leonardo Barros',
-      usuarioUsername: 'leo@email.com',
-      onboardingConcluido: false,
-      trialInicio: '2026-03-20',
-      trialFim: '2026-03-27',
-    };
+    return cadastro || null;
   }
 
   private trackConversionIfNeeded(): void {
@@ -130,17 +114,17 @@ export class AppCadastroConcluidoComponent implements OnInit {
     sessionStorage.setItem(storageKey, '1');
   }
 
-  private parseBoolean(value: string | null, fallback: boolean): boolean {
-    if (value === null) {
-      return fallback;
+  private readStoredCadastro(): CadastroConcluidoViewModel | null {
+    const raw = sessionStorage.getItem(this.cadastroConcluidoStorageKey);
+    if (!raw) {
+      return null;
     }
 
-    return value === 'true';
-  }
-
-  private parseNumber(value: string | null, fallback: number): number {
-    const parsed = Number(value);
-    return Number.isFinite(parsed) ? parsed : fallback;
+    try {
+      return JSON.parse(raw) as CadastroConcluidoViewModel;
+    } catch {
+      return null;
+    }
   }
 
   private parseDate(value: string): Date | null {

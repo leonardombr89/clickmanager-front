@@ -16,6 +16,7 @@ import { InputTextoRestritoComponent } from 'src/app/components/inputs/input-tex
 import { InputTelefoneComponent } from 'src/app/components/inputs/input-telefone/input-telefone.component';
 import { InputDocumentoComponent } from 'src/app/components/inputs/input-documento/input-documento.component';
 import { InputEmailComponent } from 'src/app/components/inputs/input-email/input-custom.component';
+import { LandingEtapaFunil, LandingpagePublicService } from 'src/app/pages/theme-pages/landingpage/landingpage-public.service';
 
 @Component({
   selector: 'app-boxed-register',
@@ -34,6 +35,11 @@ import { InputEmailComponent } from 'src/app/components/inputs/input-email/input
   templateUrl: './boxed-register.component.html',
 })
 export class AppBoxedRegisterComponent implements OnInit {
+  private readonly cadastroConcluidoStorageKey = 'clickmanager:onboarding:cadastro-concluido';
+  private readonly landingSessionStorageKey = 'clickmanager:landing:session-id';
+  private readonly landingStageStoragePrefix = 'clickmanager:landing:stage';
+  private readonly pageTitle = 'Cadastro de Empresa';
+  private sessionId = '';
 
   options = this.settings.getOptions();
 
@@ -41,7 +47,8 @@ export class AppBoxedRegisterComponent implements OnInit {
     private settings: CoreService,
     private router: Router,
     private toastr: ToastrService,
-    private onboardingService: OnboardingService
+    private onboardingService: OnboardingService,
+    private landingpagePublicService: LandingpagePublicService
   ) { }
 
   // Formulário aninhado: empresa + usuario
@@ -62,8 +69,8 @@ export class AppBoxedRegisterComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    // Aqui NÃO verificamos mais se já existe usuário,
-    // pois agora cada empresa faz seu próprio cadastro (multi-tenant).
+    this.sessionId = this.ensureSessionId();
+    this.registrarEtapaFunil('FORMULARIO_VISUALIZADO');
   }
 
   // getters para facilitar o template
@@ -148,11 +155,14 @@ export class AppBoxedRegisterComponent implements OnInit {
 
     this.onboardingService.registrarEmpresaComGestor(payload).subscribe({
       next: response => {
-        this.toastr.success('Empresa e gestor cadastrados com sucesso!');
-        this.router.navigate(['authentication/cadastro-concluido'], {
-          state: {
-            cadastro: response
-          }
+        this.registrarEtapaFunil('FORMULARIO_CONCLUIDO', () => {
+          sessionStorage.setItem(this.cadastroConcluidoStorageKey, JSON.stringify(response));
+          this.toastr.success('Empresa e gestor cadastrados com sucesso!');
+          this.router.navigate(['authentication/cadastro-concluido'], {
+            state: {
+              cadastro: response
+            }
+          });
         });
       },
       error: err => {
@@ -160,5 +170,45 @@ export class AppBoxedRegisterComponent implements OnInit {
         this.toastr.error('Erro ao concluir cadastro: ' + msg);
       }
     });
+  }
+
+  private registrarEtapaFunil(etapaFunil: LandingEtapaFunil, onComplete?: () => void): void {
+    const stageStorageKey = `${this.landingStageStoragePrefix}:${etapaFunil}:${this.getCurrentPath()}`;
+    if (sessionStorage.getItem(stageStorageKey)) {
+      onComplete?.();
+      return;
+    }
+
+    this.landingpagePublicService.registrarEtapa({
+      pagina: this.pageTitle,
+      path: this.getCurrentPath(),
+      sessionId: this.sessionId,
+      etapaFunil,
+    }).subscribe({
+      next: () => {
+        sessionStorage.setItem(stageStorageKey, '1');
+        onComplete?.();
+      },
+      error: () => onComplete?.(),
+    });
+  }
+
+  private ensureSessionId(): string {
+    const existing = localStorage.getItem(this.landingSessionStorageKey);
+    if (existing) {
+      return existing;
+    }
+
+    const generated =
+      typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+        ? crypto.randomUUID()
+        : `landing-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+
+    localStorage.setItem(this.landingSessionStorageKey, generated);
+    return generated;
+  }
+
+  private getCurrentPath(): string {
+    return window.location.pathname || '/';
   }
 }

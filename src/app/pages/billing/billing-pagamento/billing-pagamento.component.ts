@@ -31,9 +31,8 @@ export class BillingPagamentoComponent implements OnInit {
   returnUrl: string | null = null;
   planos: PlanoPublico[] = [];
   planoSelecionado: PlanoPublico | null = null;
-  checkoutIndisponivel = false;
   usuario?: Usuario | null;
-  private readonly fallbackCheckoutEndpoint = 'api/assinaturas/checkout';
+  private planoIdParam: number | null = null;
 
   constructor(
     private billingState: BillingStateService,
@@ -47,15 +46,14 @@ export class BillingPagamentoComponent implements OnInit {
   ngOnInit(): void {
     this.authService.usuario$.subscribe(u => this.usuario = u);
     this.returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
+    this.planoIdParam = this.parsePlanoId(this.route.snapshot.queryParamMap.get('planoId'));
     this.billing = this.billingState.snapshot;
 
     if (!this.billing) {
       this.carregarStatus();
     } else {
       this.verificarPlanos();
-      if (!this.billing.checkoutUrl) {
-        this.carregarStatus();
-      }
+      this.carregarStatus();
     }
   }
 
@@ -65,48 +63,31 @@ export class BillingPagamentoComponent implements OnInit {
         this.billingState.setFromResponse(resp);
         this.billing = resp;
         this.verificarPlanos();
-        this.checkoutIndisponivel = !resp?.checkoutUrl;
       },
       error: () => {
         // se 402, o interceptor já redireciona. Aqui evitamos travar o botão.
         this.billing = this.billingState.snapshot;
         if (!this.billing) {
           this.toastr.error('Não foi possível carregar o status de assinatura.');
-        } else if (!this.billing.checkoutUrl) {
-          this.checkoutIndisponivel = true;
         }
       }
     });
   }
 
   private verificarPlanos(): void {
-    this.billingService.listarPlanosPublicos().subscribe({
+    this.billingService.listarPlanosInternos().subscribe({
       next: (planos) => {
-        const comDefaults = (planos || []).map((plano, idx) => ({
-          ...plano,
-          // normaliza campos vindos do back (camelCase) para os consumidos pelo front
-          preco_centavos: plano.preco_centavos ?? (plano as any).precoCentavos,
-          beneficios_json: plano.beneficios_json ?? (plano as any).beneficiosJson,
-          limites_json: plano.limites_json ?? (plano as any).limitesJson,
-          periodicidade: plano.periodicidade ?? (plano as any).periodicidade,
-          destaque: plano.destaque ?? (plano as any).destaque ?? null,
-          imgSrc: plano.imgSrc || this.fallbackImg(idx),
-          popular: plano.popular ?? (!!((plano as any).destaque) ? true : idx === 1),
-        }));
-        this.planos = comDefaults.sort((a, b) => (a.ordem_exibicao || 0) - (b.ordem_exibicao || 0));
-        if (this.billing?.planoId) {
-          this.planoSelecionado = this.planos.find((plano) => plano.id === this.billing?.planoId) || null;
-          if (this.planoSelecionado?.id) {
-            sessionStorage.setItem('billing_selected_plan', this.planoSelecionado.id.toString());
-          }
-        } else {
-          const stored = sessionStorage.getItem('billing_selected_plan');
-          if (stored) {
-            const found = this.planos.find(p => p.id?.toString() === stored);
-            this.planoSelecionado = found || null;
-          } else {
-            this.planoSelecionado = null;
-          }
+        this.planos = [...(planos || [])].sort((a, b) => (a.ordem_exibicao || a.ordemExibicao || 0) - (b.ordem_exibicao || b.ordemExibicao || 0));
+        const planoPreferido =
+          this.findPlanoById(this.planoIdParam) ||
+          this.findPlanoById(this.billing?.planoId ?? null) ||
+          this.findPlanoById(this.parsePlanoId(sessionStorage.getItem('billing_selected_plan'))) ||
+          this.planos[0] ||
+          null;
+
+        this.planoSelecionado = planoPreferido;
+        if (this.planoSelecionado?.id) {
+          sessionStorage.setItem('billing_selected_plan', this.planoSelecionado.id.toString());
         }
       },
       error: () => {
@@ -123,8 +104,7 @@ export class BillingPagamentoComponent implements OnInit {
 
   get podePagar(): boolean {
     if (this.ownerDenied) return false;
-    if (!this.billing?.checkoutUrl) return false;
-    return true; // sempre habilitado quando há checkoutUrl
+    return !!this.planoSelecionado?.id;
   }
 
   getBeneficios(plano: PlanoPublico): string[] {
@@ -151,11 +131,81 @@ export class BillingPagamentoComponent implements OnInit {
   }
 
   preco(plano: PlanoPublico): number {
-    return (plano.preco_centavos || 0) / 100;
+    if (typeof plano.valorFinal === 'number' && Number.isFinite(plano.valorFinal)) {
+      return plano.valorFinal;
+    }
+    return ((plano.precoFinalCentavos ?? plano.preco_centavos) || 0) / 100;
+  }
+
+  precoOriginal(plano: PlanoPublico): number {
+    if (typeof plano.valorOriginal === 'number' && Number.isFinite(plano.valorOriginal)) {
+      return plano.valorOriginal;
+    }
+    return ((plano.precoOriginalCentavos ?? plano.precoFinalCentavos ?? plano.preco_centavos) || 0) / 100;
   }
 
   precoAnual(plano: PlanoPublico): number {
     return this.preco(plano) * 12;
+  }
+
+  precoMensal(plano: PlanoPublico): number {
+    const meses = this.periodicidadeMeses(plano);
+    return this.preco(plano) / meses;
+  }
+
+  periodicidadeLabel(plano: PlanoPublico): string {
+    const periodicidade = `${plano.periodicidade || ''}`.trim().toUpperCase();
+
+    switch (periodicidade) {
+      case 'MENSAL':
+        return 'mês';
+      case 'TRIMESTRAL':
+        return 'trimestre';
+      case 'SEMESTRAL':
+        return 'semestre';
+      case 'ANUAL':
+        return 'ano';
+      default:
+        return periodicidade ? periodicidade.toLowerCase() : 'mês';
+    }
+  }
+
+  periodicidadeMeses(plano: PlanoPublico): number {
+    const periodicidade = `${plano.periodicidade || ''}`.trim().toUpperCase();
+
+    switch (periodicidade) {
+      case 'TRIMESTRAL':
+        return 3;
+      case 'SEMESTRAL':
+        return 6;
+      case 'ANUAL':
+        return 12;
+      case 'MENSAL':
+      default:
+        return 1;
+    }
+  }
+
+  exibeValorCheio(plano: PlanoPublico): boolean {
+    return this.periodicidadeMeses(plano) > 1;
+  }
+
+  temDesconto(plano: PlanoPublico): boolean {
+    return this.precoOriginal(plano) > this.preco(plano);
+  }
+
+  get benefitCodeSelecionado(): string | null {
+    const raw = this.planoSelecionado?.benefitCode;
+    if (!raw || typeof raw !== 'string') return null;
+    const trimmed = raw.trim();
+    return trimmed.length ? trimmed : null;
+  }
+
+  descricaoPlano(plano: PlanoPublico): string | null {
+    const raw = plano?.descricao;
+    if (!raw || typeof raw !== 'string') return null;
+    const trimmed = raw.trim();
+    return trimmed.length ? trimmed : null;
   }
 
   selecionar(plano: PlanoPublico): void {
@@ -164,41 +214,43 @@ export class BillingPagamentoComponent implements OnInit {
       sessionStorage.setItem('billing_selected_plan', plano.id.toString());
     }
   }
-
-  private fallbackImg(idx: number): string {
-    const assets = [
-      'assets/images/backgrounds/silver.png',
-      'assets/images/backgrounds/bronze.png',
-      'assets/images/backgrounds/gold.png',
-    ];
-    return assets[idx % assets.length];
-  }
-
   irParaPagamento(): void {
-    // Usa sempre o endpoint atual de checkout de assinaturas (Asaas)
-    const checkoutEndpoint = this.fallbackCheckoutEndpoint;
     if (!this.planoSelecionado?.id) {
       this.toastr.warning('Selecione um plano para continuar.');
       return;
     }
 
     this.loading = true;
-    const body: any = { planoId: this.planoSelecionado.id };
-
-    const obs = checkoutEndpoint === this.fallbackCheckoutEndpoint
-      ? this.billingService.checkoutAssinatura(this.planoSelecionado.id)
-      : this.billingService.checkoutUrl(checkoutEndpoint, body);
-
-    obs.subscribe({
+    this.billingService.checkoutAssinatura(this.planoSelecionado.id).subscribe({
       next: (resp: CheckoutResponse) => {
-        const invoiceUrl = resp?.initPoint || (resp as any)?.invoiceUrl;
-        if (invoiceUrl) {
+        const outcome = `${resp?.outcome || ''}`.toUpperCase()
+          || (resp?.requiresPayment ? 'PAYMENT_REQUIRED' : '')
+          || (resp?.benefitApplied ? 'BENEFIT_APPLIED' : '')
+          || (!resp?.requiresPayment ? 'ALREADY_REGULAR' : '');
+        const initPoint = resp?.initPoint || (resp as any)?.invoiceUrl;
+
+        if (outcome === 'PAYMENT_REQUIRED') {
+          if (!initPoint) {
+            this.toastr.error('Não foi possível iniciar o checkout.');
+            return;
+          }
+
+          sessionStorage.setItem('billing_checkout_pending', JSON.stringify(resp));
           sessionStorage.setItem('asaas_last_payment_id', resp?.paymentReference || resp?.paymentId || '');
-          sessionStorage.setItem('asaas_last_invoice_url', invoiceUrl);
-          window.location.href = invoiceUrl;
-        } else {
-          this.toastr.error('Não foi possível iniciar o checkout.');
+          sessionStorage.setItem('asaas_last_invoice_url', initPoint);
+          window.location.href = initPoint;
+          return;
         }
+
+        if (outcome === 'BENEFIT_APPLIED' || outcome === 'ALREADY_REGULAR') {
+          sessionStorage.setItem('billing_checkout_result', JSON.stringify(resp));
+          this.router.navigate(['/billing/confirmacao'], {
+            state: { billingConfirmationResult: resp }
+          });
+          return;
+        }
+
+        this.toastr.error(resp?.message || 'Não foi possível iniciar o checkout.');
       },
       error: (err) => {
         if (err?.status === 403) {
@@ -224,5 +276,16 @@ export class BillingPagamentoComponent implements OnInit {
     } else {
       this.router.navigate(['/billing/blocked']);
     }
+  }
+
+  private findPlanoById(id: number | null): PlanoPublico | null {
+    if (!id) return null;
+    return this.planos.find((plano) => plano.id === id) || null;
+  }
+
+  private parsePlanoId(raw: string | number | null | undefined): number | null {
+    if (raw === null || raw === undefined || raw === '') return null;
+    const parsed = Number(raw);
+    return Number.isFinite(parsed) ? parsed : null;
   }
 }

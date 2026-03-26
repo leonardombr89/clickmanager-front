@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { BillingBlockedComponent } from './billing-blocked/billing-blocked.component';
+import { BillingConfirmationComponent } from './billing-confirmation/billing-confirmation.component';
 import { BillingPagamentoComponent } from './billing-pagamento/billing-pagamento.component';
 import { BillingReturnComponent } from './billing-return/billing-return.component';
 
@@ -37,6 +38,14 @@ export const BillingRoutes: Routes = [
         data: {
           title: 'Retorno de pagamento',
           urls: [{ title: 'Dashboard', url: '/dashboards/dashboard1' }, { title: 'Retorno de pagamento' }],
+        },
+      },
+      {
+        path: 'confirmacao',
+        component: BillingConfirmationComponent,
+        data: {
+          title: 'Confirmação de assinatura',
+          urls: [{ title: 'Dashboard', url: '/dashboards/dashboard1' }, { title: 'Confirmação de assinatura' }],
         },
       },
     ],

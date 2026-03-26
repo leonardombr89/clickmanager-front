@@ -22,7 +22,20 @@ export class PricingCardComponent {
   @Output() escolher = new EventEmitter<PlanoPublico>();
 
   preco(plano: PlanoPublico): number {
-    const cents = plano.preco_centavos ?? (plano as any).precoCentavos ?? 0;
+    if (typeof plano.valorFinal === 'number' && Number.isFinite(plano.valorFinal)) {
+      return plano.valorFinal;
+    }
+
+    const cents = plano.precoFinalCentavos ?? plano.preco_centavos ?? (plano as any).precoCentavos ?? 0;
+    return Number.isFinite(cents) ? cents / 100 : 0;
+  }
+
+  precoOriginal(plano: PlanoPublico): number {
+    if (typeof plano.valorOriginal === 'number' && Number.isFinite(plano.valorOriginal)) {
+      return plano.valorOriginal;
+    }
+
+    const cents = plano.precoOriginalCentavos ?? plano.precoFinalCentavos ?? plano.preco_centavos ?? (plano as any).precoCentavos ?? 0;
     return Number.isFinite(cents) ? cents / 100 : 0;
   }
 
@@ -33,6 +46,58 @@ export class PricingCardComponent {
   get valorExibicao(): number | null {
     const valor = this.mostrarAnual ? this.precoAnual(this.plano) : this.preco(this.plano);
     return Number.isFinite(valor) ? valor : null;
+  }
+
+  get precoMensal(): number | null {
+    if (this.mostrarAnual) {
+      return this.valorExibicao;
+    }
+    const total = this.preco(this.plano);
+    const meses = this.periodicidadeMeses;
+    if (!Number.isFinite(total) || meses <= 0) return null;
+    return total / meses;
+  }
+
+  get valorCobranca(): number | null {
+    const valor = this.preco(this.plano);
+    return Number.isFinite(valor) ? valor : null;
+  }
+
+  get valorOriginalCobranca(): number | null {
+    const valor = this.precoOriginal(this.plano);
+    return Number.isFinite(valor) ? valor : null;
+  }
+
+  get periodicidadeMeses(): number {
+    const periodicidade = `${this.plano?.periodicidade || ''}`.trim().toUpperCase();
+    switch (periodicidade) {
+      case 'TRIMESTRAL':
+        return 3;
+      case 'SEMESTRAL':
+        return 6;
+      case 'ANUAL':
+        return 12;
+      case 'MENSAL':
+      default:
+        return 1;
+    }
+  }
+
+  get periodicidadeLabel(): string {
+    const periodicidade = `${this.plano?.periodicidade || ''}`.trim().toUpperCase();
+
+    switch (periodicidade) {
+      case 'MENSAL':
+        return 'mês';
+      case 'TRIMESTRAL':
+        return 'trimestre';
+      case 'SEMESTRAL':
+        return 'semestre';
+      case 'ANUAL':
+        return 'ano';
+      default:
+        return periodicidade ? periodicidade.toLowerCase() : 'mês';
+    }
   }
 
   getBeneficios(plano: PlanoPublico): string[] {
@@ -75,5 +140,29 @@ export class PricingCardComponent {
 
   get isDestaque(): boolean {
     return !!this.destaqueLabel;
+  }
+
+  get descricao(): string | null {
+    const raw = this.plano?.descricao;
+    if (!raw || typeof raw !== 'string') return null;
+    const trimmed = raw.trim();
+    return trimmed.length ? trimmed : null;
+  }
+
+  get exibeValorCheioSecundario(): boolean {
+    return !this.mostrarAnual && this.periodicidadeMeses > 1 && !this.isFree;
+  }
+
+  get hasDiscount(): boolean {
+    const original = this.valorOriginalCobranca;
+    const final = this.valorCobranca;
+    return original !== null && final !== null && original > final;
+  }
+
+  get benefitCode(): string | null {
+    const raw = this.plano?.benefitCode;
+    if (!raw || typeof raw !== 'string') return null;
+    const trimmed = raw.trim();
+    return trimmed.length ? trimmed : null;
   }
 }

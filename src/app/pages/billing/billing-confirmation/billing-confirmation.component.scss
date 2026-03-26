@@ -1,0 +1,181 @@
+.billing-card-full {
+  width: 100%;
+}
+
+.confirmation-layout {
+  display: grid;
+  gap: 20px;
+  padding: 8px 0;
+}
+
+.confirmation-hero {
+  border-radius: 22px;
+  padding: 24px;
+  display: flex;
+  gap: 18px;
+  align-items: center;
+}
+
+.confirmation-hero__icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 20px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.confirmation-hero__icon mat-icon {
+  font-size: 34px;
+  width: 34px;
+  height: 34px;
+}
+
+.confirmation-hero__label {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 6px;
+}
+
+.confirmation-hero__title {
+  margin: 0;
+  font-size: 30px;
+  line-height: 1.15;
+  font-weight: 800;
+}
+
+.confirmation-hero__subtitle {
+  margin: 8px 0 0;
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+.confirmation-hero__badge {
+  display: inline-flex;
+  margin-top: 14px;
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.confirmation-card--success {
+  background: linear-gradient(180deg, #f4fbf6 0%, #ebf8ef 100%);
+  border: 1px solid #bfe7ca;
+}
+
+.confirmation-card--success .confirmation-hero__icon {
+  background: #dbf4e2;
+  color: #16803d;
+}
+
+.confirmation-card--success .confirmation-hero__label,
+.confirmation-card--success .confirmation-hero__badge {
+  color: #16803d;
+}
+
+.confirmation-card--success .confirmation-hero__badge {
+  background: #dbf4e2;
+}
+
+.confirmation-card--benefit {
+  background: linear-gradient(180deg, #fff9ef 0%, #fff4de 100%);
+  border: 1px solid #f1d39a;
+}
+
+.confirmation-card--benefit .confirmation-hero__icon {
+  background: #ffe6b7;
+  color: #a16207;
+}
+
+.confirmation-card--benefit .confirmation-hero__label,
+.confirmation-card--benefit .confirmation-hero__badge {
+  color: #9a6700;
+}
+
+.confirmation-card--benefit .confirmation-hero__badge {
+  background: #ffecbf;
+}
+
+.confirmation-card--partial-benefit {
+  background: linear-gradient(180deg, #f5f9ff 0%, #edf4ff 100%);
+  border: 1px solid #bfd3ff;
+}
+
+.confirmation-card--partial-benefit .confirmation-hero__icon {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.confirmation-card--partial-benefit .confirmation-hero__label,
+.confirmation-card--partial-benefit .confirmation-hero__badge {
+  color: #1d4ed8;
+}
+
+.confirmation-card--partial-benefit .confirmation-hero__badge {
+  background: #dbeafe;
+}
+
+.confirmation-card--regular {
+  background: linear-gradient(180deg, #f7faff 0%, #eef4ff 100%);
+  border: 1px solid #c8dafd;
+}
+
+.confirmation-card--regular .confirmation-hero__icon {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.confirmation-card--regular .confirmation-hero__label,
+.confirmation-card--regular .confirmation-hero__badge {
+  color: #1d4ed8;
+}
+
+.confirmation-card--regular .confirmation-hero__badge {
+  background: #dbeafe;
+}
+
+.confirmation-message {
+  border: 1px solid #e5eaf1;
+  border-radius: 18px;
+  background: #fbfcfe;
+  padding: 20px;
+}
+
+.confirmation-message h3 {
+  margin: 0 0 8px;
+  font-size: 24px;
+  line-height: 1.2;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.confirmation-message p {
+  margin: 0;
+  color: #475569;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.confirmation-message__detail {
+  margin-top: 12px !important;
+}
+
+.confirmation-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+  .confirmation-hero {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .confirmation-hero__title {
+    font-size: 24px;
+  }
+}

@@ -1,81 +1,64 @@
-<mat-card class="cardWithShadow">
+<app-page-card
+  [titulo]="isEditMode ? 'Editar Acabamento' : 'Novo Acabamento'"
+  subtitulo="Cadastre o acabamento e configure as variações de aplicação e preço."
+  botaoTexto="Voltar"
+  botaoIcone="arrow_back"
+  botaoCor="primary"
+  [botaoRota]="['/page/cadastro-tecnico/acabamentos']"
+  [mostrarDivisor]="true">
 
-  <!-- Cabeçalho padrão com botão Voltar -->
-  <app-card-header
-    [titulo]="isEditMode ? 'Editar Acabamento' : 'Novo Acabamento'"
-    botaoTexto="Voltar"
-    botaoIcone="arrow_back"
-    botaoCor="primary"
-    [botaoRota]="['/page/cadastro-tecnico/acabamentos']"
-    [mostrarDivisor]="true">
-  </app-card-header>
-
-  <mat-card-content>
-
-    <form [formGroup]="form" (ngSubmit)="onSubmit()">
-
-      <mat-tab-group>
-
-        <!-- Aba Geral -->
-        <mat-tab label="Geral">
-          <mat-card class="cardWithShadow">
-            <mat-card-content>
-
-              <app-input-texto-restrito
-                class="m-b-16"
-                [control]="nomeControl"
-                label="Nome"
-                placeholder="Digite o nome do acabamento">
-              </app-input-texto-restrito>
-
-              <app-input-texto-restrito
-                class="m-b-16"
-                [control]="descricaoControl"
-                label="Descrição"
-                placeholder="Digite uma descrição">
-              </app-input-texto-restrito>
-
-            </mat-card-content>
-          </mat-card>
-        </mat-tab>
-
-        <!-- Aba Variações -->
-        <mat-tab label="Variações">
-          <mat-card class="cardWithShadow">
-            <mat-card-content>
-              <app-variacoes-acabamento
-                [variacoesIniciais]="variacoesIniciais"
-                (variacoesChange)="onVariacoesChange($event)">
-              </app-variacoes-acabamento>
-            </mat-card-content>
-          </mat-card>
-        </mat-tab>
-
-      </mat-tab-group>
-
-      <!-- Botões -->
-      <div class="d-flex gap-12 m-t-24 flex-wrap">
-
-        <!-- CANCELAR -->
-        <a
-          mat-flat-button
-          class="bg-error text-white"
-          [routerLink]="['/page/cadastro-tecnico/acabamentos']">
-          Cancelar
-        </a>
-
-        <!-- SALVAR -->
-        <button
-          mat-flat-button
-          color="primary"
-          type="submit"
-          [disabled]="form.invalid || loading">
-          {{ isEditMode ? 'Atualizar' : 'Salvar' }}
-        </button>
-
+  <app-section-card
+    titulo="Dados principais"
+    subtitulo="Informe o nome e descreva quando esse acabamento deve ser utilizado."
+    [divider]="true">
+    <form class="row g-3" [formGroup]="form">
+      <div class="col-12 col-md-6">
+        <app-input-texto-restrito
+          [control]="nomeControl"
+          label="Nome"
+          placeholder="Ex.: Laminação fosca premium"
+          [maxlength]="120">
+        </app-input-texto-restrito>
       </div>
 
+      <div class="col-12">
+        <app-input-textarea
+          [control]="descricaoControl"
+          label="Descrição"
+          placeholder="Explique a aplicação, características e contexto de uso do acabamento."
+          [rows]="5"
+          [maxlength]="1000">
+        </app-input-textarea>
+      </div>
     </form>
+  </app-section-card>
 
-  </mat-card-content>
-</mat-card>
+  <app-section-card
+    titulo="Variações"
+    subtitulo="Configure as combinações de material, formato, aplicação e preço do acabamento."
+    [divider]="true">
+    <app-variacoes-acabamento
+      [variacoesIniciais]="variacoesIniciais"
+      (variacoesChange)="onVariacoesChange($event)">
+    </app-variacoes-acabamento>
+  </app-section-card>
+
+  <div class="actions-row">
+    <button
+      mat-flat-button
+      color="primary"
+      type="button"
+      (click)="onSubmit()"
+      [disabled]="form.invalid || loading">
+      {{ loading ? 'Salvando...' : (isEditMode ? 'Atualizar' : 'Salvar') }}
+    </button>
+
+    <button
+      mat-stroked-button
+      color="primary"
+      type="button"
+      [routerLink]="['/page/cadastro-tecnico/acabamentos']">
+      Voltar
+    </button>
+  </div>
+</app-page-card>
