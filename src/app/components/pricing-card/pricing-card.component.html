@@ -13,6 +13,13 @@
       {{ destaqueLabel || 'Popular' }}
     </span>
 
+    <span
+      class="benefit-badge text-uppercase p-x-8 p-y-4 f-s-12 f-w-600 rounded"
+      *ngIf="benefitCode as code"
+    >
+      {{ code }}
+    </span>
+
     <span class="d-block text-uppercase f-s-12 m-b-16">
       {{ plano?.nome || 'Plano' }}
     </span>
@@ -21,12 +28,20 @@
       <img [src]="imgSrc" alt="badge" width="90" />
     </div>
 
-    <ng-container *ngIf="!isFree && valorExibicao !== null; else freeLabel">
-      <div class="d-flex align-items-baseline justify-content-center m-b-24">
+    <ng-container *ngIf="!isFree && precoMensal !== null; else freeLabel">
+      <div class="original-price m-b-8" *ngIf="hasDiscount && valorOriginalCobranca !== null">
+        De {{ valorOriginalCobranca | currency:(plano.moeda || 'BRL'):'symbol-narrow':'1.2-2':'pt-BR' }}/{{ periodicidadeLabel }}
+      </div>
+
+      <div class="d-flex align-items-baseline justify-content-center">
         <h2 class="plan-title m-b-0">
-          {{ valorExibicao | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
+          {{ precoMensal | currency:(plano.moeda || 'BRL'):'symbol-narrow':'1.2-2':'pt-BR' }}
         </h2>
-        <span class="f-s-16 per-month">/{{ mostrarAnual ? 'ano' : (plano?.periodicidade?.toLowerCase() || 'mensal') }}</span>
+        <span class="f-s-16 per-month">/mês</span>
+      </div>
+
+      <div class="full-price m-b-24" *ngIf="exibeValorCheioSecundario && valorCobranca !== null">
+        Cobrança de {{ valorCobranca | currency:(plano.moeda || 'BRL'):'symbol-narrow':'1.2-2':'pt-BR' }}/{{ periodicidadeLabel }}
       </div>
     </ng-container>    
     
@@ -34,22 +49,20 @@
       <h2 class="plan-title m-b-24">Free</h2>
     </ng-template>
 
+    <p class="plan-description m-b-16" *ngIf="descricao as descricao">
+      {{ descricao }}
+    </p>
+
     <div class="vantagem-highlight m-b-16" *ngIf="vantagem as destaque">
       <div class="vantagem-label">Vantagem</div>
       <div class="vantagem-text">{{ destaque }}</div>
     </div>
 
-    <div class="m-b-12">
+    <div class="m-b-12" *ngIf="beneficios.length > 0">
       @for (beneficio of beneficios; track beneficio) {
       <div class="d-flex align-items-center p-y-8">
         <i-tabler name="check" class="icon-16 m-r-12 text-primary d-flex"></i-tabler>
         <span class="f-s-14 f-w-500">{{ beneficio }}</span>
-      </div>
-      }
-      @if (beneficios.length === 0) {
-      <div class="d-flex align-items-center p-y-8 op-5">
-        <i-tabler name="x" class="icon-16 m-r-12 d-flex"></i-tabler>
-        <span class="f-s-14 f-w-500">Benefícios não informados</span>
       </div>
       }
     </div>

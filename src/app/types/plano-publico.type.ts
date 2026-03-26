@@ -5,14 +5,26 @@ export interface PlanoPublico {
   descricao?: string;
   periodicidade?: string;
   preco_centavos?: number;
+  precoCentavos?: number;
+  precoOriginalCentavos?: number;
+  precoFinalCentavos?: number;
+  valorOriginal?: number;
+  valorFinal?: number;
   moeda?: string;
   ativo?: boolean;
   ordem_exibicao?: number;
+  ordemExibicao?: number;
   limites_json?: string;
+  limitesJson?: string;
   beneficios_json?: string[] | string;
+  beneficiosJson?: string[] | string;
   vantagem?: string;
   destaque?: string | null;
+  benefitApplied?: boolean;
+  benefitCode?: string | null;
+  benefitType?: string | null;
   mercado_pago_plan_id?: string;
+  mercadoPagoPlanId?: string;
   imgSrc?: string;
   popular?: boolean;
 }

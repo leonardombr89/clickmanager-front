@@ -29,4 +29,14 @@ export interface CheckoutResponse {
   initPoint?: string;
   invoiceUrl?: string;
   paymentReference?: string;
+  originalValue?: number | null;
+  finalValue?: number | null;
+  originalValueCentavos?: number | null;
+  finalValueCentavos?: number | null;
+  requiresPayment?: boolean;
+  benefitApplied?: boolean;
+  benefitCode?: string | null;
+  message?: string | null;
+  confirmationMode?: 'PAYMENT_CONFIRMED' | 'PARTIAL_BENEFIT' | 'BENEFIT_EXEMPTION' | 'ALREADY_REGULAR' | string;
+  outcome?: 'PAYMENT_REQUIRED' | 'BENEFIT_APPLIED' | 'ALREADY_REGULAR' | string;
 }

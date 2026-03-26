@@ -1,0 +1,12 @@
+.actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+@media (max-width: 768px) {
+  .actions-row > * {
+    width: 100%;
+  }
+}

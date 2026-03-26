@@ -24,6 +24,10 @@ export class BillingInterceptor implements HttpInterceptor {
     '/billing/pagamento',
     '/billing/return'
   ];
+  private allowedWhenBlockedRoutes = [
+    '/page/suporte',
+    '/page/suporte/'
+  ];
 
   constructor(
     private billingState: BillingStateService,
@@ -52,7 +56,11 @@ export class BillingInterceptor implements HttpInterceptor {
           this.billingState.setReturnUrl(returnUrl);
           this.billingState.setFromHttpError(error, returnUrl);
           sessionStorage.setItem('billing_return_url', returnUrl);
-          const inBillingFlow = this.router.url.includes('/billing/blocked') || this.router.url.includes('/billing/pagamento') || this.router.url.includes('/billing/return');
+          const inBillingFlow =
+            this.router.url.includes('/billing/blocked') ||
+            this.router.url.includes('/billing/pagamento') ||
+            this.router.url.includes('/billing/return') ||
+            this.isAllowedWhenBlockedRoute(this.router.url);
           if (!inBillingFlow) {
             this.router.navigate(['/billing/blocked'], { queryParams: { returnUrl } });
           }
@@ -81,5 +89,10 @@ export class BillingInterceptor implements HttpInterceptor {
   private isOwnerOnlyMessage(error: HttpErrorResponse): boolean {
     const msg = (error.error?.message || '').toString().toLowerCase();
     return msg.includes('propriet') || msg.includes('somente o proprietário');
+  }
+
+  private isAllowedWhenBlockedRoute(url: string): boolean {
+    const current = (url || '').toLowerCase();
+    return this.allowedWhenBlockedRoutes.some((route) => current.includes(route));
   }
 }

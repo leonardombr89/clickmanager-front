@@ -9,6 +9,7 @@ import { switchMap, takeWhile } from 'rxjs/operators';
 import { BillingService } from '../services/billing.service';
 import { BillingStateService } from '../services/billing-state.service';
 import { ToastrService } from 'ngx-toastr';
+import { CheckoutResponse } from 'src/app/models/billing-access.model';
 
 @Component({
   selector: 'app-billing-return',
@@ -79,9 +80,45 @@ export class BillingReturnComponent implements OnInit, OnDestroy {
   }
 
   private redirecionarSucesso(): void {
-    const returnUrl = this.billingState.getReturnUrl() || sessionStorage.getItem('billing_return_url') || '/';
     this.parar();
-    this.router.navigateByUrl(returnUrl);
-    this.toastr.success('Assinatura validada com sucesso.');
+    const pendingCheckout = this.readPendingCheckout();
+    const benefitCode = pendingCheckout?.benefitCode?.trim() || null;
+    const partialBenefit = !!benefitCode || !!pendingCheckout?.benefitApplied;
+    const confirmationResult: CheckoutResponse = {
+      provider: pendingCheckout?.provider || 'ASAAS',
+      paymentReference: pendingCheckout?.paymentReference || pendingCheckout?.paymentId,
+      originalValue: pendingCheckout?.originalValue ?? null,
+      finalValue: pendingCheckout?.finalValue ?? null,
+      originalValueCentavos: pendingCheckout?.originalValueCentavos ?? null,
+      finalValueCentavos: pendingCheckout?.finalValueCentavos ?? null,
+      requiresPayment: false,
+      benefitApplied: partialBenefit,
+      benefitCode,
+      confirmationMode: partialBenefit ? 'PARTIAL_BENEFIT' : 'PAYMENT_CONFIRMED',
+      outcome: 'PAYMENT_CONFIRMED',
+      message: partialBenefit
+        ? `Pagamento confirmado com benefício especial${benefitCode ? ` (${benefitCode})` : ''}.`
+        : 'Pagamento confirmado e assinatura validada com sucesso.'
+    };
+
+    sessionStorage.setItem('billing_checkout_result', JSON.stringify(confirmationResult));
+    sessionStorage.removeItem('billing_checkout_pending');
+    this.router.navigate(['/billing/confirmacao'], {
+      state: {
+        billingConfirmationResult: confirmationResult
+      }
+    });
+    this.toastr.success(partialBenefit ? 'Pagamento confirmado com benefício aplicado.' : 'Assinatura validada com sucesso.');
+  }
+
+  private readPendingCheckout(): CheckoutResponse | null {
+    const raw = sessionStorage.getItem('billing_checkout_pending');
+    if (!raw) return null;
+
+    try {
+      return JSON.parse(raw) as CheckoutResponse;
+    } catch {
+      return null;
+    }
   }
 }

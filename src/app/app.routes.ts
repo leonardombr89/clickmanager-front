@@ -7,6 +7,7 @@ import { PrintComponent } from './layouts/print/print.component';
 import { ImprimirEtiquetasPageComponent } from './pages/pedido/pedido-imprimir/etiquetas/imprimir-etiquetas.page';
 import { ImprimirWhatsAppComponent } from './pages/pedido/pedido-imprimir-whatsapp/imprimir-whatsapp.component';
 import { BillingBlockedComponent } from './pages/billing/billing-blocked/billing-blocked.component';
+import { BillingConfirmationComponent } from './pages/billing/billing-confirmation/billing-confirmation.component';
 import { BillingPagamentoComponent } from './pages/billing/billing-pagamento/billing-pagamento.component';
 import { BillingReturnComponent } from './pages/billing/billing-return/billing-return.component';
 
@@ -120,6 +121,12 @@ export const routes: Routes = [
       {
         path: 'billing/return',
         component: BillingReturnComponent,
+        canActivate: [AuthGuard],
+        data: { perfil: 'GESTOR' },
+      },
+      {
+        path: 'billing/confirmacao',
+        component: BillingConfirmationComponent,
         canActivate: [AuthGuard],
         data: { perfil: 'GESTOR' },
       },

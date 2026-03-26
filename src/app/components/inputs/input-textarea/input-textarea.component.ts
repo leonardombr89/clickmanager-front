@@ -20,6 +20,7 @@ export class InputTextareaComponent {
   @Input() label: string = 'Textarea';
   @Input() placeholder: string = '';
   @Input() rows: number = 5;
+  @Input() maxlength: number = 255;
 
   get isRequired(): boolean {
     return this.control?.validator?.({} as any)?.['required'] ?? false;

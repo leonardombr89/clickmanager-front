@@ -2,7 +2,10 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiService } from 'src/app/services/api.service';
 
-export type LandingEtapaFunil = 'LANDING_VISUALIZADA' | 'FORMULARIO_VISUALIZADO';
+export type LandingEtapaFunil =
+  | 'LANDING_VISUALIZADA'
+  | 'FORMULARIO_VISUALIZADO'
+  | 'FORMULARIO_CONCLUIDO';
 
 export interface LandingAcessoRequest {
   pagina: string;

@@ -80,16 +80,21 @@ export class AutoCompleteComponent implements OnInit {
   }
 
   aoSelecionar(item: any): void {
-    if (!this.multiplo) {
-      this.reabrirBloqueado = true;
-      this.control.setValue(item, { emitEvent: false });
-      this.selecionado.emit(item);
-      this.onChange(item.id);
+    this.selecionado.emit(item);
 
-      setTimeout(() => {
-        this.reabrirBloqueado = false;
-      }, 300);
+    if (this.multiplo) {
+      this.control.setValue('', { emitEvent: false });
+      setTimeout(() => this.trigger.openPanel(), 0);
+      return;
     }
+
+    this.reabrirBloqueado = true;
+    this.control.setValue(item, { emitEvent: false });
+    this.onChange(item.id);
+
+    setTimeout(() => {
+      this.reabrirBloqueado = false;
+    }, 300);
   }
 
   abrirOpcoes(): void {

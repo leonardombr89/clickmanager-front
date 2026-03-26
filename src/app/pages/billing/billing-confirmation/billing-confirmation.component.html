@@ -1,0 +1,50 @@
+<mat-card class="cardWithShadow billing-card-full">
+  <app-card-header titulo="Confirmação da assinatura" [mostrarDivisor]="true"></app-card-header>
+
+  <mat-card-content>
+    <div class="confirmation-layout">
+      <div class="confirmation-hero" [ngClass]="cardClass">
+        <div class="confirmation-hero__icon">
+          <mat-icon>{{ icon }}</mat-icon>
+        </div>
+
+        <div class="confirmation-hero__content">
+          <div class="confirmation-hero__label">{{ heroLabel }}</div>
+          <h2 class="confirmation-hero__title">{{ title }}</h2>
+          <p class="confirmation-hero__subtitle">{{ subtitle }}</p>
+          <span class="confirmation-hero__badge">{{ badgeText }}</span>
+        </div>
+      </div>
+
+      <div class="confirmation-message">
+        <h3>{{ destaqueTitle }}</h3>
+        <p>{{ destaqueBody }}</p>
+        <p class="confirmation-message__detail">{{ message }}</p>
+
+        <div class="confirmation-values" *ngIf="exibeValores">
+          <div class="confirmation-values__card" *ngIf="temDescontoVisual && originalValue !== null">
+            <span class="confirmation-values__label">{{ valorOriginalLabel }}</span>
+            <span class="confirmation-values__value confirmation-values__value--muted">
+              {{ originalValue | currency:'BRL':'symbol-narrow':'1.2-2':'pt-BR' }}
+            </span>
+          </div>
+          <div class="confirmation-values__card" *ngIf="finalValue !== null">
+            <span class="confirmation-values__label">{{ valorFinalLabel }}</span>
+            <span class="confirmation-values__value">
+              {{ finalValue | currency:'BRL':'symbol-narrow':'1.2-2':'pt-BR' }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="confirmation-actions">
+        <button mat-flat-button color="primary" (click)="irParaAssinatura()">
+          Ver minha assinatura
+        </button>
+        <button mat-stroked-button color="primary" (click)="voltarAoSistema()">
+          Voltar ao sistema
+        </button>
+      </div>
+    </div>
+  </mat-card-content>
+</mat-card>

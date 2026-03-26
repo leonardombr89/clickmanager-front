@@ -5,3 +5,70 @@
 .pricing-card {
   height: 100%;
 }
+
+.selected-plan-summary {
+  border: 1px solid #dbe4ff;
+  background: linear-gradient(180deg, #f8fbff 0%, #eef4ff 100%);
+  border-radius: 18px;
+  padding: 16px 18px;
+}
+
+.selected-plan-summary__label {
+  color: #60708f;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.selected-plan-summary__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #e8f1ff;
+  color: #2f6fed;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.selected-plan-summary__title {
+  color: #1f2a3d;
+  font-size: 20px;
+  font-weight: 700;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: baseline;
+}
+
+.selected-plan-summary__price {
+  color: #2f6fed;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.selected-plan-summary__original {
+  margin-top: 6px;
+  color: #94a3b8;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: line-through;
+}
+
+.selected-plan-summary__description {
+  margin-top: 8px;
+  color: #5b6b84;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.selected-plan-summary__billing {
+  margin-top: 6px;
+  color: #6e7f99;
+  font-size: 14px;
+  line-height: 1.4;
+}

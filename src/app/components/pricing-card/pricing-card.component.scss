@@ -24,6 +24,16 @@
   z-index: 2;
 }
 
+.benefit-badge {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 2;
+  background: #e9f2ff;
+  color: #2f6fed;
+  border-radius: 999px;
+}
+
 .pricing-card {
   min-height: 360px;
 }
@@ -53,6 +63,28 @@
 .per-month {
   color: #6c757d;
   margin-left: 6px;
+}
+
+.original-price {
+  color: #94a3b8;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: line-through;
+  text-align: center;
+}
+
+.full-price {
+  color: #7b8798;
+  font-size: 13px;
+  line-height: 1.35;
+  text-align: center;
+}
+
+.plan-description {
+  color: #6c757d;
+  font-size: 14px;
+  line-height: 1.45;
+  min-height: 40px;
 }
 
 .vantagem-highlight {
