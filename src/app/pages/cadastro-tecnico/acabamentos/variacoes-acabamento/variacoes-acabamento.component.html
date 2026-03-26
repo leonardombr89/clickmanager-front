@@ -3,43 +3,39 @@
     <mat-expansion-panel-header>
       <mat-panel-title class="f-w-600">Gerar variações</mat-panel-title>
       <mat-panel-description class="f-s-14">
-        Selecione grupos e gere várias combinações de uma vez
+        Monte grupos e gere em lote
       </mat-panel-description>
     </mat-expansion-panel-header>
 
     <div *ngIf="formVariacaoAtual" class="builder-shell p-16">
       <div class="builder-intro">
         <div>
-          <div class="builder-title">Selecione os grupos e defina o preço base</div>
-          <div class="builder-copy">
-            Monte várias combinações de uma vez. Deixe materiais ou formatos em branco quando a regra precisar valer para todos.
-          </div>
+          <div class="builder-title">Selecione grupos e preço base</div>
         </div>
+        <button
+          type="button"
+          mat-icon-button
+          class="builder-help"
+          matTooltip="Deixe materiais ou formatos em branco quando a regra precisar valer para todos.">
+          <mat-icon>help_outline</mat-icon>
+        </button>
       </div>
 
       <div class="builder-status">
-        <span class="builder-status-item">
-          {{ materiaisSelecionadosCount || 'Todos' }} materiais
-        </span>
+        <span class="builder-status-item">{{ materiaisSelecionadosCount || 'Todos' }} materiais</span>
         <span class="builder-status-divider">•</span>
-        <span class="builder-status-item">
-          {{ formatosSelecionadosCount || 'Todos' }} formatos
-        </span>
+        <span class="builder-status-item">{{ formatosSelecionadosCount || 'Todos' }} formatos</span>
         <span class="builder-status-divider">•</span>
-        <span class="builder-status-item">
-          {{ tiposAplicacaoSelecionadosCount }} aplicações
-        </span>
+        <span class="builder-status-item">{{ tiposAplicacaoSelecionadosCount }} aplicações</span>
         <span class="builder-status-divider">→</span>
-        <span class="builder-status-item builder-status-item--highlight">
-          {{ totalCombinacoes }} combinações
-        </span>
+        <span class="builder-status-item builder-status-item--highlight">{{ totalCombinacoes }} combinações</span>
       </div>
 
       <div class="row g-3 m-b-16">
         <div class="col-md-4">
           <app-input-multi-select
             [control]="getFormControl(formVariacaoAtual.get('materiaisIds'))"
-            [label]="'Materiais (opcional)'"
+            [label]="'Materiais' + (materiaisSelecionadosCount ? ' (' + materiaisSelecionadosCount + ')' : ' (opcional)')"
             [options]="materiaisOptions"
             [cardMinHeight]="280"
             [listHeight]="220"
@@ -52,7 +48,7 @@
         <div class="col-md-4">
           <app-input-multi-select
             [control]="getFormControl(formVariacaoAtual.get('formatosIds'))"
-            [label]="'Formatos (opcional)'"
+            [label]="'Formatos' + (formatosSelecionadosCount ? ' (' + formatosSelecionadosCount + ')' : ' (opcional)')"
             [options]="formatosOptions"
             [cardMinHeight]="280"
             [listHeight]="220"
@@ -65,7 +61,7 @@
         <div class="col-md-4">
           <app-input-multi-select
             [control]="getFormControl(formVariacaoAtual.get('tiposAplicacao'))"
-            [label]="'Tipos de aplicação'"
+            [label]="'Tipos de aplicação' + (tiposAplicacaoSelecionadosCount ? ' (' + tiposAplicacaoSelecionadosCount + ')' : '')"
             [options]="tiposAplicacaoOptions"
             [cardMinHeight]="280"
             [listHeight]="220"
@@ -81,22 +77,21 @@
         <div class="builder-pricing-head">
           <div>
             <div class="builder-pricing-title">Preço base das combinações</div>
-            <div class="builder-pricing-copy">
-              Defina o valor que será aplicado nas combinações geradas. Depois você pode ajustar exceções individualmente ou em lote.
-            </div>
           </div>
 
           <div class="builder-footer">
-            <div class="generation-preview">
-              {{ resumoGeracao }}
-            </div>
+            <div class="generation-preview">{{ resumoGeracao }}</div>
 
             <button type="button" mat-flat-button color="primary" (click)="gerarVariacoes()"
               [disabled]="!podeGerarCombinacoes">
               <mat-icon>auto_awesome</mat-icon>
-              {{ totalCombinacoes ? 'Gerar ' + totalCombinacoes + ' combinações' : 'Gerar combinações' }}
+              {{ ctaGeracaoLabel }}
             </button>
           </div>
+        </div>
+
+        <div class="builder-cta-helper" *ngIf="mensagemGeracaoBloqueada">
+          {{ mensagemGeracaoBloqueada }}
         </div>
 
         <app-preco-selector [formGroup]="getFormGroup(formVariacaoAtual.get('preco')!)"
@@ -107,17 +102,23 @@
   </mat-expansion-panel>
 </mat-accordion>
 
-<mat-card class="p-16 m-t-16 cardWithShadow">
-  <mat-card-title class="f-s-16 f-w-600 m-b-16">Variações Salvas</mat-card-title>
+<mat-card class="p-16 m-t-16 cardWithShadow" #variacoesSalvasCard>
+  <div class="saved-section-header">
+    <div>
+      <mat-card-title class="f-s-16 f-w-600 m-b-8">{{ tituloAjustes }}</mat-card-title>
+      <div class="saved-section-subtitle">{{ subtituloAjustes }}</div>
+    </div>
+  </div>
 
   <div class="saved-toolbar" *ngIf="dataSource.data.length">
     <div>
-      <div class="saved-summary">
-        {{ dataSource.data.length }} variação(ões) prontas para salvar.
+      <div class="saved-summary">{{ dataSource.data.length }} variação(ões) prontas.</div>
+      <div class="saved-hint" *ngIf="selectedCount; else semSelecaoHint">
+        Use a ação em lote para atualizar as {{ selectedCount }} selecionadas.
       </div>
-      <div class="saved-hint">
-        Selecione linhas para aplicar o mesmo preço em lote ou use editar para tratar exceções.
-      </div>
+      <ng-template #semSelecaoHint>
+        <div class="saved-hint">Selecione linhas para aplicar preço em lote.</div>
+      </ng-template>
     </div>
 
     <div class="saved-actions">
@@ -134,7 +135,7 @@
   <mat-card class="inline-editor-card m-b-16" *ngIf="mostrarEditorLote">
     <mat-card-title class="f-s-16 f-w-600">Aplicar preço em lote</mat-card-title>
     <div class="inline-editor-copy">
-      O preço configurado abaixo será aplicado nas {{ selectedCount }} variação(ões) selecionadas.
+      O preço abaixo será aplicado nas {{ selectedCount }} selecionadas.
     </div>
 
     <app-preco-selector [formGroup]="getFormGroup(formPrecoEmLote.get('preco')!)"
@@ -150,7 +151,7 @@
   <mat-card class="inline-editor-card m-b-16" *ngIf="editandoIndex !== null">
     <mat-card-title class="f-s-16 f-w-600">Editar preço da variação</mat-card-title>
     <div class="inline-editor-copy">
-      Ajuste apenas esta combinação sem alterar as demais.
+      Ajuste só esta combinação.
     </div>
 
     <app-preco-selector [formGroup]="getFormGroup(formEdicaoRapida.get('preco')!)"
@@ -166,7 +167,7 @@
   <mat-card class="inline-editor-card m-b-16" *ngIf="duplicandoIndex !== null" [formGroup]="formDuplicarVariacao">
     <mat-card-title class="f-s-16 f-w-600">Duplicar com ajustes</mat-card-title>
     <div class="inline-editor-copy">
-      Crie uma nova variação a partir da linha escolhida. A cópia só é salva se a combinação final ainda não existir.
+      Crie uma nova variação sem repetir combinações já existentes.
     </div>
 
     <div class="row g-3 m-b-16">
@@ -294,7 +295,7 @@
       </div>
       <div class="variacoes-empty-title">Nenhuma variação gerada ainda</div>
       <div class="variacoes-empty-copy">
-        Selecione materiais, formatos e tipos de aplicação no gerador acima para criar as primeiras combinações.
+        Use o gerador acima para criar as primeiras combinações.
       </div>
       <button type="button" mat-stroked-button color="primary" (click)="abrirGerador()">
         Abrir gerador

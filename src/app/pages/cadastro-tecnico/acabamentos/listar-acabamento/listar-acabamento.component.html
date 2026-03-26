@@ -2,7 +2,13 @@
 
   <!-- Cabeçalho padrão -->
   <app-card-header titulo="Acabamentos" botaoTexto="Novo Acabamento" botaoIcone="add"
-    [botaoRota]="['/page/cadastro-tecnico/acabamentos/criar']" permissao="GERENCIAR_PRODUTOS" [mostrarDivisor]="true">
+    [botaoRota]="['/page/cadastro-tecnico/acabamentos/criar']"
+    [helpRota]="['/page/ajuda']"
+    helpFragment="acabamentos"
+    helpTexto=""
+    helpIcone="help_outline"
+    permissao="GERENCIAR_PRODUTOS"
+    [mostrarDivisor]="true">
   </app-card-header>
 
   <mat-card-content>
