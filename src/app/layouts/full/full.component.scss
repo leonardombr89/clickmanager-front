@@ -1,0 +1,45 @@
+.onboarding-resume-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 20px;
+  border: 1px solid rgba(37, 99, 235, 0.12);
+  border-radius: 22px;
+  background: linear-gradient(135deg, #eff6ff, #f8fbff);
+  box-shadow: 0 14px 32px rgba(14, 23, 38, 0.05);
+}
+
+.onboarding-resume-banner__copy {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: #0f172a;
+}
+
+.onboarding-resume-banner__copy strong {
+  font-size: 0.98rem;
+  line-height: 1.45;
+}
+
+.onboarding-resume-banner__eyebrow {
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #2563eb;
+}
+
+@media (max-width: 768px) {
+  .onboarding-resume-banner {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 16px;
+    border-radius: 18px;
+  }
+
+  .onboarding-resume-banner button {
+    width: 100%;
+    min-height: 46px;
+  }
+}

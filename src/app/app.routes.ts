@@ -10,6 +10,8 @@ import { BillingBlockedComponent } from './pages/billing/billing-blocked/billing
 import { BillingConfirmationComponent } from './pages/billing/billing-confirmation/billing-confirmation.component';
 import { BillingPagamentoComponent } from './pages/billing/billing-pagamento/billing-pagamento.component';
 import { BillingReturnComponent } from './pages/billing/billing-return/billing-return.component';
+import { OnboardingPageComponent } from './pages/onboarding/onboarding-page.component';
+import { OnboardingGuard } from './guards/onboarding.guard';
 
 export const routes: Routes = [
   {
@@ -21,6 +23,7 @@ export const routes: Routes = [
     path: '',
     component: FullComponent,
     canActivate: [AuthGuard],
+    canActivateChild: [OnboardingGuard],
     data: { perfil: 'GESTOR' },
     children: [
       {
@@ -158,6 +161,11 @@ export const routes: Routes = [
           import('./pages/theme-pages/landingpage/landingpage.routes').then(
             (m) => m.LandingPageRoutes
           ),
+      },
+      {
+        path: 'onboarding',
+        component: OnboardingPageComponent,
+        canActivate: [AuthGuard],
       },
     ],
   },

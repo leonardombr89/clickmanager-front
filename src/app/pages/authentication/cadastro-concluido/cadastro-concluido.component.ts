@@ -83,7 +83,7 @@ export class AppCadastroConcluidoComponent implements OnInit, OnDestroy {
 
   private scheduleAutoRedirect(): void {
     this.autoRedirectTimer = setTimeout(() => {
-      this.router.navigate(['/dashboards/dashboard1']);
+      this.router.navigate(['/onboarding']);
     }, 2500);
   }
 

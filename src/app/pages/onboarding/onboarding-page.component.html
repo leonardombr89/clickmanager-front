@@ -1,0 +1,156 @@
+<div class="blank-layout-container justify-content-center onboarding-page-layout">
+  <div class="auth-wrapper onboarding-page-wrapper">
+    <div class="position-relative shaper-wrapper">
+      <div class="w-100 position-relative rounded bg-white auth-card onboarding-page-card">
+        <div class="auth-body onboarding-page">
+          <ng-container *ngIf="!carregandoStatus; else loadingStatus">
+            <app-onboarding-shell
+              [tituloEtapa]="currentStep.title"
+              [subtituloEtapa]="currentStep.subtitle"
+              [passoAtual]="passoAtualLabel"
+              [totalPassos]="totalPassos"
+              [progressoComplementar]="progressoComplementar"
+              [progressoPercentual]="progressoPercentual"
+              [showFooter]="deveMostrarFooter"
+              [showBack]="podeVoltar"
+              [showSkip]="podePular"
+              [primaryLabel]="tituloAcaoPrincipal"
+              [primaryDisabled]="acaoPrincipalDesabilitada"
+              [primaryLoading]="salvandoEtapa"
+              [primaryHint]="dicaAcaoPrincipal"
+              (voltar)="voltarEtapa()"
+              (pular)="pularEtapa()"
+              (principal)="executarAcaoPrincipal()"
+              (sair)="solicitarSaida()"
+            >
+              <ng-container *ngIf="isEtapaEmpresa; else outrasEtapas">
+                <section class="onboarding-page__section onboarding-page__section--empresa">
+                  <div class="onboarding-page__microcopy">
+                    <mat-icon>bolt</mat-icon>
+                    <span>Isso leva menos de 1 minuto</span>
+                  </div>
+
+                  <app-empresa-form
+                    [modoOnboarding]="true"
+                    [esconderAcoesOnboarding]="true"
+                    [onboardingSection]="secaoOnboardingEmpresa"
+                    (empresaSalva)="onEmpresaSalva()"
+                  ></app-empresa-form>
+                </section>
+              </ng-container>
+
+              <ng-template #outrasEtapas>
+                <ng-container [ngSwitch]="currentStep.id">
+                <section *ngSwitchCase="'acabamentos'" class="onboarding-page__section">
+                  <app-onboarding-selection-step
+                    titulo="Acabamentos padrão"
+                    subtitulo="Selecione os acabamentos mais usados para já começar com tudo pronto"
+                    ajuda="Você pode alterar isso depois a qualquer momento"
+                    [items]="acabamentosPadrao"
+                    [loading]="carregandoAcabamentos"
+                    [selectedIds]="selecionadosAcabamentos"
+                    (toggleAll)="selecionarTodosAcabamentos($event)"
+                    (toggleItem)="toggleAcabamento($event)"
+                  ></app-onboarding-selection-step>
+                </section>
+
+                <section *ngSwitchCase="'cores'" class="onboarding-page__section">
+                  <app-onboarding-selection-step
+                    titulo="Cores mais usadas"
+                    subtitulo="Crie sua base de cores para acelerar a criação de pedidos"
+                    ajuda="Você pode ajustar isso depois a qualquer momento"
+                    [items]="coresPadrao"
+                    [loading]="carregandoCores"
+                    [selectedIds]="selecionadosCores"
+                    (toggleAll)="selecionarTodasCores($event)"
+                    (toggleItem)="toggleCor($event)"
+                  ></app-onboarding-selection-step>
+                </section>
+
+                <section *ngSwitchCase="'formatos'" class="onboarding-page__section">
+                  <app-onboarding-selection-step
+                    titulo="Formatos mais usados"
+                    subtitulo="Adicione os formatos mais comuns para agilizar seus orçamentos"
+                    ajuda="Você pode ajustar isso depois a qualquer momento"
+                    [items]="formatosPadrao"
+                    [loading]="carregandoFormatos"
+                    [selectedIds]="selecionadosFormatos"
+                    (toggleAll)="selecionarTodosFormatos($event)"
+                    (toggleItem)="toggleFormato($event)"
+                  ></app-onboarding-selection-step>
+                </section>
+
+                <section *ngSwitchCase="'materiais'" class="onboarding-page__section">
+                  <app-onboarding-selection-step
+                    titulo="Materiais mais usados"
+                    subtitulo="Selecione os materiais mais usados para começar com tudo pronto"
+                    ajuda="Você pode ajustar isso depois a qualquer momento"
+                    [items]="materiaisPadrao"
+                    [loading]="carregandoMateriais"
+                    [selectedIds]="selecionadosMateriais"
+                    (toggleAll)="selecionarTodosMateriais($event)"
+                    (toggleItem)="toggleMaterial($event)"
+                  ></app-onboarding-selection-step>
+                </section>
+
+                <section *ngSwitchCase="'servicos'" class="onboarding-page__section">
+                  <app-onboarding-selection-step
+                    titulo="Serviços mais oferecidos"
+                    subtitulo="Escolha os serviços mais comuns para agilizar seu atendimento"
+                    ajuda="Você pode ajustar isso depois a qualquer momento"
+                    [items]="servicosPadrao"
+                    [loading]="carregandoServicos"
+                    [selectedIds]="selecionadosServicos"
+                    (toggleAll)="selecionarTodosServicos($event)"
+                    (toggleItem)="toggleServico($event)"
+                  ></app-onboarding-selection-step>
+                </section>
+
+                <section *ngSwitchCase="'finalizacao'" class="onboarding-page__section">
+                  <app-section-card titulo="Revisar e concluir" subtitulo="Confira o que já foi preparado antes de entrar no sistema." [divider]="true">
+                    <div class="onboarding-page__company-line">
+                      <span class="onboarding-page__summary-label">Empresa</span>
+                      <strong>{{ empresaNome }}</strong>
+                    </div>
+
+                    <div class="onboarding-page__status-list">
+                      <article
+                        class="onboarding-page__status-item"
+                        *ngFor="let item of statusFinalizacao"
+                        [class.onboarding-page__status-item--done]="item.status === 'done'"
+                        [class.onboarding-page__status-item--pending]="item.status === 'pending'"
+                      >
+                        <mat-icon>{{ item.status === 'done' ? 'check_circle' : 'warning_amber' }}</mat-icon>
+                        <strong>{{ item.text }}</strong>
+                        <button
+                          mat-button
+                          color="primary"
+                          type="button"
+                          *ngIf="item.status === 'pending' && item.stepId"
+                          (click)="irParaEtapa(item.stepId)"
+                        >
+                          Configurar
+                        </button>
+                      </article>
+                    </div>
+
+                    <mat-checkbox color="primary" [formControl]="naoMostrarMaisControl">
+                      Não mostrar mais este passo a passo nos próximos acessos
+                    </mat-checkbox>
+                  </app-section-card>
+                </section>
+                </ng-container>
+              </ng-template>
+            </app-onboarding-shell>
+          </ng-container>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<ng-template #loadingStatus>
+  <div class="onboarding-page__loading">
+    <mat-spinner diameter="42"></mat-spinner>
+  </div>
+</ng-template>

@@ -83,6 +83,15 @@
       }
 
       <div class="m-t-30" [ngClass]="{ 'p-l-24 p-r-24': options.horizontal }">
+        <div class="onboarding-resume-banner m-b-20" *ngIf="exibirAvisoOnboarding">
+          <div class="onboarding-resume-banner__copy">
+            <span class="onboarding-resume-banner__eyebrow">Configuração inicial</span>
+            <strong>Finalize sua configuração para usar todas as funcionalidades</strong>
+          </div>
+          <button mat-flat-button color="primary" type="button" (click)="continuarOnboarding()">
+            Continuar configuração
+          </button>
+        </div>
         <app-billing-banner></app-billing-banner>
         <app-breadcrumb></app-breadcrumb>
         <!-- ============================================================== -->

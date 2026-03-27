@@ -27,11 +27,13 @@ import { InputTelefoneComponent } from 'src/app/components/inputs/input-telefone
 import { InputDocumentoComponent } from 'src/app/components/inputs/input-documento/input-documento.component';
 import { InputCepComponent } from 'src/app/components/inputs/input-cep/input-cep.component';
 
+type EmpresaOnboardingSection = 'all' | 'empresa' | 'logo' | 'endereco';
 
 @Component({
   selector: 'app-empresa-form',
   standalone: true,
   templateUrl: './empresa-form.component.html',
+  styleUrls: ['./empresa-form.component.scss'],
   imports: [
     CommonModule,
     ReactiveFormsModule,
@@ -57,6 +59,8 @@ import { InputCepComponent } from 'src/app/components/inputs/input-cep/input-cep
 export class EmpresaFormComponent implements OnInit {
 
   @Input() modoOnboarding = false;
+  @Input() esconderAcoesOnboarding = false;
+  @Input() onboardingSection: EmpresaOnboardingSection = 'all';
   @Output() empresaSalva = new EventEmitter<void>();
 
   form!: FormGroup;
@@ -89,6 +93,43 @@ export class EmpresaFormComponent implements OnInit {
           });
         }
       });
+  }
+
+  get mostrarSecaoEmpresa(): boolean {
+    return this.onboardingSection === 'all' || this.onboardingSection === 'empresa';
+  }
+
+  get mostrarSecaoLogo(): boolean {
+    return this.onboardingSection === 'all' || this.onboardingSection === 'logo';
+  }
+
+  get mostrarSecaoEndereco(): boolean {
+    return this.onboardingSection === 'all' || this.onboardingSection === 'endereco';
+  }
+
+  isCurrentSectionValid(): boolean {
+    switch (this.onboardingSection) {
+      case 'empresa':
+        return [
+          this.nomeControl,
+          this.telefoneControl,
+          this.emailControl,
+          this.cnpjControl,
+        ].every((control) => control.valid);
+      case 'logo':
+        return true;
+      case 'endereco':
+        return [
+          this.cepControl,
+          this.logradouroControl,
+          this.numeroControl,
+          this.bairroControl,
+          this.cidadeControl,
+          this.estadoControl,
+        ].every((control) => control.valid);
+      default:
+        return this.form.valid;
+    }
   }
 
   private criarFormulario(): FormGroup {

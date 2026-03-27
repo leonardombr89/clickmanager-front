@@ -9,16 +9,14 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatTabsModule } from '@angular/material/tabs';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { TablerIconsModule } from 'angular-tabler-icons';
 import { MatDividerModule } from '@angular/material/divider';
 import { ToastrService } from 'ngx-toastr';
 import { AccountSettingService } from './account-setting.service';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ImagemUtil } from 'src/app/utils/imagem-util';
 import { AuthService } from 'src/app/services/auth.service';
 import { Usuario } from 'src/app/models/usuario/usuario.model';
-import { OnboardingWizardComponent } from 'src/app/components/onboarding/onboarding-wizard.component';
 import { Subscription } from 'rxjs';
 import { AppNotificacoesComponent } from '../../notificacoes/notificacoes.component';
 
@@ -37,9 +35,7 @@ import { AppNotificacoesComponent } from '../../notificacoes/notificacoes.compon
     MatInputModule,
     MatButtonModule,
     MatDividerModule,
-    MatDialogModule,
     ReactiveFormsModule,
-    OnboardingWizardComponent,
     AppNotificacoesComponent
   ],
   templateUrl: './account-setting.component.html',
@@ -65,8 +61,8 @@ export class AppAccountSettingComponent implements OnInit, OnDestroy {
     private toastr: ToastrService,
     private accountService: AccountSettingService,
     private route: ActivatedRoute,
+    private router: Router,
     private authService: AuthService,
-    private dialog: MatDialog
   ) {}
 
   ngOnInit(): void {
@@ -294,17 +290,6 @@ export class AppAccountSettingComponent implements OnInit, OnDestroy {
   }
 
   abrirOnboarding(): void {
-    const empresaNome = this.usuarioAtual?.empresa?.nome || 'Sua empresa';
-    const naoMostrarMaisDefault = this.usuarioAtual?.onboardingIgnorado ?? this.usuarioAtual?.empresa?.onboardingIgnorado ?? false;
-    this.dialog.open(OnboardingWizardComponent, {
-      width: '96vw',
-      maxWidth: '96vw',
-      maxHeight: '92vh',
-      disableClose: true,
-      data: {
-        empresaNome,
-        naoMostrarMaisDefault
-      }
-    });
+    this.router.navigate(['/onboarding']);
   }
 }
