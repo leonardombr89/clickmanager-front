@@ -1,12 +1,151 @@
+.flow-step-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.flow-step-header--compact {
+  margin-bottom: 16px;
+}
+
+.flow-step-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 70px;
+  height: 30px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: rgba(37, 99, 235, 0.08);
+  color: #2563eb;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.flow-step-copy {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.flow-step-copy h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.flow-step-help {
+  width: 28px;
+  height: 28px;
+  color: #64748b;
+}
+
+.review-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.review-summary-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 18px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 18px;
+  background: #fbfdff;
+}
+
+.review-summary-card--highlight {
+  border-color: rgba(37, 99, 235, 0.24);
+  background: rgba(37, 99, 235, 0.03);
+}
+
+.review-summary-label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.review-summary-value {
+  font-size: 18px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.review-summary-value--warning {
+  color: #c2410c;
+}
+
+.review-summary-helper {
+  font-size: 13px;
+  line-height: 1.5;
+  color: #64748b;
+}
+
+.review-pendencias {
+  margin-top: 18px;
+  padding: 16px 18px;
+  border-radius: 16px;
+  background: #fff7ed;
+  border: 1px solid rgba(249, 115, 22, 0.14);
+}
+
+.review-pendencias__title {
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #9a3412;
+}
+
+.review-pendencias ul {
+  margin: 0;
+  padding-left: 18px;
+  color: #9a3412;
+}
+
 .actions-row {
   display: flex;
+  align-items: center;
+  justify-content: space-between;
   flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 8px;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.actions-row__hint {
+  font-size: 13px;
+  color: #64748b;
+}
+
+.actions-row__buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 12px;
 }
 
 @media (max-width: 768px) {
-  .actions-row > * {
+  .flow-step-header {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .review-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .actions-row > *,
+  .actions-row__buttons > * {
+    width: 100%;
+  }
+
+  .actions-row__buttons {
     width: 100%;
   }
 }

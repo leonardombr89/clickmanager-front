@@ -7,6 +7,10 @@
     <input
     matInput
     #input
+    type="tel"
+    inputmode="tel"
+    [formControl]="control"
+    [attr.autocomplete]="autocomplete"
     [placeholder]="placeholder"
     [attr.maxlength]="maxLength + 4"
     (keydown)="permitirApenasNumeros($event)"

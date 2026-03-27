@@ -1,6 +1,6 @@
 <app-page-card
   [titulo]="isEditMode ? 'Editar Acabamento' : 'Novo Acabamento'"
-  subtitulo="Cadastre o acabamento e configure as variações de aplicação e preço."
+  subtitulo="Cadastre o acabamento e configure as variações."
   botaoTexto="Voltar"
   botaoIcone="arrow_back"
   botaoCor="primary"
@@ -9,8 +9,22 @@
 
   <app-section-card
     titulo="Dados principais"
-    subtitulo="Informe o nome e descreva quando esse acabamento deve ser utilizado."
+    subtitulo="Defina a base do cadastro."
     [divider]="true">
+    <div class="flow-step-header">
+      <span class="flow-step-badge">Etapa 1</span>
+      <div class="flow-step-copy">
+        <h3>Defina a base do cadastro</h3>
+        <button
+          type="button"
+          mat-icon-button
+          class="flow-step-help"
+          matTooltip="Use um nome fácil de reconhecer e uma descrição curta para diferenciar este acabamento depois.">
+          <mat-icon>help_outline</mat-icon>
+        </button>
+      </div>
+    </div>
+
     <form class="row g-3" [formGroup]="form">
       <div class="col-12 col-md-6">
         <app-input-texto-restrito
@@ -35,30 +49,103 @@
 
   <app-section-card
     titulo="Variações"
-    subtitulo="Configure as combinações de material, formato, aplicação e preço do acabamento."
+    subtitulo="Gere e ajuste as combinações."
     [divider]="true">
+    <div class="flow-step-header">
+      <span class="flow-step-badge">Etapas 2 e 3</span>
+      <div class="flow-step-copy">
+        <h3>Gerar primeiro, ajustar depois</h3>
+        <button
+          type="button"
+          mat-icon-button
+          class="flow-step-help"
+          matTooltip="Selecione os grupos, defina o preço base e gere as combinações automaticamente. Depois ajuste só as exceções.">
+          <mat-icon>help_outline</mat-icon>
+        </button>
+      </div>
+    </div>
+
     <app-variacoes-acabamento
       [variacoesIniciais]="variacoesIniciais"
       (variacoesChange)="onVariacoesChange($event)">
     </app-variacoes-acabamento>
   </app-section-card>
 
-  <div class="actions-row">
-    <button
-      mat-flat-button
-      color="primary"
-      type="button"
-      (click)="onSubmit()"
-      [disabled]="form.invalid || loading">
-      {{ loading ? 'Salvando...' : (isEditMode ? 'Atualizar' : 'Salvar') }}
-    </button>
+  <app-section-card
+    titulo="Revisar e salvar"
+    subtitulo="Confira e conclua."
+    [divider]="false">
+    <div class="flow-step-header flow-step-header--compact">
+      <span class="flow-step-badge">Etapa 4</span>
+      <div class="flow-step-copy">
+        <h3>{{ statusRevisaoTitulo }}</h3>
+        <button
+          type="button"
+          mat-icon-button
+          class="flow-step-help"
+          [matTooltip]="statusRevisaoDescricao">
+          <mat-icon>help_outline</mat-icon>
+        </button>
+      </div>
+    </div>
 
-    <button
-      mat-stroked-button
-      color="primary"
-      type="button"
-      [routerLink]="['/page/cadastro-tecnico/acabamentos']">
-      Voltar
-    </button>
-  </div>
+    <div class="review-summary-grid">
+      <div class="review-summary-card review-summary-card--highlight">
+        <span class="review-summary-label">Acabamento</span>
+        <strong class="review-summary-value">{{ resumoNome }}</strong>
+        <span class="review-summary-helper" *ngIf="resumoNome !== 'Pendente'">Identificação principal pronta para salvar.</span>
+        <span class="review-summary-helper" *ngIf="resumoNome === 'Pendente'">Defina o nome para identificar o acabamento.</span>
+      </div>
+
+      <div class="review-summary-card">
+        <span class="review-summary-label">Variações configuradas</span>
+        <strong class="review-summary-value">{{ variacoesCount }}</strong>
+        <span class="review-summary-helper">
+          {{ variacoesCount ? 'Lista pronta para revisão e salvamento.' : 'Gere ao menos uma variação para continuar.' }}
+        </span>
+      </div>
+
+      <div class="review-summary-card">
+        <span class="review-summary-label">Status do preenchimento</span>
+        <strong class="review-summary-value" [class.review-summary-value--warning]="!prontoParaSalvar">
+          {{ prontoParaSalvar ? 'Completo' : 'Em revisão' }}
+        </strong>
+        <span class="review-summary-helper">
+          {{ prontoParaSalvar ? 'Tudo certo para concluir o cadastro.' : 'Ainda existem pendências antes de salvar.' }}
+        </span>
+      </div>
+    </div>
+
+    <div class="review-pendencias" *ngIf="pendenciasSalvamento.length">
+      <div class="review-pendencias__title">O que falta para avançar</div>
+      <ul>
+        <li *ngFor="let pendencia of pendenciasSalvamento">{{ pendencia }}</li>
+      </ul>
+    </div>
+
+    <div class="actions-row">
+      <div class="actions-row__hint" *ngIf="!prontoParaSalvar">
+        Falta revisar alguns pontos antes de salvar.
+      </div>
+
+      <div class="actions-row__buttons">
+        <button
+          mat-flat-button
+          color="primary"
+          type="button"
+          (click)="onSubmit()"
+          [disabled]="!prontoParaSalvar || loading">
+          {{ loading ? 'Salvando...' : (isEditMode ? 'Atualizar acabamento' : 'Salvar acabamento') }}
+        </button>
+
+        <button
+          mat-stroked-button
+          color="primary"
+          type="button"
+          [routerLink]="['/page/cadastro-tecnico/acabamentos']">
+          Voltar
+        </button>
+      </div>
+    </div>
+  </app-section-card>
 </app-page-card>

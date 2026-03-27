@@ -14,6 +14,8 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 
 import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { Observable } from 'rxjs';
 
@@ -39,6 +41,8 @@ import { InputTextareaComponent } from 'src/app/components/inputs/input-textarea
     RouterModule,
     ReactiveFormsModule,
     MatButtonModule,
+    MatIconModule,
+    MatTooltipModule,
     InputTextoRestritoComponent,
     VariacoesAcabamentoComponent,
     PageCardComponent,
@@ -310,5 +314,59 @@ export class FormAcabamentoComponent implements OnInit {
 
   get descricaoControl(): FormControl {
     return this.form.get('descricao') as FormControl;
+  }
+
+  get variacoesCount(): number {
+    return this.variacoes.length;
+  }
+
+  get dadosPrincipaisProntos(): boolean {
+    return this.nomeControl.valid && this.descricaoControl.valid;
+  }
+
+  get prontoParaSalvar(): boolean {
+    return this.dadosPrincipaisProntos && this.variacoesCount > 0;
+  }
+
+  get resumoNome(): string {
+    return (this.nomeControl.value || '').trim() || 'Pendente';
+  }
+
+  get statusRevisaoTitulo(): string {
+    return this.prontoParaSalvar ? 'Pronto para salvar' : 'Ainda falta revisar';
+  }
+
+  get statusRevisaoDescricao(): string {
+    if (this.prontoParaSalvar) {
+      return `Acabamento ${this.resumoNome} com ${this.variacoesCount} variação(ões) configurada(s) e pronto para salvar.`;
+    }
+
+    if (!this.dadosPrincipaisProntos && !this.variacoesCount) {
+      return 'Preencha os dados principais e gere ao menos uma variação para concluir o cadastro.';
+    }
+
+    if (!this.dadosPrincipaisProntos) {
+      return 'Revise nome e descrição para deixar o acabamento pronto para ser salvo.';
+    }
+
+    return 'Gere ao menos uma variação para concluir o cadastro deste acabamento.';
+  }
+
+  get pendenciasSalvamento(): string[] {
+    const pendencias: string[] = [];
+
+    if (!this.nomeControl.valid) {
+      pendencias.push('Informar o nome do acabamento.');
+    }
+
+    if (!this.descricaoControl.valid) {
+      pendencias.push('Preencher uma descrição clara do uso do acabamento.');
+    }
+
+    if (!this.variacoesCount) {
+      pendencias.push('Gerar ao menos uma variação antes de salvar.');
+    }
+
+    return pendencias;
   }
 }

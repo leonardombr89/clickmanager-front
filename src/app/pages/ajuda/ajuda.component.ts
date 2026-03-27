@@ -91,6 +91,60 @@ export class AjudaComponent implements OnInit, OnDestroy {
       ],
     },
     {
+      id: 'acabamentos',
+      titulo: 'Acabamentos',
+      descricao: 'Como cadastrar um acabamento e montar variações de aplicação e preço de forma simples.',
+      icon: 'auto_awesome',
+      itens: [
+        {
+          titulo: '1) O que é um acabamento',
+          detalhes: [
+            'Acabamento é uma configuração extra aplicada ao produto, como laminação, verniz, corte especial ou dobra.',
+            'O cadastro define o nome do acabamento e as regras de preço por material, formato e tipo de aplicação.',
+          ],
+        },
+        {
+          titulo: '2) Como cadastrar',
+          detalhes: [
+            'Preencha primeiro o nome e a descrição do acabamento.',
+            'Depois vá para o gerador de variações para montar as combinações de preço.',
+          ],
+        },
+        {
+          titulo: '3) Como gerar variações',
+          detalhes: [
+            'Selecione os materiais, formatos e tipos de aplicação que devem usar a mesma regra.',
+            'Defina o preço base e clique em “Gerar variações”.',
+            'Se deixar material ou formato em branco, a regra pode valer para todos daquele grupo.',
+          ],
+        },
+        {
+          titulo: '4) Como revisar e ajustar',
+          detalhes: [
+            'As combinações geradas aparecem na lista de variações salvas.',
+            'Você pode editar uma linha específica, duplicar com ajustes ou aplicar preço em lote em várias linhas selecionadas.',
+            'O sistema evita combinações repetidas para não gerar duplicidade no cadastro.',
+          ],
+        },
+        {
+          titulo: '5) Antes de salvar',
+          detalhes: [
+            'Confira se o acabamento tem nome preenchido.',
+            'Verifique se existe pelo menos uma variação pronta.',
+            'Use o bloco final de revisão para confirmar que está tudo certo antes de salvar.',
+          ],
+        },
+        {
+          titulo: '6) Boas práticas',
+          detalhes: [
+            'Use nomes fáceis de reconhecer no dia a dia, como “Laminação fosca” ou “Verniz localizado”.',
+            'Gere primeiro em lote e ajuste só as exceções depois.',
+            'Evite criar muitas variações manuais quando puder montar grupos e deixar o sistema gerar automaticamente.',
+          ],
+        },
+      ],
+    },
+    {
       id: 'clientes',
       titulo: 'Clientes',
       descricao: 'Cadastro e uso de clientes nos pedidos.',

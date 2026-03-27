@@ -20,7 +20,10 @@ export class InputEmailComponent implements OnInit {
   @Input() control!: FormControl;
   @Input() label: string = 'E-mail';
   @Input() placeholder: string = 'Digite seu e-mail';
+  @Input() autocomplete: string = 'email';
   @Input() maxlength: number = 200;
+  @Input() requiredError: string = 'Campo obrigatório';
+  @Input() emailError: string = 'E-mail inválido';
   readonly type: string = 'email'; // fixo
 
   ngOnInit(): void {
@@ -35,13 +38,13 @@ export class InputEmailComponent implements OnInit {
 
   errorMessage(): string {
     if (this.control.hasError('required')) {
-      return 'Campo obrigatório';
+      return this.requiredError;
     }
     if (this.control.hasError('maxlength')) {
       return `Máximo de ${this.control.getError('maxlength')?.requiredLength} caracteres`;
     }
     if (this.control.hasError('email')) {
-      return 'E-mail inválido';
+      return this.emailError;
     }
     return 'Valor inválido';
   }

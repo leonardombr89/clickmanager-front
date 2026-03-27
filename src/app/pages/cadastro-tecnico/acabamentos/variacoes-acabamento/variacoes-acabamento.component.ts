@@ -1,5 +1,6 @@
 import {
   Component,
+  ElementRef,
   EventEmitter,
   Input,
   Output,
@@ -85,6 +86,7 @@ export class VariacoesAcabamentoComponent {
   @ViewChild(MatAccordion) accordion?: MatAccordion;
   @ViewChild('novaVarPanel') novaVarPanel?: MatExpansionPanel;
   @ViewChild(MatTable) table!: MatTable<AcabamentoVariacaoForm>;
+  @ViewChild('variacoesSalvasCard') variacoesSalvasCard?: ElementRef<HTMLElement>;
 
   materiais: any[] = [];
   formatos: any[] = [];
@@ -221,6 +223,8 @@ export class VariacoesAcabamentoComponent {
     this.emitirVariacoes();
     this.mostrarEditorLote = false;
     this.limparSelecao();
+    this.novaVarPanel?.close();
+    this.focusVariacoesGeradas();
 
     const duplicadas = this.totalCombinacoes - novasVariacoes.length;
     if (duplicadas > 0) {
@@ -520,10 +524,45 @@ export class VariacoesAcabamentoComponent {
 
   get resumoGeracao(): string {
     if (!this.tiposAplicacaoSelecionadosCount) {
-      return 'Selecione ao menos um tipo de aplicação para gerar as combinações.';
+      return 'Selecione ao menos um tipo de aplicação para iniciar a geração.';
     }
 
-    return `${this.totalCombinacoes} combinação(ões) serão geradas com o preço informado. Duplicadas existentes serão ignoradas.`;
+    return `Você está prestes a gerar ${this.totalCombinacoes} variação(ões) (${this.materiaisSelecionadosCount || 1} material(is) × ${this.formatosSelecionadosCount || 1} formato(s) × ${this.tiposAplicacaoSelecionadosCount} aplicação(ões)).`;
+  }
+
+  get mensagemGeracaoBloqueada(): string {
+    if (!this.tiposAplicacaoSelecionadosCount) {
+      return 'Selecione ao menos um tipo de aplicação para gerar variações.';
+    }
+
+    const precoFG = this.formVariacaoAtual?.get('preco') as FormGroup | null;
+    if (!precoFG?.value || !Object.keys(precoFG.getRawValue() || {}).length || precoFG.invalid) {
+      return 'Defina um preço base válido antes de gerar as combinações.';
+    }
+
+    return '';
+  }
+
+  get ctaGeracaoLabel(): string {
+    return this.totalCombinacoes
+      ? `Gerar ${this.totalCombinacoes} variação(ões)`
+      : 'Gerar variações';
+  }
+
+  get tituloAjustes(): string {
+    if (!this.dataSource.data.length) {
+      return 'Ajustar variações geradas';
+    }
+
+    return 'Variações geradas';
+  }
+
+  get subtituloAjustes(): string {
+    if (!this.dataSource.data.length) {
+      return 'Gere as primeiras combinações acima para começar a revisar e ajustar.';
+    }
+
+    return `${this.dataSource.data.length} variação(ões) pronta(s) para revisão e ajustes finais.`;
   }
 
   get selectedCount(): number {
@@ -623,5 +662,14 @@ export class VariacoesAcabamentoComponent {
       }
     });
     this.indicesSelecionados = atualizado;
+  }
+
+  private focusVariacoesGeradas(): void {
+    setTimeout(() => {
+      this.variacoesSalvasCard?.nativeElement.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    }, 50);
   }
 }

@@ -38,6 +38,27 @@ export class AuthService {
     );
   }
 
+  autenticarComTokens(tokens: AuthTokens, lembrar = false): Observable<Usuario> {
+    lembrar ? this.tokenStorage.usarLocalStorage() : this.tokenStorage.usarSessionStorage();
+
+    return new Observable<Usuario>(observer => {
+      try {
+        this.persistirTokens(tokens);
+      } catch (error) {
+        observer.error(error);
+        return;
+      }
+
+      this.carregarUsuarioCompleto().subscribe({
+        next: usuario => {
+          observer.next(usuario);
+          observer.complete();
+        },
+        error: err => observer.error(err),
+      });
+    });
+  }
+
   private initJwt(): void {
     const token = this.tokenStorage.getToken();
     if (!token) return;
