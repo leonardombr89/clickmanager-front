@@ -290,6 +290,8 @@ export class AppAccountSettingComponent implements OnInit, OnDestroy {
   }
 
   abrirOnboarding(): void {
-    this.router.navigate(['/onboarding']);
+    this.router.navigate(['/onboarding'], {
+      queryParams: { reabrir: '1' },
+    });
   }
 }
