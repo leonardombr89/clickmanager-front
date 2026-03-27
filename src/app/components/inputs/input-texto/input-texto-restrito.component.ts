@@ -20,8 +20,12 @@ export class InputTextoRestritoComponent implements OnInit {
   @Input() control!: FormControl;
   @Input() label: string = '';
   @Input() placeholder: string = '';
+  @Input() autocomplete: string = 'off';
+  @Input() inputmode: string | null = null;
   @Input() maxlength: number = 200;
   @Input() bloquearNumeros: boolean = false;
+  @Input() requiredError: string = 'Campo obrigatório';
+  @Input() invalidError: string = 'Valor inválido';
 
   ngOnInit(): void {
     if (!this.control) {
@@ -35,12 +39,12 @@ export class InputTextoRestritoComponent implements OnInit {
 
   errorMessage(): string {
     if (this.control.hasError('required')) {
-      return 'Campo obrigatório';
+      return this.requiredError;
     }
     if (this.control.hasError('maxlength')) {
       return "Máximo de ${this.control.getError('maxlength')?.requiredLength} caracteres";
     }
-    return 'Valor inválido';
+    return this.invalidError;
   }
 
   get isRequired(): boolean {

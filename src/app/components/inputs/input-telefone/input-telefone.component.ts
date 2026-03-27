@@ -37,7 +37,11 @@ export class InputTelefoneComponent implements OnInit, AfterViewInit {
   @Input() control!: FormControl;
   @Input() label: string = 'Telefone';
   @Input() placeholder: string = '';
+  @Input() autocomplete: string = 'tel';
   @Input() maxLength: number = 11;
+  @Input() required: boolean = true;
+  @Input() requiredError: string = 'Campo obrigatório';
+  @Input() invalidError: string = 'Telefone inválido';
 
   @ViewChild('input') inputRef!: ElementRef<HTMLInputElement>;
 
@@ -51,7 +55,7 @@ export class InputTelefoneComponent implements OnInit, AfterViewInit {
     const existingValidators = this.control.validator ? [this.control.validator] : [];
     this.control.setValidators([
       ...existingValidators,
-      Validators.required,
+      ...(this.required ? [Validators.required] : []),
       this.telefoneValidoValidator()
     ]);
     this.control.updateValueAndValidity();
@@ -119,17 +123,18 @@ export class InputTelefoneComponent implements OnInit, AfterViewInit {
   private telefoneValidoValidator(): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
       const raw = this.limparMascara(control.value ?? '');
+      if (!raw.length && !this.required) return null;
       return raw.length === 10 || raw.length === 11 ? null : { telefoneInvalido: true };
     };
   }
 
   get isRequired(): boolean {
-    return !!this.control?.validator?.({} as AbstractControl)?.['required'];
+    return this.required;
   }
 
   errorMessage(): string {
-    if (this.control.hasError('required')) return 'Campo obrigatório';
-    if (this.control.hasError('telefoneInvalido')) return 'Telefone inválido';
+    if (this.control.hasError('required')) return this.requiredError;
+    if (this.control.hasError('telefoneInvalido')) return this.invalidError;
     return '';
   }
 }

@@ -5,72 +5,94 @@
         <div class="auth-body cadastro-body">
           <div class="cadastro-header">
             <app-branding></app-branding>
-            <a mat-stroked-button [routerLink]="['/authentication/registro-gestor']">
-              Voltar ao cadastro
-            </a>
           </div>
 
           <section class="hero-section">
             <div class="hero-badge">
               <mat-icon>task_alt</mat-icon>
-              Cadastro concluido
+              Cadastro concluído
             </div>
 
-            <h1 class="hero-title">Sua empresa ja esta pronta para começar no ClickManager</h1>
+            <h1 class="hero-title">Tudo pronto para começar 🚀</h1>
             <p class="hero-subtitle">
-              O cadastro foi concluido com sucesso. Agora voce pode entrar, seguir com o onboarding
-              e configurar a operação da sua empresa com calma.
+              Sua conta já está pronta. Agora é só começar.
             </p>
           </section>
 
           <section class="summary-grid">
             <article class="summary-card summary-card--highlight">
-              <span class="summary-label">Empresa criada</span>
+              <div class="summary-card-header">
+                <span class="summary-card-icon">
+                  <mat-icon>apartment</mat-icon>
+                </span>
+                <span class="summary-label">Empresa</span>
+              </div>
               <strong class="summary-value">{{ cadastro.empresaNome }}</strong>
-              <span class="summary-helper">Codigo interno #{{ cadastro.empresaId }}</span>
+              <span class="summary-helper">Código interno #{{ cadastro.empresaId }}</span>
             </article>
 
             <article class="summary-card">
-              <span class="summary-label">Gestor principal</span>
+              <div class="summary-card-header">
+                <span class="summary-card-icon">
+                  <mat-icon>person</mat-icon>
+                </span>
+                <span class="summary-label">Acesso</span>
+              </div>
               <strong class="summary-value">{{ cadastro.usuarioNome }}</strong>
               <span class="summary-helper">{{ cadastro.usuarioUsername }}</span>
             </article>
 
             <article class="summary-card">
-              <span class="summary-label">Periodo de trial</span>
-              <strong class="summary-value">{{ diasDeTrial }} dias gratis</strong>
+              <div class="summary-card-header">
+                <span class="summary-card-icon">
+                  <mat-icon>calendar_month</mat-icon>
+                </span>
+                <span class="summary-label">Período de teste</span>
+              </div>
+              <strong class="summary-value">{{ trialLabel }}</strong>
               <span class="summary-helper">{{ trialPeriodoFormatado }}</span>
             </article>
           </section>
 
           <section class="next-step-card">
+            <div class="next-step-status next-step-status--mobile">
+              <div class="status-pill">
+                <mat-icon>schedule</mat-icon>
+                Configuração inicial pendente
+              </div>
+            </div>
+
             <div class="next-step-copy">
-              <span class="next-step-kicker">Proximo passo natural</span>
-              <h2>Entrar e concluir o onboarding inicial</h2>
-              <p>
-                O sistema já reconhece que o cadastro da empresa foi concluido. Ao acessar a conta,
-                o proximo fluxo esperado é terminar as etapas iniciais de configuração.
-              </p>
+              <div class="next-step-heading">
+                <span class="next-step-kicker">Próximo passo</span>
+                <h2>Você já está quase pronto 🚀</h2>
+              </div>
+              <p>Finalize sua configuração para começar.</p>
               <ul class="next-step-list">
-                <li>Entrar com o e-mail do gestor e a senha cadastrada.</li>
-                <li>Concluir o onboarding inicial para configurar a empresa.</li>
-                <li>Adicionar itens do catálogo e começar a operar.</li>
+                <li>Configurar sua empresa</li>
+                <li>Adicionar seus primeiros produtos</li>
+                <li>Começar a usar o sistema</li>
               </ul>
             </div>
 
             <div class="next-step-status">
-              <div class="status-pill" [class.status-pill--done]="cadastro.onboardingConcluido">
-                <mat-icon>{{ cadastro.onboardingConcluido ? 'check_circle' : 'schedule' }}</mat-icon>
-                {{ cadastro.onboardingConcluido ? 'Onboarding concluido' : 'Onboarding pendente' }}
+              <div class="status-pill">
+                <mat-icon>schedule</mat-icon>
+                Configuração inicial pendente
               </div>
             </div>
           </section>
 
           <div class="cta-row">
-            <a mat-flat-button color="primary" [routerLink]="['/authentication/login']">
-              Ir para o login
+            <a mat-flat-button color="primary" class="cta-row__primary" [routerLink]="['/dashboards/dashboard1']">
+              Começar a usar o sistema
+            </a>
+            <a mat-stroked-button class="cta-row__secondary" [routerLink]="['/authentication/registro-gestor']">
+              Voltar ao cadastro
             </a>
           </div>
+
+          <p class="auto-login-copy">Entrando automaticamente...</p>
         </div>
       </div>
     </div>

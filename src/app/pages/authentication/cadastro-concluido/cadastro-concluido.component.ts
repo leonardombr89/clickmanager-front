@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { MaterialModule } from 'src/app/material.module';
 import { BrandingComponent } from 'src/app/layouts/full/vertical/sidebar/branding.component';
@@ -7,6 +7,10 @@ import { BrandingComponent } from 'src/app/layouts/full/vertical/sidebar/brandin
 interface CadastroConcluidoViewModel {
   cadastroConcluido: boolean;
   eventoConversao: string;
+  autenticado: boolean;
+  accessToken: string;
+  refreshToken: string;
+  tokenType: string;
   empresaId: number;
   empresaNome: string;
   usuarioId: number;
@@ -31,8 +35,9 @@ declare global {
   templateUrl: './cadastro-concluido.component.html',
   styleUrl: './cadastro-concluido.component.scss',
 })
-export class AppCadastroConcluidoComponent implements OnInit {
+export class AppCadastroConcluidoComponent implements OnInit, OnDestroy {
   private readonly cadastroConcluidoStorageKey = 'clickmanager:onboarding:cadastro-concluido';
+  private autoRedirectTimer: ReturnType<typeof setTimeout> | null = null;
   cadastro!: CadastroConcluidoViewModel;
   private cameFromRealFlow = false;
 
@@ -47,6 +52,13 @@ export class AppCadastroConcluidoComponent implements OnInit {
 
     this.cadastro = cadastro;
     this.trackConversionIfNeeded();
+    this.scheduleAutoRedirect();
+  }
+
+  ngOnDestroy(): void {
+    if (this.autoRedirectTimer) {
+      clearTimeout(this.autoRedirectTimer);
+    }
   }
 
   get trialPeriodoFormatado(): string {
@@ -63,6 +75,16 @@ export class AppCadastroConcluidoComponent implements OnInit {
 
     const diffInMs = fim.getTime() - inicio.getTime();
     return Math.max(0, Math.round(diffInMs / 86400000));
+  }
+
+  get trialLabel(): string {
+    return `${this.diasDeTrial || 7} dias grátis`;
+  }
+
+  private scheduleAutoRedirect(): void {
+    this.autoRedirectTimer = setTimeout(() => {
+      this.router.navigate(['/dashboards/dashboard1']);
+    }, 2500);
   }
 
   private resolveCadastro(): CadastroConcluidoViewModel | null {

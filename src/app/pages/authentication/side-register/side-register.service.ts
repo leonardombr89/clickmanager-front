@@ -7,6 +7,10 @@ import { ApiService } from 'src/app/services/api.service';
 export interface OnboardingCadastroResponse {
   cadastroConcluido: boolean;
   eventoConversao: string;
+  autenticado: boolean;
+  accessToken: string;
+  refreshToken: string;
+  tokenType: string;
   empresaId: number;
   empresaNome: string;
   usuarioId: number;

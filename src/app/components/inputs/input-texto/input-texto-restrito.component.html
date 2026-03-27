@@ -6,6 +6,8 @@
   <mat-form-field appearance="outline" class="w-100">
     <input matInput type="text"
       [placeholder]="placeholder"
+      [attr.autocomplete]="autocomplete"
+      [attr.inputmode]="inputmode"
       [maxlength]="maxlength"
       [formControl]="control"
       (keydown)="onKeydown($event)"

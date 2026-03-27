@@ -17,8 +17,7 @@
 .cadastro-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 16px;
+  justify-content: center;
 }
 
 .hero-section {
@@ -44,6 +43,10 @@
   color: #1f7a33;
   font-size: 14px;
   font-weight: 700;
+}
+
+.next-step-status--mobile {
+  display: none;
 }
 
 .hero-title {
@@ -81,10 +84,34 @@
   box-shadow: 0 18px 40px rgba(15, 23, 42, 0.06);
 }
 
+.summary-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.summary-card-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  background: rgba(0, 123, 255, 0.08);
+  color: #0d6efd;
+}
+
+.summary-card-icon mat-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+
 .summary-card--highlight {
   background:
     linear-gradient(180deg, rgba(0, 123, 255, 0.08), rgba(255, 255, 255, 1));
-  border-color: rgba(0, 123, 255, 0.18);
+  border-color: rgba(0, 123, 255, 0.28);
+  box-shadow: 0 20px 42px rgba(13, 110, 253, 0.09);
 }
 
 .summary-label,
@@ -129,6 +156,12 @@
   font-size: 24px;
   line-height: 1.25;
   font-weight: 700;
+}
+
+.next-step-heading {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .next-step-copy p,
@@ -179,7 +212,23 @@
 .cta-row {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 16px;
+}
+
+.cta-row__primary,
+.cta-row__secondary {
+  min-width: 220px;
+  min-height: 52px;
+  border-radius: 16px;
+}
+
+.auto-login-copy {
+  margin: -6px 0 0;
+  text-align: center;
+  color: #6f7d95;
+  font-size: 13px;
+  line-height: 1.4;
 }
 
 @media (max-width: 959px) {
@@ -200,8 +249,8 @@
 
 @media (max-width: 599px) {
   .cadastro-body {
-    padding: 20px;
-    gap: 22px;
+    padding: 16px;
+    gap: 14px;
   }
 
   .cadastro-header {
@@ -209,18 +258,129 @@
     align-items: stretch;
   }
 
+  .hero-section {
+    gap: 12px;
+    padding: 20px 18px;
+    border-radius: 18px;
+  }
+
+  .hero-badge {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+
   .hero-section,
   .summary-card,
   .next-step-card {
-    padding: 22px;
+    border-radius: 18px;
+  }
+
+  .summary-card,
+  .next-step-card {
+    padding: 16px 14px;
     border-radius: 18px;
   }
 
   .hero-title {
-    font-size: 30px;
+    font-size: 28px;
+    line-height: 1.12;
+  }
+
+  .hero-subtitle {
+    font-size: 15px;
+    line-height: 1.5;
   }
 
   .summary-value {
-    font-size: 24px;
+    font-size: 22px;
+  }
+
+  .summary-grid {
+    gap: 12px;
+  }
+
+  .summary-card {
+    min-height: 0;
+    gap: 8px;
+  }
+
+  .summary-card-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+  }
+
+  .summary-card-icon mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+
+  .next-step-card {
+    gap: 14px;
+  }
+
+  .next-step-status {
+    display: none;
+  }
+
+  .next-step-status--mobile {
+    display: flex;
+  }
+
+  .next-step-copy h2 {
+    margin: 6px 0 8px;
+    font-size: 22px;
+  }
+
+  .next-step-copy p,
+  .next-step-copy li {
+    font-size: 14px;
+    line-height: 1.55;
+  }
+
+  .next-step-list {
+    margin-top: 14px;
+    gap: 8px;
+  }
+
+  .status-pill {
+    width: 100%;
+    justify-content: center;
+    padding: 12px 14px;
+    font-size: 14px;
+  }
+
+  .cta-row {
+    gap: 10px;
+  }
+
+  .cta-row__primary,
+  .cta-row__secondary {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .auto-login-copy {
+    margin-top: -2px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 420px) {
+  .cadastro-body {
+    padding: 14px;
+  }
+
+  .hero-section {
+    padding: 18px 16px;
+  }
+
+  .hero-title {
+    font-size: 26px;
+  }
+
+  .hero-subtitle {
+    font-size: 14px;
   }
 }
