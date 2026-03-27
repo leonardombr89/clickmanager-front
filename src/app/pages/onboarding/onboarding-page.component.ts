@@ -1,7 +1,7 @@
 import { CommonModule, ViewportScroller } from '@angular/common';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { MaterialModule } from 'src/app/material.module';
 import { AcabamentoPadraoResumidoResponse } from 'src/app/models/acabamento-padrao/acabamento-padrao-resumido-response';
@@ -70,6 +70,7 @@ interface OnboardingFinalStatusItem {
 export class OnboardingPageComponent implements OnInit {
   readonly naoMostrarMaisControl = new FormControl(false, { nonNullable: true });
   @ViewChild(EmpresaFormComponent) empresaFormComponent?: EmpresaFormComponent;
+  private readonly reabrindoOnboarding: boolean;
 
   readonly steps: OnboardingUiStepConfig[] = [
     {
@@ -166,10 +167,12 @@ export class OnboardingPageComponent implements OnInit {
     private onboardingFlow: OnboardingFlowService,
     private toastr: ToastrService,
     private router: Router,
+    private route: ActivatedRoute,
     private authService: AuthService,
     private viewportScroller: ViewportScroller,
     private dialog: MatDialog
   ) {
+    this.reabrindoOnboarding = this.route.snapshot.queryParamMap.get('reabrir') === '1';
     this.acabamentosForm = this.buildSelectionForm();
     this.coresForm = this.buildSelectionForm();
     this.formatosForm = this.buildSelectionForm();
@@ -189,11 +192,11 @@ export class OnboardingPageComponent implements OnInit {
       next: (status) => {
         this.status = status;
         this.onboardingFlow.setStatus(status);
-        if (status.onboardingConcluido) {
+        if (status.onboardingConcluido && !this.reabrindoOnboarding) {
           this.router.navigate(['/dashboards/dashboard1']);
           return;
         }
-        this.currentStepIndex = this.resolveCurrentStepIndex(status);
+        this.currentStepIndex = this.reabrindoOnboarding ? 0 : this.resolveCurrentStepIndex(status);
         this.carregandoStatus = false;
       },
       error: () => {
