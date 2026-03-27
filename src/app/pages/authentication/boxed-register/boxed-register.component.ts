@@ -249,6 +249,7 @@ export class AppBoxedRegisterComponent implements OnInit, AfterViewInit {
       next: response => {
         const finalizarFluxo = () => {
           sessionStorage.setItem(this.cadastroConcluidoStorageKey, JSON.stringify(response));
+          this.resetFunilSession();
           this.toastr.success('Empresa e gestor cadastrados com sucesso!');
           this.submitting = false;
           this.router.navigate(['authentication/cadastro-concluido'], {
@@ -289,28 +290,37 @@ export class AppBoxedRegisterComponent implements OnInit, AfterViewInit {
   }
 
   private registrarEtapaFunil(etapaFunil: LandingEtapaFunil, onComplete?: () => void): void {
+    if (etapaFunil === 'FORMULARIO_CONCLUIDO') {
+      this.enviarEtapaFunil(etapaFunil, onComplete);
+      return;
+    }
+
     const stageStorageKey = `${this.landingStageStoragePrefix}:${etapaFunil}:${this.getCurrentPath()}`;
     if (sessionStorage.getItem(stageStorageKey)) {
       onComplete?.();
       return;
     }
 
+    this.enviarEtapaFunil(etapaFunil, () => {
+      sessionStorage.setItem(stageStorageKey, '1');
+      onComplete?.();
+    });
+  }
+
+  private enviarEtapaFunil(etapaFunil: LandingEtapaFunil, onComplete?: () => void): void {
     this.landingpagePublicService.registrarEtapa({
       pagina: this.pageTitle,
       path: this.getCurrentPath(),
       sessionId: this.sessionId,
       etapaFunil,
     }).subscribe({
-      next: () => {
-        sessionStorage.setItem(stageStorageKey, '1');
-        onComplete?.();
-      },
+      next: () => onComplete?.(),
       error: () => onComplete?.(),
     });
   }
 
   private ensureSessionId(): string {
-    const existing = localStorage.getItem(this.landingSessionStorageKey);
+    const existing = sessionStorage.getItem(this.landingSessionStorageKey);
     if (existing) {
       return existing;
     }
@@ -320,8 +330,23 @@ export class AppBoxedRegisterComponent implements OnInit, AfterViewInit {
         ? crypto.randomUUID()
         : `landing-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 
-    localStorage.setItem(this.landingSessionStorageKey, generated);
+    sessionStorage.setItem(this.landingSessionStorageKey, generated);
     return generated;
+  }
+
+  private resetFunilSession(): void {
+    this.sessionId = this.generateSessionId();
+    sessionStorage.setItem(this.landingSessionStorageKey, this.sessionId);
+
+    Object.keys(sessionStorage)
+      .filter(key => key.startsWith(this.landingStageStoragePrefix))
+      .forEach(key => sessionStorage.removeItem(key));
+  }
+
+  private generateSessionId(): string {
+    return typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+      ? crypto.randomUUID()
+      : `landing-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
   }
 
   private getCurrentPath(): string {
