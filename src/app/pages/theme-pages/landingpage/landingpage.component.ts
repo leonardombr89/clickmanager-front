@@ -433,7 +433,7 @@ export class AppLandingpageComponent implements OnInit, AfterViewInit, OnDestroy
   }
 
   private ensureSessionId(): string {
-    const existing = localStorage.getItem(this.landingSessionStorageKey);
+    const existing = sessionStorage.getItem(this.landingSessionStorageKey);
     if (existing) {
       return existing;
     }
@@ -443,7 +443,7 @@ export class AppLandingpageComponent implements OnInit, AfterViewInit, OnDestroy
         ? crypto.randomUUID()
         : `landing-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 
-    localStorage.setItem(this.landingSessionStorageKey, generated);
+    sessionStorage.setItem(this.landingSessionStorageKey, generated);
     return generated;
   }
 

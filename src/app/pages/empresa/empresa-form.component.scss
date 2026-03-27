@@ -1,0 +1,81 @@
+.empresa-onboarding-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.empresa-onboarding-section {
+  padding: 24px 26px;
+  border: 1px solid rgba(14, 23, 38, 0.08);
+  border-radius: 24px;
+  background: #fff;
+  box-shadow: 0 16px 35px rgba(14, 23, 38, 0.05);
+}
+
+.empresa-onboarding-section--logo {
+  padding: 30px 26px;
+}
+
+.empresa-onboarding-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  text-align: center;
+}
+
+.empresa-onboarding-logo__preview {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: min(100%, 340px);
+  min-height: 216px;
+  padding: 12px;
+  border: 1px solid rgba(14, 23, 38, 0.1);
+  border-radius: 24px;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+}
+
+.empresa-onboarding-logo__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+}
+
+.empresa-onboarding-logo__hint {
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: #64748b;
+}
+
+@media (max-width: 768px) {
+  .empresa-onboarding-form {
+    gap: 18px;
+  }
+
+  .empresa-onboarding-section,
+  .empresa-onboarding-section--logo {
+    padding: 18px 16px;
+    border-radius: 20px;
+  }
+
+  .empresa-onboarding-logo__preview {
+    min-height: auto;
+    border-radius: 20px;
+  }
+
+  .empresa-onboarding-logo__preview img {
+    width: 100% !important;
+    height: auto !important;
+  }
+
+  .empresa-onboarding-logo__actions {
+    width: 100%;
+  }
+
+  .empresa-onboarding-logo__actions button {
+    flex: 1 1 100%;
+    min-height: 46px;
+  }
+}

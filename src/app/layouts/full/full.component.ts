@@ -25,6 +25,7 @@ import { BrandingComponent } from './vertical/sidebar/branding.component';
 import { BillingBannerComponent } from '../../components/billing-banner/billing-banner.component';
 import { BillingService } from 'src/app/pages/billing/services/billing.service';
 import { BillingStateService } from 'src/app/pages/billing/services/billing-state.service';
+import { OnboardingFlowService } from 'src/app/components/onboarding/onboarding-flow.service';
 
 const MOBILE_VIEW = 'screen and (max-width: 768px)';
 const TABLET_VIEW = 'screen and (min-width: 769px) and (max-width: 1024px)';
@@ -64,7 +65,7 @@ interface quicklinks {
     BillingBannerComponent
   ],
   templateUrl: './full.component.html',
-  styleUrls: [],
+  styleUrls: ['./full.component.scss'],
   encapsulation: ViewEncapsulation.None,
 })
 export class FullComponent implements OnInit {
@@ -83,6 +84,7 @@ export class FullComponent implements OnInit {
 
   usuarioLogado: Usuario | null = null;
   navItemsFiltrados: NavItem[] = [];
+  exibirAvisoOnboarding = false;
 
   get isOver(): boolean {
     return this.isMobileScreen;
@@ -120,6 +122,7 @@ export class FullComponent implements OnInit {
     private authService: AuthService,
     @Inject(BillingService) private billingService: BillingService,
     private billingState: BillingStateService,
+    private onboardingFlow: OnboardingFlowService,
   ) {
     this.htmlElement = document.querySelector('html')!;
     this.layoutChangesSubscription = this.breakpointObserver
@@ -161,6 +164,7 @@ export class FullComponent implements OnInit {
         const permissoes = usuario.perfil!.permissoes.map(p => p.chave);
         this.navItemsFiltrados = this.filtrarMenusPorPermissao(navItems, permissoes);
         this.carregarStatusBilling();
+        this.carregarAvisoOnboarding(usuario);
       });
   }
 
@@ -217,6 +221,41 @@ export class FullComponent implements OnInit {
     this.billingService.obterStatus().subscribe({
       next: (resp) => this.billingState.setFromResponse(resp),
       error: () => {}
+    });
+  }
+
+  continuarOnboarding(): void {
+    this.router.navigate(['/onboarding']);
+  }
+
+  private carregarAvisoOnboarding(usuario: Usuario): void {
+    if (!usuario?.proprietario) {
+      this.exibirAvisoOnboarding = false;
+      return;
+    }
+
+    const usuarioId = usuario.id ?? null;
+    const ignorarOnboarding = usuario.onboardingIgnorado ?? usuario.empresa?.onboardingIgnorado;
+    if (ignorarOnboarding || !usuarioId || !this.onboardingFlow.wasDismissed(usuarioId)) {
+      this.exibirAvisoOnboarding = false;
+      return;
+    }
+
+    this.onboardingFlow.loadStatus(true).subscribe({
+      next: (status) => {
+        this.onboardingFlow.setStatus(status);
+
+        if (status.onboardingConcluido) {
+          this.onboardingFlow.clearDismissed(usuarioId);
+          this.exibirAvisoOnboarding = false;
+          return;
+        }
+
+        this.exibirAvisoOnboarding = true;
+      },
+      error: () => {
+        this.exibirAvisoOnboarding = false;
+      }
     });
   }
 

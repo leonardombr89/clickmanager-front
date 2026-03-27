@@ -24,6 +24,7 @@ import { ToastrService } from 'ngx-toastr';
     BrandingComponent,
   ],
   templateUrl: './boxed-login.component.html',
+  styleUrls: ['./boxed-login.component.scss'],
 })
 export class AppBoxedLoginComponent {
   options = this.settings.getOptions();
@@ -35,7 +36,7 @@ export class AppBoxedLoginComponent {
     private toastr: ToastrService) {}
 
   form = new FormGroup({
-    uname: new FormControl('', [Validators.required, Validators.minLength(6)]),
+    uname: new FormControl('', [Validators.required, Validators.email]),
     password: new FormControl('', [Validators.required]),
     lembrar: new FormControl(false)
   });
@@ -52,7 +53,7 @@ export class AppBoxedLoginComponent {
         this.router.navigate(['/dashboards/dashboard1']);
       },
       error: () => {
-        this.toastr.error('Usuário ou senha inválidos');
+        this.toastr.error('E-mail ou senha inválidos');
       }
     });
   }

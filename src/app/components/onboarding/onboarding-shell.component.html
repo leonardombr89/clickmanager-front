@@ -1,0 +1,85 @@
+<section class="onboarding-shell">
+  <header class="onboarding-shell__header">
+    <div class="onboarding-shell__mobile-top">
+      <button mat-icon-button type="button" *ngIf="showBack" (click)="voltar.emit()" aria-label="Voltar">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <h1 class="onboarding-shell__mobile-title">{{ tituloEtapa }}</h1>
+      <div class="onboarding-shell__mobile-actions">
+        <strong class="onboarding-shell__mobile-progress">{{ progressoPercentual | number: '1.0-0' }}%</strong>
+        <button
+          mat-icon-button
+          type="button"
+          *ngIf="showExit"
+          [matMenuTriggerFor]="mobileMenu"
+          aria-label="Mais opções"
+        >
+          <mat-icon>more_vert</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <div class="onboarding-shell__brand">
+      <img src="./assets/images/logos/logoClickManager.png" alt="ClickManager" />
+      <div>
+        <span class="onboarding-shell__eyebrow">{{ tituloFluxo }}</span>
+        <h1>{{ tituloEtapa }}</h1>
+        <p *ngIf="subtituloEtapa">{{ subtituloEtapa }}</p>
+      </div>
+    </div>
+
+    <div class="onboarding-shell__progress">
+      <div class="onboarding-shell__progress-actions" *ngIf="showExit">
+        <button mat-button type="button" (click)="sair.emit()">Sair da configuração</button>
+      </div>
+      <div class="onboarding-shell__progress-copy">
+        <span>
+          Passo {{ passoAtual }} de {{ totalPassos }}<ng-container *ngIf="progressoComplementar">
+            — {{ progressoComplementar }}
+          </ng-container>
+        </span>
+        <strong>{{ progressoPercentual | number: '1.0-0' }}%</strong>
+      </div>
+      <mat-progress-bar mode="determinate" [value]="progressoPercentual"></mat-progress-bar>
+    </div>
+  </header>
+
+  <mat-menu #mobileMenu="matMenu">
+    <button mat-menu-item type="button" (click)="sair.emit()">
+      <mat-icon>logout</mat-icon>
+      <span>Sair da configuração</span>
+    </button>
+  </mat-menu>
+
+  <main class="onboarding-shell__content">
+    <ng-content></ng-content>
+  </main>
+
+  <footer class="onboarding-shell__footer" *ngIf="showFooter">
+    <div class="onboarding-shell__footer-left">
+      <button mat-stroked-button type="button" *ngIf="showBack" (click)="voltar.emit()">
+        Voltar
+      </button>
+    </div>
+
+    <div class="onboarding-shell__footer-right">
+      <span class="onboarding-shell__hint" *ngIf="primaryHint">{{ primaryHint }}</span>
+
+      <button mat-button type="button" *ngIf="showSkip" (click)="pular.emit()">
+        Pular por agora
+      </button>
+
+      <button
+        mat-flat-button
+        color="primary"
+        type="button"
+        *ngIf="showPrimary"
+        [disabled]="primaryDisabled || primaryLoading"
+        (click)="principal.emit()"
+      >
+        <mat-spinner diameter="18" *ngIf="primaryLoading"></mat-spinner>
+        <span>{{ primaryLabel }}</span>
+      </button>
+    </div>
+  </footer>
+</section>

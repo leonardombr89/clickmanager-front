@@ -1,0 +1,218 @@
+.onboarding-page-layout {
+  padding: 24px 16px;
+  background:
+    radial-gradient(circle at top left, rgba(37, 99, 235, 0.08), transparent 28%),
+    linear-gradient(180deg, #eff5ff 0%, #f8fbff 100%);
+}
+
+.onboarding-page-wrapper {
+  width: min(1120px, 100%);
+  max-width: 1120px;
+}
+
+.onboarding-page-card {
+  border-radius: 32px;
+  overflow: hidden;
+  box-shadow: 0 24px 60px rgba(14, 23, 38, 0.08);
+}
+
+.onboarding-page {
+  padding: 28px;
+}
+
+.onboarding-page__section {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.onboarding-page__section--empresa {
+  gap: 14px;
+}
+
+.onboarding-page__microcopy {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  align-self: flex-start;
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: rgba(37, 99, 235, 0.08);
+  color: #2563eb;
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.onboarding-page__microcopy .mat-icon {
+  width: 18px;
+  height: 18px;
+  font-size: 18px;
+}
+
+.onboarding-page__final-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.onboarding-page__final-grid--status {
+  align-items: stretch;
+}
+
+.onboarding-page__company-line {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 16px;
+}
+
+.onboarding-page__company-line strong {
+  font-size: 1.1rem;
+  color: #0f172a;
+}
+
+.onboarding-page__status-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.onboarding-page__summary-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 18px 20px;
+  border-radius: 20px;
+  border: 1px solid rgba(14, 23, 38, 0.08);
+  background: #fff;
+  color: #475569;
+}
+
+.onboarding-page__summary-card strong {
+  font-size: 1.1rem;
+  color: #0f172a;
+}
+
+.onboarding-page__summary-card--highlight {
+  background: linear-gradient(135deg, #eff6ff, #f8fbff);
+  border-color: rgba(37, 99, 235, 0.18);
+}
+
+.onboarding-page__summary-label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #2563eb;
+}
+
+.onboarding-page__status-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(14, 23, 38, 0.06);
+  background: #fff;
+}
+
+.onboarding-page__status-item .mat-icon {
+  width: 22px;
+  height: 22px;
+  font-size: 22px;
+  flex: 0 0 auto;
+}
+
+.onboarding-page__status-item strong {
+  color: #0f172a;
+  font-size: 0.98rem;
+  flex: 1 1 auto;
+}
+
+.onboarding-page__status-item--done {
+  border-color: rgba(34, 197, 94, 0.18);
+  background: linear-gradient(180deg, #f4fff7 0%, #ffffff 100%);
+}
+
+.onboarding-page__status-item--done .mat-icon {
+  color: #16a34a;
+}
+
+.onboarding-page__status-item--pending {
+  border-color: rgba(245, 158, 11, 0.18);
+  background: linear-gradient(180deg, #fffaf0 0%, #ffffff 100%);
+}
+
+.onboarding-page__status-item--pending .mat-icon {
+  color: #d97706;
+}
+
+.onboarding-page__loading {
+  min-height: 420px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 768px) {
+  .onboarding-page-layout {
+    padding: 12px;
+  }
+
+  .onboarding-page-card {
+    border-radius: 24px;
+  }
+
+  .onboarding-page {
+    padding: 10px 10px 14px;
+  }
+
+  .onboarding-page__final-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .onboarding-page__microcopy {
+    width: 100%;
+    justify-content: center;
+    font-size: 0.82rem;
+  }
+
+  .onboarding-page__summary-card {
+    padding: 16px;
+    border-radius: 18px;
+  }
+
+  .onboarding-page__status-item {
+    padding: 12px 14px;
+    border-radius: 14px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .onboarding-page__status-item button {
+    margin-left: 34px;
+    min-height: 40px;
+  }
+
+  .onboarding-page__loading {
+    min-height: 260px;
+  }
+
+  :host ::ng-deep app-section-card .section-card {
+    padding: 0;
+    box-shadow: none;
+    border-radius: 0;
+    background: transparent;
+  }
+
+  :host ::ng-deep app-section-card .section-card__header {
+    margin-bottom: 6px;
+  }
+
+  :host ::ng-deep app-section-card mat-divider {
+    display: none;
+  }
+}
