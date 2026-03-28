@@ -52,7 +52,11 @@ export class AppBoxedLoginComponent {
       next: () => {
         this.router.navigate(['/dashboards/dashboard1']);
       },
-      error: () => {
+      error: (error) => {
+        if (error?.status === 402) {
+          return;
+        }
+
         this.toastr.error('E-mail ou senha inválidos');
       }
     });

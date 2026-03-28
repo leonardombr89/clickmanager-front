@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { CanActivateChild, Router, UrlTree } from '@angular/router';
+import { CanActivateChild, Router, UrlTree, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { catchError, map, switchMap, take } from 'rxjs/operators';
 import { OnboardingFlowService } from '../components/onboarding/onboarding-flow.service';
@@ -14,7 +14,11 @@ export class OnboardingGuard implements CanActivateChild {
     private router: Router
   ) {}
 
-  canActivateChild(): Observable<boolean | UrlTree> {
+  canActivateChild(_route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean | UrlTree> {
+    if (this.isBillingRoute(state.url)) {
+      return of(true);
+    }
+
     return this.resolveUsuario().pipe(
       switchMap((usuario) => {
         if (!usuario?.proprietario) {
@@ -63,5 +67,10 @@ export class OnboardingGuard implements CanActivateChild {
         );
       })
     );
+  }
+
+  private isBillingRoute(url: string): boolean {
+    const normalized = (url || '').toLowerCase();
+    return normalized.startsWith('/billing/');
   }
 }
