@@ -6,7 +6,7 @@ import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatSortModule, Sort } from '@angular/material/sort';
 import { MatTabsModule, MatTabChangeEvent } from '@angular/material/tabs';
-import { RouterModule } from '@angular/router';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 import { animate, state, style, transition, trigger } from '@angular/animations';
 import { InputPesquisaComponent } from 'src/app/components/inputs/input-pesquisa/input-pesquisa.component';
 import { PedidoService } from '../pedido.service';
@@ -52,6 +52,7 @@ import { PedidoTabelaComponent } from "src/app/components/pedido-tabela/pedido-t
 })
 export class ListarPedidoComponent implements OnInit {
   private readonly pedidoService = inject(PedidoService);
+  private readonly route = inject(ActivatedRoute);
 
   pedidos = signal<PedidoListagem[]>([]);
   totalPedidos = 0;
@@ -71,7 +72,13 @@ export class ListarPedidoComponent implements OnInit {
 
   ngOnInit(): void {
     this.carregarStatus();
-    this.carregarPedidos();
+    this.route.queryParamMap.subscribe((params) => {
+      const status = (params.get('status') || 'TODOS').toUpperCase();
+      this.statusSelecionado = status || 'TODOS';
+      this.abaAtual = status === 'ORCAMENTO' ? 'orcamentos' : status === 'RASCUNHO' ? 'rascunhos' : 'todos';
+      this.paginaAtual = 0;
+      this.carregarPedidos();
+    });
   }
 
   carregarStatus(): void {

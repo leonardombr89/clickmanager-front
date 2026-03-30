@@ -1,0 +1,129 @@
+<mat-card class="cardWithShadow dashboard-chart-card">
+  <mat-card-content class="dashboard-chart-card__content">
+    <div class="dashboard-chart-card__header">
+      <div>
+        <span class="dashboard-chart-card__eyebrow">Tendência</span>
+        <h3>Pedidos no período</h3>
+      </div>
+
+      <div class="dashboard-chart-card__legend">
+        <span class="dashboard-chart-card__legend-item">
+          <i class="dashboard-chart-card__legend-dot dashboard-chart-card__legend-dot--primary"></i>
+          {{ legendLabels[0] || mesLabel(mesA) }}
+        </span>
+        <span class="dashboard-chart-card__legend-item">
+          <i class="dashboard-chart-card__legend-dot dashboard-chart-card__legend-dot--accent"></i>
+          {{ legendLabels[1] || mesLabel(mesB) }}
+        </span>
+      </div>
+    </div>
+
+    <div class="dashboard-chart-card__filters">
+      <button type="button" class="dashboard-chart-filter" [matMenuTriggerFor]="mesAMenu">
+        {{ mesLabel(mesA) }}
+      </button>
+      <button type="button" class="dashboard-chart-filter" [matMenuTriggerFor]="mesBMenu">
+        {{ mesLabel(mesB) }}
+      </button>
+      <button type="button" class="dashboard-chart-filter" [matMenuTriggerFor]="anoMenu">
+        {{ ano }}
+      </button>
+      @for(item of modos; track item.value) {
+      <button type="button" class="dashboard-chart-filter"
+        [class.dashboard-chart-filter--active]="modo === item.value"
+        (click)="alterarModo(item.value)">
+        {{ item.label }}
+      </button>
+      }
+    </div>
+
+    <div class="dashboard-chart-card__desktop-summary">
+      <div class="dashboard-chart-card__desktop-metric">
+        <span class="dashboard-chart-card__desktop-metric-label">
+          <i class="dashboard-chart-card__legend-dot dashboard-chart-card__legend-dot--primary"></i>
+          {{ legendLabels[0] || mesLabel(mesA) }}
+        </span>
+        <strong>{{ formatarValor(totalMesA) }}</strong>
+      </div>
+      <div class="dashboard-chart-card__desktop-metric">
+        <span class="dashboard-chart-card__desktop-metric-label">
+          <i class="dashboard-chart-card__legend-dot dashboard-chart-card__legend-dot--accent"></i>
+          {{ legendLabels[1] || mesLabel(mesB) }}
+        </span>
+        <strong>{{ formatarValor(totalMesB) }}</strong>
+      </div>
+      <div class="dashboard-chart-card__desktop-highlight">
+        <strong class="dashboard-chart-card__desktop-highlight-value"
+          [class.dashboard-chart-card__desktop-highlight-value--positive]="desktopDeltaTone === 'positive'"
+          [class.dashboard-chart-card__desktop-highlight-value--negative]="desktopDeltaTone === 'negative'"
+          [class.dashboard-chart-card__desktop-highlight-value--neutral]="desktopDeltaTone === 'neutral'">
+          <span class="dashboard-chart-card__desktop-highlight-icon">{{ desktopDeltaIcon }}</span>
+          {{ desktopDeltaValue }}
+        </strong>
+        <span>{{ desktopDeltaCaption }}</span>
+      </div>
+    </div>
+
+    <div class="dashboard-chart-card__mobile-summary">
+      <div class="dashboard-chart-card__mobile-lines">
+        <div class="dashboard-chart-card__mobile-line">
+          <span>{{ legendLabels[0] || mesLabel(mesA) }}</span>
+          <strong>{{ formatarValor(totalMesA) }}</strong>
+        </div>
+        <div class="dashboard-chart-card__mobile-line">
+          <span>{{ legendLabels[1] || mesLabel(mesB) }}</span>
+          <strong>{{ formatarValor(totalMesB) }}</strong>
+        </div>
+      </div>
+
+      <div class="dashboard-chart-card__mobile-insights">
+        <strong>{{ mobileDeltaLabel }}</strong>
+      </div>
+    </div>
+
+    <div class="dashboard-chart-card__canvas" [class.dashboard-chart-card__canvas--loading]="loading">
+      <apx-chart
+        #chart
+        [series]="revenueSeries"
+        [chart]="revenueChart.chart"
+        [legend]="revenueChart.legend"
+        [stroke]="revenueChart.stroke"
+        [grid]="revenueChart.grid"
+        [xaxis]="revenueChart.xaxis"
+        [yaxis]="revenueChart.yaxis"
+        [tooltip]="revenueChart.tooltip"
+        [markers]="revenueChart.markers">
+      </apx-chart>
+    </div>
+
+    <div class="dashboard-chart-card__footer">
+      <button mat-flat-button color="primary" type="button" class="dashboard-chart-card__mobile-cta" (click)="abrirGraficoComparativo()">
+        Ver gráfico →
+      </button>
+    </div>
+  </mat-card-content>
+</mat-card>
+
+<mat-menu #mesAMenu="matMenu">
+  @for(month of meses; track month.value) {
+  <button mat-menu-item type="button" (click)="alterarMesA(month.value)">
+    {{ month.viewValue }}
+  </button>
+  }
+</mat-menu>
+
+<mat-menu #mesBMenu="matMenu">
+  @for(month of meses; track month.value) {
+  <button mat-menu-item type="button" (click)="alterarMesB(month.value)">
+    {{ month.viewValue }}
+  </button>
+  }
+</mat-menu>
+
+<mat-menu #anoMenu="matMenu">
+  @for(item of anos; track item) {
+  <button mat-menu-item type="button" (click)="alterarAno(item)">
+    {{ item }}
+  </button>
+  }
+</mat-menu>

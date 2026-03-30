@@ -1,43 +1,55 @@
-<mat-card class="cardWithShadow">
-  <mat-card-header>
-    <div class="d-flex align-items-center justify-content-between w-100">
+<mat-card class="cardWithShadow dashboard-receita-card">
+  <mat-card-content class="dashboard-receita-card__content">
+    <div class="dashboard-receita-card__top">
       <div>
-        <mat-card-title>Receita</mat-card-title>
-        <mat-card-subtitle>{{ selectedRangeLabel }}</mat-card-subtitle>
-      </div>
-
-      <div class="text-right">
-        <mat-card-title>{{ formatBRL(totalValor) }}</mat-card-title>
-        <span class="f-s-12">{{ totalPedidos }} pedidos</span>
+        <span class="dashboard-receita-card__eyebrow">Receita hoje</span>
+        <h2>{{ formatBRL(totalValor) }}</h2>
+        <p>{{ totalPedidos }} pedidos</p>
+        <small class="dashboard-receita-card__range">{{ selectedRangeLabel }}</small>
       </div>
     </div>
-  </mat-card-header>
 
-  <mat-card-content class="p-t-8">
-    <div class="m-b-12" style="min-width:260px">
-      <mat-form-field appearance="outline" class="w-100">
-        <mat-label>Período</mat-label>
-        <mat-select [value]="selectedRange" (selectionChange)="selectedRange = $event.value; onRangeChange()">
-          <mat-option *ngFor="let r of ranges" [value]="r.id">
-            {{ r.label }}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
+    <div class="dashboard-receita-card__filters">
+      <button *ngFor="let r of ranges" type="button" class="dashboard-receita-card__chip"
+        [class.dashboard-receita-card__chip--active]="selectedRange === r.id"
+        (click)="selectedRange = r.id; onRangeChange()">
+        {{ r.shortLabel }}
+      </button>
     </div>
 
-    <div class="rounded-bars">
-      <apx-chart #chart [series]="chartData.series" [chart]="chartData.chart" [plotOptions]="chartData.plotOptions"
-        [legend]="chartData.legend" [stroke]="chartData.stroke" [tooltip]="chartData.tooltip"
-        [labels]="chartData.labels" [colors]="chartData.colors"></apx-chart>
-    </div>
+    <div class="dashboard-receita-card__body">
+      <div class="dashboard-receita-card__chart">
+        <ng-container *ngIf="!semMovimentacao; else receitaVazia">
+          <apx-chart #chart [series]="chartData.series" [chart]="chartData.chart" [plotOptions]="chartData.plotOptions"
+            [legend]="chartData.legend" [stroke]="chartData.stroke" [tooltip]="chartData.tooltip"
+            [labels]="chartData.labels" [colors]="chartData.colors"></apx-chart>
+        </ng-container>
 
-    <div class="grid grid-cols-2 md:grid-cols-3 gap-8 m-t-12">
-      <div *ngFor="let label of chartData.labels; let i = index" class="d-flex align-items-center gap-8">
-        <span class="inline-block rounded-full" [style.background]="chartData.colors[i]"
-          style="width:10px;height:10px"></span>
-        <span class="f-s-14">{{ label }}</span>
-        <span class="f-s-14 f-w-600 m-l-auto">{{ formatBRL(chartData.series[i] || 0) }}</span>
+        <ng-template #receitaVazia>
+          <div class="dashboard-receita-card__empty-state">
+            <div class="dashboard-receita-card__empty-ring">
+              <div class="dashboard-receita-card__empty-copy">
+                <strong>Sem receita</strong>
+                <span>Nenhuma movimentação neste período</span>
+              </div>
+            </div>
+          </div>
+        </ng-template>
       </div>
+
+      <div class="dashboard-receita-card__legend">
+        <div *ngFor="let label of chartData.labels; let i = index" class="dashboard-receita-card__legend-item">
+          <span class="dashboard-receita-card__legend-color" [style.background]="chartData.colors[i]"></span>
+          <span class="dashboard-receita-card__legend-label">{{ label }}</span>
+          <strong class="dashboard-receita-card__legend-value">{{ formatBRL(chartData.series[i] || 0) }}</strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="dashboard-receita-card__footer">
+      <button mat-flat-button color="primary" type="button" class="dashboard-receita-card__detail-btn" (click)="abrirGraficoReceita()">
+        Ver gráfico →
+      </button>
     </div>
   </mat-card-content>
 </mat-card>

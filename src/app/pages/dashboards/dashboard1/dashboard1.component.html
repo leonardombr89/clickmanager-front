@@ -1,27 +1,57 @@
-<div class="row">
-  <div class="col-lg-6">
-    <app-congratulate-card></app-congratulate-card>
+<section class="dashboard-mobile">
+  <div class="dashboard-mobile__summary">
+    @for(card of mobileSummaryCards; track card.key) {
+    <button type="button" class="dashboard-mobile__summary-card" (click)="abrirResumo(card)">
+      <span class="dashboard-mobile__summary-label">{{ card.label }}</span>
+      <strong class="dashboard-mobile__summary-value">{{ card.value }}</strong>
+    </button>
+    }
   </div>
-  <div class="col-lg-6">
-    <div class="row">
-      <div class="col-lg-12">
-        <app-receita-resumo></app-receita-resumo>
+
+  <div class="dashboard-mobile__section dashboard-mobile__section--status">
+    <app-status-grid></app-status-grid>
+  </div>
+
+  <div class="dashboard-mobile__section dashboard-mobile__section--revenue">
+    <app-receita-resumo></app-receita-resumo>
+  </div>
+
+  <div class="dashboard-mobile__section dashboard-mobile__section--chart">
+    <app-comparativo-pedidos></app-comparativo-pedidos>
+  </div>
+</section>
+
+<section class="dashboard-desktop">
+  <section class="dashboard-desktop__hero">
+    <div class="dashboard-desktop__hero-main">
+      <span class="dashboard-desktop__hero-label">{{ heroReceita.label }}</span>
+      <strong class="dashboard-desktop__hero-value">{{ heroReceita.value }}</strong>
+      <p class="dashboard-desktop__hero-caption">Visão consolidada do período atual</p>
+    </div>
+
+    <div class="dashboard-desktop__hero-metrics">
+      @for(card of heroMetricas; track card.key) {
+      <div class="dashboard-desktop__hero-metric dashboard-desktop__hero-metric--{{ card.accent || 'neutral' }}">
+        <span>{{ card.label }}</span>
+        <strong>{{ card.value }}</strong>
       </div>
-      <!--<div class="col-lg-6">
-        <app-latest-deals></app-latest-deals>
-      </div> -->
-      <!--<div class="col-lg-6">
-        <app-customers></app-customers>
-      </div> -->
+      }
+    </div>
+  </section>
+
+  <div class="dashboard-desktop__analytics">
+    <div class="dashboard-desktop__graph">
+      <app-comparativo-pedidos></app-comparativo-pedidos>
+    </div>
+
+    <div class="dashboard-desktop__status">
+      <app-status-grid></app-status-grid>
     </div>
   </div>
-  <!--<div class="col-lg-8">
-    <app-top-projects></app-top-projects>
+
+  <div class="dashboard-desktop__details">
+    <div class="dashboard-desktop__revenue">
+      <app-receita-resumo></app-receita-resumo>
+    </div>
   </div>
-  <div class="col-lg-4">
-    <app-visit-usa></app-visit-usa>
-  </div> -->
-  <!-- <div class="col-12">
-    <app-latest-reviews></app-latest-reviews>
-  </div> -->
-</div>
+</section>

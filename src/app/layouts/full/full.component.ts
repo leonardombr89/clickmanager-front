@@ -1,5 +1,5 @@
 import { BreakpointObserver, MediaMatcher } from '@angular/cdk/layout';
-import { Component, Inject, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
+import { Component, Inject, OnDestroy, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { MatSidenav, MatSidenavContent } from '@angular/material/sidenav';
 import { CoreService } from 'src/app/services/core.service';
@@ -26,6 +26,7 @@ import { BillingBannerComponent } from '../../components/billing-banner/billing-
 import { BillingService } from 'src/app/pages/billing/services/billing.service';
 import { BillingStateService } from 'src/app/pages/billing/services/billing-state.service';
 import { OnboardingFlowService } from 'src/app/components/onboarding/onboarding-flow.service';
+import { ImagemUtil } from 'src/app/utils/imagem-util';
 
 const MOBILE_VIEW = 'screen and (max-width: 768px)';
 const TABLET_VIEW = 'screen and (min-width: 769px) and (max-width: 1024px)';
@@ -45,6 +46,11 @@ interface quicklinks {
   id: number;
   title: string;
   link: string;
+}
+
+interface MobileNavGroup {
+  title: string;
+  items: NavItem[];
 }
 
 @Component({
@@ -68,7 +74,7 @@ interface quicklinks {
   styleUrls: ['./full.component.scss'],
   encapsulation: ViewEncapsulation.None,
 })
-export class FullComponent implements OnInit {
+export class FullComponent implements OnInit, OnDestroy {
 
   @ViewChild('leftsidenav')
   public sidenav: MatSidenav;
@@ -85,6 +91,14 @@ export class FullComponent implements OnInit {
   usuarioLogado: Usuario | null = null;
   navItemsFiltrados: NavItem[] = [];
   exibirAvisoOnboarding = false;
+  ImagemUtil = ImagemUtil;
+  mobileNavGroups: MobileNavGroup[] = [];
+  mobileDrawerOpen = false;
+  mobileAppsOpen = false;
+  mobileProfileOpen = false;
+  currentRoute = '';
+  currentPageTitle = '';
+  private mobileExpandedItems = new Set<string>();
 
   get isOver(): boolean {
     return this.isMobileScreen;
@@ -92,6 +106,18 @@ export class FullComponent implements OnInit {
 
   get isTablet(): boolean {
     return this.resView;
+  }
+
+  get isMobileLayout(): boolean {
+    return this.resView;
+  }
+
+  get hasMobileOverlayOpen(): boolean {
+    return this.mobileDrawerOpen || this.mobileAppsOpen || this.mobileProfileOpen;
+  }
+
+  get mobileProfileSubtitle(): string {
+    return this.usuarioLogado?.perfil?.nome || this.usuarioLogado?.username || '';
   }
 
   // for mobile app sidebar
@@ -136,6 +162,10 @@ export class FullComponent implements OnInit {
         }
         this.isContentWidthFixed = state.breakpoints[MONITOR_VIEW];
         this.resView = state.breakpoints[BELOWMONITOR];
+
+        if (!this.resView) {
+          this.closeMobileOverlays();
+        }
       });
 
     // Initialize project theme with options
@@ -146,6 +176,9 @@ export class FullComponent implements OnInit {
       .pipe(filter((event) => event instanceof NavigationEnd))
       .subscribe((e) => {
         this.content.scrollTo({ top: 0 });
+        this.currentRoute = (e as NavigationEnd).urlAfterRedirects;
+        this.currentPageTitle = this.resolveCurrentPageTitle(this.currentRoute);
+        this.closeMobileOverlays();
       });
   }
 
@@ -163,12 +196,18 @@ export class FullComponent implements OnInit {
         this.usuarioLogado = usuario;
         const permissoes = usuario.perfil!.permissoes.map(p => p.chave);
         this.navItemsFiltrados = this.filtrarMenusPorPermissao(navItems, permissoes);
+        this.mobileNavGroups = this.buildMobileNavGroups(this.navItemsFiltrados);
+        this.currentPageTitle = this.resolveCurrentPageTitle(this.router.url);
         this.carregarStatusBilling();
         this.carregarAvisoOnboarding(usuario);
       });
+
+    this.currentRoute = this.router.url;
+    this.currentPageTitle = this.resolveCurrentPageTitle(this.currentRoute);
   }
 
   ngOnDestroy() {
+    this.unlockBodyScroll();
     this.layoutChangesSubscription.unsubscribe();
   }
 
@@ -228,6 +267,91 @@ export class FullComponent implements OnInit {
     this.router.navigate(['/onboarding']);
   }
 
+  logout(): void {
+    this.authService.logout();
+  }
+
+  toggleMobileDrawer(): void {
+    this.mobileDrawerOpen = !this.mobileDrawerOpen;
+    if (this.mobileDrawerOpen) {
+      this.mobileAppsOpen = false;
+      this.mobileProfileOpen = false;
+    }
+    this.syncBodyScroll();
+  }
+
+  toggleMobileAppsSheet(): void {
+    this.mobileAppsOpen = !this.mobileAppsOpen;
+    if (this.mobileAppsOpen) {
+      this.mobileDrawerOpen = false;
+      this.mobileProfileOpen = false;
+    }
+    this.syncBodyScroll();
+  }
+
+  toggleMobileProfileSheet(): void {
+    this.mobileProfileOpen = !this.mobileProfileOpen;
+    if (this.mobileProfileOpen) {
+      this.mobileDrawerOpen = false;
+      this.mobileAppsOpen = false;
+    }
+    this.syncBodyScroll();
+  }
+
+  closeMobileOverlays(): void {
+    this.mobileDrawerOpen = false;
+    this.mobileAppsOpen = false;
+    this.mobileProfileOpen = false;
+    this.syncBodyScroll();
+  }
+
+  onMobileNavItemClick(item: NavItem): void {
+    if (item.children?.length) {
+      this.toggleMobileItemExpanded(item);
+      return;
+    }
+
+    if (item.route) {
+      this.router.navigate([item.route]);
+    }
+  }
+
+  onMobileChildItemClick(item: NavItem): void {
+    if (item.route) {
+      this.router.navigate([item.route]);
+    }
+  }
+
+  toggleMobileItemExpanded(item: NavItem): void {
+    const key = this.getMobileItemKey(item);
+    if (this.mobileExpandedItems.has(key)) {
+      this.mobileExpandedItems.delete(key);
+      return;
+    }
+
+    this.mobileExpandedItems.add(key);
+  }
+
+  isMobileItemExpanded(item: NavItem): boolean {
+    return this.mobileExpandedItems.has(this.getMobileItemKey(item));
+  }
+
+  isMobileItemActive(item: NavItem): boolean {
+    if (item.route && this.router.isActive(item.route, false)) {
+      return true;
+    }
+
+    return !!item.children?.some((child) => child.route ? this.router.isActive(child.route, false) : false);
+  }
+
+  trackByGroupTitle(_: number, group: MobileNavGroup): string {
+    return group.title;
+  }
+
+  trackByNavItem(_: number, item: NavItem): string {
+    return this.getMobileItemKey(item);
+  }
+
   private carregarAvisoOnboarding(usuario: Usuario): void {
     if (!usuario?.proprietario) {
       this.exibirAvisoOnboarding = false;
@@ -257,6 +381,109 @@ export class FullComponent implements OnInit {
         this.exibirAvisoOnboarding = false;
       }
     });
+  }
+
+  private buildMobileNavGroups(items: NavItem[]): MobileNavGroup[] {
+    const groups: MobileNavGroup[] = [];
+    const groupMap: Record<string, (item: NavItem) => boolean> = {
+      Principal: (item) => item.route === '/dashboards/dashboard1',
+      'Gestão': (item) =>
+        [
+          '/page/pedido',
+          '/page/funcionarios',
+          '/page/cliente',
+          '/page/usuarios/listar',
+          '/page/perfil'
+        ].some((route) => item.route?.startsWith(route)),
+      'Cadastros / Configurações': (item) =>
+        [
+          '/cadastro-tecnico',
+          '/page/empresa',
+          '/config'
+        ].some((route) => item.route?.startsWith(route)),
+      Ajuda: (item) =>
+        [
+          '/page/suporte',
+          '/page/ajuda'
+        ].some((route) => item.route?.startsWith(route)),
+    };
+
+    Object.entries(groupMap).forEach(([title, matcher]) => {
+      const groupItems = items.filter((item) => !item.navCap && matcher(item));
+      if (groupItems.length) {
+        groups.push({ title, items: groupItems });
+      }
+    });
+
+    const usedRoutes = new Set(groups.flatMap((group) => group.items.map((item) => item.route || item.displayName || '')));
+    const remainingItems = items.filter(
+      (item) => !item.navCap && !usedRoutes.has(item.route || item.displayName || '')
+    );
+
+    if (remainingItems.length) {
+      groups.push({ title: 'Mais', items: remainingItems });
+    }
+
+    return groups;
+  }
+
+  private getMobileItemKey(item: NavItem): string {
+    return item.route || item.displayName || item.iconName || Math.random().toString();
+  }
+
+  private resolveCurrentPageTitle(url: string): string {
+    const exactMatch = this.findNavLabel(url, true);
+    if (exactMatch) return exactMatch;
+
+    const prefixMatch = this.findNavLabel(url, false);
+    if (prefixMatch) return prefixMatch;
+
+    if (url.includes('/theme-pages/account-setting')) return 'Meu perfil';
+    if (url.includes('/billing/')) return 'Assinatura';
+    if (url.includes('/page/suporte')) return 'Suporte';
+
+    return 'ClickManager';
+  }
+
+  private findNavLabel(url: string, exact: boolean): string | null {
+    const search = (items: NavItem[]): string | null => {
+      for (const item of items) {
+        if (item.route) {
+          const matched = exact ? this.router.isActive(item.route, true) : url.startsWith(item.route);
+          if (matched) {
+            return item.displayName || null;
+          }
+        }
+
+        if (item.children?.length) {
+          const childMatch = search(item.children);
+          if (childMatch) return childMatch;
+        }
+      }
+
+      return null;
+    };
+
+    return search(this.navItemsFiltrados);
+  }
+
+  private syncBodyScroll(): void {
+    if (this.hasMobileOverlayOpen && this.isMobileLayout) {
+      this.lockBodyScroll();
+      return;
+    }
+
+    this.unlockBodyScroll();
+  }
+
+  private lockBodyScroll(): void {
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
+  }
+
+  private unlockBodyScroll(): void {
+    document.body.style.overflow = '';
+    document.documentElement.style.overflow = '';
   }
 
   toggleDarkTheme(options: AppSettings) {

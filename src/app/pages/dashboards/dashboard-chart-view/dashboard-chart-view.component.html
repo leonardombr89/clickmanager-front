@@ -1,0 +1,161 @@
+<section class="dashboard-chart-view" [class.dashboard-chart-view--landscape]="comparativoPaisagemAtivo">
+  <header class="dashboard-chart-view__header">
+    <div class="dashboard-chart-view__mobile-top">
+      <button mat-icon-button type="button" class="dashboard-chart-view__icon-back" (click)="voltar()" aria-label="Voltar">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <h1 class="dashboard-chart-view__mobile-title">{{ pageTitle }}</h1>
+      @if (canRotateComparativo) {
+      <button
+        mat-icon-button
+        type="button"
+        class="dashboard-chart-view__icon-rotate"
+        (click)="alternarRotacaoComparativo()"
+        [attr.aria-label]="comparativoPaisagemAtivo ? 'Fechar modo horizontal' : 'Abrir modo horizontal'">
+        <mat-icon>{{ comparativoPaisagemAtivo ? 'screen_rotation_alt' : 'screen_rotation' }}</mat-icon>
+      </button>
+      } @else {
+      <span class="dashboard-chart-view__mobile-badge">{{ mode === 'receita' ? 'Receita' : 'Tendência' }}</span>
+      }
+    </div>
+
+    <div class="dashboard-chart-view__desktop-top">
+      <button mat-stroked-button type="button" class="dashboard-chart-view__back" (click)="voltar()">
+        Voltar
+      </button>
+
+      <div class="dashboard-chart-view__hero-copy">
+        <h1>{{ pageTitle }}</h1>
+      </div>
+
+      @if (canRotateComparativo) {
+      <button mat-stroked-button type="button" class="dashboard-chart-view__rotate-btn" (click)="alternarRotacaoComparativo()">
+        {{ comparativoPaisagemAtivo ? 'Fechar horizontal' : 'Ver na horizontal' }}
+      </button>
+      }
+    </div>
+  </header>
+
+  @if (mode === 'receita') {
+  <mat-card class="cardWithShadow dashboard-chart-view__card">
+    <mat-card-content class="dashboard-chart-view__content">
+      <div class="dashboard-chart-view__summary dashboard-chart-view__summary--stacked">
+        <strong>{{ formatBRL(receitaTotal) }}</strong>
+        <span>{{ receitaPedidos }} pedidos</span>
+      </div>
+
+      <div class="dashboard-chart-view__filters">
+        @for (range of receitaRanges; track range.id) {
+        <button type="button" class="dashboard-chart-view__chip" [class.dashboard-chart-view__chip--active]="selectedRange === range.id"
+          (click)="selecionarReceita(range.id)">
+          {{ range.shortLabel }}
+        </button>
+        }
+      </div>
+
+      <div class="dashboard-chart-view__chart dashboard-chart-view__chart--donut" [class.dashboard-chart-view__chart--loading]="loading">
+        <apx-chart
+          #receitaChartRef
+          [series]="receitaChartSeries"
+          [chart]="receitaChart.chart"
+          [plotOptions]="receitaChart.plotOptions"
+          [tooltip]="receitaChart.tooltip"
+          [stroke]="receitaChart.stroke"
+          [legend]="receitaChart.legend"
+          [labels]="receitaChartLabels"
+          [colors]="receitaChartColors">
+        </apx-chart>
+
+        @if (receitaSemDados) {
+        <div class="dashboard-chart-view__empty-donut">
+          <strong>Sem receita</strong>
+          <span>Nenhuma movimentação neste período</span>
+        </div>
+        }
+      </div>
+
+      <div class="dashboard-chart-view__legend">
+        @for (label of receitaLabels; track label; let i = $index) {
+        <div class="dashboard-chart-view__legend-item">
+          <span class="dashboard-chart-view__legend-dot" [style.background]="receitaChart.colors[i]"></span>
+          <span>{{ label }}</span>
+          <strong>{{ formatBRL(receitaChart.series[i] || 0) }}</strong>
+        </div>
+        }
+      </div>
+    </mat-card-content>
+  </mat-card>
+  } @else {
+  <mat-card class="cardWithShadow dashboard-chart-view__card">
+    <mat-card-content class="dashboard-chart-view__content">
+      <div class="dashboard-chart-view__summary dashboard-chart-view__summary--compact">
+        <strong>{{ mesLabel(mesA) }} x {{ mesLabel(mesB) }}</strong>
+        <span>{{ ano }} • {{ comparativoModo === 'quantidade' ? 'Quantidade' : 'Valor' }}</span>
+      </div>
+
+      <div class="dashboard-chart-view__rotate-hint">
+        <mat-icon>screen_rotation</mat-icon>
+        <span>Esse gráfico fica melhor na horizontal</span>
+      </div>
+
+      <div class="dashboard-chart-view__filters">
+        <button type="button" class="dashboard-chart-view__chip" [matMenuTriggerFor]="mesAMenu">
+          {{ mesLabel(mesA) }}
+        </button>
+        <button type="button" class="dashboard-chart-view__chip" [matMenuTriggerFor]="mesBMenu">
+          {{ mesLabel(mesB) }}
+        </button>
+        <button type="button" class="dashboard-chart-view__chip" [matMenuTriggerFor]="anoMenu">
+          {{ ano }}
+        </button>
+        @for (item of modos; track item.value) {
+        <button type="button" class="dashboard-chart-view__chip"
+          [class.dashboard-chart-view__chip--active]="comparativoModo === item.value"
+          (click)="alterarModo(item.value)">
+          {{ item.label }}
+        </button>
+        }
+      </div>
+
+      <div class="dashboard-chart-view__chart" [class.dashboard-chart-view__chart--loading]="loading">
+        <apx-chart
+          #comparativoChartRef
+          [series]="comparativoChart.series"
+          [chart]="comparativoChart.chart"
+          [legend]="comparativoChart.legend"
+          [stroke]="comparativoChart.stroke"
+          [grid]="comparativoChart.grid"
+          [xaxis]="comparativoChart.xaxis"
+          [yaxis]="comparativoChart.yaxis"
+          [tooltip]="comparativoChart.tooltip"
+          [markers]="comparativoChart.markers">
+        </apx-chart>
+      </div>
+    </mat-card-content>
+  </mat-card>
+  }
+</section>
+
+<mat-menu #mesAMenu="matMenu">
+  @for (month of meses; track month.value) {
+  <button mat-menu-item type="button" (click)="alterarMesA(month.value)">
+    {{ month.viewValue }}
+  </button>
+  }
+</mat-menu>
+
+<mat-menu #mesBMenu="matMenu">
+  @for (month of meses; track month.value) {
+  <button mat-menu-item type="button" (click)="alterarMesB(month.value)">
+    {{ month.viewValue }}
+  </button>
+  }
+</mat-menu>
+
+<mat-menu #anoMenu="matMenu">
+  @for (item of anos; track item) {
+  <button mat-menu-item type="button" (click)="alterarAno(item)">
+    {{ item }}
+  </button>
+  }
+</mat-menu>
