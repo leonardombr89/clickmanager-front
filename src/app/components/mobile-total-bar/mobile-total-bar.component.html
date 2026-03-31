@@ -1,0 +1,29 @@
+<div class="mobile-total-bar"
+  role="button"
+  tabindex="0"
+  [attr.aria-label]="expandAriaLabel"
+  (click)="onRootClick()"
+  (keydown)="onRootKeydown($event)"
+  (touchstart)="onTouchStart($event)"
+  (touchend)="onTouchEnd($event)">
+  <div class="mobile-total-bar__handle"></div>
+
+  <div class="mobile-total-bar__summary">
+    <span class="label">{{ label }}</span>
+    <span class="value" [class.value--loading]="loading">{{ valueText }}</span>
+    <span class="mobile-total-bar__expand">
+      <span>{{ detailText }}</span>
+      <mat-icon>{{ expanded ? 'expand_more' : 'expand_less' }}</mat-icon>
+    </span>
+  </div>
+
+  <button mat-flat-button
+    color="primary"
+    type="button"
+    class="mobile-total-bar__cta"
+    [attr.aria-label]="actionAriaLabel"
+    [disabled]="actionDisabled"
+    (click)="onActionClick($event)">
+    {{ actionText }}
+  </button>
+</div>

@@ -11,6 +11,7 @@ import { InputMultiSelectComponent } from 'src/app/components/inputs/input-multi
 import { InputNumericoComponent } from 'src/app/components/inputs/input-numerico/input-numerico.component';
 import { InputOptionsComponent } from 'src/app/components/inputs/input-options/input-options.component';
 import { MobilePageHeaderComponent } from 'src/app/components/mobile-page-header/mobile-page-header.component';
+import { MobileTotalBarComponent } from 'src/app/components/mobile-total-bar/mobile-total-bar.component';
 
 import { SmartCalcInitDataService } from './smart-calc-init-data.service';
 import { SmartCalcDataService } from './smart-calc-data.service'; // (por enquanto mantém cálculo + pedido aqui)
@@ -52,6 +53,7 @@ type Acabamento = { id: number; nome: string };
     InputNumericoComponent,
     InputOptionsComponent,
     MobilePageHeaderComponent,
+    MobileTotalBarComponent,
     MatCard,
   ],
   templateUrl: './smart-calc.component.html',
@@ -92,7 +94,6 @@ export class SmartCalcComponent implements OnInit, OnDestroy {
   private readonly destroy$ = new Subject<void>();
   private calculoRequestId = 0;
   private focoInicialAplicado = false;
-  private gestoBarraStartY: number | null = null;
   private gestoSheetStartY: number | null = null;
 
   // =========================
@@ -710,24 +711,6 @@ export class SmartCalcComponent implements OnInit, OnDestroy {
   fecharResultadoMobile(): void {
     this.resultadoMobileAberto.set(false);
     document.body.style.overflow = '';
-  }
-
-  iniciarGestoBarra(event: TouchEvent): void {
-    this.gestoBarraStartY = event.changedTouches[0]?.clientY ?? null;
-  }
-
-  finalizarGestoBarra(event: TouchEvent): void {
-    if (this.gestoBarraStartY == null) {
-      return;
-    }
-
-    const endY = event.changedTouches[0]?.clientY ?? this.gestoBarraStartY;
-    const deltaY = this.gestoBarraStartY - endY;
-    this.gestoBarraStartY = null;
-
-    if (deltaY > 24) {
-      this.abrirResultadoMobile();
-    }
   }
 
   iniciarGestoSheet(event: TouchEvent): void {

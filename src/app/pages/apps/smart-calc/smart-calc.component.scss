@@ -24,7 +24,6 @@
   padding: 4px 4px 24px;
 }
 
-.mobile-result-bar,
 .mobile-result-sheet,
 .mobile-result-sheet-backdrop {
   display: none;
@@ -924,113 +923,6 @@
 
   .extras-stack {
     gap: 12px;
-  }
-
-  .mobile-result-bar {
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 20;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    grid-template-areas:
-      "handle handle"
-      "summary cta";
-    gap: 12px;
-    align-items: center;
-    padding: 12px 12px calc(12px + env(safe-area-inset-bottom));
-    border-radius: 18px 18px 0 0;
-    border-top: 1px solid rgba(14, 23, 38, 0.1);
-    border-left: 0;
-    border-right: 0;
-    border-bottom: 0;
-    background: rgba(255, 255, 255, 0.96);
-    box-shadow:
-      0 -6px 20px rgba(14, 23, 38, 0.08),
-      0 -18px 36px rgba(14, 23, 38, 0.08);
-    backdrop-filter: blur(8px);
-    cursor: pointer;
-
-    &:focus-visible {
-      outline: 0;
-      box-shadow:
-        0 0 0 3px rgba(37, 99, 235, 0.14),
-        0 -6px 20px rgba(14, 23, 38, 0.08),
-        0 -18px 36px rgba(14, 23, 38, 0.08);
-    }
-  }
-
-  .mobile-result-bar__handle {
-    grid-area: handle;
-    justify-self: center;
-    width: 40px;
-    height: 5px;
-    margin-top: -2px;
-    border-radius: 999px;
-    background: rgba(148, 163, 184, 0.42);
-  }
-
-  .mobile-result-bar__summary {
-    grid-area: summary;
-    min-width: 0;
-    padding: 2px 8px 2px 4px;
-    display: grid;
-    gap: 4px;
-
-    .label {
-      color: #64748b;
-      font-size: 0.68rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-    }
-
-    .value {
-      color: #0f172a;
-      font-size: 1.52rem;
-      font-weight: 800;
-      line-height: 1;
-      transition: color 0.22s ease, transform 0.22s ease;
-    }
-
-    .value--loading {
-      color: #2563eb;
-      transform: scale(1.02);
-    }
-  }
-
-  .mobile-result-bar__expand {
-    justify-self: start;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    min-height: 24px;
-    padding: 0;
-    border: 0;
-    background: transparent;
-    color: #64748b;
-    font-size: 0.74rem;
-    font-weight: 700;
-    line-height: 1.2;
-    pointer-events: none;
-
-    mat-icon {
-      width: 14px;
-      height: 14px;
-      font-size: 14px;
-    }
-  }
-
-  .mobile-result-bar__cta {
-    grid-area: cta;
-    min-height: 56px;
-    padding-inline: 20px;
-    border-radius: 20px;
-    font-weight: 800;
-    white-space: nowrap;
-    box-shadow: 0 14px 28px rgba(37, 99, 235, 0.22);
-    cursor: pointer;
   }
 
   .mobile-result-sheet-backdrop {

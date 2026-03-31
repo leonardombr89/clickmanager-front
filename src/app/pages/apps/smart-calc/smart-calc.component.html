@@ -178,31 +178,19 @@
     </aside>
   </form>
 
-  <div class="mobile-result-bar"
-    role="button"
-    tabindex="0"
-    aria-label="Ver detalhes do cálculo"
-    (click)="abrirResultadoMobile()"
-    (keydown.enter)="abrirResultadoMobile()"
-    (keydown.space)="abrirResultadoMobile(); $event.preventDefault()"
-    (touchstart)="iniciarGestoBarra($event)"
-    (touchend)="finalizarGestoBarra($event)">
-    <div class="mobile-result-bar__handle"></div>
-
-    <div class="mobile-result-bar__summary">
-      <span class="label">Total estimado</span>
-      <span class="value" [class.value--loading]="carregandoCalculo">{{ total() | currency:'BRL':'symbol-narrow':'1.2-2' }}</span>
-      <span class="mobile-result-bar__expand">
-        <span>Ver detalhes</span>
-        <mat-icon>{{ resultadoMobileAberto() ? 'expand_more' : 'expand_less' }}</mat-icon>
-      </span>
-    </div>
-
-    <button mat-flat-button color="primary" type="button" class="mobile-result-bar__cta"
-      (click)="$event.stopPropagation(); adicionarAoPedido()" [disabled]="!temResultado() || carregandoAdd || needsRecalcular() || carregandoCalculo">
-      {{ carregandoAdd ? 'Criando...' : 'Criar pedido →' }}
-    </button>
-  </div>
+  <app-mobile-total-bar
+    label="Total estimado"
+    [valueText]="(total() | currency:'BRL':'symbol-narrow':'1.2-2') ?? ''"
+    detailText="Ver detalhes"
+    [expanded]="resultadoMobileAberto()"
+    [loading]="carregandoCalculo"
+    [actionText]="carregandoAdd ? 'Criando...' : 'Criar pedido →'"
+    [actionDisabled]="!temResultado() || carregandoAdd || needsRecalcular() || carregandoCalculo"
+    expandAriaLabel="Ver detalhes do cálculo"
+    actionAriaLabel="Criar pedido"
+    (expand)="abrirResultadoMobile()"
+    (action)="adicionarAoPedido()">
+  </app-mobile-total-bar>
 
   <div class="mobile-result-sheet-backdrop" *ngIf="resultadoMobileAberto()" (click)="fecharResultadoMobile()"></div>
 
