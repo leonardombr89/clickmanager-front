@@ -67,14 +67,24 @@
           <span class="mobile-topbar__title">{{ currentPageTitle }}</span>
         </div>
 
-        <button mat-icon-button type="button" class="mobile-topbar__avatar-btn" (click)="toggleMobileProfileSheet()"
-          aria-label="Abrir perfil">
-          @if(usuarioLogado?.fotoPerfil) {
-          <img [src]="ImagemUtil.montarUrlImagemPerfil(usuarioLogado?.fotoPerfil)" alt="Perfil" class="mobile-topbar__avatar-image" />
-          } @else {
-          <i-tabler name="user-circle" class="icon-22 d-flex"></i-tabler>
-          }
-        </button>
+        <div class="mobile-topbar__actions">
+          <button mat-icon-button type="button" class="mobile-topbar__icon-btn mobile-topbar__notification-btn"
+            (click)="toggleMobileNotificationsSheet()" aria-label="Abrir notificações"
+            [class.mobile-topbar__notification-btn--critical]="possuiNotificacaoCriticaNaoLida()">
+            <i-tabler name="message-2" class="icon-20 d-flex"></i-tabler>
+            @if(notificacoesNaoLidas > 0) {
+            <span class="mobile-topbar__notification-badge">{{ notificacoesNaoLidas }}</span>
+            }
+          </button>
+          <button mat-icon-button type="button" class="mobile-topbar__avatar-btn" (click)="toggleMobileProfileSheet()"
+            aria-label="Abrir perfil">
+            @if(usuarioLogado?.fotoPerfil) {
+            <img [src]="ImagemUtil.montarUrlImagemPerfil(usuarioLogado?.fotoPerfil)" alt="Perfil" class="mobile-topbar__avatar-image" />
+            } @else {
+            <i-tabler name="user-circle" class="icon-22 d-flex"></i-tabler>
+            }
+          </button>
+        </div>
         } @else if(useMinimalMobileHeader) {
         <button mat-icon-button type="button" class="mobile-topbar__icon-btn" (click)="navigateMobileBack()"
           aria-label="Voltar">
@@ -85,14 +95,24 @@
           <span class="mobile-topbar__title">{{ currentPageTitle }}</span>
         </div>
 
-        <button mat-icon-button type="button" class="mobile-topbar__avatar-btn" (click)="toggleMobileProfileSheet()"
-          aria-label="Abrir perfil">
-          @if(usuarioLogado?.fotoPerfil) {
-          <img [src]="ImagemUtil.montarUrlImagemPerfil(usuarioLogado?.fotoPerfil)" alt="Perfil" class="mobile-topbar__avatar-image" />
-          } @else {
-          <i-tabler name="user-circle" class="icon-22 d-flex"></i-tabler>
-          }
-        </button>
+        <div class="mobile-topbar__actions">
+          <button mat-icon-button type="button" class="mobile-topbar__icon-btn mobile-topbar__notification-btn"
+            (click)="toggleMobileNotificationsSheet()" aria-label="Abrir notificações"
+            [class.mobile-topbar__notification-btn--critical]="possuiNotificacaoCriticaNaoLida()">
+            <i-tabler name="message-2" class="icon-20 d-flex"></i-tabler>
+            @if(notificacoesNaoLidas > 0) {
+            <span class="mobile-topbar__notification-badge">{{ notificacoesNaoLidas }}</span>
+            }
+          </button>
+          <button mat-icon-button type="button" class="mobile-topbar__avatar-btn" (click)="toggleMobileProfileSheet()"
+            aria-label="Abrir perfil">
+            @if(usuarioLogado?.fotoPerfil) {
+            <img [src]="ImagemUtil.montarUrlImagemPerfil(usuarioLogado?.fotoPerfil)" alt="Perfil" class="mobile-topbar__avatar-image" />
+            } @else {
+            <i-tabler name="user-circle" class="icon-22 d-flex"></i-tabler>
+            }
+          </button>
+        </div>
         } @else {
         <button mat-icon-button type="button" class="mobile-topbar__icon-btn" (click)="toggleMobileDrawer()"
           aria-label="Abrir menu">
@@ -108,6 +128,14 @@
         </div>
 
         <div class="mobile-topbar__actions">
+          <button mat-icon-button type="button" class="mobile-topbar__icon-btn mobile-topbar__notification-btn"
+            (click)="toggleMobileNotificationsSheet()" aria-label="Abrir notificações"
+            [class.mobile-topbar__notification-btn--critical]="possuiNotificacaoCriticaNaoLida()">
+            <i-tabler name="message-2" class="icon-20 d-flex"></i-tabler>
+            @if(notificacoesNaoLidas > 0) {
+            <span class="mobile-topbar__notification-badge">{{ notificacoesNaoLidas }}</span>
+            }
+          </button>
           <button mat-icon-button type="button" class="mobile-topbar__icon-btn" (click)="toggleMobileAppsSheet()"
             aria-label="Abrir aplicativos">
             <i-tabler name="grid-dots" class="icon-20 d-flex"></i-tabler>
@@ -253,6 +281,104 @@
       <i-tabler name="external-link" class="icon-18 d-flex"></i-tabler>
     </a>
     }
+  </div>
+</section>
+
+<section class="mobile-sheet mobile-sheet--notifications" [class.mobile-sheet--open]="mobileNotificationsOpen" aria-label="Notificações">
+  <div class="mobile-sheet__top"
+    role="button"
+    tabindex="0"
+    aria-label="Fechar notificações"
+    (click)="closeMobileOverlays()"
+    (keydown.enter)="closeMobileOverlays()"
+    (keydown.space)="closeMobileOverlays(); $event.preventDefault()">
+    <app-mobile-sheet-header title="Notificações"></app-mobile-sheet-header>
+  </div>
+
+  <div class="mobile-sheet__section mobile-sheet__section--notifications">
+    <div class="mobile-sheet__section-head mobile-sheet__section-head--notifications">
+      <div class="mobile-sheet__section-meta">
+        @if(notificacoesNaoLidas > 0) {
+        <span class="mobile-sheet__status-pill">{{ notificacaoLabelNova() }}</span>
+        } @else {
+        <span class="mobile-sheet__status-pill mobile-sheet__status-pill--muted">Tudo em dia</span>
+        }
+      </div>
+
+      <div class="mobile-sheet__section-actions">
+        @if(notificacoesNaoLidas > 0) {
+        <button type="button" class="mobile-sheet__head-action mobile-sheet__head-action--ghost"
+          (click)="marcarTodasNotificacoesComoLidasMobile()">
+          <span>Marcar todas</span>
+        </button>
+        }
+        @if(podeEnviarNotificacao) {
+        <button type="button" class="mobile-sheet__head-action" (click)="abrirDialogEnvioNotificacaoMobile()">
+          <i-tabler name="plus" class="icon-16 d-flex"></i-tabler>
+          <span>Enviar</span>
+        </button>
+        }
+      </div>
+    </div>
+
+    @if(carregandoNotificacoes) {
+    <div class="mobile-sheet__empty">Carregando notificações...</div>
+    } @else if(notificacoes.length === 0) {
+    <div class="mobile-sheet__empty mobile-sheet__empty--notifications">
+      <strong>Tudo em dia</strong>
+      <span>Você não tem notificações novas.</span>
+    </div>
+    } @else {
+    <div class="mobile-notification-list">
+      @for(notification of notificacoes; track notification.id) {
+      <div class="mobile-notification-row" [class.mobile-notification-row--swiped]="swipedNotificationId === notification.id">
+        @if(!notification.lida) {
+        <button type="button" class="mobile-notification-row__action"
+          (click)="marcarNotificacaoComoLidaMobile(notification, $event)">
+          <i-tabler name="check" class="icon-16 d-flex"></i-tabler>
+          <span>Lida</span>
+        </button>
+        }
+
+        <button type="button" class="mobile-notification-item" [class.mobile-notification-item--unread]="!notification.lida"
+          (click)="abrirNotificacaoMobile(notification)"
+          (touchstart)="onNotificationTouchStart($event)"
+          (touchend)="onNotificationTouchEnd($event, notification)">
+          <span class="mobile-notification-item__icon"
+            [ngClass]="{
+              'mobile-notification-item__icon--info': notification.nivel === 'INFO',
+              'mobile-notification-item__icon--success': notification.nivel === 'SUCESSO',
+              'mobile-notification-item__icon--warning': notification.nivel === 'ATENCAO',
+              'mobile-notification-item__icon--critical': notification.nivel === 'CRITICO'
+            }">
+            <i-tabler [name]="iconeNotificacao(notification)" class="icon-18 d-flex"></i-tabler>
+          </span>
+          <span class="mobile-notification-item__content">
+            <span class="mobile-notification-item__head">
+              <span class="mobile-notification-item__title-line">
+                @if(!notification.lida) {
+                <span class="mobile-notification-item__dot" aria-hidden="true"></span>
+                }
+                <strong>{{ notification.titulo }}</strong>
+              </span>
+              <span class="mobile-notification-item__time">{{ formatarTempoNotificacao(notification.criadaEm) }}</span>
+            </span>
+            <span class="mobile-notification-item__summary">{{ resumoNotificacao(notification) }}</span>
+            @if(!notification.lida) {
+            <span class="mobile-notification-item__badge">não lida</span>
+            }
+          </span>
+          <i-tabler name="chevron-right" class="icon-18 d-flex mobile-notification-item__chevron"></i-tabler>
+        </button>
+      </div>
+      }
+    </div>
+    }
+
+    <button type="button" class="mobile-action-link mobile-action-link--inline" (click)="abrirTodasNotificacoesMobile()">
+      <span>Ver todas</span>
+      <i-tabler name="chevron-right" class="icon-18 d-flex"></i-tabler>
+    </button>
   </div>
 </section>
 

@@ -2,6 +2,7 @@ import { BreakpointObserver, MediaMatcher } from '@angular/cdk/layout';
 import { Component, Inject, OnDestroy, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { MatSidenav, MatSidenavContent } from '@angular/material/sidenav';
+import { MatDialog } from '@angular/material/dialog';
 import { CoreService } from 'src/app/services/core.service';
 import { AppSettings } from 'src/app/config';
 import { distinctUntilChanged, filter } from 'rxjs/operators';
@@ -28,6 +29,9 @@ import { BillingService } from 'src/app/pages/billing/services/billing.service';
 import { BillingStateService } from 'src/app/pages/billing/services/billing-state.service';
 import { OnboardingFlowService } from 'src/app/components/onboarding/onboarding-flow.service';
 import { ImagemUtil } from 'src/app/utils/imagem-util';
+import { NotificacaoItem } from 'src/app/pages/notificacoes/models/notificacao.model';
+import { NotificacaoService } from 'src/app/pages/notificacoes/services/notificacao.service';
+import { NotificacaoEnviarDialogComponent } from 'src/app/pages/notificacoes/components/notificacao-enviar-dialog.component';
 
 const MOBILE_VIEW = 'screen and (max-width: 768px)';
 const TABLET_VIEW = 'screen and (min-width: 769px) and (max-width: 1024px)';
@@ -107,10 +111,20 @@ export class FullComponent implements OnInit, OnDestroy {
   mobileDrawerOpen = false;
   mobileAppsOpen = false;
   mobileProfileOpen = false;
+  mobileNotificationsOpen = false;
   currentRoute = '';
   currentPageTitle = '';
   private mobileExpandedItems = new Set<string>();
   private moreSheetTouchStartY: number | null = null;
+  notificacoes: NotificacaoItem[] = [];
+  notificacoesNaoLidas = 0;
+  carregandoNotificacoes = false;
+  podeEnviarNotificacao = false;
+  swipedNotificationId: number | null = null;
+  private ultimaCargaResumoAt = 0;
+  private readonly intervaloMinimoResumoMs = 5000;
+  private readonly permissoesEnviarNotificacao = ['NOTIFICACAO_ENVIAR', 'NOTIFICACAO_ENVIAR_EMPRESA'];
+  private notificationTouchStartX: number | null = null;
   mobileBottomNavItems: MobileBottomNavItem[] = [
     {
       key: 'dashboard',
@@ -161,7 +175,7 @@ export class FullComponent implements OnInit, OnDestroy {
   }
 
   get hasMobileOverlayOpen(): boolean {
-    return this.mobileDrawerOpen || this.mobileAppsOpen || this.mobileProfileOpen;
+    return this.mobileDrawerOpen || this.mobileAppsOpen || this.mobileProfileOpen || this.mobileNotificationsOpen;
   }
 
   get useMinimalMobileHeader(): boolean {
@@ -219,10 +233,12 @@ export class FullComponent implements OnInit, OnDestroy {
     private breakpointObserver: BreakpointObserver,
     private navService: NavService,
     private authService: AuthService,
+    private dialog: MatDialog,
     private location: Location,
     @Inject(BillingService) private billingService: BillingService,
     private billingState: BillingStateService,
     private onboardingFlow: OnboardingFlowService,
+    private notificacaoService: NotificacaoService,
   ) {
     this.htmlElement = document.querySelector('html')!;
     this.layoutChangesSubscription = this.breakpointObserver
@@ -253,6 +269,9 @@ export class FullComponent implements OnInit, OnDestroy {
         this.currentRoute = (e as NavigationEnd).urlAfterRedirects;
         this.currentPageTitle = this.resolveCurrentPageTitle(this.currentRoute);
         this.closeMobileOverlays();
+        if (this.usuarioLogado?.id) {
+          this.carregarResumoNotificacoes();
+        }
       });
   }
 
@@ -268,12 +287,20 @@ export class FullComponent implements OnInit, OnDestroy {
       )
       .subscribe(usuario => {  
         this.usuarioLogado = usuario;
+        this.atualizarPermissaoEnvioNotificacao();
         const permissoes = usuario.perfil!.permissoes.map(p => p.chave);
         this.navItemsFiltrados = this.filtrarMenusPorPermissao(navItems, permissoes);
         this.mobileNavGroups = this.buildMobileNavGroups(this.navItemsFiltrados);
         this.currentPageTitle = this.resolveCurrentPageTitle(this.router.url);
         this.carregarStatusBilling();
         this.carregarAvisoOnboarding(usuario);
+        if (usuario?.id) {
+          this.carregarResumoNotificacoes(true);
+        } else {
+          this.notificacoes = [];
+          this.notificacoesNaoLidas = 0;
+          this.ultimaCargaResumoAt = 0;
+        }
       });
 
     this.currentRoute = this.router.url;
@@ -350,6 +377,7 @@ export class FullComponent implements OnInit, OnDestroy {
     if (this.mobileDrawerOpen) {
       this.mobileAppsOpen = false;
       this.mobileProfileOpen = false;
+      this.mobileNotificationsOpen = false;
     }
     this.syncBodyScroll();
   }
@@ -377,6 +405,7 @@ export class FullComponent implements OnInit, OnDestroy {
     if (this.mobileAppsOpen) {
       this.mobileDrawerOpen = false;
       this.mobileProfileOpen = false;
+      this.mobileNotificationsOpen = false;
     }
     this.syncBodyScroll();
   }
@@ -386,6 +415,18 @@ export class FullComponent implements OnInit, OnDestroy {
     if (this.mobileProfileOpen) {
       this.mobileDrawerOpen = false;
       this.mobileAppsOpen = false;
+      this.mobileNotificationsOpen = false;
+    }
+    this.syncBodyScroll();
+  }
+
+  toggleMobileNotificationsSheet(): void {
+    this.mobileNotificationsOpen = !this.mobileNotificationsOpen;
+    if (this.mobileNotificationsOpen) {
+      this.mobileDrawerOpen = false;
+      this.mobileAppsOpen = false;
+      this.mobileProfileOpen = false;
+      this.carregarResumoNotificacoes(true);
     }
     this.syncBodyScroll();
   }
@@ -403,6 +444,8 @@ export class FullComponent implements OnInit, OnDestroy {
     this.mobileDrawerOpen = false;
     this.mobileAppsOpen = false;
     this.mobileProfileOpen = false;
+    this.mobileNotificationsOpen = false;
+    this.swipedNotificationId = null;
     this.syncBodyScroll();
   }
 
@@ -494,6 +537,126 @@ export class FullComponent implements OnInit, OnDestroy {
 
   trackByNavItem(_: number, item: NavItem): string {
     return this.getMobileItemKey(item);
+  }
+
+  abrirNotificacaoMobile(item: NotificacaoItem): void {
+    if (!item?.id) return;
+
+    this.marcarNotificacaoComoLidaLocal(item);
+    if (!item.lida) {
+      this.notificacaoService.marcarComoLida$(item.id).subscribe({ error: () => {} });
+    }
+
+    this.closeMobileOverlays();
+    this.abrirCentralNotificacoes(item.id);
+  }
+
+  marcarNotificacaoComoLidaMobile(item: NotificacaoItem, event?: Event): void {
+    event?.stopPropagation();
+
+    if (!item?.id || item.lida) {
+      this.swipedNotificationId = null;
+      return;
+    }
+
+    this.marcarNotificacaoComoLidaLocal(item);
+    this.notificacaoService.marcarComoLida$(item.id).subscribe({ error: () => {} });
+    this.swipedNotificationId = null;
+  }
+
+  marcarTodasNotificacoesComoLidasMobile(): void {
+    if (!this.notificacoesNaoLidas) return;
+
+    this.notificacoes = this.notificacoes.map((item) => ({ ...item, lida: true }));
+    this.notificacoesNaoLidas = 0;
+    this.swipedNotificationId = null;
+    this.notificacaoService.marcarTodasComoLidas$().subscribe({ error: () => {} });
+  }
+
+  abrirTodasNotificacoesMobile(): void {
+    this.closeMobileOverlays();
+    this.abrirCentralNotificacoes();
+  }
+
+  abrirDialogEnvioNotificacaoMobile(): void {
+    this.atualizarPermissaoEnvioNotificacao();
+    if (!this.podeEnviarNotificacao) return;
+
+    const dialogRef = this.dialog.open(NotificacaoEnviarDialogComponent, {
+      width: '720px',
+      maxWidth: '95vw',
+      disableClose: true
+    });
+
+    dialogRef.afterClosed().subscribe((enviou) => {
+      if (!enviou) return;
+      this.carregarResumoNotificacoes(true);
+      this.closeMobileOverlays();
+      this.abrirCentralNotificacoes();
+    });
+  }
+
+  notificacaoLabelNova(): string {
+    return this.notificacoesNaoLidas === 1 ? '1 nova' : `${this.notificacoesNaoLidas} novas`;
+  }
+
+  possuiNotificacaoCriticaNaoLida(): boolean {
+    return this.notificacoes.some(
+      (item) => !item.lida && String(item?.nivel || '').toUpperCase() === 'CRITICO'
+    );
+  }
+
+  formatarTempoNotificacao(iso?: string | null): string {
+    if (!iso) return 'Agora';
+    const date = new Date(iso);
+    if (Number.isNaN(date.getTime())) return 'Agora';
+    const diffMs = Date.now() - date.getTime();
+    const min = Math.floor(diffMs / 60000);
+    if (min < 1) return 'Agora';
+    if (min < 60) return `${min} min atrás`;
+
+    const agora = new Date();
+    const inicioHoje = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate()).getTime();
+    const inicioData = new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
+    const diffDias = Math.floor((inicioHoje - inicioData) / 86400000);
+
+    if (diffDias === 0) return 'Hoje';
+    if (diffDias === 1) return 'Ontem';
+    return `há ${Math.max(1, diffDias)} dias`;
+  }
+
+  resumoNotificacao(item: NotificacaoItem): string {
+    return String(item.resumo || item.conteudo || 'Sem resumo');
+  }
+
+  iconeNotificacao(item: NotificacaoItem): string {
+    const nivel = String(item?.nivel || 'INFO').toUpperCase();
+    if (nivel === 'CRITICO') return 'alert-octagon';
+    if (nivel === 'ATENCAO') return 'alert-triangle';
+    if (nivel === 'SUCESSO') return 'circle-check';
+    return 'info-circle';
+  }
+
+  onNotificationTouchStart(event: TouchEvent): void {
+    this.notificationTouchStartX = event.changedTouches?.[0]?.clientX ?? null;
+  }
+
+  onNotificationTouchEnd(event: TouchEvent, item: NotificacaoItem): void {
+    const endX = event.changedTouches?.[0]?.clientX ?? null;
+
+    if (this.notificationTouchStartX == null || endX == null || item.lida) {
+      this.notificationTouchStartX = null;
+      return;
+    }
+
+    const deltaX = endX - this.notificationTouchStartX;
+    if (deltaX <= -48) {
+      this.swipedNotificationId = item.id;
+    } else if (deltaX >= 36 && this.swipedNotificationId === item.id) {
+      this.swipedNotificationId = null;
+    }
+
+    this.notificationTouchStartX = null;
   }
 
   private carregarAvisoOnboarding(usuario: Usuario): void {
@@ -642,5 +805,51 @@ export class FullComponent implements OnInit, OnDestroy {
       this.htmlElement.classList.remove('dark-theme');
       this.htmlElement.classList.add('light-theme');
     }
+  }
+
+  private carregarResumoNotificacoes(force = false): void {
+    if (!force) {
+      const agora = Date.now();
+      if (agora - this.ultimaCargaResumoAt < this.intervaloMinimoResumoMs) {
+        return;
+      }
+    }
+
+    this.carregandoNotificacoes = true;
+    this.notificacaoService.obterResumo$(5).subscribe({
+      next: (resumo) => {
+        this.notificacoes = resumo.itens || [];
+        this.notificacoesNaoLidas = Number(resumo.naoLidas || 0);
+        this.carregandoNotificacoes = false;
+        this.ultimaCargaResumoAt = Date.now();
+      },
+      error: () => {
+        this.carregandoNotificacoes = false;
+      }
+    });
+  }
+
+  private atualizarPermissaoEnvioNotificacao(): void {
+    this.podeEnviarNotificacao = this.authService.temAlgumaPermissao(this.permissoesEnviarNotificacao);
+  }
+
+  private marcarNotificacaoComoLidaLocal(item: NotificacaoItem): void {
+    this.notificacoesNaoLidas = Math.max(0, this.notificacoesNaoLidas - (item.lida ? 0 : 1));
+    this.notificacoes = this.notificacoes.map((n) => (n.id === item.id ? { ...n, lida: true } : n));
+  }
+
+  private abrirCentralNotificacoes(notificacaoId?: number): void {
+    const usuarioId = this.usuarioLogado?.id ?? null;
+    if (!usuarioId) {
+      this.router.navigate(notificacaoId ? ['/apps/notificacoes', notificacaoId] : ['/apps/notificacoes']);
+      return;
+    }
+
+    const queryParams: Record<string, any> = { tab: 'notificacoes' };
+    if (notificacaoId) {
+      queryParams['notificacaoId'] = notificacaoId;
+    }
+
+    this.router.navigate(['/theme-pages/account-setting', usuarioId], { queryParams });
   }
 }
