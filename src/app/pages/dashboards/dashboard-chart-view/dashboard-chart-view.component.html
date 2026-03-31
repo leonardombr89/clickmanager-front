@@ -1,15 +1,5 @@
 <section class="dashboard-chart-view" [class.dashboard-chart-view--landscape]="comparativoPaisagemAtivo">
   <header class="dashboard-chart-view__header">
-    <app-mobile-page-header
-      class="dashboard-chart-view__mobile-top"
-      [title]="pageTitle"
-      [badgeText]="mode === 'receita' ? 'Receita' : 'Tendência'"
-      [actionIcon]="canRotateComparativo ? (comparativoPaisagemAtivo ? 'screen_rotation_alt' : 'screen_rotation') : ''"
-      [actionAriaLabel]="comparativoPaisagemAtivo ? 'Fechar modo horizontal' : 'Abrir modo horizontal'"
-      (back)="voltar()"
-      (action)="alternarRotacaoComparativo()">
-    </app-mobile-page-header>
-
     <div class="dashboard-chart-view__desktop-top">
       <button mat-stroked-button type="button" class="dashboard-chart-view__back" (click)="voltar()">
         Voltar

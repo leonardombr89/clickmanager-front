@@ -1,4 +1,7 @@
 <div class="mobile-total-bar"
+  [class.mobile-total-bar--expanded]="expanded"
+  [class.mobile-total-bar--attached]="attachedToBottomNav"
+  [style.bottom]="bottomOffset"
   role="button"
   tabindex="0"
   [attr.aria-label]="expandAriaLabel"

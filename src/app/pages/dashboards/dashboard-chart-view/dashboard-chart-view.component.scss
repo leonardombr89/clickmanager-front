@@ -217,18 +217,7 @@
   }
 
   .dashboard-chart-view__header {
-    position: sticky;
-    top: 0;
-    z-index: 12;
-    gap: 10px;
-    padding: 12px 14px 14px;
-    border-radius: 18px;
-    box-shadow: 0 10px 24px rgba(14, 23, 38, 0.08);
-  }
-
-  .dashboard-chart-view__mobile-top {
-    display: block;
-    width: 100%;
+    display: none;
   }
 
   .dashboard-chart-view__desktop-top {

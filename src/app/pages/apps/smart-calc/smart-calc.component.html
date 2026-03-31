@@ -1,20 +1,15 @@
 <div class="smartcalc-page smartcalc">
   <header class="sc-page-header">
-    <app-mobile-page-header
-      class="sc-page-header__mobile-top"
-      title="SmartCalc"
-      badgeText="Cálculo"
-      (back)="fechar()">
-    </app-mobile-page-header>
-
     <div class="sc-page-header__main">
       <span class="sc-page-header__icon">
         <mat-icon>calculate</mat-icon>
       </span>
       <div class="sc-page-header__copy">
+        @if (!mobileViewport()) {
         <span class="sc-page-header__eyebrow">SmartCalc</span>
-        <h1>Simule e gere orçamentos automaticamente</h1>
-        <p>{{ produtoInitSelecionado?.nome || 'Escolha produto, medidas e extras para transformar cálculo em pedido sem fricção.' }}</p>
+        }
+        <h1>{{ mobileViewport() ? 'Simule orçamentos automaticamente' : 'Simule e gere orçamentos automaticamente' }}</h1>
+        <p>{{ mobileViewport() ? (produtoInitSelecionado?.nome || 'Produto, medidas e extras. O valor atualiza sozinho.') : (produtoInitSelecionado?.nome || 'Escolha produto, medidas e extras para transformar cálculo em pedido sem fricção.') }}</p>
       </div>
     </div>
 
@@ -56,7 +51,7 @@
             <span class="step-badge">1</span>
             <div>
               <div class="title">Produto e material</div>
-              <div class="hint">Selecione a base do cálculo para liberar as opções corretas.</div>
+              <div class="hint">{{ mobileViewport() ? 'Escolha a base principal do cálculo.' : 'Selecione a base do cálculo para liberar as opções corretas.' }}</div>
             </div>
           </div>
         </div>
@@ -67,7 +62,7 @@
               [placeholder]="'Ex: Cartão de visita, panfleto, adesivo'" [options]="produtos" labelKey="nome"
               valueKey="id" [disabled]="carregandoProdutos || !!erroProdutos"
               [nullLabel]="erroProdutos || 'Selecione um produto...'"></app-input-options>
-            <div class="field-hint">Escolha o item base que você quer simular.</div>
+            <div class="field-hint">{{ mobileViewport() ? 'Escolha o que você quer calcular.' : 'Escolha o item base que você quer simular.' }}</div>
           </div>
 
           <div class="field-stack">
@@ -75,7 +70,7 @@
               [placeholder]="'Ex: Couché 150g, adesivo, sulfite'" [options]="materiais" labelKey="nome"
               valueKey="id" [disabled]="carregandoProdutos || !!erroProdutos || !materiais.length"
               [nullLabel]="!materiais.length ? 'Nenhum material disponível' : '-- Selecione --'"></app-input-options>
-            <div class="field-hint">Defina a base que mais impacta no custo e no formato.</div>
+            <div class="field-hint">{{ mobileViewport() ? 'Esse material define custo e aproveitamento.' : 'Defina a base que mais impacta no custo e no formato.' }}</div>
           </div>
         </div>
 
@@ -99,7 +94,7 @@
             <span class="step-badge">2</span>
             <div>
               <div class="title">Medidas e quantidade</div>
-              <div class="hint">Informe os dados do item para atualizar o cálculo automaticamente.</div>
+              <div class="hint">{{ mobileViewport() ? 'Preencha e acompanhe o valor em tempo real.' : 'Informe os dados do item para atualizar o cálculo automaticamente.' }}</div>
             </div>
           </div>
           <div class="subtitle" *ngIf="isMetroLinear()">
@@ -111,19 +106,19 @@
           <div class="field-stack">
             <app-input-numerico [control]="form.controls.largura" label="Largura (cm)"
               placeholder="Ex: 9"></app-input-numerico>
-            <div class="field-hint">Informe a largura final do produto.</div>
+            <div class="field-hint">{{ mobileViewport() ? 'Largura final do produto.' : 'Informe a largura final do produto.' }}</div>
           </div>
 
           <div class="field-stack">
             <app-input-numerico [control]="form.controls.altura" label="Altura (cm)"
               placeholder="Ex: 5"></app-input-numerico>
-            <div class="field-hint">Use a altura final para achar a melhor distribuição.</div>
+            <div class="field-hint">{{ mobileViewport() ? 'Altura final para a melhor distribuição.' : 'Use a altura final para achar a melhor distribuição.' }}</div>
           </div>
 
           <div class="field-stack">
             <app-input-numerico [control]="form.controls.quantidade" label="Quantidade"
               placeholder="Ex: 500"></app-input-numerico>
-            <div class="field-hint">A quantidade ajuda a definir produção, sobra e valor.</div>
+            <div class="field-hint">{{ mobileViewport() ? 'A quantidade define produção e valor.' : 'A quantidade ajuda a definir produção, sobra e valor.' }}</div>
           </div>
         </div>
       </section>
@@ -134,22 +129,30 @@
             <span class="step-badge optional">3</span>
             <div>
               <div class="title">Extras</div>
-              <div class="hint">Acabamentos e serviços entram no cálculo sem sair da tela.</div>
+              <div class="hint">{{ mobileViewport() ? 'Marque só o que entra no cálculo.' : 'Acabamentos e serviços entram no cálculo sem sair da tela.' }}</div>
             </div>
           </div>
         </div>
 
         <div class="section-card__body extras-stack">
           <div class="extras-block">
-            <div class="extras-block__title">Acabamentos</div>
-            <app-input-multi-select [control]="form.controls.acabamentosIds" [label]="'Acabamentos (opcional)'"
+            <div class="extras-block__heading">
+              <div class="extras-block__title">Acabamentos</div>
+              <div class="extras-block__meta">Opcional</div>
+            </div>
+            <app-input-multi-select [control]="form.controls.acabamentosIds" [label]="mobileViewport() ? '' : 'Acabamentos (opcional)'"
+              [searchPlaceholder]="mobileViewport() ? 'Buscar acabamento' : 'Buscar opção'" [showSelectedCount]="!mobileViewport()"
               [options]="acabamentos" [cardMinHeight]="multiSelectCardMinHeight()"
               [listHeight]="multiSelectListHeight()" [visualStyle]="mobileViewport() ? 'subtle' : 'default'"></app-input-multi-select>
           </div>
 
           <div class="extras-block">
-            <div class="extras-block__title">Serviços</div>
-            <app-input-multi-select [control]="form.controls.servicosIds" [label]="'Serviços (opcional)'"
+            <div class="extras-block__heading">
+              <div class="extras-block__title">Serviços</div>
+              <div class="extras-block__meta">Opcional</div>
+            </div>
+            <app-input-multi-select [control]="form.controls.servicosIds" [label]="mobileViewport() ? '' : 'Serviços (opcional)'"
+              [searchPlaceholder]="mobileViewport() ? 'Buscar serviço' : 'Buscar opção'" [showSelectedCount]="!mobileViewport()"
               [options]="servicos" [cardMinHeight]="multiSelectCardMinHeight()"
               [listHeight]="multiSelectListHeight()" [visualStyle]="mobileViewport() ? 'subtle' : 'default'"></app-input-multi-select>
           </div>
@@ -179,16 +182,18 @@
   </form>
 
   <app-mobile-total-bar
-    label="Total estimado"
+    [label]="mobileViewport() ? 'Total' : 'Total estimado'"
     [valueText]="(total() | currency:'BRL':'symbol-narrow':'1.2-2') ?? ''"
-    detailText="Ver detalhes"
+    [detailText]="mobileViewport() ? 'Detalhes' : 'Ver detalhes'"
     [expanded]="resultadoMobileAberto()"
     [loading]="carregandoCalculo"
     [actionText]="carregandoAdd ? 'Criando...' : 'Criar pedido →'"
     [actionDisabled]="!temResultado() || carregandoAdd || needsRecalcular() || carregandoCalculo"
+    bottomOffset="var(--mobile-bottom-nav-height, 0px)"
+    [attachedToBottomNav]="true"
     expandAriaLabel="Ver detalhes do cálculo"
     actionAriaLabel="Criar pedido"
-    (expand)="abrirResultadoMobile()"
+    (expand)="alternarResultadoMobile()"
     (action)="adicionarAoPedido()">
   </app-mobile-total-bar>
 
@@ -202,14 +207,10 @@
       (click)="fecharResultadoMobile()"
       (keydown.enter)="fecharResultadoMobile()"
       (keydown.space)="fecharResultadoMobile(); $event.preventDefault()">
-      <div class="mobile-result-sheet__handle"
-        (touchstart)="iniciarGestoSheet($event)"
-        (touchend)="finalizarGestoSheet($event)"></div>
-
-      <div class="mobile-result-sheet__header">
-        <div>
-          <div class="title">Resultado do cálculo</div>
-          <div class="hint">Veja itens, distribuição e folhas sem sair da simulação.</div>
+      <div (touchstart)="iniciarGestoSheet($event)"
+        (touchend)="finalizarGestoSheet($event)">
+        <div class="mobile-result-sheet__pull">
+          <div class="mobile-result-sheet__pull-handle"></div>
         </div>
       </div>
     </div>
@@ -219,7 +220,18 @@
     </div>
 
     <div class="mobile-result-sheet__footer">
-      <ng-container [ngTemplateOutlet]="resultFooterTpl"></ng-container>
+      <div class="footer-left">
+        <div *ngIf="erroCalculo" class="error-text">{{ erroCalculo }}</div>
+        <div *ngIf="needsRecalcular() && !carregandoCalculo" class="muted small">
+          Atualizando o cálculo automaticamente…
+        </div>
+      </div>
+
+      <div class="actions">
+        <button mat-stroked-button type="button" (click)="limpar()" [disabled]="carregandoCalculo || carregandoAdd">
+          Limpar
+        </button>
+      </div>
     </div>
   </section>
 
@@ -307,10 +319,12 @@
     </div>
     }
 
+    @if (!mobileViewport()) {
     <div class="total-highlight">
       <div class="label">Total estimado</div>
       <div class="value">{{ total() | currency:'BRL':'symbol-narrow':'1.2-2' }}</div>
     </div>
+    }
     }
   </ng-template>
 

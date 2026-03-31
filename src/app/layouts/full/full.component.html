@@ -56,7 +56,44 @@
       }
 
       @if(isMobileLayout) {
-      <header class="mobile-topbar">
+      <header
+        class="mobile-topbar"
+        [class.mobile-topbar--minimal]="useMinimalMobileHeader"
+        [class.mobile-topbar--title-only]="useTitleOnlyMobileHeader">
+        @if(useTitleOnlyMobileHeader) {
+        <span class="mobile-topbar__spacer" aria-hidden="true"></span>
+
+        <div class="mobile-topbar__center mobile-topbar__center--minimal">
+          <span class="mobile-topbar__title">{{ currentPageTitle }}</span>
+        </div>
+
+        <button mat-icon-button type="button" class="mobile-topbar__avatar-btn" (click)="toggleMobileProfileSheet()"
+          aria-label="Abrir perfil">
+          @if(usuarioLogado?.fotoPerfil) {
+          <img [src]="ImagemUtil.montarUrlImagemPerfil(usuarioLogado?.fotoPerfil)" alt="Perfil" class="mobile-topbar__avatar-image" />
+          } @else {
+          <i-tabler name="user-circle" class="icon-22 d-flex"></i-tabler>
+          }
+        </button>
+        } @else if(useMinimalMobileHeader) {
+        <button mat-icon-button type="button" class="mobile-topbar__icon-btn" (click)="navigateMobileBack()"
+          aria-label="Voltar">
+          <i-tabler name="arrow-left" class="icon-20 d-flex"></i-tabler>
+        </button>
+
+        <div class="mobile-topbar__center mobile-topbar__center--minimal">
+          <span class="mobile-topbar__title">{{ currentPageTitle }}</span>
+        </div>
+
+        <button mat-icon-button type="button" class="mobile-topbar__avatar-btn" (click)="toggleMobileProfileSheet()"
+          aria-label="Abrir perfil">
+          @if(usuarioLogado?.fotoPerfil) {
+          <img [src]="ImagemUtil.montarUrlImagemPerfil(usuarioLogado?.fotoPerfil)" alt="Perfil" class="mobile-topbar__avatar-image" />
+          } @else {
+          <i-tabler name="user-circle" class="icon-22 d-flex"></i-tabler>
+          }
+        </button>
+        } @else {
         <button mat-icon-button type="button" class="mobile-topbar__icon-btn" (click)="toggleMobileDrawer()"
           aria-label="Abrir menu">
           <i-tabler name="menu-2" class="icon-22 d-flex"></i-tabler>
@@ -84,6 +121,7 @@
             }
           </button>
         </div>
+        }
       </header>
       }
 
@@ -131,17 +169,24 @@
 @if(isMobileLayout) {
 <div class="mobile-shell-backdrop" [class.mobile-shell-backdrop--visible]="hasMobileOverlayOpen" (click)="closeMobileOverlays()"></div>
 
-<aside class="mobile-drawer" [class.mobile-drawer--open]="mobileDrawerOpen" aria-label="Menu principal">
-  <div class="mobile-drawer__header">
-    <div class="mobile-drawer__brand">
-      <app-branding></app-branding>
-    </div>
-    <button mat-icon-button type="button" (click)="closeMobileOverlays()" aria-label="Fechar menu">
-      <i-tabler name="x" class="icon-20 d-flex"></i-tabler>
-    </button>
+<section
+  class="mobile-sheet mobile-sheet--more"
+  [class.mobile-sheet--open]="mobileDrawerOpen"
+  aria-label="Mais opções">
+  <div
+    class="mobile-sheet__top mobile-sheet__top--sheet"
+    role="button"
+    tabindex="0"
+    aria-label="Fechar mais opções"
+    (click)="closeMobileOverlays()"
+    (keydown.enter)="closeMobileOverlays()"
+    (keydown.space)="closeMobileOverlays(); $event.preventDefault()"
+    (touchstart)="onMoreSheetTouchStart($event)"
+    (touchend)="onMoreSheetTouchEnd($event)">
+    <app-mobile-sheet-header title="Mais opções"></app-mobile-sheet-header>
   </div>
 
-  <div class="mobile-drawer__content">
+  <div class="mobile-sheet__content mobile-sheet__content--more">
     @for(group of mobileNavGroups; track trackByGroupTitle($index, group)) {
     <section class="mobile-nav-group">
       <h3 class="mobile-nav-group__title">{{ group.title }}</h3>
@@ -173,38 +218,31 @@
       </div>
     </section>
     }
-  </div>
-</aside>
 
-<section class="mobile-sheet mobile-sheet--apps" [class.mobile-sheet--open]="mobileAppsOpen" aria-label="Aplicativos">
-  <div class="mobile-sheet__handle"></div>
-  <div class="mobile-sheet__header">
-    <div>
-      <span class="mobile-sheet__eyebrow">Aplicativos</span>
-      <h3 class="mobile-sheet__title">Ferramentas e atalhos</h3>
+    <div class="mobile-sheet__section">
+      <button type="button" class="mobile-action-link mobile-action-link--danger" (click)="logout(); closeMobileOverlays()">
+        <span>Sair</span>
+        <i-tabler name="logout-2" class="icon-18 d-flex"></i-tabler>
+      </button>
     </div>
-    <button mat-icon-button type="button" (click)="closeMobileOverlays()" aria-label="Fechar aplicativos">
-      <i-tabler name="x" class="icon-20 d-flex"></i-tabler>
-    </button>
   </div>
+</section>
 
-  <div class="mobile-apps-list">
-    @for(appdd of apps; track appdd.id) {
-    <a [routerLink]="[appdd.link]" class="mobile-app-link" (click)="closeMobileOverlays()">
-      <span class="mobile-app-link__icon">
-        <img [src]="appdd.img" [alt]="appdd.title" width="20" height="20" />
-      </span>
-      <span class="mobile-app-link__content">
-        <strong>{{ appdd.title }}</strong>
-        <small>{{ appdd.subtitle }}</small>
-      </span>
-      <i-tabler name="chevron-right" class="icon-18 d-flex"></i-tabler>
-    </a>
-    }
+<section class="mobile-sheet mobile-sheet--apps" [class.mobile-sheet--open]="mobileAppsOpen" aria-label="Atalhos">
+  <div class="mobile-sheet__top"
+    role="button"
+    tabindex="0"
+    aria-label="Fechar atalhos"
+    (click)="closeMobileOverlays()"
+    (keydown.enter)="closeMobileOverlays()"
+    (keydown.space)="closeMobileOverlays(); $event.preventDefault()">
+    <app-mobile-sheet-header
+      title="Atalhos"
+      hint="Acesse destinos rápidos sem sair da tela.">
+    </app-mobile-sheet-header>
   </div>
 
   <div class="mobile-sheet__section">
-    <h4 class="mobile-sheet__section-title">Atalhos</h4>
     <a [routerLink]="['/billing/minha-assinatura']" class="mobile-action-link" (click)="closeMobileOverlays()">
       <span>Minha assinatura</span>
       <i-tabler name="chevron-right" class="icon-18 d-flex"></i-tabler>
@@ -219,7 +257,16 @@
 </section>
 
 <section class="mobile-sheet mobile-sheet--profile" [class.mobile-sheet--open]="mobileProfileOpen" aria-label="Perfil do usuário">
-  <div class="mobile-sheet__handle"></div>
+  <div class="mobile-sheet__top"
+    role="button"
+    tabindex="0"
+    aria-label="Fechar perfil"
+    (click)="closeMobileOverlays()"
+    (keydown.enter)="closeMobileOverlays()"
+    (keydown.space)="closeMobileOverlays(); $event.preventDefault()">
+    <app-mobile-sheet-header title="Perfil"></app-mobile-sheet-header>
+  </div>
+
   <div class="mobile-profile">
     <div class="mobile-profile__summary">
       <div class="mobile-profile__avatar">
@@ -234,9 +281,6 @@
         <span>{{ mobileProfileSubtitle }}</span>
         <small>{{ usuarioLogado?.username }}</small>
       </div>
-      <button mat-icon-button type="button" (click)="closeMobileOverlays()" aria-label="Fechar perfil">
-        <i-tabler name="x" class="icon-20 d-flex"></i-tabler>
-      </button>
     </div>
 
     <div class="mobile-sheet__section">
@@ -252,4 +296,20 @@
     </div>
   </div>
 </section>
+
+<nav class="mobile-bottom-nav" aria-label="Navegação principal">
+  @for(item of mobileBottomNavItems; track item.key) {
+  <button
+    type="button"
+    class="mobile-bottom-nav__item"
+    [class.mobile-bottom-nav__item--active]="isMobileBottomNavActive(item)"
+    [class.mobile-bottom-nav__item--special]="item.special"
+    (click)="onMobileBottomNavClick(item)">
+    <span class="mobile-bottom-nav__icon-wrap">
+      <i-tabler [name]="item.icon" class="icon-20 d-flex"></i-tabler>
+    </span>
+    <span class="mobile-bottom-nav__label">{{ item.label }}</span>
+  </button>
+  }
+</nav>
 }

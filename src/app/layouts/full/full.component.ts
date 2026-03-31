@@ -6,6 +6,7 @@ import { CoreService } from 'src/app/services/core.service';
 import { AppSettings } from 'src/app/config';
 import { distinctUntilChanged, filter } from 'rxjs/operators';
 import { NavigationEnd, Router } from '@angular/router';
+import { Location } from '@angular/common';
 import { navItems } from './vertical/sidebar/sidebar-data';
 import { NavService } from '../../services/nav.service';
 import { AppNavItemComponent } from './vertical/sidebar/nav-item/nav-item.component';
@@ -18,10 +19,10 @@ import { TablerIconsModule } from 'angular-tabler-icons';
 import { HeaderComponent } from './vertical/header/header.component';
 import { AppBreadcrumbComponent } from './shared/breadcrumb/breadcrumb.component';
 import { CustomizerComponent } from './shared/customizer/customizer.component';
+import { MobileSheetHeaderComponent } from 'src/app/components/mobile-sheet-header/mobile-sheet-header.component';
 import { AuthService } from 'src/app/services/auth.service';
 import { NavItem } from './vertical/sidebar/nav-item/nav-item';
 import { Usuario } from 'src/app/models/usuario/usuario.model';
-import { BrandingComponent } from './vertical/sidebar/branding.component';
 import { BillingBannerComponent } from '../../components/billing-banner/billing-banner.component';
 import { BillingService } from 'src/app/pages/billing/services/billing.service';
 import { BillingStateService } from 'src/app/pages/billing/services/billing-state.service';
@@ -53,6 +54,16 @@ interface MobileNavGroup {
   items: NavItem[];
 }
 
+interface MobileBottomNavItem {
+  key: string;
+  label: string;
+  icon: string;
+  route?: string;
+  startsWith?: string[];
+  special?: boolean;
+  action?: 'drawer' | 'apps' | 'profile';
+}
+
 @Component({
   selector: 'app-full',
   standalone: true,
@@ -67,8 +78,8 @@ interface MobileNavGroup {
     HeaderComponent,
     AppBreadcrumbComponent,
     CustomizerComponent,
-    BrandingComponent,
-    BillingBannerComponent
+    BillingBannerComponent,
+    MobileSheetHeaderComponent
   ],
   templateUrl: './full.component.html',
   styleUrls: ['./full.component.scss'],
@@ -99,6 +110,43 @@ export class FullComponent implements OnInit, OnDestroy {
   currentRoute = '';
   currentPageTitle = '';
   private mobileExpandedItems = new Set<string>();
+  private moreSheetTouchStartY: number | null = null;
+  mobileBottomNavItems: MobileBottomNavItem[] = [
+    {
+      key: 'dashboard',
+      label: 'Dashboard',
+      icon: 'layout-dashboard',
+      route: '/dashboards/dashboard1',
+      startsWith: ['/dashboards/dashboard1'],
+    },
+    {
+      key: 'atalhos',
+      label: 'Atalhos',
+      icon: 'grid-dots',
+      action: 'apps',
+    },
+    {
+      key: 'smartcalc',
+      label: 'SmartCalc',
+      icon: 'calculator',
+      route: '/smartcalc',
+      startsWith: ['/smartcalc'],
+      special: true,
+    },
+    {
+      key: 'pedidos',
+      label: 'Pedidos',
+      icon: 'file-text',
+      route: '/page/pedido',
+      startsWith: ['/page/pedido'],
+    },
+    {
+      key: 'mais',
+      label: 'Mais',
+      icon: 'menu-2',
+      action: 'drawer',
+    }
+  ];
 
   get isOver(): boolean {
     return this.isMobileScreen;
@@ -114,6 +162,31 @@ export class FullComponent implements OnInit, OnDestroy {
 
   get hasMobileOverlayOpen(): boolean {
     return this.mobileDrawerOpen || this.mobileAppsOpen || this.mobileProfileOpen;
+  }
+
+  get useMinimalMobileHeader(): boolean {
+    const url = this.currentRoute;
+
+    if (!this.isMobileLayout) {
+      return false;
+    }
+
+    return (
+      url.startsWith('/smartcalc') ||
+      url.startsWith('/dashboards/dashboard1/grafico') ||
+      url.startsWith('/onboarding') ||
+      url.includes('/form') ||
+      url.includes('/criar') ||
+      url.includes('/editar')
+    );
+  }
+
+  get useTitleOnlyMobileHeader(): boolean {
+    if (!this.isMobileLayout) {
+      return false;
+    }
+
+    return this.currentRoute.startsWith('/dashboards/dashboard1');
   }
 
   get mobileProfileSubtitle(): string {
@@ -146,6 +219,7 @@ export class FullComponent implements OnInit, OnDestroy {
     private breakpointObserver: BreakpointObserver,
     private navService: NavService,
     private authService: AuthService,
+    private location: Location,
     @Inject(BillingService) private billingService: BillingService,
     private billingState: BillingStateService,
     private onboardingFlow: OnboardingFlowService,
@@ -280,6 +354,24 @@ export class FullComponent implements OnInit, OnDestroy {
     this.syncBodyScroll();
   }
 
+  onMoreSheetTouchStart(event: TouchEvent): void {
+    this.moreSheetTouchStartY = event.touches[0]?.clientY ?? null;
+  }
+
+  onMoreSheetTouchEnd(event: TouchEvent): void {
+    if (this.moreSheetTouchStartY === null) {
+      return;
+    }
+
+    const endY = event.changedTouches[0]?.clientY ?? this.moreSheetTouchStartY;
+    const delta = endY - this.moreSheetTouchStartY;
+    this.moreSheetTouchStartY = null;
+
+    if (delta > 56) {
+      this.closeMobileOverlays();
+    }
+  }
+
   toggleMobileAppsSheet(): void {
     this.mobileAppsOpen = !this.mobileAppsOpen;
     if (this.mobileAppsOpen) {
@@ -296,6 +388,15 @@ export class FullComponent implements OnInit, OnDestroy {
       this.mobileAppsOpen = false;
     }
     this.syncBodyScroll();
+  }
+
+  navigateMobileBack(): void {
+    if (window.history.length > 1) {
+      this.location.back();
+      return;
+    }
+
+    this.router.navigate(['/dashboards/dashboard1']);
   }
 
   closeMobileOverlays(): void {
@@ -320,6 +421,49 @@ export class FullComponent implements OnInit, OnDestroy {
     if (item.route) {
       this.router.navigate([item.route]);
     }
+  }
+
+  onMobileBottomNavClick(item: MobileBottomNavItem): void {
+    if (item.action === 'drawer') {
+      this.toggleMobileDrawer();
+      return;
+    }
+
+    if (item.action === 'apps') {
+      this.toggleMobileAppsSheet();
+      return;
+    }
+
+    if (item.action === 'profile') {
+      this.toggleMobileProfileSheet();
+      return;
+    }
+
+    if (item.route) {
+      this.router.navigate([item.route]);
+    }
+  }
+
+  isMobileBottomNavActive(item: MobileBottomNavItem): boolean {
+    if (item.action === 'drawer') {
+      return this.mobileDrawerOpen;
+    }
+
+    if (item.action === 'apps') {
+      return this.mobileAppsOpen;
+    }
+
+    if (item.action === 'profile') {
+      if (this.mobileProfileOpen) {
+        return true;
+      }
+    }
+
+    if (!item.route) {
+      return !!item.startsWith?.some((route) => this.currentRoute.startsWith(route));
+    }
+
+    return (item.startsWith ?? [item.route]).some((route) => this.currentRoute.startsWith(route));
   }
 
   toggleMobileItemExpanded(item: NavItem): void {
@@ -385,21 +529,22 @@ export class FullComponent implements OnInit, OnDestroy {
 
   private buildMobileNavGroups(items: NavItem[]): MobileNavGroup[] {
     const groups: MobileNavGroup[] = [];
+    const primaryRoutes = new Set(['/dashboards/dashboard1', '/page/pedido', '/smartcalc', '/page/cliente']);
+    const secondaryItems = items.filter((item) => !item.navCap && !primaryRoutes.has(item.route || ''));
+
     const groupMap: Record<string, (item: NavItem) => boolean> = {
-      Principal: (item) => item.route === '/dashboards/dashboard1',
-      'Gestão': (item) =>
+      Administração: (item) =>
         [
-          '/page/pedido',
-          '/page/funcionarios',
-          '/page/cliente',
           '/page/usuarios/listar',
-          '/page/perfil'
+          '/page/perfil',
+          '/page/empresa',
+          '/config',
+          '/page/calculadora/config/criar'
         ].some((route) => item.route?.startsWith(route)),
-      'Cadastros / Configurações': (item) =>
+      'Cadastros técnicos': (item) =>
         [
           '/cadastro-tecnico',
-          '/page/empresa',
-          '/config'
+          '/page/funcionarios'
         ].some((route) => item.route?.startsWith(route)),
       Ajuda: (item) =>
         [
@@ -409,15 +554,15 @@ export class FullComponent implements OnInit, OnDestroy {
     };
 
     Object.entries(groupMap).forEach(([title, matcher]) => {
-      const groupItems = items.filter((item) => !item.navCap && matcher(item));
+      const groupItems = secondaryItems.filter((item) => matcher(item));
       if (groupItems.length) {
         groups.push({ title, items: groupItems });
       }
     });
 
     const usedRoutes = new Set(groups.flatMap((group) => group.items.map((item) => item.route || item.displayName || '')));
-    const remainingItems = items.filter(
-      (item) => !item.navCap && !usedRoutes.has(item.route || item.displayName || '')
+    const remainingItems = secondaryItems.filter(
+      (item) => !usedRoutes.has(item.route || item.displayName || '')
     );
 
     if (remainingItems.length) {
@@ -432,6 +577,9 @@ export class FullComponent implements OnInit, OnDestroy {
   }
 
   private resolveCurrentPageTitle(url: string): string {
+    if (url.startsWith('/smartcalc')) return 'SmartCalc';
+    if (url.startsWith('/dashboards/dashboard1/grafico')) return 'Gráfico';
+
     const exactMatch = this.findNavLabel(url, true);
     if (exactMatch) return exactMatch;
 

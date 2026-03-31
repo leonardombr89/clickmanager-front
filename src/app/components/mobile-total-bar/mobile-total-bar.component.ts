@@ -19,6 +19,8 @@ export class MobileTotalBarComponent {
   @Input() actionDisabled = false;
   @Input() expandAriaLabel = 'Ver detalhes do cálculo';
   @Input() actionAriaLabel = 'Executar ação principal';
+  @Input() bottomOffset = '0px';
+  @Input() attachedToBottomNav = false;
 
   @Output() expand = new EventEmitter<void>();
   @Output() action = new EventEmitter<void>();

@@ -10,7 +10,6 @@ import { MatCard } from '@angular/material/card';
 import { InputMultiSelectComponent } from 'src/app/components/inputs/input-multi-select/input-multi-select-component';
 import { InputNumericoComponent } from 'src/app/components/inputs/input-numerico/input-numerico.component';
 import { InputOptionsComponent } from 'src/app/components/inputs/input-options/input-options.component';
-import { MobilePageHeaderComponent } from 'src/app/components/mobile-page-header/mobile-page-header.component';
 import { MobileTotalBarComponent } from 'src/app/components/mobile-total-bar/mobile-total-bar.component';
 
 import { SmartCalcInitDataService } from './smart-calc-init-data.service';
@@ -52,7 +51,6 @@ type Acabamento = { id: number; nome: string };
     InputMultiSelectComponent,
     InputNumericoComponent,
     InputOptionsComponent,
-    MobilePageHeaderComponent,
     MobileTotalBarComponent,
     MatCard,
   ],
@@ -706,6 +704,15 @@ export class SmartCalcComponent implements OnInit, OnDestroy {
   abrirResultadoMobile(): void {
     this.resultadoMobileAberto.set(true);
     document.body.style.overflow = 'hidden';
+  }
+
+  alternarResultadoMobile(): void {
+    if (this.resultadoMobileAberto()) {
+      this.fecharResultadoMobile();
+      return;
+    }
+
+    this.abrirResultadoMobile();
   }
 
   fecharResultadoMobile(): void {
