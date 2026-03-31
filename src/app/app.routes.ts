@@ -67,6 +67,22 @@ export const routes: Routes = [
         data: { perfil: 'GESTOR' },
       },
       {
+        path: 'smartcalc',
+        loadComponent: () =>
+          import('./pages/apps/smart-calc/smart-calc.component').then(
+            (m) => m.SmartCalcComponent
+          ),
+        canActivate: [AuthGuard],
+        data: {
+          perfil: 'GESTOR',
+          title: 'SmartCalc – Calculadora Inteligente',
+          urls: [
+            { title: 'Dashboard', url: '/dashboards/dashboard1' },
+            { title: 'SmartCalc' }
+          ]
+        },
+      },
+      {
         path: 'widgets',
         loadChildren: () =>
           import('./pages/widgets/widgets.routes').then(

@@ -1,20 +1,16 @@
-import { Component, Inject, OnInit, computed, signal } from '@angular/core';
+import { Component, ElementRef, HostListener, OnDestroy, OnInit, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MAT_DIALOG_DATA, MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
+import { MatDialog } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatChipsModule } from '@angular/material/chips';
-import { MatExpansionModule } from '@angular/material/expansion';
-import { MatCardTitle, MatCard } from '@angular/material/card';
+import { MatCard } from '@angular/material/card';
 
 import { InputMultiSelectComponent } from 'src/app/components/inputs/input-multi-select/input-multi-select-component';
 import { InputNumericoComponent } from 'src/app/components/inputs/input-numerico/input-numerico.component';
 import { InputOptionsComponent } from 'src/app/components/inputs/input-options/input-options.component';
+import { MobilePageHeaderComponent } from 'src/app/components/mobile-page-header/mobile-page-header.component';
 
 import { SmartCalcInitDataService } from './smart-calc-init-data.service';
 import { SmartCalcDataService } from './smart-calc-data.service'; // (por enquanto mantém cálculo + pedido aqui)
@@ -26,7 +22,7 @@ import { SmartCalcInitResponse, ProdutoSmartCalcInitResponse, ProdutoVariacaoSma
 import { ProdutoListagem } from 'src/app/models/produto/produto-listagem.model';
 
 import { ToastrService } from 'ngx-toastr';
-import { of, switchMap, map, finalize, Observable } from 'rxjs';
+import { Subject, of, switchMap, map, finalize, Observable, debounceTime, takeUntil } from 'rxjs';
 
 import { PedidoItemRequest } from 'src/app/models/pedido/pedido-item-request.model';
 import { ConfirmDialogComponent } from 'src/app/components/dialog/confirm-dialog/confirm-dialog.component';
@@ -49,25 +45,19 @@ type Acabamento = { id: number; nome: string };
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    MatDialogModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
-    MatChipsModule,
-    MatExpansionModule,
     InputMultiSelectComponent,
     InputNumericoComponent,
     InputOptionsComponent,
-    MatCardTitle,
+    MobilePageHeaderComponent,
     MatCard,
   ],
   templateUrl: './smart-calc.component.html',
   styleUrls: ['./smart-calc.component.scss'],
 })
-export class SmartCalcComponent implements OnInit {
+export class SmartCalcComponent implements OnInit, OnDestroy {
   // =========================
   // INIT (tela)
   // =========================
@@ -95,6 +85,15 @@ export class SmartCalcComponent implements OnInit {
   erroCalculo: string | null = null;
   carregandoAdd = false;
   needsRecalcular = signal(false);
+  animandoResultado = signal(false);
+  mobileViewport = signal(false);
+  resultadoMobileAberto = signal(false);
+  private readonly recalculo$ = new Subject<void>();
+  private readonly destroy$ = new Subject<void>();
+  private calculoRequestId = 0;
+  private focoInicialAplicado = false;
+  private gestoBarraStartY: number | null = null;
+  private gestoSheetStartY: number | null = null;
 
   // =========================
   // FORM
@@ -129,18 +128,19 @@ export class SmartCalcComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private dialogRef: MatDialogRef<SmartCalcComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: any,
     private initSvc: SmartCalcInitDataService, // ✅ NOVO: só init
     private dataSvc: SmartCalcDataService, // ✅ por enquanto mantém cálculo + pedido aqui
     private pedidoService: PedidoService,
     private dialog: MatDialog,
     private toastr: ToastrService,
     private router: Router,
-    private calcCfgSvc: CalculadoraConfigService
+    private calcCfgSvc: CalculadoraConfigService,
+    private host: ElementRef<HTMLElement>
   ) { }
 
   ngOnInit(): void {
+    this.atualizarViewport();
+
     // 1) cria o form
     this.form = this.fb.group({
       largura: this.fb.control<number | null>(null, [Validators.required, Validators.min(1)]),
@@ -152,6 +152,15 @@ export class SmartCalcComponent implements OnInit {
       acabamentosIds: this.fb.nonNullable.control<number[]>([]),
       permiteRotacao: this.fb.nonNullable.control(true),
     });
+
+    this.recalculo$
+      .pipe(
+        debounceTime(300),
+        takeUntil(this.destroy$)
+      )
+      .subscribe(() => this.calcular(true));
+
+    this.agendarFocoInicial();
 
     // 2) listeners
     this.form.controls.produtoId.valueChanges.subscribe((id) => {
@@ -170,8 +179,22 @@ export class SmartCalcComponent implements OnInit {
     });
 
     this.form.valueChanges.subscribe(() => {
-      if (!this.resultado()) return;
+      if (!this.configAtiva || this.carregandoProdutos) {
+        return;
+      }
+
+      this.erroCalculo = null;
+
+      if (!this.temParametrosMinimosParaCalcular()) {
+        this.calculoRequestId++;
+        this.carregandoCalculo = false;
+        this.resultado.set(null);
+        this.needsRecalcular.set(false);
+        return;
+      }
+
       this.needsRecalcular.set(true);
+      this.recalculo$.next();
     });
 
     // 3) carrega configuração (whitelist)
@@ -199,6 +222,18 @@ export class SmartCalcComponent implements OnInit {
         this.carregarInit();
       },
     });
+  }
+
+  ngOnDestroy(): void {
+    document.body.style.overflow = '';
+    this.destroy$.next();
+    this.destroy$.complete();
+    this.recalculo$.complete();
+  }
+
+  @HostListener('window:resize')
+  onWindowResize(): void {
+    this.atualizarViewport();
   }
 
   // ==========================================================
@@ -235,6 +270,8 @@ export class SmartCalcComponent implements OnInit {
           this.form.enable({ emitEvent: false });
         }
 
+        this.agendarFocoInicial();
+
         this.carregandoProdutos = false;
       },
       error: (err) => {
@@ -246,6 +283,8 @@ export class SmartCalcComponent implements OnInit {
   }
 
   private resetProdutoDependencias(): void {
+    this.calculoRequestId++;
+    this.carregandoCalculo = false;
     this.produtoInitSelecionado = null;
     this.resultado.set(null);
     this.needsRecalcular.set(false);
@@ -340,12 +379,11 @@ export class SmartCalcComponent implements OnInit {
   // ==========================================================
   // CORE: cálculo (por enquanto fica no dataSvc antigo)
   // ==========================================================
-  calcular(): void {
+  calcular(automatico = false): void {
     if (!this.configAtiva) {
-      this.toastr.warning('O SmartCalc está desabilitado nas configurações.', 'SmartCalc');
       return;
     }
-    if (this.form.invalid) return;
+    if (!this.temParametrosMinimosParaCalcular()) return;
 
     const v = this.form.getRawValue();
     if (v.largura == null || v.altura == null || v.quantidade == null || v.produtoId == null) return;
@@ -362,16 +400,22 @@ export class SmartCalcComponent implements OnInit {
 
     this.carregandoCalculo = true;
     this.erroCalculo = null;
+    const requestId = ++this.calculoRequestId;
 
     this.dataSvc.calcularSmartCalc(payload).subscribe({
       next: (res) => {
+        if (requestId !== this.calculoRequestId) return;
         this.resultado.set(res ?? { itens: [], total: 0, observacao: undefined });
         this.needsRecalcular.set(false);
         this.carregandoCalculo = false;
+        this.dispararAnimacaoResultado();
       },
       error: (err) => {
+        if (requestId !== this.calculoRequestId) return;
         const msg = extrairMensagemErro(err, 'Não foi possível calcular. Tente novamente.');
-        this.toastr.error(msg, 'SmartCalc', { timeOut: 6000, closeButton: true, progressBar: true });
+        if (!automatico) {
+          this.toastr.error(msg, 'SmartCalc', { timeOut: 6000, closeButton: true, progressBar: true });
+        }
         this.resultado.set(null);
         this.erroCalculo = msg;
         this.needsRecalcular.set(false);
@@ -535,7 +579,6 @@ export class SmartCalcComponent implements OnInit {
             .subscribe({
               next: (p) => {
                 if (!p) return;
-                this.dialog.closeAll();
                 this.router.navigate(['/page/pedido/detalhe', p.id]);
               },
               error: (err) =>
@@ -559,6 +602,10 @@ export class SmartCalcComponent implements OnInit {
   }
 
   limpar(): void {
+  this.calculoRequestId++;
+  this.carregandoCalculo = false;
+  this.focoInicialAplicado = false;
+  this.resultadoMobileAberto.set(false);
   this.form.reset({
     largura: null,
     altura: null,
@@ -578,7 +625,7 @@ export class SmartCalcComponent implements OnInit {
   }
 
   fechar(): void {
-    this.dialogRef.close(null);
+    this.router.navigate(['/dashboards/dashboard1']);
   }
 
   getMaterialDescricao(id: number): string {
@@ -622,7 +669,100 @@ export class SmartCalcComponent implements OnInit {
     }
   }
 
-  podeCalcular(): boolean {
-    return this.configAtiva && this.form.valid && !this.carregandoCalculo && !this.carregandoProdutos;
+  private temParametrosMinimosParaCalcular(): boolean {
+    return this.configAtiva && this.form.valid && !this.carregandoProdutos;
+  }
+
+  private dispararAnimacaoResultado(): void {
+    this.animandoResultado.set(true);
+    setTimeout(() => this.animandoResultado.set(false), 260);
+  }
+
+  private agendarFocoInicial(): void {
+    if (this.focoInicialAplicado) return;
+
+    setTimeout(() => {
+      const trigger = this.obterTriggerSelect('.smartcalc-page app-input-options');
+
+      if (!trigger) return;
+      trigger.focus();
+      this.focoInicialAplicado = true;
+    }, 0);
+  }
+
+  focarMaterialSelector(): void {
+    const trigger = this.obterTriggerSelect('.smartcalc-page app-input-options:nth-of-type(2)');
+    trigger?.focus();
+    trigger?.click();
+  }
+
+  private obterTriggerSelect(seletorBase: string): HTMLElement | null {
+    return this.host.nativeElement.querySelector(
+      `${seletorBase} .mat-mdc-select-trigger`
+    ) as HTMLElement | null;
+  }
+
+  abrirResultadoMobile(): void {
+    this.resultadoMobileAberto.set(true);
+    document.body.style.overflow = 'hidden';
+  }
+
+  fecharResultadoMobile(): void {
+    this.resultadoMobileAberto.set(false);
+    document.body.style.overflow = '';
+  }
+
+  iniciarGestoBarra(event: TouchEvent): void {
+    this.gestoBarraStartY = event.changedTouches[0]?.clientY ?? null;
+  }
+
+  finalizarGestoBarra(event: TouchEvent): void {
+    if (this.gestoBarraStartY == null) {
+      return;
+    }
+
+    const endY = event.changedTouches[0]?.clientY ?? this.gestoBarraStartY;
+    const deltaY = this.gestoBarraStartY - endY;
+    this.gestoBarraStartY = null;
+
+    if (deltaY > 24) {
+      this.abrirResultadoMobile();
+    }
+  }
+
+  iniciarGestoSheet(event: TouchEvent): void {
+    this.gestoSheetStartY = event.changedTouches[0]?.clientY ?? null;
+  }
+
+  finalizarGestoSheet(event: TouchEvent): void {
+    if (this.gestoSheetStartY == null) {
+      return;
+    }
+
+    const endY = event.changedTouches[0]?.clientY ?? this.gestoSheetStartY;
+    const deltaY = endY - this.gestoSheetStartY;
+    this.gestoSheetStartY = null;
+
+    if (deltaY > 24) {
+      this.fecharResultadoMobile();
+    }
+  }
+
+  multiSelectCardMinHeight(): number {
+    return this.mobileViewport() ? 168 : 220;
+  }
+
+  multiSelectListHeight(): number {
+    return this.mobileViewport() ? 124 : 220;
+  }
+
+  private atualizarViewport(): void {
+    const mobile = typeof window !== 'undefined' ? window.innerWidth <= 900 : false;
+    this.mobileViewport.set(mobile);
+
+    if (!mobile) {
+      this.resultadoMobileAberto.set(false);
+      document.body.style.overflow = '';
+    }
   }
 }

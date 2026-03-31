@@ -29,9 +29,8 @@ export const AppsRoutes: Routes = [
     children: [
       {
         path: 'smart-calc',
-        loadComponent: () =>
-          import('./smart-calc/smart-calc.component')
-            .then(m => m.SmartCalcComponent),
+        redirectTo: '/smartcalc',
+        pathMatch: 'full',
         data: {
           title: 'SmartCalc – Calculadora Inteligente',
           urls: [

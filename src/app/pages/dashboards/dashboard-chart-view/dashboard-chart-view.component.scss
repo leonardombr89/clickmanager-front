@@ -36,18 +36,6 @@
   border-radius: 999px;
 }
 
-.dashboard-chart-view__icon-back {
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
-}
-
-.dashboard-chart-view__icon-rotate {
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
-}
-
 .dashboard-chart-view__hero-copy {
   min-width: 0;
 }
@@ -58,29 +46,6 @@
   font-size: 1.2rem;
   font-weight: 800;
   line-height: 1.15;
-}
-
-.dashboard-chart-view__mobile-title {
-  margin: 0;
-  min-width: 0;
-  font-size: 1rem;
-  line-height: 1.2;
-  font-weight: 700;
-  color: #0f172a;
-  text-align: center;
-}
-
-.dashboard-chart-view__mobile-badge {
-  justify-self: end;
-  display: inline-flex;
-  align-items: center;
-  min-height: 28px;
-  padding: 0 10px;
-  border-radius: 999px;
-  background: #eff6ff;
-  color: #2563eb;
-  font-size: 0.74rem;
-  font-weight: 700;
 }
 
 .dashboard-chart-view__rotate-btn {
@@ -262,10 +227,7 @@
   }
 
   .dashboard-chart-view__mobile-top {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr) auto;
-    align-items: center;
-    gap: 8px;
+    display: block;
     width: 100%;
   }
 

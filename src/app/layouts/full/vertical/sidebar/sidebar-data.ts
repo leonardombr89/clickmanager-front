@@ -11,6 +11,12 @@ export const navItems: NavItem[] = [
         route: '/dashboards/dashboard1',
     },
     {
+        displayName: 'SmartCalc',
+        iconName: 'calculator',
+        bgcolor: 'primary',
+        route: '/smartcalc',
+    },
+    {
         displayName: 'Gerenciar Pedidos',
         iconName: 'file-text',
         bgcolor: 'primary',

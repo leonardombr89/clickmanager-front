@@ -1,23 +1,14 @@
 <section class="dashboard-chart-view" [class.dashboard-chart-view--landscape]="comparativoPaisagemAtivo">
   <header class="dashboard-chart-view__header">
-    <div class="dashboard-chart-view__mobile-top">
-      <button mat-icon-button type="button" class="dashboard-chart-view__icon-back" (click)="voltar()" aria-label="Voltar">
-        <mat-icon>arrow_back</mat-icon>
-      </button>
-      <h1 class="dashboard-chart-view__mobile-title">{{ pageTitle }}</h1>
-      @if (canRotateComparativo) {
-      <button
-        mat-icon-button
-        type="button"
-        class="dashboard-chart-view__icon-rotate"
-        (click)="alternarRotacaoComparativo()"
-        [attr.aria-label]="comparativoPaisagemAtivo ? 'Fechar modo horizontal' : 'Abrir modo horizontal'">
-        <mat-icon>{{ comparativoPaisagemAtivo ? 'screen_rotation_alt' : 'screen_rotation' }}</mat-icon>
-      </button>
-      } @else {
-      <span class="dashboard-chart-view__mobile-badge">{{ mode === 'receita' ? 'Receita' : 'Tendência' }}</span>
-      }
-    </div>
+    <app-mobile-page-header
+      class="dashboard-chart-view__mobile-top"
+      [title]="pageTitle"
+      [badgeText]="mode === 'receita' ? 'Receita' : 'Tendência'"
+      [actionIcon]="canRotateComparativo ? (comparativoPaisagemAtivo ? 'screen_rotation_alt' : 'screen_rotation') : ''"
+      [actionAriaLabel]="comparativoPaisagemAtivo ? 'Fechar modo horizontal' : 'Abrir modo horizontal'"
+      (back)="voltar()"
+      (action)="alternarRotacaoComparativo()">
+    </app-mobile-page-header>
 
     <div class="dashboard-chart-view__desktop-top">
       <button mat-stroked-button type="button" class="dashboard-chart-view__back" (click)="voltar()">

@@ -127,7 +127,7 @@ export class FullComponent implements OnInit, OnDestroy {
       img: 'assets/images/svgs/icon-connect.svg',
       title: 'SmartCalc',
       subtitle: 'Calculadora Inteligente',
-      link: '/apps/smart-calc',
+      link: '/smartcalc',
     },
   ];
 

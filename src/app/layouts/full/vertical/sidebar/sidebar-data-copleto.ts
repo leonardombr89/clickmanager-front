@@ -41,7 +41,13 @@ export const navItems: NavItem[] = [
         bgcolor: 'primary',
         route: '/page/calculadora/config/criar',
         requiredPermission: ['CONFIG_CALCULADORAS']
-    },    
+    },
+    {
+        displayName: 'SmartCalc',
+        iconName: 'calculator',
+        bgcolor: 'primary',
+        route: '/smartcalc',
+    },
     {
         navCap: 'Gerenciar Usuários',
         requiredPermission: ['USUARIOS_VER', 'USUARIO_CADASTRAR', 'USUARIO_EDITAR', 'USUARIO_EXCLUIR']

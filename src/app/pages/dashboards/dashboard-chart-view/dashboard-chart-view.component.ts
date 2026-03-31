@@ -18,6 +18,7 @@ import {
 } from 'ng-apexcharts';
 
 import { MaterialModule } from 'src/app/material.module';
+import { MobilePageHeaderComponent } from 'src/app/components/mobile-page-header/mobile-page-header.component';
 import {
   DashboardComparativoResponse,
   DashboardService,
@@ -55,7 +56,7 @@ type LineChart = {
 @Component({
   selector: 'app-dashboard-chart-view',
   standalone: true,
-  imports: [CommonModule, MaterialModule, NgApexchartsModule],
+  imports: [CommonModule, MaterialModule, NgApexchartsModule, MobilePageHeaderComponent],
   templateUrl: './dashboard-chart-view.component.html',
   styleUrls: ['./dashboard-chart-view.component.scss'],
 })
