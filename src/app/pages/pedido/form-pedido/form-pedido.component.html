@@ -421,7 +421,7 @@
     @if (mobileResumoAberto()) {
     <app-mobile-summary-sheet
       [open]="mobileResumoAberto()"
-      bottomOffset="calc(114px + env(safe-area-inset-bottom))"
+      bottomOffset="58px"
       closeAriaLabel="Fechar resumo"
       (close)="fecharResumoMobile()">
       <div class="pedido-mobile-summary-content">
@@ -472,6 +472,7 @@
     </app-mobile-summary-sheet>
     }
 
+    @if (!mobileResumoAberto()) {
     <app-mobile-total-bar
       label="Total"
       [valueText]="(grandTotal | currency:'BRL':'symbol':'1.2-2') || 'R$ 0,00'"
@@ -486,6 +487,7 @@
       (expand)="toggleResumoMobile()"
       (action)="salvarPedidoMobile()">
     </app-mobile-total-bar>
+    }
   </section>
 </form>
 }
