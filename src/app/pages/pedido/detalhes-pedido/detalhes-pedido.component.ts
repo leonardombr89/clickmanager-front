@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, HostListener, OnInit, inject, signal } from '@angular/core';
 import { HttpClientModule } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -19,6 +19,7 @@ import { ToastrService } from 'ngx-toastr';
 import { PagamentoRequest } from 'src/app/models/pagamento/pagamento-request.model';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogAdicionarProdutoComponent } from '../dialog-adicionar-produto/dialog-adicionar-produto.component';
+import { DialogAdicionarProdutoMobileComponent } from '../dialog-adicionar-produto/dialog-adicionar-produto-mobile.component';
 import { PedidoItemRequest } from 'src/app/models/pedido/pedido-item-request.model';
 import { ItemTipo } from 'src/app/models/pedido/item-tipo.enum';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -43,6 +44,17 @@ import { PedidoFlowConfigService } from 'src/app/core/flow/pedido-flow-config.se
 import { PedidoFlowGuardService } from 'src/app/core/flow/pedido-flow-guard.service';
 import { FlowConfig, FlowPermissoes } from 'src/app/core/flow/pedido-flow.types';
 import { mapPedidoToFlowContext } from 'src/app/core/flow/pedido-flow.context';
+import { StatusBadgeComponent } from 'src/app/components/status-badge/status-badge.component';
+import { animate, style, transition, trigger } from '@angular/animations';
+import { MobileTotalBarComponent } from 'src/app/components/mobile-total-bar/mobile-total-bar.component';
+import { MobileSummarySheetComponent } from 'src/app/components/mobile-summary-sheet/mobile-summary-sheet.component';
+import {
+    buildPedidoWhatsAppPreviewMessage,
+    buildPedidoWhatsAppSendMessage,
+    toE164BR
+} from '../pedido-whatsapp.utils';
+
+const MOBILE_FLOW_STEPS = ['RASCUNHO', 'AGUARDANDO_PAGAMENTO', 'PENDENTE', 'EM_PRODUCAO', 'PRONTO', 'ENTREGUE'] as const;
 
 @Component({
     selector: 'app-detalhes-pedido',
@@ -75,12 +87,35 @@ import { mapPedidoToFlowContext } from 'src/app/core/flow/pedido-flow.context';
         ItensPedidoSectionComponent,
         ObservacoesCardComponent,
         PagamentosSectionComponent,
-        ConfirmDialogComponent
+        ConfirmDialogComponent,
+        StatusBadgeComponent,
+        MobileTotalBarComponent,
+        MobileSummarySheetComponent
     ],
     templateUrl: './detalhes-pedido.component.html',
-    styleUrls: ['./detalhes-pedido.component.scss']
+    styleUrls: ['./detalhes-pedido.component.scss'],
+    animations: [
+        trigger('expandCollapse', [
+            transition(':enter', [
+                style({ height: 0, opacity: 0, overflow: 'hidden' }),
+                animate('220ms ease-out', style({ height: '*', opacity: 1, overflow: 'hidden' }))
+            ]),
+            transition(':leave', [
+                style({ height: '*', opacity: 1, overflow: 'hidden' }),
+                animate('180ms ease-in', style({ height: 0, opacity: 0, overflow: 'hidden' }))
+            ])
+        ])
+    ]
 })
 export class DetalhesPedidoComponent implements OnInit {
+    readonly isMobileView = signal(false);
+    readonly mobileFinanceiroAberto = signal(false);
+    readonly mobileClienteAberto = signal(false);
+    readonly mobilePagamentosAberto = signal(false);
+    readonly mobileObservacoesAberto = signal(false);
+    readonly mobileResumoAberto = signal(false);
+    readonly mobileWhatsAppAberto = signal(false);
+    readonly mobileFlowSteps = MOBILE_FLOW_STEPS;
 
     form!: FormGroup;
 
@@ -120,6 +155,7 @@ export class DetalhesPedidoComponent implements OnInit {
     formasPagamento = Object.values(FormaPagamento);
 
     obsSub?: Subscription;
+    pagamentoFormaSub?: Subscription;
 
     displayedColumnsItens = ['descricao', 'quantidade', 'valor', 'subTotal'];
     displayedColumnsPagamentos = ['forma', 'valor', 'confirmado', 'data'];
@@ -131,7 +167,9 @@ export class DetalhesPedidoComponent implements OnInit {
     ) { }
 
     ngOnInit(): void {
+        this.atualizarViewport();
         this.form = this.criarFormulario();
+        this.bindAutoValorPagamento();
 
         this.flowConfigService.getConfig().subscribe(cfg => {
             this.flowConfig = cfg;
@@ -168,8 +206,14 @@ export class DetalhesPedidoComponent implements OnInit {
         });
     }
 
+    @HostListener('window:resize')
+    onWindowResize(): void {
+        this.atualizarViewport();
+    }
+
     ngOnDestroy(): void {
         this.obsSub?.unsubscribe();
+        this.pagamentoFormaSub?.unsubscribe();
     }
 
 
@@ -211,6 +255,7 @@ export class DetalhesPedidoComponent implements OnInit {
             next: () => {
                 this.toastr.success('Cliente atualizado no pedido.');
                 this.trocandoCliente = false;
+                this.mobileClienteAberto.set(false);
                 this.pedidoService.buscarPorId(id).subscribe(p => this.sincronizarPedido(p));
             },
             error: (err) => {
@@ -285,6 +330,7 @@ export class DetalhesPedidoComponent implements OnInit {
 
     trocarCliente(): void {
         this.trocandoCliente = true;
+        this.mobileClienteAberto.set(true);
         const atual = this.pedido?.cliente ?? null;
         // se quiser, pode popular o autocomplete com o atual:
         this.clienteControl.setValue(atual);
@@ -337,6 +383,11 @@ export class DetalhesPedidoComponent implements OnInit {
         if (!this.pedido?.id) return;
         if (!this.pedido?.cliente) {
             this.toastr.info('Defina um cliente antes de imprimir.');
+            return;
+        }
+        if (this.isMobileView()) {
+            this.router.navigate([`/pedido/imprimir-etiquetas/${this.pedido.id}`]);
+            return;
         }
         window.open(`/pedido/imprimir-etiquetas/${this.pedido.id}`, '_blank');
     }
@@ -345,6 +396,11 @@ export class DetalhesPedidoComponent implements OnInit {
         if (!this.pedido?.id) return;
         if (!this.pedido?.cliente) {
             this.toastr.info('Defina um cliente antes de imprimir.');
+            return;
+        }
+        if (this.isMobileView()) {
+            this.router.navigate([`/pedido/imprimir/${this.pedido.id}`]);
+            return;
         }
         window.open(`/pedido/imprimir/${this.pedido.id}`, '_blank');
     }
@@ -353,6 +409,11 @@ export class DetalhesPedidoComponent implements OnInit {
         if (!this.pedido?.id) return;
         if (!this.pedido?.cliente) {
             this.toastr.info('Defina um cliente antes de imprimir.');
+            return;
+        }
+        if (this.isMobileView()) {
+            this.router.navigate([`/pedido/imprimir-duas-vias/${this.pedido.id}`]);
+            return;
         }
         window.open(`/pedido/imprimir-duas-vias/${this.pedido.id}`, '_blank');
     }
@@ -361,8 +422,50 @@ export class DetalhesPedidoComponent implements OnInit {
         if (!this.pedido?.id) return;
         if (!this.pedido?.cliente) {
             this.toastr.info('Defina um cliente antes de gerar mensagem.');
+            return;
         }
+
+        if (this.isMobileView()) {
+            this.mobileWhatsAppAberto.set(true);
+            return;
+        }
+
         window.open(`/pedido/whatsapp/${this.pedido.id}`, '_blank');
+    }
+
+    fecharMobileWhatsApp(): void {
+        this.mobileWhatsAppAberto.set(false);
+    }
+
+    copiarMensagemWhatsAppMobile(): void {
+        const mensagem = this.mobileWhatsAppPreview;
+        if (!mensagem) {
+            return;
+        }
+
+        navigator.clipboard.writeText(mensagem)
+            .then(() => this.toastr.success('Mensagem copiada.'))
+            .catch(() => this.toastr.error('Não foi possível copiar a mensagem.'));
+    }
+
+    enviarWhatsAppMobile(): void {
+        if (!this.pedido?.cliente?.telefone) {
+            this.toastr.error('Telefone do cliente não encontrado.');
+            return;
+        }
+
+        const phone = toE164BR(this.pedido.cliente.telefone);
+        if (!phone) {
+            this.toastr.error('Telefone do cliente não encontrado ou inválido.');
+            return;
+        }
+
+        const encodedMessage = encodeURIComponent(this.mobileWhatsAppSendMessage);
+        const appUrl = `whatsapp://send?phone=${phone}&text=${encodedMessage}`;
+        const webUrl = `https://wa.me/${phone}?text=${encodedMessage}`;
+
+        this.mobileWhatsAppAberto.set(false);
+        this.abrirWhatsAppComFallback(appUrl, webUrl);
     }
 
 
@@ -411,9 +514,18 @@ export class DetalhesPedidoComponent implements OnInit {
         const id = this.pedido?.id;
         if (!id) return;
 
-        const dialogRef = this.dialog.open(DialogAdicionarProdutoComponent, {
-            panelClass: 'dialog-grande'
-        });
+        const isMobile = globalThis?.matchMedia?.('(max-width: 900px)')?.matches ?? false;
+        const dialogRef = isMobile
+            ? this.dialog.open(DialogAdicionarProdutoMobileComponent, {
+                width: '100vw',
+                maxWidth: '100vw',
+                height: '100dvh',
+                maxHeight: '100dvh',
+                panelClass: 'dialog-mobile-fullscreen',
+            })
+            : this.dialog.open(DialogAdicionarProdutoComponent, {
+                panelClass: 'dialog-grande'
+            });
 
         dialogRef.afterClosed().subscribe(result => {
             if (result && Array.isArray(result)) {
@@ -643,8 +755,226 @@ export class DetalhesPedidoComponent implements OnInit {
         return this.form.get('pagamento') as FormGroup;
     }
 
+    get pedidoNumeroExibicao(): string {
+        if (!this.pedido) return '—';
+        return (this.pedido.status === 'ORCAMENTO' ? this.pedido.numeroOrcamento : this.pedido.numero) || '—';
+    }
+
+    get isOrcamentoAtual(): boolean {
+        return (this.pedido?.status || '').toUpperCase() === 'ORCAMENTO';
+    }
+
+    get mobilePrimaryActionLabel(): string {
+        return this.mobilePrimaryAction()?.label || 'Sem ação disponível';
+    }
+
+    get mobilePrimaryActionDisabled(): boolean {
+        const action = this.mobilePrimaryAction();
+        return !action || !!action.disabled;
+    }
+
+    get mobilePodeCancelarPedido(): boolean {
+        if (this.inativoStatus || this.carregandoStatus) {
+            return false;
+        }
+
+        return this.statusOptions.includes('CANCELADO');
+    }
+
+    get mobileResumoBarraTexto(): string {
+        const restante = this.restaPagar || 0;
+        return `Restante ${this.formatCurrency(restante)}`;
+    }
+
+    get mobileWhatsAppPreview(): string {
+        if (!this.pedido) {
+            return '';
+        }
+
+        return buildPedidoWhatsAppPreviewMessage(this.pedido);
+    }
+
+    get mobileWhatsAppSendMessage(): string {
+        if (!this.pedido) {
+            return '';
+        }
+
+        return buildPedidoWhatsAppSendMessage(this.pedido);
+    }
+
+    get mobileAtualizadoTexto(): string {
+        const datas = [
+            this.pedido?.dataCriacao,
+            ...(this.pedido?.pagamentos?.map(pagamento => pagamento.data) ?? [])
+        ].filter(Boolean) as string[];
+
+        if (!datas.length) {
+            return '';
+        }
+
+        const ultimaData = datas
+            .map(data => new Date(data))
+            .sort((a, b) => b.getTime() - a.getTime())[0];
+
+        const agora = new Date();
+        const diffMs = agora.getTime() - ultimaData.getTime();
+        const diffMin = Math.max(0, Math.floor(diffMs / 60000));
+        const diffDias = Math.floor(diffMs / 86400000);
+
+        if (diffMin < 1) return 'Atualizado agora';
+        if (diffMin < 60) return `Atualizado há ${diffMin} min`;
+        if (diffDias === 0) return 'Atualizado hoje';
+        if (diffDias === 1) return 'Atualizado ontem';
+        return `Atualizado há ${diffDias} dias`;
+    }
+
+    get mobileFlowStatusTexto(): string {
+        return this.statusLabel(this.pedido?.status || '');
+    }
+
+    get mobileFlowHelperTexto(): string {
+        if (this.flowHints.length) {
+            return this.flowHints[0];
+        }
+
+        const statusKey = (this.pedido?.status || '').toUpperCase();
+
+        if (this.isOrcamentoAtual) {
+            return this.orcamentoVencido
+                ? 'Orçamento vencido. Gere um novo para seguir.'
+                : 'Orçamento: aguardando aprovação do cliente.';
+        }
+
+        if (this.mobilePrimaryActionDisabled) {
+            return 'Sem ação disponível no momento';
+        }
+
+        switch (statusKey) {
+            case 'RASCUNHO':
+                return 'Rascunho: revise itens e cliente antes de confirmar.';
+            case 'PENDENTE':
+                return 'Pedido confirmado. Envie para produção.';
+            case 'AGUARDANDO_PAGAMENTO':
+                return 'Aguardando pagamento do cliente. Confirme o pedido quando estiver ok.';
+            case 'EM_PRODUCAO':
+                return 'Em produção. Ao finalizar, marque como pronto.';
+            case 'PRONTO':
+                return 'Pronto para retirada/entrega.';
+            case 'ENTREGUE':
+                return 'Pedido entregue. Somente leitura.';
+            case 'CANCELADO':
+                return 'Pedido cancelado. Somente leitura.';
+            default:
+                return 'Gerencie o próximo passo do pedido.';
+        }
+    }
+
+    get mobileClienteLinhas(): string[] {
+        if (!this.pedido?.cliente) return [];
+
+        return [
+            this.pedido.cliente.telefone || '',
+            this.pedido.cliente.email || ''
+        ].filter(Boolean);
+    }
+
+    get mobileClienteDetalhes(): string[] {
+        if (!this.pedido?.cliente?.endereco) return [];
+
+        const endereco = this.pedido.cliente.endereco;
+        return [
+            endereco.logradouro ? `${endereco.logradouro}${endereco.numero ? `, ${endereco.numero}` : ''}` : '',
+            endereco.bairro || '',
+            [endereco.cidade, endereco.estado].filter(Boolean).join(' / '),
+            endereco.cep ? `CEP ${endereco.cep}` : '',
+            endereco.complemento || ''
+        ].filter(Boolean);
+    }
+
+    formatarResumoPedidoMobile(data?: string | null): string {
+        if (!data) return '';
+
+        const date = new Date(data);
+        return new Intl.DateTimeFormat('pt-BR', {
+            day: '2-digit',
+            month: '2-digit'
+        }).format(date);
+    }
+
+    statusLabel(status: string): string {
+        if (!status) return '—';
+        return status
+            .replace(/_/g, ' ')
+            .toLowerCase()
+            .replace(/\b\w/g, char => char.toUpperCase());
+    }
+
+    flowStepState(step: typeof MOBILE_FLOW_STEPS[number]): 'active' | 'done' | 'pending' {
+        const currentIndex = this.flowCurrentIndex();
+        const stepIndex = this.mobileFlowSteps.indexOf(step);
+
+        if (currentIndex === stepIndex) return 'active';
+        if (currentIndex > stepIndex) return 'done';
+        return 'pending';
+    }
+
+    toggleMobileFinanceiro(): void {
+        this.mobileFinanceiroAberto.set(!this.mobileFinanceiroAberto());
+    }
+
+    toggleMobileCliente(): void {
+        this.mobileClienteAberto.set(!this.mobileClienteAberto());
+    }
+
+    toggleMobilePagamentos(): void {
+        const aberto = !this.mobilePagamentosAberto();
+        this.mobilePagamentosAberto.set(aberto);
+        this.expandirPagamentos = aberto;
+    }
+
+    toggleMobileObservacoes(): void {
+        this.mobileObservacoesAberto.set(!this.mobileObservacoesAberto());
+    }
+
+    toggleMobileResumo(): void {
+        this.mobileResumoAberto.set(!this.mobileResumoAberto());
+    }
+
+    fecharMobileResumo(): void {
+        this.mobileResumoAberto.set(false);
+    }
+
+    executarAcaoPrincipalMobile(): void {
+        const action = this.mobilePrimaryAction();
+        if (!action || action.disabled) return;
+
+        switch (action.type) {
+            case 'aprovarOrcamento':
+                this.confirmarAprovarOrcamento();
+                break;
+            case 'confirmarPedido':
+                this.confirmarPedido();
+                break;
+            case 'iniciarProducao':
+                this.mudarStatusDireto('EM_PRODUCAO');
+                break;
+            case 'marcarPronto':
+                this.mudarStatusDireto('PRONTO');
+                break;
+            case 'marcarEntregue':
+                this.mudarStatusDireto('ENTREGUE');
+                break;
+            case 'mudarStatus':
+                if (action.target) {
+                    this.onSolicitarMudancaStatus(action.target);
+                }
+                break;
+        }
+    }
+
     scrollParaPagamentosEExpandir(): void {
         this.expandirPagamentos = true;
+        this.mobilePagamentosAberto.set(true);
         setTimeout(() => {
             const el = document.getElementById('pagamentos-section');
             if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -818,6 +1148,46 @@ export class DetalhesPedidoComponent implements OnInit {
         }).add(() => this.adicionandoItens = false);
     }
 
+    alterarQuantidadeItemDetalhe(index: number, valor: any): void {
+        const status = (this.pedido?.status || '').toUpperCase();
+        if (status !== 'RASCUNHO') return;
+
+        const id = this.pedido?.id;
+        if (!id || !this.pedido?.itens?.length) return;
+
+        const qtd = Math.max(1, Number(valor) || 1);
+        const itensAtualizados = [...this.pedido.itens];
+        const itemAtual = itensAtualizados[index];
+        if (!itemAtual) return;
+
+        itensAtualizados[index] = {
+            ...itemAtual,
+            quantidade: qtd,
+            subTotal: Number(itemAtual.valor || 0) * qtd
+        };
+
+        const payload: any = {
+            clienteId: this.pedido.cliente?.id ?? null,
+            responsavelId: this.pedido.responsavel?.id ?? null,
+            itens: itensAtualizados,
+            acrescimo: this.pedido.acrescimo ?? 0,
+            frete: this.pedido.frete ?? 0,
+            desconto: this.pedido.desconto ?? 0,
+            observacoes: this.pedido.observacoes ?? ''
+        };
+
+        this.adicionandoItens = true;
+        this.pedidoService.atualizar(id, payload).subscribe({
+            next: () => {
+                this.toastr.success('Quantidade atualizada.');
+                this.pedidoService.buscarPorId(id).subscribe(p => this.sincronizarPedido(p));
+            },
+            error: () => {
+                this.toastr.error('Não foi possível atualizar a quantidade.');
+            }
+        }).add(() => this.adicionandoItens = false);
+    }
+
     private persistirStatus(id: number, novoStatus: string) {
         if (!this.flowConfig) {
             this.toastr.warning('Configuração de fluxo não carregada. Tente novamente.');
@@ -919,5 +1289,131 @@ export class DetalhesPedidoComponent implements OnInit {
         ).subscribe();
 
         this.atualizarPermissoesETransicoes();
+    }
+
+    private atualizarViewport(): void {
+        this.isMobileView.set(typeof window !== 'undefined' ? window.innerWidth <= 768 : false);
+    }
+
+    private bindAutoValorPagamento(): void {
+        this.pagamentoFormaSub?.unsubscribe();
+        this.pagamentoFormaSub = this.pagamentoFormaControl.valueChanges.subscribe((novaForma) => {
+            this.applyValorRestanteAoSelecionarForma(novaForma);
+        });
+    }
+
+    private applyValorRestanteAoSelecionarForma(novaForma: any): void {
+        if (!novaForma || this.inativoPagamentos) {
+            return;
+        }
+
+        const jaTemPagamentos = (this.pedido?.pagamentos?.length || 0) > 0;
+        if (!jaTemPagamentos) {
+            return;
+        }
+
+        if (this.restaPagar > 0 && this.pagamentoValorControl.value !== this.restaPagar) {
+            this.pagamentoValorControl.setValue(this.restaPagar, { emitEvent: true });
+        }
+    }
+
+    private mobilePrimaryTransition(): { status: string; label: string; bloqueado: boolean; motivo?: string } | null {
+        return this.transicoesUI[0] || null;
+    }
+
+    private mobilePrimaryAction():
+        | { label: string; type: 'aprovarOrcamento' | 'confirmarPedido' | 'iniciarProducao' | 'marcarPronto' | 'marcarEntregue' | 'mudarStatus'; target?: string; disabled?: boolean }
+        | null {
+        const statusKey = (this.pedido?.status || '').toUpperCase();
+        const readonly = this.inativoStatus || this.carregandoStatus;
+        const proximaTransicao = this.mobilePrimaryTransition();
+        let nextAction:
+            | { label: string; type: 'aprovarOrcamento' | 'confirmarPedido' | 'iniciarProducao' | 'marcarPronto' | 'marcarEntregue' | 'mudarStatus'; target?: string; disabled?: boolean }
+            | null = null;
+
+        if (this.isOrcamentoAtual) {
+            nextAction = {
+                label: 'Aprovar orçamento',
+                type: 'aprovarOrcamento',
+                disabled: this.orcamentoVencido
+            };
+        } else {
+            switch (statusKey) {
+                case 'RASCUNHO':
+                    nextAction = { label: 'Confirmar pedido', type: 'confirmarPedido' };
+                    break;
+                case 'PENDENTE':
+                    nextAction = { label: 'Iniciar produção', type: 'iniciarProducao' };
+                    break;
+                case 'AGUARDANDO_PAGAMENTO':
+                    nextAction = { label: 'Confirmar pedido', type: 'confirmarPedido' };
+                    break;
+                case 'EM_PRODUCAO':
+                    nextAction = { label: 'Marcar como pronto', type: 'marcarPronto' };
+                    break;
+                case 'PRONTO':
+                    nextAction = { label: 'Marcar como entregue', type: 'marcarEntregue' };
+                    break;
+                case 'ENTREGUE':
+                case 'CANCELADO':
+                    nextAction = null;
+                    break;
+            }
+        }
+
+        if (!readonly && proximaTransicao) {
+            nextAction = {
+                label: proximaTransicao.label || this.statusLabel(proximaTransicao.status),
+                type: 'mudarStatus',
+                target: proximaTransicao.status
+            };
+        }
+
+        if (readonly) {
+            return nextAction ? { ...nextAction, disabled: true } : null;
+        }
+
+        return nextAction;
+    }
+
+    private flowCurrentIndex(): number {
+        const status = (this.pedido?.status || '').toUpperCase();
+
+        if (status === 'ORCAMENTO' || status === 'AGUARDANDO_PAGAMENTO') {
+            return 1;
+        }
+
+        const index = this.mobileFlowSteps.indexOf(status as typeof MOBILE_FLOW_STEPS[number]);
+        return index >= 0 ? index : 0;
+    }
+
+    private formatCurrency(value: number): string {
+        return new Intl.NumberFormat('pt-BR', {
+            style: 'currency',
+            currency: 'BRL',
+            minimumFractionDigits: 2
+        }).format(value || 0);
+    }
+
+    private abrirWhatsAppComFallback(appUrl: string, webUrl: string): void {
+        let abriuApp = false;
+
+        const onVisibilityChange = () => {
+            if (document.visibilityState === 'hidden') {
+                abriuApp = true;
+                clearTimeout(fallbackTimer);
+                document.removeEventListener('visibilitychange', onVisibilityChange);
+            }
+        };
+
+        const fallbackTimer = window.setTimeout(() => {
+            document.removeEventListener('visibilitychange', onVisibilityChange);
+            if (!abriuApp) {
+                window.open(webUrl, '_blank');
+            }
+        }, 900);
+
+        document.addEventListener('visibilitychange', onVisibilityChange);
+        window.location.href = appUrl;
     }
 }

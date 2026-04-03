@@ -1,0 +1,51 @@
+:host {
+  display: contents;
+}
+
+@media (max-width: 900px) {
+  .mobile-summary-sheet__backdrop {
+    position: fixed;
+    inset: 0;
+    border: 0;
+    background: rgba(15, 23, 42, 0.24);
+    will-change: opacity;
+  }
+
+  .mobile-summary-sheet {
+    position: fixed;
+    left: 0;
+    right: 0;
+    display: grid;
+    gap: 12px;
+    padding: 12px 16px 18px;
+    border-radius: 24px 24px 0 0;
+    border-top: 1px solid rgba(226, 232, 240, 0.92);
+    background: rgba(255, 255, 255, 0.985);
+    box-shadow: 0 -16px 40px rgba(15, 23, 42, 0.12);
+    backdrop-filter: blur(10px);
+    will-change: transform, opacity;
+  }
+
+  .mobile-summary-sheet__handle-button {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    padding: 2px 0 4px;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .mobile-summary-sheet__handle {
+    width: 42px;
+    height: 5px;
+    border-radius: 999px;
+    background: rgba(148, 163, 184, 0.42);
+  }
+
+  .mobile-summary-sheet__content {
+    display: grid;
+    gap: 14px;
+  }
+}

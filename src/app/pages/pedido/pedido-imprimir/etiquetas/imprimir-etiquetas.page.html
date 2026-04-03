@@ -1,11 +1,45 @@
 <ng-container *ngIf="pedido as p; else loading">
-  <div class="print-shell">
-    <div class="page-preview">
-      <app-imprimir-etiquetas-layout [pedido]="p"></app-imprimir-etiquetas-layout>
+  <div class="print-shell" [class.print-shell--mobile]="isMobileView">
+    <header class="print-mobile-header no-print" *ngIf="isMobileView">
+      <button mat-icon-button type="button" aria-label="Voltar ao pedido" (click)="fecharPreview()">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+
+      <div class="print-mobile-header__copy">
+        <span>Etiquetas</span>
+        <strong>{{ p.status === 'ORCAMENTO' ? (p.numeroOrcamento || '—') : (p.numero || '—') }}</strong>
+      </div>
+
+      <span class="print-mobile-header__spacer"></span>
+    </header>
+
+    <div class="page-preview page-preview--pdf">
+      <iframe
+        *ngIf="pdfPreviewUrl; else pdfLoading"
+        class="pdf-frame"
+        [src]="pdfPreviewUrl"
+        title="Preview do PDF de etiquetas">
+      </iframe>
     </div>
 
-    <div class="no-print actions-bottom">
+    <ng-template #pdfLoading>
+      <div class="loading">Gerando PDF...</div>
+    </ng-template>
+
+    <div class="no-print actions-bottom" *ngIf="!isMobileView">
       <button mat-stroked-button color="primary" (click)="onPrint()">Imprimir</button>
+    </div>
+
+    <div class="print-mobile-cta no-print" *ngIf="isMobileView">
+      <button
+        mat-flat-button
+        color="primary"
+        type="button"
+        class="print-mobile-cta__button"
+        aria-label="Imprimir etiquetas"
+        (click)="onPrint()">
+        Imprimir
+      </button>
     </div>
   </div>
 </ng-container>

@@ -1,158 +1,491 @@
+@if (!isMobileView()) {
 <app-page-card titulo="Novo Pedido" botaoTexto="Voltar" botaoIcone="arrow_back" botaoCor="primary"
   [botaoRota]="['/page/pedido']" [mostrarDivisor]="true">
 
   <form [formGroup]="addForm">
     <div class="pedido-layout">
-      <!-- Coluna esquerda: fluxo principal -->
       <div class="main-column">
+        <app-cliente-selector-card
+          [cliente]="clienteConfirmado"
+          [editando]="trocandoCliente || !clienteConfirmado"
+          [showEmptyAlert]="true"
+          [control]="clienteControl"
+          [displayWith]="mostrarCliente"
+          [buscarFn]="buscarClientes"
+          [minimoCaracteres]="3"
+          (salvarCliente)="confirmarClienteSelecionado()"
+          (editarCliente)="iniciarTrocaCliente()"
+          (cancelarEdicao)="cancelarTrocaCliente()"
+          (criarCliente)="onCriarCliente()">
+        </app-cliente-selector-card>
 
-          <!-- Cliente -->
-          <app-cliente-selector-card
-            [cliente]="clienteConfirmado"
-            [editando]="trocandoCliente || !clienteConfirmado"
-            [showEmptyAlert]="true"
-            [control]="clienteControl"
-            [displayWith]="mostrarCliente"
-            [buscarFn]="buscarClientes"
-            [minimoCaracteres]="3"
-            (salvarCliente)="confirmarClienteSelecionado()"
-            (editarCliente)="iniciarTrocaCliente()"
-            (cancelarEdicao)="cancelarTrocaCliente()"
-            (criarCliente)="onCriarCliente()">
-          </app-cliente-selector-card>
+        <app-itens-pedido-section
+          [itens]="pedidoItens"
+          [subtotal]="subTotal"
+          (buscarProdutos)="onBuscarProdutos()"
+          (descreverItens)="onDescreverItens()"
+          (removerItem)="removerItem($event)"
+          (alterarQuantidade)="alterarQuantidade($event.index, $event.quantidade)">
+        </app-itens-pedido-section>
 
-          <!-- Itens do pedido -->
-          <app-itens-pedido-section
-            [itens]="pedidoItens"
-            [subtotal]="subTotal"
-            (buscarProdutos)="onBuscarProdutos()"
-            (descreverItens)="onDescreverItens()"
-            (removerItem)="removerItem($event)"
-            (alterarQuantidade)="alterarQuantidade($event.index, $event.quantidade)"
-          ></app-itens-pedido-section>
+        <app-observacoes-card
+          class="observacoes-compact"
+          [control]="observacoesControl"
+          [textoSalvo]="observacaoSalva"
+          [salvando]="false"
+          [salvo]="obsSalvo"
+          placeholder="Insira observações relevantes sobre este pedido..."
+          (salvar)="confirmarObservacaoLocal()">
+        </app-observacoes-card>
+      </div>
 
-          <!-- Observações -->
-          <app-observacoes-card
-            class="observacoes-compact"
-            [control]="observacoesControl"
-            [textoSalvo]="observacaoSalva"
-            [salvando]="false"
-            [salvo]="obsSalvo"
-            placeholder="Insira observações relevantes sobre este pedido..."
-            (salvar)="confirmarObservacaoLocal()">
-          </app-observacoes-card>
+      <div class="summary-column">
+        <div class="summary-sticky">
+          <app-section-card titulo="Ajustes" [divider]="true">
+            <div class="step-body ajustes-grid">
+              <app-input-moeda [control]="acrescimoControl" label="Acréscimo"></app-input-moeda>
+              <app-input-moeda [control]="freteControl" label="Frete"></app-input-moeda>
+              <app-input-moeda [control]="descontoControl" label="Desconto"></app-input-moeda>
+            </div>
+          </app-section-card>
+
+          <app-section-card titulo="Resumo financeiro" [divider]="true" class="summary-card">
+            <div class="summary-row">
+              <span>Subtotal</span>
+              <strong class="value align-right">{{ subTotal | currency:'BRL':'symbol':'1.2-2' }}</strong>
+            </div>
+            <div class="summary-row">
+              <span>Acréscimos</span>
+              <strong class="value align-right">{{ acrescimoControl.value || 0 | currency:'BRL':'symbol':'1.2-2' }}</strong>
+            </div>
+            <div class="summary-row">
+              <span>Frete</span>
+              <strong class="value align-right">{{ freteControl.value || 0 | currency:'BRL':'symbol':'1.2-2' }}</strong>
+            </div>
+            <div class="summary-row">
+              <span>Descontos</span>
+              <strong class="value align-right">{{ descontoControl.value || 0 | currency:'BRL':'symbol':'1.2-2' }}</strong>
+            </div>
+            <mat-divider class="m-t-8 m-b-8"></mat-divider>
+            <div class="summary-row total">
+              <span>Total</span>
+              <strong class="value highlight">{{ grandTotal | currency:'BRL':'symbol':'1.2-2' }}</strong>
+            </div>
+            <div class="summary-row resta">
+              <span>Resta pagar</span>
+              <strong class="value highlight" [class.attention]="restaPagar > 0">{{ restaPagar | currency:'BRL':'symbol':'1.2-2' }}</strong>
+            </div>
+            <div class="microcopy">O total considera ajustes e descontos.</div>
+          </app-section-card>
+
+          <app-pagamentos-section
+            [pagamentoNovo]="pagamentoNovo"
+            [pagamentosControls]="pagamentosControls"
+            [formasPagamento]="formasPagamento"
+            [pago]="totalPago"
+            [restante]="restaPagar"
+            [mostrarConfirmado]="false"
+            [mostrarData]="false"
+            [expanded]="pagamentosControls.length > 0"
+            (addPagamento)="addPagamento()"
+            (removerPagamento)="removerPagamento($event)">
+          </app-pagamentos-section>
+
+          <app-section-card titulo="Orçamento" [divider]="true" *ngIf="orcamentoControl.value">
+            <div class="step-body" [@expandCollapse]>
+              <div class="alert-soft">
+                O pedido só será registrado após a aprovação do orçamento.
+              </div>
+              <app-input-texto-restrito [control]="nomeOrcamentoControl" label="Nome do orçamento"
+                placeholder="Ex.: Cardápios do restaurante">
+              </app-input-texto-restrito>
+              <div class="m-t-8">
+                <app-input-data [control]="vencimentoOrcamentoControl" label="Data de vencimento">
+                </app-input-data>
+              </div>
+            </div>
+          </app-section-card>
+
+          <app-section-card>
+            <div class="actions-final">
+              <div class="checklist" *ngIf="addForm.invalid || !pedidoItens.length || !addForm.get('clienteId')?.value || (orcamentoControl.value && (!nomeOrcamentoControl.value || !vencimentoOrcamentoControl.value))">
+                <div class="check-item" [class.done]="addForm.get('clienteId')?.value">
+                  <span class="icon">{{ addForm.get('clienteId')?.value ? '✓' : '•' }}</span>
+                  <span>Selecione um cliente</span>
+                </div>
+                <div class="check-item" [class.done]="pedidoItens.length">
+                  <span class="icon">{{ pedidoItens.length ? '✓' : '•' }}</span>
+                  <span>Adicione ao menos 1 item</span>
+                </div>
+                <div class="check-item" *ngIf="orcamentoControl.value" [class.done]="nomeOrcamentoControl.value && vencimentoOrcamentoControl.value">
+                  <span class="icon">{{ nomeOrcamentoControl.value && vencimentoOrcamentoControl.value ? '✓' : '•' }}</span>
+                  <span>Informe nome e vencimento do orçamento</span>
+                </div>
+              </div>
+
+              <div class="orcamento-opt">
+                <mat-checkbox [formControl]="orcamentoControl" class="f-w-600 f-s-13">
+                  Salvar como orçamento
+                </mat-checkbox>
+                <div class="microcopy">Se marcado, o pedido vira orçamento e precisa ser aprovado.</div>
+              </div>
+
+              <div class="d-flex gap-8 flex-wrap action-buttons">
+                <a routerLink="/page/pedido" mat-stroked-button color="warn">
+                  Cancelar
+                </a>
+                <button mat-flat-button color="primary" (click)="saveDetail($event)"
+                  [disabled]="addForm.invalid || !pedidoItens.length || !addForm.get('clienteId')?.value || (orcamentoControl.value && (!nomeOrcamentoControl.value || !vencimentoOrcamentoControl.value))">
+                  Salvar pedido
+                </button>
+              </div>
+            </div>
+          </app-section-card>
         </div>
-
-        <!-- Coluna direita: ajustes, resumo, pagamentos, orçamento, ações -->
-        <div class="summary-column">
-          <div class="summary-sticky">
-            <!-- Ajustes -->
-            <app-section-card titulo="Ajustes" [divider]="true">
-              <div class="step-body ajustes-grid">
-                <app-input-moeda [control]="acrescimoControl" label="Acréscimo"></app-input-moeda>
-                <app-input-moeda [control]="freteControl" label="Frete"></app-input-moeda>
-                <app-input-moeda [control]="descontoControl" label="Desconto"></app-input-moeda>
-              </div>
-            </app-section-card>
-
-            <!-- Resumo financeiro -->
-            <app-section-card titulo="Resumo financeiro" [divider]="true" class="summary-card">
-              <div class="summary-row">
-                <span>Subtotal</span>
-                <strong class="value align-right">{{ subTotal | currency:'BRL':'symbol':'1.2-2' }}</strong>
-              </div>
-              <div class="summary-row">
-                <span>Acréscimos</span>
-                <strong class="value align-right">{{ acrescimoControl.value || 0 | currency:'BRL':'symbol':'1.2-2' }}</strong>
-              </div>
-              <div class="summary-row">
-                <span>Frete</span>
-                <strong class="value align-right">{{ freteControl.value || 0 | currency:'BRL':'symbol':'1.2-2' }}</strong>
-              </div>
-              <div class="summary-row">
-                <span>Descontos</span>
-                <strong class="value align-right">{{ descontoControl.value || 0 | currency:'BRL':'symbol':'1.2-2' }}</strong>
-              </div>
-              <mat-divider class="m-t-8 m-b-8"></mat-divider>
-              <div class="summary-row total">
-                <span>Total</span>
-                <strong class="value highlight">{{ grandTotal | currency:'BRL':'symbol':'1.2-2' }}</strong>
-              </div>
-              <div class="summary-row resta">
-                <span>Resta pagar</span>
-                <strong class="value highlight" [class.attention]="restaPagar > 0">{{ restaPagar | currency:'BRL':'symbol':'1.2-2' }}</strong>
-              </div>
-              <div class="microcopy">O total considera ajustes e descontos.</div>
-            </app-section-card>
-
-            <!-- Pagamentos -->
-            <app-pagamentos-section
-              [pagamentoNovo]="pagamentoNovo"
-              [pagamentosControls]="pagamentosControls"
-              [formasPagamento]="formasPagamento"
-              [pago]="totalPago"
-              [restante]="restaPagar"
-              [mostrarConfirmado]="false"
-              [mostrarData]="false"
-              [expanded]="pagamentosControls.length > 0"
-              (addPagamento)="addPagamento()"
-              (removerPagamento)="removerPagamento($event)">
-            </app-pagamentos-section>
-
-            <!-- Orçamento (condicional) -->
-            <app-section-card titulo="Orçamento" [divider]="true" *ngIf="orcamentoControl.value">
-              <div class="step-body" [@expandCollapse]>
-                <div class="alert-soft">
-                  O pedido só será registrado após a aprovação do orçamento.
-                </div>
-                <app-input-texto-restrito [control]="nomeOrcamentoControl" label="Nome do orçamento"
-                  placeholder="Ex.: Cardápios do restaurante">
-                </app-input-texto-restrito>
-                <div class="m-t-8">
-                  <app-input-data [control]="vencimentoOrcamentoControl" label="Data de vencimento">
-                  </app-input-data>
-                </div>
-              </div>
-            </app-section-card>
-
-            <!-- Ações finais -->
-            <app-section-card>
-              <div class="actions-final">
-                <div class="checklist" *ngIf="addForm.invalid || !pedidoItens.length || !addForm.get('clienteId')?.value || (orcamentoControl.value && (!nomeOrcamentoControl.value || !vencimentoOrcamentoControl.value))">
-                  <div class="check-item" [class.done]="addForm.get('clienteId')?.value">
-                    <span class="icon">{{ addForm.get('clienteId')?.value ? '✓' : '•' }}</span>
-                    <span>Selecione um cliente</span>
-                  </div>
-                  <div class="check-item" [class.done]="pedidoItens.length">
-                    <span class="icon">{{ pedidoItens.length ? '✓' : '•' }}</span>
-                    <span>Adicione ao menos 1 item</span>
-                  </div>
-                  <div class="check-item" *ngIf="orcamentoControl.value" [class.done]="nomeOrcamentoControl.value && vencimentoOrcamentoControl.value">
-                    <span class="icon">{{ nomeOrcamentoControl.value && vencimentoOrcamentoControl.value ? '✓' : '•' }}</span>
-                    <span>Informe nome e vencimento do orçamento</span>
-                  </div>
-                </div>
-
-                <div class="orcamento-opt">
-                  <mat-checkbox [formControl]="orcamentoControl" class="f-w-600 f-s-13">
-                    Salvar como orçamento
-                  </mat-checkbox>
-                  <div class="microcopy">Se marcado, o pedido vira orçamento e precisa ser aprovado.</div>
-                </div>
-
-                <div class="d-flex gap-8 flex-wrap action-buttons">
-                  <a routerLink="/page/pedido" mat-stroked-button color="warn">
-                    Cancelar
-                  </a>
-                  <button mat-flat-button color="primary" (click)="saveDetail($event)"
-                    [disabled]="addForm.invalid || !pedidoItens.length || !addForm.get('clienteId')?.value || (orcamentoControl.value && (!nomeOrcamentoControl.value || !vencimentoOrcamentoControl.value))">
-                    Salvar pedido
-                  </button>
-                </div>
-              </div>
-            </app-section-card>
-          </div>
       </div>
     </div>
   </form>
 </app-page-card>
+} @else {
+<form [formGroup]="addForm" class="pedido-mobile-form">
+  <section class="pedido-mobile-flow">
+    <div class="pedido-mobile-hero">
+      <span class="pedido-mobile-hero__eyebrow">Novo pedido</span>
+      <strong>Monte o pedido por etapas</strong>
+      <span>{{ etapasConcluidasMobile }}/4 etapas concluídas</span>
+    </div>
+
+    <div class="pedido-mobile-progress">
+      <div class="pedido-mobile-progress__bar">
+        <span class="pedido-mobile-progress__fill" [style.width.%]="progressoMobilePercentual()"></span>
+      </div>
+      <div class="pedido-mobile-progress__steps">
+        @for (step of mobileFlowSteps; track step.key) {
+        <button
+          type="button"
+          class="pedido-mobile-progress__step"
+          [class.is-complete]="etapaConcluida(step.key)"
+          [class.is-active]="etapaAtiva(step.key)"
+          [class.is-pending]="etapaPendente(step.key)"
+          (click)="abrirEtapaMobile(step.key)">
+          <span class="pedido-mobile-progress__step-icon">
+            @if (etapaConcluida(step.key)) {
+            <mat-icon>check</mat-icon>
+            } @else {
+            {{ $index + 1 }}
+            }
+          </span>
+          <span>{{ step.label }}</span>
+        </button>
+        }
+      </div>
+    </div>
+
+    <div class="pedido-mobile-steps">
+      <section class="pedido-mobile-step"
+        [class.is-complete]="etapaConcluida('cliente')"
+        [class.is-active]="etapaAtiva('cliente')"
+        [class.is-pending]="etapaPendente('cliente')">
+        <button type="button" class="pedido-mobile-step__header" (click)="abrirEtapaMobile('cliente')">
+          <div class="pedido-mobile-step__title-wrap">
+            <span class="pedido-mobile-step__index">1</span>
+            <div>
+              <strong>Cliente</strong>
+              <span>{{ resumoClienteMobile() }}</span>
+            </div>
+          </div>
+          <mat-icon>{{ etapaAtiva('cliente') ? 'expand_less' : 'expand_more' }}</mat-icon>
+        </button>
+
+        @if (etapaAtiva('cliente')) {
+        <div class="pedido-mobile-step__body">
+          @if (!clienteConfirmado || trocandoCliente) {
+          <app-auto-complete
+            [control]="clienteControl"
+            label="Buscar cliente"
+            placeholder="Digite nome, e-mail ou telefone"
+            [displayWith]="mostrarCliente"
+            [buscarFn]="buscarClientes"
+            [minimoCaracteres]="3">
+          </app-auto-complete>
+
+          <div class="pedido-mobile-step__actions">
+            <button mat-flat-button color="primary" type="button" (click)="confirmarClienteSelecionado()">
+              Usar cliente
+            </button>
+            <button mat-stroked-button color="primary" type="button" (click)="onCriarCliente()">
+              Novo cliente
+            </button>
+          </div>
+          } @else {
+          <div class="pedido-mobile-client-summary">
+            <strong>{{ clienteConfirmado.nome || 'Cliente selecionado' }}</strong>
+            <span>{{ clienteConfirmado.email || 'Sem e-mail cadastrado' }}</span>
+            <span>{{ clienteConfirmado.telefone || 'Sem telefone cadastrado' }}</span>
+          </div>
+
+          <div class="pedido-mobile-step__actions">
+            <button mat-stroked-button color="primary" type="button" (click)="iniciarTrocaCliente()">
+              Trocar cliente
+            </button>
+            <button mat-button type="button" (click)="abrirEtapaMobile('itens')">
+              Continuar
+            </button>
+          </div>
+          }
+        </div>
+        }
+      </section>
+
+      <section class="pedido-mobile-step"
+        [class.is-complete]="etapaConcluida('itens')"
+        [class.is-active]="etapaAtiva('itens')"
+        [class.is-pending]="etapaPendente('itens')">
+        <button type="button" class="pedido-mobile-step__header" (click)="abrirEtapaMobile('itens')">
+          <div class="pedido-mobile-step__title-wrap">
+            <span class="pedido-mobile-step__index">2</span>
+            <div>
+              <strong>Itens</strong>
+              <span>{{ resumoItensMobile() }}</span>
+            </div>
+          </div>
+          <mat-icon>{{ etapaAtiva('itens') ? 'expand_less' : 'expand_more' }}</mat-icon>
+        </button>
+
+        @if (etapaAtiva('itens')) {
+        <div class="pedido-mobile-step__body">
+          <div class="pedido-mobile-step__actions pedido-mobile-step__actions--stack">
+            <button mat-flat-button color="primary" type="button" (click)="onBuscarProdutos()">
+              + Adicionar item
+            </button>
+            <button mat-stroked-button color="primary" type="button" (click)="onDescreverItens()">
+              Item manual
+            </button>
+          </div>
+
+          @if (itensBaseMobile().length) {
+          <div class="pedido-mobile-items">
+            @for (item of itensBaseMobile(); track trackItemPedido($index, item); let i = $index) {
+            <article class="pedido-mobile-item-card">
+              <div class="pedido-mobile-item-card__head">
+                <strong>{{ item.descricao }}</strong>
+              </div>
+              <div class="pedido-mobile-item-card__meta">
+                <label>
+                  <span>Qtd</span>
+                  <input
+                    type="number"
+                    min="1"
+                    [attr.data-item-qty]="i"
+                    [value]="item.quantidade"
+                    (change)="alterarQuantidadeMobile(i, $any($event.target).value)" />
+                </label>
+                <div>
+                  <span>Valor</span>
+                  <strong>{{ (item.subTotal ?? item.valor * item.quantidade) | currency:'BRL':'symbol':'1.2-2' }}</strong>
+                </div>
+              </div>
+              <div class="pedido-mobile-item-card__actions">
+                <button mat-button type="button" color="primary" (click)="focarQuantidadeMobile(i)">
+                  Editar
+                </button>
+                <button mat-button type="button" color="warn" (click)="removerItemMobile(i)">
+                  Remover
+                </button>
+              </div>
+            </article>
+            }
+          </div>
+          } @else {
+          <div class="pedido-mobile-empty">
+            <strong>Adicione ao menos 1 item</strong>
+            <span>Itens entram no resumo automaticamente e liberam pagamento.</span>
+          </div>
+          }
+        </div>
+        }
+      </section>
+
+      <section class="pedido-mobile-step"
+        [class.is-complete]="etapaConcluida('ajustes')"
+        [class.is-active]="etapaAtiva('ajustes')"
+        [class.is-pending]="etapaPendente('ajustes')">
+        <button type="button" class="pedido-mobile-step__header" (click)="abrirEtapaMobile('ajustes')">
+          <div class="pedido-mobile-step__title-wrap">
+            <span class="pedido-mobile-step__index">3</span>
+            <div>
+              <strong>Ajustes (opcional)</strong>
+              <span>{{ resumoAjustesMobile() }}</span>
+            </div>
+          </div>
+          <mat-icon>{{ etapaAtiva('ajustes') ? 'expand_less' : 'expand_more' }}</mat-icon>
+        </button>
+
+        @if (etapaAtiva('ajustes')) {
+        <div class="pedido-mobile-step__body">
+          <div class="pedido-mobile-adjusts-grid">
+            <app-input-moeda [control]="acrescimoControl" label="Acréscimo"></app-input-moeda>
+            <app-input-moeda [control]="freteControl" label="Frete"></app-input-moeda>
+            <app-input-moeda [control]="descontoControl" label="Desconto"></app-input-moeda>
+          </div>
+
+          <mat-checkbox [formControl]="orcamentoControl" class="pedido-mobile-check">
+            Salvar como orçamento
+          </mat-checkbox>
+
+          @if (orcamentoControl.value) {
+          <div class="pedido-mobile-orcamento">
+            <app-input-texto-restrito [control]="nomeOrcamentoControl" label="Nome do orçamento"
+              placeholder="Ex.: Cardápios do restaurante">
+            </app-input-texto-restrito>
+            <app-input-data [control]="vencimentoOrcamentoControl" label="Vencimento"></app-input-data>
+          </div>
+          }
+
+        </div>
+        }
+      </section>
+
+      @if (mostrarPagamentoMobile) {
+      <section class="pedido-mobile-step"
+        [class.is-complete]="etapaConcluida('pagamento')"
+        [class.is-active]="etapaAtiva('pagamento')"
+        [class.is-pending]="etapaPendente('pagamento')">
+        <button type="button" class="pedido-mobile-step__header" (click)="abrirEtapaMobile('pagamento')">
+          <div class="pedido-mobile-step__title-wrap">
+            <span class="pedido-mobile-step__index">4</span>
+            <div>
+              <strong>Pagamento</strong>
+              <span>{{ resumoPagamentoMobile() }}</span>
+            </div>
+          </div>
+          <mat-icon>{{ etapaAtiva('pagamento') ? 'expand_less' : 'expand_more' }}</mat-icon>
+        </button>
+
+        @if (etapaAtiva('pagamento')) {
+        <div class="pedido-mobile-step__body">
+          <div class="pedido-mobile-payment-summary">
+            <span>Pago: {{ totalPago | currency:'BRL':'symbol':'1.2-2' }}</span>
+            <span>Restante: {{ restaPagar | currency:'BRL':'symbol':'1.2-2' }}</span>
+          </div>
+
+          <app-input-options [control]="getFormaPagamentoControl(pagamentoNovo)" label="Forma de pagamento"
+            placeholder="Selecione a forma" [options]="formasPagamento">
+          </app-input-options>
+          <app-input-moeda [control]="pagamentoNovoValorControl"></app-input-moeda>
+
+          <button mat-flat-button color="primary" type="button" (click)="addPagamento()" [disabled]="pagamentoNovo.invalid">
+            Adicionar pagamento
+          </button>
+
+          @if (pagamentosControls.length) {
+          <div class="pedido-mobile-payments">
+            @for (pg of pagamentosControls; track $index; let i = $index) {
+            <div class="pedido-mobile-payment-card">
+              <div>
+                <strong>{{ pg.value.forma || 'Forma não informada' }}</strong>
+                <span>{{ pg.value.valor | currency:'BRL':'symbol':'1.2-2' }}</span>
+              </div>
+              <button mat-icon-button color="warn" type="button" (click)="removerPagamento(i)">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+            }
+          </div>
+          }
+        </div>
+        }
+      </section>
+      }
+    </div>
+
+    <section class="pedido-mobile-note">
+      <button type="button" class="pedido-mobile-note__summary" (click)="toggleObservacoesMobile()">
+        <div>
+          <strong>Observações (opcional)</strong>
+          <span>{{ resumoObservacoesMobile() }}</span>
+        </div>
+        <mat-icon>{{ mobileObservacoesAberto() ? 'expand_less' : 'expand_more' }}</mat-icon>
+      </button>
+
+      @if (mobileObservacoesAberto()) {
+      <div class="pedido-mobile-note__body">
+        <mat-form-field appearance="outline" class="pedido-mobile-field">
+          <mat-label>Observações</mat-label>
+          <textarea matInput rows="3" [formControl]="observacoesControl" placeholder="Observações rápidas para produção ou entrega"></textarea>
+        </mat-form-field>
+      </div>
+      }
+    </section>
+
+    @if (mobileResumoAberto()) {
+    <app-mobile-summary-sheet
+      [open]="mobileResumoAberto()"
+      bottomOffset="calc(114px + env(safe-area-inset-bottom))"
+      closeAriaLabel="Fechar resumo"
+      (close)="fecharResumoMobile()">
+      <div class="pedido-mobile-summary-content">
+      <header class="pedido-mobile-summary-sheet__header">
+        <strong>{{ statusResumoMobile() }}</strong>
+        <span>Atualizado em tempo real</span>
+      </header>
+
+      <div class="pedido-mobile-summary-sheet__rows">
+        <div class="summary-row">
+          <span>Subtotal</span>
+          <strong>{{ subTotal | currency:'BRL':'symbol':'1.2-2' }}</strong>
+        </div>
+        <div class="summary-row">
+          <span>Acréscimo</span>
+          <strong>{{ acrescimoControl.value || 0 | currency:'BRL':'symbol':'1.2-2' }}</strong>
+        </div>
+        <div class="summary-row">
+          <span>Frete</span>
+          <strong>{{ freteControl.value || 0 | currency:'BRL':'symbol':'1.2-2' }}</strong>
+        </div>
+        <div class="summary-row">
+          <span>Desconto</span>
+          <strong>{{ descontoControl.value || 0 | currency:'BRL':'symbol':'1.2-2' }}</strong>
+        </div>
+        <div class="summary-row summary-row--total">
+          <span>Total</span>
+          <strong>{{ grandTotal | currency:'BRL':'symbol':'1.2-2' }}</strong>
+        </div>
+      </div>
+
+      <div class="pedido-mobile-summary-sheet__checks">
+        @if (faltasResumoMobile().length) {
+          @for (falta of faltasResumoMobile(); track falta) {
+          <div class="check-item">
+            <span class="icon">•</span>
+            <span>{{ falta }}</span>
+          </div>
+          }
+        } @else {
+        <div class="check-item done">
+          <span class="icon">✓</span>
+          <span>Pedido pronto para salvar</span>
+        </div>
+        }
+      </div>
+      </div>
+    </app-mobile-summary-sheet>
+    }
+
+    <app-mobile-total-bar
+      label="Total"
+      [valueText]="(grandTotal | currency:'BRL':'symbol':'1.2-2') || 'R$ 0,00'"
+      [detailText]="resumoBarraMobile()"
+      [expanded]="mobileResumoAberto()"
+      actionText="Criar pedido →"
+      [actionDisabled]="!podeSalvarPedido"
+      expandAriaLabel="Abrir resumo financeiro"
+      actionAriaLabel="Criar pedido"
+      bottomOffset="58px"
+      [attachedToBottomNav]="true"
+      (expand)="toggleResumoMobile()"
+      (action)="salvarPedidoMobile()">
+    </app-mobile-total-bar>
+  </section>
+</form>
+}

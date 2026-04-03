@@ -18,4 +18,16 @@
     <mat-error>{{ errorMessage() }}</mat-error>
     }
   </mat-form-field>
+
+  @if (showSearchButton) {
+  <button
+    mat-stroked-button
+    color="primary"
+    type="button"
+    class="w-100"
+    [disabled]="!canSearch"
+    (click)="buscarEndereco()">
+    {{ searchButtonText }}
+  </button>
+  }
 </div>

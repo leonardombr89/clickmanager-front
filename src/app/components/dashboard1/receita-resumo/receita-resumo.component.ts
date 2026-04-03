@@ -19,7 +19,7 @@ import {
   Periodo
 } from '../dashboard.service';
 import { firstValueFrom } from 'rxjs';
-import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { Router } from '@angular/router';
 
 type DonutChart = {
   series: number[];
@@ -35,18 +35,19 @@ type DonutChart = {
 @Component({
   selector: 'app-receita-resumo',
   standalone: true,
-  imports: [MaterialModule, NgApexchartsModule, TablerIconsModule, CommonModule, MatButtonToggleModule],
+  imports: [MaterialModule, NgApexchartsModule, TablerIconsModule, CommonModule],
   templateUrl: './receita-resumo.component.html',
+  styleUrls: ['./receita-resumo.component.scss'],
 })
 export class AppReceitaResumoComponent implements OnInit {
   @ViewChild('chart') chart?: ChartComponent;
 
   // -------- Filtros de período (front) --------
   ranges = [
-    { id: 'mes_atual', label: 'Mês atual (início → hoje)', periodo: 'MES_ATUAL' as Periodo },
-    { id: 'ultimos_30', label: 'Últimos 30 dias',          periodo: 'ULTIMOS_30' as Periodo },
-    { id: 'mes_passado', label: 'Último mês',               periodo: 'MES_PASSADO' as Periodo },
-    { id: 'ytd', label: 'Ano atual (YTD)',                  periodo: 'YTD' as Periodo },
+    { id: 'mes_atual', shortLabel: 'Hoje', label: 'Mês atual (início → hoje)', periodo: 'MES_ATUAL' as Periodo },
+    { id: 'ultimos_30', shortLabel: '30d', label: 'Últimos 30 dias', periodo: 'ULTIMOS_30' as Periodo },
+    { id: 'mes_passado', shortLabel: 'Mês passado', label: 'Último mês', periodo: 'MES_PASSADO' as Periodo },
+    { id: 'ytd', shortLabel: 'Ano', label: 'Ano atual (YTD)', periodo: 'YTD' as Periodo },
   ] as const;
   selectedRange = 'mes_atual' as typeof this.ranges[number]['id'];
 
@@ -79,14 +80,14 @@ export class AppReceitaResumoComponent implements OnInit {
     colors: [],
     chart: {
       type: 'donut',
-      height: 220,
+      height: 200,
       toolbar: { show: false },
       fontFamily: 'inherit',
       foreColor: '#adb0bb',
     },
-    plotOptions: { pie: { donut: { size: '80%' } } },
+    plotOptions: { pie: { donut: { size: '84%' } } },
     stroke: { show: false },
-    legend: { show: true, position: 'bottom' },
+    legend: { show: false, position: 'bottom' },
     tooltip: {
       y: {
         formatter: (v: number) =>
@@ -95,7 +96,10 @@ export class AppReceitaResumoComponent implements OnInit {
     },
   };
 
-  constructor(private dashboard: DashboardService) {}
+  constructor(
+    private dashboard: DashboardService,
+    private router: Router
+  ) {}
 
   async ngOnInit() {
     await this.carregarDoBack();
@@ -103,6 +107,15 @@ export class AppReceitaResumoComponent implements OnInit {
 
   async onRangeChange() {
     await this.carregarDoBack();
+  }
+
+  abrirGraficoReceita(): void {
+    this.router.navigate(['/dashboards/dashboard1/grafico'], {
+      queryParams: {
+        tipo: 'receita',
+        periodo: this.selectedRange
+      }
+    });
   }
 
   // ======== Backend =======
@@ -140,6 +153,10 @@ export class AppReceitaResumoComponent implements OnInit {
 
   get selectedRangeLabel(): string {
     return this.rangesMap[this.selectedRange] || 'Mês atual (início → hoje)';
+  }
+
+  get semMovimentacao(): boolean {
+    return !this.chartData.series.some((value) => value > 0);
   }
 
   formatBRL(v: number) {

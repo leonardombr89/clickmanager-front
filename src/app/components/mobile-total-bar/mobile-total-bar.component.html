@@ -1,0 +1,61 @@
+<div class="mobile-total-bar"
+  [class.mobile-total-bar--expanded]="expanded"
+  [class.mobile-total-bar--attached]="attachedToBottomNav"
+  [class.mobile-total-bar--static]="!expandable"
+  [style.bottom]="bottomOffset"
+  [attr.role]="expandable ? 'button' : null"
+  [attr.tabindex]="expandable ? 0 : null"
+  [attr.aria-label]="expandable ? expandAriaLabel : null"
+  (click)="onRootClick()"
+  (keydown)="onRootKeydown($event)"
+  (touchstart)="onTouchStart($event)"
+  (touchend)="onTouchEnd($event)">
+  @if (expandable) {
+  <div class="mobile-total-bar__handle"></div>
+  }
+
+  <div class="mobile-total-bar__summary" [class.mobile-total-bar__summary--compact]="!status && !detailText">
+    <span class="label">{{ label }}</span>
+    <span class="value" [class.value--loading]="loading">{{ valueText }}</span>
+    @if (status || detailText) {
+    <div class="mobile-total-bar__meta" [class.mobile-total-bar__meta--single]="!status">
+      @if (status) {
+      <div class="mobile-total-bar__status">
+        <app-status-badge [status]="status"></app-status-badge>
+      </div>
+      }
+      @if (detailText) {
+      <span class="mobile-total-bar__expand" [class.mobile-total-bar__expand--static]="!expandable">
+        <span>{{ detailText }}</span>
+        @if (expandable) {
+        <mat-icon>{{ expanded ? 'expand_more' : 'expand_less' }}</mat-icon>
+        }
+      </span>
+      }
+    </div>
+    }
+  </div>
+
+  <div class="mobile-total-bar__actions">
+    @if (secondaryActionText) {
+    <button mat-stroked-button
+      type="button"
+      class="mobile-total-bar__secondary"
+      [attr.aria-label]="secondaryActionAriaLabel"
+      [disabled]="secondaryActionDisabled"
+      (click)="onSecondaryActionClick($event)">
+      {{ secondaryActionText }}
+    </button>
+    }
+
+    <button mat-flat-button
+      color="primary"
+      type="button"
+      class="mobile-total-bar__cta"
+      [attr.aria-label]="actionAriaLabel"
+      [disabled]="actionDisabled"
+      (click)="onActionClick($event)">
+      {{ actionText }}
+    </button>
+  </div>
+</div>

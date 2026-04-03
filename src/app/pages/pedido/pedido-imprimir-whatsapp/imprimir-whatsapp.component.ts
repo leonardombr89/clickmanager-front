@@ -8,6 +8,12 @@ import { PedidoService } from '../pedido.service';
 import { PedidoResponse } from 'src/app/models/pedido/pedido-response.model';
 import { ToastrService } from 'ngx-toastr';
 import { UsuarioService } from 'src/app/services/usuario.service';
+import {
+    buildPedidoWhatsAppPreviewMessage,
+    buildPedidoWhatsAppSendMessage,
+    displayPedidoNumero,
+    toE164BR
+} from '../pedido-whatsapp.utils';
 
 @Component({
     selector: 'app-imprimir-whatsapp',
@@ -99,32 +105,31 @@ export class ImprimirWhatsAppComponent implements OnInit {
                 this.usuarioService.buscarPorId(respId).subscribe({
                     next: (u: any) => {
                         this.empresaNome = u?.empresa?.nome || '';
-                        this.mensagem = this.montarMensagemComIcones(this.pedido);
+                        this.mensagem = buildPedidoWhatsAppPreviewMessage(this.pedido, this.empresaNome);
                         this.cdr.detectChanges();
                     },
                     error: () => {
                         this.empresaNome = '';
-                        this.mensagem = this.montarMensagemComIcones(this.pedido);
+                        this.mensagem = buildPedidoWhatsAppPreviewMessage(this.pedido, this.empresaNome);
                         this.cdr.detectChanges();
                     }
                 });
             } else {
-                this.mensagem = this.montarMensagemComIcones(this.pedido);
+                this.mensagem = buildPedidoWhatsAppPreviewMessage(this.pedido, this.empresaNome);
                 this.cdr.detectChanges();
             }
         });
     }
 
     displayNumero(p: PedidoResponse): string {
-        return p.numeroOrcamento?.trim() || p.numero?.trim() || '—';
+        return displayPedidoNumero(p);
     }
 
     abrirWhatsApp(): void {
-        // >>> AQUI: usa a versão SEM ícones <<<
-        const mensagemSemIcones = this.montarMensagemSemIcones(this.pedido);
+        const mensagemSemIcones = buildPedidoWhatsAppSendMessage(this.pedido, this.empresaNome);
 
         const telRaw = this.pedido?.cliente?.telefone ?? '';
-        const phone = this.toE164BR(telRaw);
+        const phone = toE164BR(telRaw);
 
         if (!phone) {
             this.toastr.error('Telefone do cliente não encontrado ou inválido.');
@@ -135,50 +140,11 @@ export class ImprimirWhatsAppComponent implements OnInit {
     }
 
 
-    /** Normaliza telefone BR para E.164 (sem sinal de +, como o wa.me exige) */
-    private toE164BR(raw: string): string {
-        if (!raw) return '';
-        let digits = raw.replace(/\D+/g, ''); // só números
-
-        // Se já vier com 55 no início, mantém
-        if (digits.startsWith('55')) {
-            return digits;
-        }
-
-        // Se vier com 0 à esquerda (DDD discado), remove
-        if (digits.startsWith('0')) {
-            digits = digits.replace(/^0+/, '');
-        }
-
-        // Telefone BR típico: 10 (fixo) ou 11 (celular com 9)
-        if (digits.length === 10 || digits.length === 11) {
-            return '55' + digits;
-        }
-
-        // Se já estiver em 13 dígitos mas começar com 550 (casos raros), corrige
-        if (digits.length === 13 && digits.startsWith('550')) {
-            return '55' + digits.slice(2);
-        }
-
-        // fallback: prefixa 55 se não tiver
-        if (!digits.startsWith('55')) {
-            digits = '55' + digits;
-        }
-        return digits;
-    }
-
-
     copiar(): void {
         if (!this.mensagem) return;
         navigator.clipboard.writeText(this.mensagem)
             .then(() => this.toastr.success('Mensagem copiada!'))
             .catch(() => this.toastr.error('Não foi possível copiar.'));
-    }
-
-    /** Helpers de formatação */
-    fmtMoney(v?: number): string {
-        const n = typeof v === 'number' ? v : 0;
-        return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(n);
     }
 
     fmtDate(iso?: string): string {
@@ -188,86 +154,4 @@ export class ImprimirWhatsAppComponent implements OnInit {
         if (isNaN(d.getTime())) return iso; // fallback
         return d.toLocaleDateString('pt-BR');
     }
-
-    // =========================
-    // MENSAGEM COM ÍCONES (preview)
-    // =========================
-    private montarMensagemComIcones(p: PedidoResponse): string {
-        const numero = this.displayNumero(p);
-        const linhaTitulo = this.empresaNome ? `*ORCAMENTO ${this.empresaNome}*` : `*ORCAMENTO*`;
-        const linhaPedido = `\n\n📦 *PEDIDO: ${numero}*`;
-        const cliente = p.cliente?.nome ? `\n\n👤 *Cliente:* ${p.cliente.nome}` : '';
-        const atendente = p.responsavel?.nome ? `\n🧑‍💼 *Atendido por:* ${p.responsavel.nome}` : '';
-        const data = p.dataCriacao ? `\n🗓️ *Data:* ${new Date(p.dataCriacao).toLocaleString('pt-BR')}` : '';
-
-        const itensHeader = `\n\n📦 *Itens*`;
-        const itens = '\n' + (p.itens || []).map(it => {
-            const qtd = it.quantidade ?? 0;
-            const unit = this.fmtMoney(it.valor ?? 0);
-            const sub = this.fmtMoney(it.subTotal ?? 0);
-            return `- ${it.descricao} — *${qtd}× ${unit} = ${sub}*`;
-        }).join('\n');
-
-        const subtotal = `\n\n➕ *Subtotal:* ${this.fmtMoney(p.subTotal)}`;
-        const freteDesc = `\n🚚 *Frete:* ${this.fmtMoney(p.frete)}  |  🔼 *Acrésc.:* ${this.fmtMoney(p.acrescimo)}  |  🔽 *Desc.:* ${this.fmtMoney(p.desconto)}`;
-        const total = `\n\n💰 *TOTAL:* *${this.fmtMoney(p.total)}*`;
-        const rodape = `\n\n🙌 Obrigado pela preferência! Qualquer dúvida, estamos à disposição.`;
-
-        return [
-            linhaTitulo,
-            linhaPedido,
-            cliente,
-            atendente,
-            data,
-            itensHeader,
-            itens || '* (sem itens)*',
-            subtotal,
-            freteDesc,
-            total,
-            rodape
-        ].join('');
-    }
-
-    // =========================
-    // MENSAGEM SEM ÍCONES (para o botão/WhatsApp)
-    // =========================
-    private montarMensagemSemIcones(p: PedidoResponse): string {
-        const numero = this.displayNumero(p);
-        const titulo = this.empresaNome ? `*ORCAMENTO ${this.empresaNome}*` : `*ORCAMENTO*`;
-
-        const linhasCabecalho = [
-            '',
-            `\n\n*PEDIDO: ${numero}*`,
-            p.cliente?.nome ? `\n*Cliente:* ${p.cliente.nome}` : '',
-            p.responsavel?.nome ? `\n*Atendido por:* ${p.responsavel.nome}` : '',
-            p.dataCriacao ? `\n*Data:* ${new Date(p.dataCriacao).toLocaleString('pt-BR')}` : ''
-        ].join('');
-
-        const itensHeader = `\n\n*Itens*`;
-        const itens = '\n' + (p.itens || []).map(it => {
-            const qtd = it.quantidade ?? 0;
-            const unit = this.fmtMoney(it.valor ?? 0);
-            const sub = this.fmtMoney(it.subTotal ?? 0);
-            return `- ${it.descricao} — *${qtd}× ${unit} = ${sub}*`;
-        }).join('\n');
-
-        const totais = [
-            `\n\n*Subtotal:* ${this.fmtMoney(p.subTotal)}`,
-            `\n*Frete:* ${this.fmtMoney(p.frete)}  |  *Acrésc.:* ${this.fmtMoney(p.acrescimo)}  |  *Desc.:* ${this.fmtMoney(p.desconto)}`,
-            `\n\n*TOTAL:* *${this.fmtMoney(p.total)}*`
-        ].join('');
-
-        const rodape = `\n\nObrigado pela preferência! Qualquer dúvida, estamos à disposição.`;
-
-        return [
-            titulo,
-            linhasCabecalho,
-            itensHeader,
-            itens || '* (sem itens)*',
-            totais,
-            rodape
-        ].join('');
-    }
 }
-
-

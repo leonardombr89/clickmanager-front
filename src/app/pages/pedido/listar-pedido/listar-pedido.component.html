@@ -1,3 +1,4 @@
+@if (!isMobileView()) {
 <app-page-card titulo="Pedidos" botaoTexto="Novo Pedido" botaoIcone="add" [botaoRota]="['/page/pedido/criar']"
   permissao="PEDIDOS_CADASTRAR" [mostrarDivisor]="true">
 
@@ -80,5 +81,121 @@
       </mat-tab>
     </mat-tab-group>
   </app-section-card>
-
 </app-page-card>
+} @else {
+<section class="pedido-mobile">
+  <div class="pedido-mobile__sticky">
+    <div class="pedido-mobile__search">
+      <mat-icon>search</mat-icon>
+      <input
+        type="search"
+        [value]="textoPesquisa"
+        placeholder="Buscar cliente ou pedido..."
+        (input)="onPesquisarMobile($any($event.target).value)" />
+      @if (textoPesquisa) {
+      <button type="button" class="pedido-mobile__clear" (click)="limparPesquisaMobile()" aria-label="Limpar busca">
+        <mat-icon>close</mat-icon>
+      </button>
+      }
+    </div>
+
+    <div class="pedido-mobile__filters" aria-label="Filtros de status">
+      @for (status of mobileStatusOptions(); track status) {
+      <button
+        type="button"
+        class="pedido-mobile__chip"
+        [class.pedido-mobile__chip--active]="statusSelecionado === status"
+        (click)="selecionarChipStatus(status)">
+        {{ labelStatus(status) }}
+      </button>
+      }
+    </div>
+  </div>
+
+  <div class="pedido-mobile__list">
+    @if(carregandoPedidos && !pedidos().length) {
+    <div class="pedido-mobile__state">
+      <mat-spinner diameter="28"></mat-spinner>
+      <span>Carregando pedidos...</span>
+    </div>
+    } @else if(!pedidos().length) {
+    <div class="pedido-mobile__state pedido-mobile__state--empty">
+      <strong>Nenhum pedido encontrado</strong>
+      <span>Tente outro filtro ou faça uma nova busca.</span>
+    </div>
+    } @else {
+    @for (grupo of groupedMobilePedidos(); track grupo.label) {
+    <section class="pedido-mobile-group">
+      <header class="pedido-mobile-group__header">{{ grupo.label }}</header>
+
+      @for (pedido of grupo.pedidos; track pedido.id) {
+      <article class="pedido-mobile-card" matRipple [matRippleColor]="'rgba(37, 99, 235, 0.08)'" (click)="abrirPedido(pedido)">
+        <div class="pedido-mobile-card__head">
+          <div class="pedido-mobile-card__identity">
+            <strong>{{ pedido.nomeCliente || pedido.nomeResponsavel || 'Cliente não informado' }}</strong>
+            <span>{{ subtituloPedido(pedido) }}</span>
+          </div>
+
+          <button
+            mat-icon-button
+            type="button"
+            class="pedido-mobile-card__menu"
+            [matMenuTriggerFor]="pedidoMenu"
+            (click)="selecionarPedidoMenu(pedido, $event)"
+            aria-label="Abrir ações do pedido">
+            <mat-icon>more_vert</mat-icon>
+          </button>
+        </div>
+
+        <div class="pedido-mobile-card__meta">
+          <div class="pedido-mobile-card__value-block">
+            <span class="pedido-mobile-card__label">Total</span>
+            <strong>{{ pedido.total | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}</strong>
+          </div>
+          <span class="pedido-mobile-card__time">{{ tempoCompactoPedido(pedido.dataCriacao) }}</span>
+        </div>
+
+        <div class="pedido-mobile-card__footer">
+          <app-status-badge [status]="pedido.status"></app-status-badge>
+          <span class="pedido-mobile-card__date">{{ formatarDataPedido(pedido.dataCriacao) }}</span>
+        </div>
+      </article>
+      }
+    </section>
+    }
+
+    @if(carregandoMais) {
+    <div class="pedido-mobile__loading-more">
+      <mat-spinner diameter="22"></mat-spinner>
+      <span>Carregando mais pedidos...</span>
+    </div>
+    } @else if(!mobileHasMore && pedidos().length) {
+    <div class="pedido-mobile__end">Fim da lista</div>
+    }
+    }
+  </div>
+
+  <button
+    *temPermissao="'PEDIDOS_CADASTRAR'"
+    mat-flat-button
+    type="button"
+    class="pedido-mobile__fab"
+    [class.pedido-mobile__fab--compact]="mobileFabCompact()"
+    (click)="abrirCriacaoPedido()"
+    aria-label="Criar novo pedido">
+    <mat-icon>add</mat-icon>
+    <span>Novo Pedido</span>
+  </button>
+</section>
+
+<mat-menu #pedidoMenu="matMenu">
+  <button mat-menu-item type="button" (click)="abrirPedido(pedidoSelecionadoMenu!)" [disabled]="!pedidoSelecionadoMenu">
+    <mat-icon>visibility</mat-icon>
+    <span>Ver</span>
+  </button>
+  <button mat-menu-item type="button" (click)="cancelarPedidoMobile()" [disabled]="!pedidoSelecionadoMenu || !podeCancelar(pedidoSelecionadoMenu)">
+    <mat-icon>close</mat-icon>
+    <span>Cancelar</span>
+  </button>
+</mat-menu>
+}

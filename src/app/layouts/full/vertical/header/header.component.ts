@@ -17,7 +17,6 @@ import { NgScrollbarModule } from 'ngx-scrollbar';
 import { AuthService } from 'src/app/services/auth.service';
 import { Usuario } from 'src/app/models/usuario/usuario.model';
 import { ImagemUtil } from 'src/app/utils/imagem-util';
-import { SmartCalcComponent } from 'src/app/pages/apps/smart-calc/smart-calc.component';
 import { NotificacaoItem } from 'src/app/pages/notificacoes/models/notificacao.model';
 import { NotificacaoService } from 'src/app/pages/notificacoes/services/notificacao.service';
 import { NotificacaoEnviarDialogComponent } from 'src/app/pages/notificacoes/components/notificacao-enviar-dialog.component';
@@ -124,14 +123,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   }
 
   abrirSmartCalc(): void {
-    this.dialog.open(SmartCalcComponent, {
-      panelClass: 'smartcalc-dialog',
-      width: '98vw',
-      maxWidth: '98vw',
-      maxHeight: '98vh',
-      autoFocus: false
-    });
-
+    this.router.navigate(['/smartcalc']);
   }
 
   quicklinks: quicklinks[] = [

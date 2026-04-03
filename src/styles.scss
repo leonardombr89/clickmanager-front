@@ -67,6 +67,25 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
     padding-right: 8px;
   }
 
+.dialog-mobile-fullscreen {
+  max-width: 100vw !important;
+  width: 100vw !important;
+  height: 100dvh !important;
+  max-height: 100dvh !important;
+}
+
+.dialog-mobile-fullscreen .mat-mdc-dialog-panel,
+.dialog-mobile-fullscreen .mat-mdc-dialog-surface {
+  width: 100vw !important;
+  max-width: 100vw !important;
+  height: 100dvh !important;
+  max-height: 100dvh !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  box-sizing: border-box;
+  overflow: hidden !important;
+}
+
 /* Fundo claro reutilizável para tabelas em cards */
 .table-bg-light {
   background: #f2f4f7;

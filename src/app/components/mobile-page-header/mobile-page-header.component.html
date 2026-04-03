@@ -1,0 +1,21 @@
+<header class="mobile-page-header">
+  @if (showBack) {
+  <button mat-icon-button type="button" class="mobile-page-header__icon" [attr.aria-label]="backAriaLabel" (click)="back.emit()">
+    <mat-icon>arrow_back</mat-icon>
+  </button>
+  } @else {
+  <span class="mobile-page-header__spacer"></span>
+  }
+
+  <h1 class="mobile-page-header__title">{{ title }}</h1>
+
+  @if (showActionButton) {
+  <button mat-icon-button type="button" class="mobile-page-header__icon" [attr.aria-label]="actionAriaLabel" (click)="action.emit()">
+    <mat-icon>{{ actionIcon }}</mat-icon>
+  </button>
+  } @else if (showBadge) {
+  <span class="mobile-page-header__badge">{{ badgeText }}</span>
+  } @else {
+  <span class="mobile-page-header__spacer"></span>
+  }
+</header>

@@ -34,55 +34,130 @@
   }
 
   <!-- ============================================================== -->
-  <!-- horizontal Sidebar -->
-  <!-- ============================================================== -->
-  @if(resView) {
-  <mat-sidenav #leftsidenav [mode]="'over'" [opened]="options.sidenavOpened && !isTablet"
-    (openedChange)="onSidenavOpenedChange($event)" (closedStart)="onSidenavClosedStart()" class="sidebarNav">
-    <app-sidebar> </app-sidebar>
-    <ng-scrollbar class="position-relative" style="height: 100%">
-      <mat-nav-list class="sidebar-list">
-        @for(item of navItemsFiltrados; track item) {
-        <app-nav-item [item]="item" (notify)="sidenav.toggle()"> </app-nav-item>
-        }
-      </mat-nav-list>
-    </ng-scrollbar>
-    <div class="p-24 m-t-auto profile-bar">
-      <div class="bg-light-primary d-flex align-items-center rounded p-16">
-        <img src="assets/images/profile/user-1.jpg" class="rounded-circle" width="40" />
-        <div class="m-l-16">
-          <h5 class="mat-subtitle-2 f-w-600">Mathew</h5>
-          <span class="f-s-12">Designer</span>
-        </div>
-        <div class="m-l-auto">
-          <a mat-icon-button [routerLink]="['/authentication/login']" class="d-flex justify-content-center">
-            <i-tabler name="power" class="text-primary icon-18 d-flex"></i-tabler>
-          </a>
-        </div>
-      </div>
-    </div>
-  </mat-sidenav>
-  }
-
-  <!-- ============================================================== -->
   <!-- Main Content -->
   <!-- ============================================================== -->
-  <mat-sidenav-content class="contentWrapper" [ngClass]="{ 'p-l-24 p-r-24': !options.horizontal }" #content>
+  <mat-sidenav-content class="contentWrapper" [ngClass]="{
+    'p-l-24 p-r-24': !options.horizontal && !isMobileLayout,
+    'contentWrapper--mobile': isMobileLayout
+  }" #content>
     
     <main class="pageWrapper" [ngClass]="{
+      pageWrapperMobile: isMobileLayout,
       maxWidth: options.boxed
     }">
       <!-- ============================================================== -->
       <!-- VerticalHeader -->
       <!-- ============================================================== -->
-      @if(!options.horizontal) {
+      @if(!options.horizontal && !isMobileLayout) {
       <ng-container>
         <app-header [showToggle]="!isOver" (toggleCollapsed)="toggleCollapsed()" (toggleMobileNav)="sidenav.toggle()"
-          (toggleMobileFilterNav)="filterNavRight.toggle()"></app-header>
+          (toggleMobileFilterNav)="toggleMobileAppsSheet()"></app-header>
       </ng-container>
       }
 
-      <div class="m-t-30" [ngClass]="{ 'p-l-24 p-r-24': options.horizontal }">
+      @if(isMobileLayout) {
+      <header
+        class="mobile-topbar"
+        [class.mobile-topbar--minimal]="useMinimalMobileHeader"
+        [class.mobile-topbar--title-only]="useTitleOnlyMobileHeader">
+        @if(useTitleOnlyMobileHeader) {
+        <span class="mobile-topbar__spacer" aria-hidden="true"></span>
+
+        <div class="mobile-topbar__center mobile-topbar__center--minimal">
+          <span class="mobile-topbar__title">{{ currentPageTitle }}</span>
+        </div>
+
+        <div class="mobile-topbar__actions">
+          <button mat-icon-button type="button" class="mobile-topbar__icon-btn mobile-topbar__notification-btn"
+            (click)="toggleMobileNotificationsSheet()" aria-label="Abrir notificações"
+            [class.mobile-topbar__notification-btn--critical]="possuiNotificacaoCriticaNaoLida()">
+            <i-tabler name="message-2" class="icon-20 d-flex"></i-tabler>
+            @if(notificacoesNaoLidas > 0) {
+            <span class="mobile-topbar__notification-badge">{{ notificacoesNaoLidas }}</span>
+            }
+          </button>
+          <button mat-icon-button type="button" class="mobile-topbar__avatar-btn" (click)="toggleMobileProfileSheet()"
+            aria-label="Abrir perfil">
+            @if(usuarioLogado?.fotoPerfil) {
+            <img [src]="ImagemUtil.montarUrlImagemPerfil(usuarioLogado?.fotoPerfil)" alt="Perfil" class="mobile-topbar__avatar-image" />
+            } @else {
+            <i-tabler name="user-circle" class="icon-22 d-flex"></i-tabler>
+            }
+          </button>
+        </div>
+        } @else if(useMinimalMobileHeader) {
+        <button mat-icon-button type="button" class="mobile-topbar__icon-btn" (click)="navigateMobileBack()"
+          aria-label="Voltar">
+          <i-tabler name="arrow-left" class="icon-20 d-flex"></i-tabler>
+        </button>
+
+        <div class="mobile-topbar__center mobile-topbar__center--minimal">
+          <span class="mobile-topbar__title">{{ currentPageTitle }}</span>
+        </div>
+
+        <div class="mobile-topbar__actions">
+          <button mat-icon-button type="button" class="mobile-topbar__icon-btn mobile-topbar__notification-btn"
+            (click)="toggleMobileNotificationsSheet()" aria-label="Abrir notificações"
+            [class.mobile-topbar__notification-btn--critical]="possuiNotificacaoCriticaNaoLida()">
+            <i-tabler name="message-2" class="icon-20 d-flex"></i-tabler>
+            @if(notificacoesNaoLidas > 0) {
+            <span class="mobile-topbar__notification-badge">{{ notificacoesNaoLidas }}</span>
+            }
+          </button>
+          <button mat-icon-button type="button" class="mobile-topbar__avatar-btn" (click)="toggleMobileProfileSheet()"
+            aria-label="Abrir perfil">
+            @if(usuarioLogado?.fotoPerfil) {
+            <img [src]="ImagemUtil.montarUrlImagemPerfil(usuarioLogado?.fotoPerfil)" alt="Perfil" class="mobile-topbar__avatar-image" />
+            } @else {
+            <i-tabler name="user-circle" class="icon-22 d-flex"></i-tabler>
+            }
+          </button>
+        </div>
+        } @else {
+        <button mat-icon-button type="button" class="mobile-topbar__icon-btn" (click)="toggleMobileDrawer()"
+          aria-label="Abrir menu">
+          <i-tabler name="menu-2" class="icon-22 d-flex"></i-tabler>
+        </button>
+
+        <div class="mobile-topbar__center">
+          @if(currentPageTitle !== 'ClickManager') {
+          <span class="mobile-topbar__title">{{ currentPageTitle }}</span>
+          } @else {
+          <img src="./assets/images/logos/logoClickManager.png" alt="ClickManager" class="mobile-topbar__logo" />
+          }
+        </div>
+
+        <div class="mobile-topbar__actions">
+          <button mat-icon-button type="button" class="mobile-topbar__icon-btn mobile-topbar__notification-btn"
+            (click)="toggleMobileNotificationsSheet()" aria-label="Abrir notificações"
+            [class.mobile-topbar__notification-btn--critical]="possuiNotificacaoCriticaNaoLida()">
+            <i-tabler name="message-2" class="icon-20 d-flex"></i-tabler>
+            @if(notificacoesNaoLidas > 0) {
+            <span class="mobile-topbar__notification-badge">{{ notificacoesNaoLidas }}</span>
+            }
+          </button>
+          <button mat-icon-button type="button" class="mobile-topbar__icon-btn" (click)="toggleMobileAppsSheet()"
+            aria-label="Abrir aplicativos">
+            <i-tabler name="grid-dots" class="icon-20 d-flex"></i-tabler>
+          </button>
+          <button mat-icon-button type="button" class="mobile-topbar__avatar-btn" (click)="toggleMobileProfileSheet()"
+            aria-label="Abrir perfil">
+            @if(usuarioLogado?.fotoPerfil) {
+            <img [src]="ImagemUtil.montarUrlImagemPerfil(usuarioLogado?.fotoPerfil)" alt="Perfil" class="mobile-topbar__avatar-image" />
+            } @else {
+            <i-tabler name="user-circle" class="icon-22 d-flex"></i-tabler>
+            }
+          </button>
+        </div>
+        }
+      </header>
+      }
+
+      <div class="pageContent" [ngClass]="{
+        'm-t-30': !isMobileLayout,
+        'p-l-24 p-r-24': options.horizontal,
+        'pageContent--mobile': isMobileLayout
+      }">
         <div class="onboarding-resume-banner m-b-20" *ngIf="exibirAvisoOnboarding">
           <div class="onboarding-resume-banner__copy">
             <span class="onboarding-resume-banner__eyebrow">Configuração inicial</span>
@@ -119,52 +194,248 @@
   </mat-sidenav>
 </mat-sidenav-container>
 
-<!-- ------------------------------------------------------------------
-  Mobile Apps Sidebar
-  ------------------------------------------------------------------ -->
-<mat-drawer #filterNavRight mode="over" position="end" class="filter-sidebar">
-  <div class="p-16">
-    <div class="d-flex justify-content-between align-items-center">
-      <div class="branding">
-        <app-branding></app-branding>
+@if(isMobileLayout) {
+<div class="mobile-shell-backdrop" [class.mobile-shell-backdrop--visible]="hasMobileOverlayOpen" (click)="closeMobileOverlays()"></div>
+
+<section
+  class="mobile-sheet mobile-sheet--more"
+  [class.mobile-sheet--open]="mobileDrawerOpen"
+  aria-label="Mais opções">
+  <div
+    class="mobile-sheet__top mobile-sheet__top--sheet"
+    role="button"
+    tabindex="0"
+    aria-label="Fechar mais opções"
+    (click)="closeMobileOverlays()"
+    (keydown.enter)="closeMobileOverlays()"
+    (keydown.space)="closeMobileOverlays(); $event.preventDefault()"
+    (touchstart)="onMoreSheetTouchStart($event)"
+    (touchend)="onMoreSheetTouchEnd($event)">
+    <app-mobile-sheet-header title="Mais opções"></app-mobile-sheet-header>
+  </div>
+
+  <div class="mobile-sheet__content mobile-sheet__content--more">
+    @for(group of mobileNavGroups; track trackByGroupTitle($index, group)) {
+    <section class="mobile-nav-group">
+      <h3 class="mobile-nav-group__title">{{ group.title }}</h3>
+      <div class="mobile-nav-group__items">
+        @for(item of group.items; track trackByNavItem($index, item)) {
+        <button type="button" class="mobile-nav-item" [class.mobile-nav-item--active]="isMobileItemActive(item)"
+          [class.mobile-nav-item--expanded]="isMobileItemExpanded(item)" (click)="onMobileNavItemClick(item)">
+          <span class="mobile-nav-item__main">
+            <i-tabler [name]="item.iconName || 'point'" class="icon-20 d-flex mobile-nav-item__icon"></i-tabler>
+            <span class="mobile-nav-item__label">{{ item.displayName }}</span>
+          </span>
+          @if(item.children?.length) {
+          <i-tabler [name]="isMobileItemExpanded(item) ? 'chevron-up' : 'chevron-down'" class="icon-18 d-flex"></i-tabler>
+          }
+        </button>
+
+        @if(item.children?.length && isMobileItemExpanded(item)) {
+        <div class="mobile-nav-children">
+          @for(child of item.children; track trackByNavItem($index, child)) {
+          <button type="button" class="mobile-nav-child"
+            [class.mobile-nav-child--active]="isMobileItemActive(child)" (click)="onMobileChildItemClick(child)">
+            <span>{{ child.displayName }}</span>
+            <i-tabler name="chevron-right" class="icon-16 d-flex"></i-tabler>
+          </button>
+          }
+        </div>
+        }
+        }
       </div>
-      <button mat-icon-button (click)="filterNavRight.toggle()" class="d-flex justify-content-center">
-        <i-tabler name="x" class="icon-18 d-flex"></i-tabler>
+    </section>
+    }
+
+    <div class="mobile-sheet__section">
+      <button type="button" class="mobile-action-link mobile-action-link--danger" (click)="logout(); closeMobileOverlays()">
+        <span>Sair</span>
+        <i-tabler name="logout-2" class="icon-18 d-flex"></i-tabler>
       </button>
     </div>
+  </div>
+</section>
 
-    <div class="m-t-12">
-      <div class="d-flex justify-content-between align-items-center m-b-12">
-        <div class="d-flex align-items-center gap-8">
-          <h5 class="f-s-16 f-w-700 m-0">Aplicativos</h5>
-          <span class="text-muted f-s-12">|</span>
-          <a [routerLink]="['/billing/minha-assinatura']" class="f-s-12 text-primary text-decoration-none">Minha Assinatura</a>
-        </div>
-        <a [routerLink]="['/apps']" class="f-s-12 text-primary text-decoration-none">Ver todos</a>
+<section class="mobile-sheet mobile-sheet--apps" [class.mobile-sheet--open]="mobileAppsOpen" aria-label="Atalhos">
+  <div class="mobile-sheet__top"
+    role="button"
+    tabindex="0"
+    aria-label="Fechar atalhos"
+    (click)="closeMobileOverlays()"
+    (keydown.enter)="closeMobileOverlays()"
+    (keydown.space)="closeMobileOverlays(); $event.preventDefault()">
+    <app-mobile-sheet-header
+      title="Atalhos"
+      hint="Acesse destinos rápidos sem sair da tela.">
+    </app-mobile-sheet-header>
+  </div>
+
+  <div class="mobile-sheet__section">
+    <a [routerLink]="['/billing/minha-assinatura']" class="mobile-action-link" (click)="closeMobileOverlays()">
+      <span>Minha assinatura</span>
+      <i-tabler name="chevron-right" class="icon-18 d-flex"></i-tabler>
+    </a>
+    @for(quicklink of quicklinks; track quicklink.title) {
+    <a [href]="quicklink.link" target="_blank" rel="noopener" class="mobile-action-link" (click)="closeMobileOverlays()">
+      <span>{{ quicklink.title }}</span>
+      <i-tabler name="external-link" class="icon-18 d-flex"></i-tabler>
+    </a>
+    }
+  </div>
+</section>
+
+<section class="mobile-sheet mobile-sheet--notifications" [class.mobile-sheet--open]="mobileNotificationsOpen" aria-label="Notificações">
+  <div class="mobile-sheet__top"
+    role="button"
+    tabindex="0"
+    aria-label="Fechar notificações"
+    (click)="closeMobileOverlays()"
+    (keydown.enter)="closeMobileOverlays()"
+    (keydown.space)="closeMobileOverlays(); $event.preventDefault()">
+    <app-mobile-sheet-header title="Notificações"></app-mobile-sheet-header>
+  </div>
+
+  <div class="mobile-sheet__section mobile-sheet__section--notifications">
+    <div class="mobile-sheet__section-head mobile-sheet__section-head--notifications">
+      <div class="mobile-sheet__section-meta">
+        @if(notificacoesNaoLidas > 0) {
+        <span class="mobile-sheet__status-pill">{{ notificacaoLabelNova() }}</span>
+        } @else {
+        <span class="mobile-sheet__status-pill mobile-sheet__status-pill--muted">Tudo em dia</span>
+        }
       </div>
-      @for(appdd of apps; track appdd.id) {
-      <a [routerLink]="[appdd.link]" class="d-flex align-items-center text-decoration-none m-b-16 gap-12">
-        <button mat-mini-fab class="text-primary bg-light-primary shadow-none rounded">
-          <img [src]="appdd.img" width="20" />
+
+      <div class="mobile-sheet__section-actions">
+        @if(notificacoesNaoLidas > 0) {
+        <button type="button" class="mobile-sheet__head-action mobile-sheet__head-action--ghost"
+          (click)="marcarTodasNotificacoesComoLidasMobile()">
+          <span>Marcar todas</span>
         </button>
-        <div>
-          <h5 class="f-s-14 f-w-600 m-0 textprimary mat-body-1 hover-text">
-            {{ appdd.title }}
-          </h5>
-          <span class="mat-body-1 f-s-12">{{ appdd.subtitle }}</span>
-        </div>
-      </a>
-      }
+        }
+        @if(podeEnviarNotificacao) {
+        <button type="button" class="mobile-sheet__head-action" (click)="abrirDialogEnvioNotificacaoMobile()">
+          <i-tabler name="plus" class="icon-16 d-flex"></i-tabler>
+          <span>Enviar</span>
+        </button>
+        }
+      </div>
     </div>
 
-    <div class="m-t-12">
-      <h5 class="f-s-16 f-w-700 m-b-8">Atalhos</h5>
-      @for(quicklink of quicklinks; track quicklink.title) {
-      <div class="text-hover-primary">
-        <a [href]="quicklink.link" target="_blank" rel="noopener"
-          class="hover-text text-decoration-none mat-body-1 f-w-600 d-block p-y-8">{{ quicklink.title }}</a>
+    @if(carregandoNotificacoes) {
+    <div class="mobile-sheet__empty">Carregando notificações...</div>
+    } @else if(notificacoes.length === 0) {
+    <div class="mobile-sheet__empty mobile-sheet__empty--notifications">
+      <strong>Tudo em dia</strong>
+      <span>Você não tem notificações novas.</span>
+    </div>
+    } @else {
+    <div class="mobile-notification-list">
+      @for(notification of notificacoes; track notification.id) {
+      <div class="mobile-notification-row" [class.mobile-notification-row--swiped]="swipedNotificationId === notification.id">
+        @if(!notification.lida) {
+        <button type="button" class="mobile-notification-row__action"
+          (click)="marcarNotificacaoComoLidaMobile(notification, $event)">
+          <i-tabler name="check" class="icon-16 d-flex"></i-tabler>
+          <span>Lida</span>
+        </button>
+        }
+
+        <button type="button" class="mobile-notification-item" [class.mobile-notification-item--unread]="!notification.lida"
+          (click)="abrirNotificacaoMobile(notification)"
+          (touchstart)="onNotificationTouchStart($event)"
+          (touchend)="onNotificationTouchEnd($event, notification)">
+          <span class="mobile-notification-item__icon"
+            [ngClass]="{
+              'mobile-notification-item__icon--info': notification.nivel === 'INFO',
+              'mobile-notification-item__icon--success': notification.nivel === 'SUCESSO',
+              'mobile-notification-item__icon--warning': notification.nivel === 'ATENCAO',
+              'mobile-notification-item__icon--critical': notification.nivel === 'CRITICO'
+            }">
+            <i-tabler [name]="iconeNotificacao(notification)" class="icon-18 d-flex"></i-tabler>
+          </span>
+          <span class="mobile-notification-item__content">
+            <span class="mobile-notification-item__head">
+              <span class="mobile-notification-item__title-line">
+                @if(!notification.lida) {
+                <span class="mobile-notification-item__dot" aria-hidden="true"></span>
+                }
+                <strong>{{ notification.titulo }}</strong>
+              </span>
+              <span class="mobile-notification-item__time">{{ formatarTempoNotificacao(notification.criadaEm) }}</span>
+            </span>
+            <span class="mobile-notification-item__summary">{{ resumoNotificacao(notification) }}</span>
+            @if(!notification.lida) {
+            <span class="mobile-notification-item__badge">não lida</span>
+            }
+          </span>
+          <i-tabler name="chevron-right" class="icon-18 d-flex mobile-notification-item__chevron"></i-tabler>
+        </button>
       </div>
       }
+    </div>
+    }
+
+    <button type="button" class="mobile-action-link mobile-action-link--inline" (click)="abrirTodasNotificacoesMobile()">
+      <span>Ver todas</span>
+      <i-tabler name="chevron-right" class="icon-18 d-flex"></i-tabler>
+    </button>
+  </div>
+</section>
+
+<section class="mobile-sheet mobile-sheet--profile" [class.mobile-sheet--open]="mobileProfileOpen" aria-label="Perfil do usuário">
+  <div class="mobile-sheet__top"
+    role="button"
+    tabindex="0"
+    aria-label="Fechar perfil"
+    (click)="closeMobileOverlays()"
+    (keydown.enter)="closeMobileOverlays()"
+    (keydown.space)="closeMobileOverlays(); $event.preventDefault()">
+    <app-mobile-sheet-header title="Perfil"></app-mobile-sheet-header>
+  </div>
+
+  <div class="mobile-profile">
+    <div class="mobile-profile__summary">
+      <div class="mobile-profile__avatar">
+        @if(usuarioLogado?.fotoPerfil) {
+        <img [src]="ImagemUtil.montarUrlImagemPerfil(usuarioLogado?.fotoPerfil)" alt="Perfil" />
+        } @else {
+        <i-tabler name="user-circle" class="icon-28 d-flex"></i-tabler>
+        }
+      </div>
+      <div class="mobile-profile__identity">
+        <strong>{{ usuarioLogado?.nome || 'Usuário' }}</strong>
+        <span>{{ mobileProfileSubtitle }}</span>
+        <small>{{ usuarioLogado?.username }}</small>
+      </div>
+    </div>
+
+    <div class="mobile-sheet__section">
+      <a [routerLink]="['/theme-pages/account-setting', usuarioLogado?.id]" class="mobile-action-link"
+        (click)="closeMobileOverlays()">
+        <span>Meu perfil</span>
+        <i-tabler name="chevron-right" class="icon-18 d-flex"></i-tabler>
+      </a>
+      <button type="button" class="mobile-action-link mobile-action-link--danger" (click)="logout(); closeMobileOverlays()">
+        <span>Sair</span>
+        <i-tabler name="logout-2" class="icon-18 d-flex"></i-tabler>
+      </button>
     </div>
   </div>
-</mat-drawer>
+</section>
+
+<nav class="mobile-bottom-nav" aria-label="Navegação principal">
+  @for(item of mobileBottomNavItems; track item.key) {
+  <button
+    type="button"
+    class="mobile-bottom-nav__item"
+    [class.mobile-bottom-nav__item--active]="isMobileBottomNavActive(item)"
+    [class.mobile-bottom-nav__item--special]="item.special"
+    (click)="onMobileBottomNavClick(item)">
+    <span class="mobile-bottom-nav__icon-wrap">
+      <i-tabler [name]="item.icon" class="icon-20 d-flex"></i-tabler>
+    </span>
+    <span class="mobile-bottom-nav__label">{{ item.label }}</span>
+  </button>
+  }
+</nav>
+}

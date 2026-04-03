@@ -1,0 +1,22 @@
+<mat-card class="cardWithShadow status-grid-card">
+  <mat-card-header class="status-grid-card__header">
+    <div>
+      <mat-card-title>Status</mat-card-title>
+      <mat-card-subtitle>Pedidos por etapa</mat-card-subtitle>
+    </div>
+  </mat-card-header>
+
+  <mat-card-content class="status-grid-card__content">
+    <div class="status-grid">
+      @for (item of stats; track item.status) {
+      <button
+        type="button"
+        class="status-grid__item status-grid__item--{{ item.tone }}"
+        (click)="abrirStatus(item.status)">
+        <strong class="status-grid__value">{{ item.quantidade }}</strong>
+        <span class="status-grid__label">{{ item.label }}</span>
+      </button>
+      }
+    </div>
+  </mat-card-content>
+</mat-card>

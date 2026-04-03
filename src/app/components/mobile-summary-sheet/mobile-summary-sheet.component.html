@@ -1,0 +1,28 @@
+@if (open) {
+<button
+  type="button"
+  class="mobile-summary-sheet__backdrop"
+  [style.z-index]="backdropZIndex"
+  @backdropFade
+  (click)="emitClose()"
+  [attr.aria-label]="closeAriaLabel">
+</button>
+
+<section
+  class="mobile-summary-sheet"
+  [style.bottom]="bottomOffset"
+  @sheetMotion
+  [style.z-index]="sheetZIndex">
+  <button
+    type="button"
+    class="mobile-summary-sheet__handle-button"
+    (click)="emitClose()"
+    [attr.aria-label]="closeAriaLabel">
+    <span class="mobile-summary-sheet__handle"></span>
+  </button>
+
+  <div class="mobile-summary-sheet__content">
+    <ng-content></ng-content>
+  </div>
+</section>
+}

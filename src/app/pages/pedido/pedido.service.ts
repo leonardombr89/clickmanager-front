@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { HttpParams, HttpResponse } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { PaginaResponse } from 'src/app/models/pagina-response.model';
 import { PedidoListagem } from 'src/app/models/pedido/pedido-listagem.model';
@@ -96,5 +97,17 @@ export class PedidoService {
 
   aprovarOrcamento(id: number) {
   return this.api.post<PedidoResponse>(`${this.endpoint}/${id}/aprovar-orcamento`, {});
-}
+  }
+
+  gerarPdf(
+    id: number,
+    layout: 'completo' | 'duas-vias' | 'etiquetas' = 'completo',
+    download = false
+  ): Observable<HttpResponse<Blob>> {
+    let params = new HttpParams().set('layout', layout);
+    if (download) {
+      params = params.set('download', 'true');
+    }
+    return this.api.getBlobResponse(`${this.endpoint}/${id}/pdf`, params);
+  }
 }

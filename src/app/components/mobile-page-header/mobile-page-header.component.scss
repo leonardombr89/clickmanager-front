@@ -1,0 +1,49 @@
+:host {
+  display: block;
+}
+
+.mobile-page-header {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  border: 1px solid rgba(14, 23, 38, 0.08);
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 10px 24px rgba(14, 23, 38, 0.08);
+}
+
+.mobile-page-header__icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+}
+
+.mobile-page-header__title {
+  margin: 0;
+  min-width: 0;
+  font-size: 1rem;
+  line-height: 1.2;
+  font-weight: 700;
+  color: #0f172a;
+  text-align: center;
+}
+
+.mobile-page-header__badge {
+  justify-self: end;
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: #eff6ff;
+  color: #2563eb;
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.mobile-page-header__spacer {
+  width: 40px;
+  height: 40px;
+}

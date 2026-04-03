@@ -1,6 +1,6 @@
+@if (!isMobileView) {
 <mat-card class="cardWithShadow">
 
-    <!-- Cabeçalho padrão com botão Voltar -->
     <app-card-header [titulo]="isEditMode ? 'Editar Cliente' : 'Novo Cliente'" botaoTexto="Voltar"
         botaoIcone="arrow_back" botaoCor="primary" [botaoRota]="['/page/cliente']" [mostrarDivisor]="true">
     </app-card-header>
@@ -9,7 +9,6 @@
 
         <form [formGroup]="form" (ngSubmit)="onSubmit()">
 
-            <!-- Dados Pessoais -->
             <mat-card class="cardWithShadow m-t-24 m-b-16">
                 <mat-card-content>
 
@@ -45,10 +44,8 @@
                 </mat-card-content>
             </mat-card>
 
-            <!-- Endereço -->
             <app-endereco-form (formReady)="setEnderecoGroup($event)"></app-endereco-form>
 
-            <!-- Botões -->
             <div class="m-t-24 d-flex gap-2 flex-wrap">
                 <a mat-flat-button class="bg-error text-white" [routerLink]="['/page/cliente']">
                     Cancelar
@@ -64,3 +61,146 @@
     </mat-card-content>
 
 </mat-card>
+} @else {
+<form [formGroup]="form" class="cliente-mobile-form" (ngSubmit)="onSubmit()">
+    <section class="cliente-mobile-hero">
+        <div class="cliente-mobile-hero__copy">
+            <div class="cliente-mobile-hero__topline">
+                <span class="cliente-mobile-hero__eyebrow">{{ isEditMode ? 'Editar cliente' : 'Novo cliente' }}</span>
+                <span class="cliente-mobile-progress__label">Etapa {{ mobileStep + 1 }} de 2</span>
+            </div>
+            <strong>{{ mobileStepTitle }}</strong>
+        </div>
+
+        <div class="cliente-mobile-progress">
+            <div class="cliente-mobile-progress__bar">
+                <span class="cliente-mobile-progress__fill" [style.width.%]="progressoMobilePercentual()"></span>
+            </div>
+        </div>
+    </section>
+
+    <div class="cliente-mobile-steps">
+        <section class="cliente-mobile-step" [class.is-active]="mobileStep === 0" [class.is-complete]="mobileStep > 0">
+            <header class="cliente-mobile-step__header">
+                <span class="cliente-mobile-step__index">{{ mobileStep > 0 ? '✓' : '1' }}</span>
+                <div>
+                    <strong>Dados básicos</strong>
+                    <span>Nome, telefone, e-mail e documento</span>
+                </div>
+            </header>
+
+            @if (mobileStep === 0) {
+            <div class="cliente-mobile-step__body">
+                <app-input-texto-restrito
+                    [control]="nomeControl"
+                    label="Nome"
+                    placeholder="Digite o nome do cliente"
+                    autocomplete="name">
+                </app-input-texto-restrito>
+
+                <app-input-telefone
+                    [control]="telefoneControl"
+                    label="Telefone"
+                    placeholder="Digite o telefone do cliente">
+                </app-input-telefone>
+
+                <app-input-email
+                    [control]="emailControl"
+                    label="E-mail"
+                    placeholder="Digite o e-mail">
+                </app-input-email>
+
+                <app-input-documento
+                    [control]="documentoControl"
+                    label="CPF ou CNPJ"
+                    placeholder="Opcional">
+                </app-input-documento>
+            </div>
+            }
+        </section>
+
+        <section class="cliente-mobile-step" [class.is-active]="mobileStep === 1" [class.is-pending]="mobileStep === 0">
+            <header class="cliente-mobile-step__header">
+                <span class="cliente-mobile-step__index">2</span>
+                <div>
+                    <strong>Endereço</strong>
+                    <span>CEP e dados para entrega ou cadastro</span>
+                </div>
+            </header>
+
+            @if (mobileStep === 1) {
+            <div class="cliente-mobile-step__body" [formGroup]="enderecoGroup">
+                <app-input-cep
+                    [control]="cepControl"
+                    label="CEP"
+                    placeholder="00000-000"
+                    [autoBuscar]="false"
+                    [showSearchButton]="true"
+                    searchButtonText="Buscar endereço"
+                    (enderecoEncontrado)="onEnderecoEncontradoMobile($event)">
+                </app-input-cep>
+
+                <app-input-texto-restrito
+                    [control]="logradouroControl"
+                    label="Logradouro"
+                    placeholder="Rua, avenida..."
+                    autocomplete="street-address">
+                </app-input-texto-restrito>
+
+                <div class="cliente-mobile-step__grid">
+                    <app-input-texto-restrito
+                        [control]="numeroControl"
+                        label="Número"
+                        placeholder="Nº"
+                        inputmode="numeric">
+                    </app-input-texto-restrito>
+
+                    <app-input-texto-restrito
+                        [control]="bairroControl"
+                        label="Bairro"
+                        placeholder="Informe o bairro">
+                    </app-input-texto-restrito>
+                </div>
+
+                <div class="cliente-mobile-step__grid">
+                    <app-input-texto-restrito
+                        [control]="cidadeControl"
+                        label="Cidade"
+                        placeholder="Informe a cidade">
+                    </app-input-texto-restrito>
+
+                    <app-input-texto-restrito
+                        [control]="estadoControl"
+                        label="Estado"
+                        placeholder="UF"
+                        [maxlength]="2">
+                    </app-input-texto-restrito>
+                </div>
+
+                <app-input-texto-restrito
+                    [control]="complementoControl"
+                    label="Complemento"
+                    placeholder="Apartamento, bloco, referência...">
+                </app-input-texto-restrito>
+            </div>
+            }
+        </section>
+    </div>
+
+    <app-mobile-total-bar
+        [label]="mobileStep === 0 ? 'Etapa 2 de 2' : 'Pronto para salvar'"
+        [valueText]="mobileFooterValue"
+        [detailText]="mobileFooterDetail"
+        [expandable]="false"
+        actionAriaLabel="Salvar cliente"
+        [actionText]="mobileFooterLabel"
+        [actionDisabled]="!podeAvancarMobile"
+        [secondaryActionText]="mobileStep === 1 ? 'Voltar' : ''"
+        secondaryActionAriaLabel="Voltar etapa"
+        bottomOffset="68px"
+        [attachedToBottomNav]="true"
+        (secondaryAction)="voltarMobile()"
+        (action)="salvarMobile()">
+    </app-mobile-total-bar>
+</form>
+}

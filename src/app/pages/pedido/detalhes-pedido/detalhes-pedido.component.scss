@@ -204,3 +204,599 @@
     flex-direction: column;
   }
 }
+
+@media (max-width: 768px) {
+  .pedido-detail-mobile {
+    display: grid;
+    gap: 16px;
+    padding: 4px 0 184px;
+  }
+
+  .pedido-detail-mobile__hero,
+  .pedido-detail-mobile__section {
+    padding: 18px;
+    border-radius: 24px;
+    border: 1px solid rgba(226, 232, 240, 0.92);
+    background: rgba(255, 255, 255, 0.98);
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.06);
+  }
+
+  .pedido-detail-mobile__headline,
+  .pedido-detail-mobile__toggle,
+  .pedido-detail-mobile__section-head,
+  .pedido-detail-mobile__payment-card,
+  .pedido-detail-mobile__item-card-actions,
+  .pedido-detail-mobile__section-actions,
+  .pedido-detail-mobile__primary-action,
+  .pedido-detail-mobile__secondary-action,
+  .pedido-detail-mobile__payment-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .pedido-detail-mobile__headline {
+    align-items: flex-start;
+  }
+
+  .pedido-detail-mobile__eyebrow,
+  .pedido-detail-mobile__section-eyebrow {
+    display: block;
+    margin-bottom: 4px;
+    color: #64748b;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .pedido-detail-mobile__headline strong {
+    color: #0f172a;
+    font-size: 1.2rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+
+  .pedido-detail-mobile__summary,
+  .pedido-detail-mobile__meta,
+  .pedido-detail-mobile__toggle span,
+  .pedido-detail-mobile__note-preview,
+  .pedido-detail-mobile__detail-line,
+  .pedido-detail-mobile__client-summary span,
+  .pedido-detail-mobile__payment-card span {
+    color: #64748b;
+    font-size: 0.84rem;
+    line-height: 1.45;
+  }
+
+  .pedido-detail-mobile__section-head strong,
+  .pedido-detail-mobile__toggle strong {
+    color: #0f172a;
+    font-size: 1rem;
+    font-weight: 800;
+  }
+
+  .pedido-detail-mobile__meta {
+    margin-top: 8px;
+    font-size: 0.78rem;
+  }
+
+  .pedido-detail-mobile__hint-count {
+    min-width: 28px;
+    min-height: 28px;
+    display: grid;
+    place-items: center;
+    border-radius: 999px;
+    background: #eff6ff;
+    color: #2563eb;
+    font-size: 0.78rem;
+    font-weight: 800;
+  }
+
+  .pedido-detail-mobile__flow {
+    display: grid;
+    gap: 10px;
+    margin-top: 14px;
+  }
+
+  .pedido-detail-mobile__flow-step {
+    display: grid;
+    grid-template-columns: 28px 1fr;
+    align-items: center;
+    gap: 10px;
+    color: #94a3b8;
+    font-size: 0.82rem;
+    font-weight: 700;
+  }
+
+  .pedido-detail-mobile__flow-step span:last-child {
+    line-height: 1.25;
+  }
+
+  .pedido-detail-mobile__flow-dot {
+    width: 28px;
+    height: 28px;
+    display: grid;
+    place-items: center;
+    border-radius: 999px;
+    border: 1px solid rgba(203, 213, 225, 0.92);
+    background: #fff;
+  }
+
+  .pedido-detail-mobile__flow-step.is-active {
+    color: #2563eb;
+  }
+
+  .pedido-detail-mobile__flow-step.is-active .pedido-detail-mobile__flow-dot {
+    border-color: rgba(96, 165, 250, 0.92);
+    background: #eff6ff;
+  }
+
+  .pedido-detail-mobile__flow-step.is-done {
+    color: #0f172a;
+  }
+
+  .pedido-detail-mobile__flow-step.is-done .pedido-detail-mobile__flow-dot {
+    border-color: rgba(52, 211, 153, 0.9);
+    background: #ecfdf5;
+    color: #059669;
+  }
+
+  .pedido-detail-mobile__hints {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  .pedido-detail-mobile__flow-current {
+    display: grid;
+    gap: 4px;
+    margin-top: 14px;
+    padding: 14px;
+    border-radius: 16px;
+    background: #f8fafc;
+  }
+
+  .pedido-detail-mobile__flow-current-label {
+    color: #64748b;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .pedido-detail-mobile__flow-current strong {
+    color: #0f172a;
+    font-size: 1rem;
+    font-weight: 800;
+  }
+
+  .pedido-detail-mobile__flow-current span:last-child {
+    color: #64748b;
+    font-size: 0.82rem;
+    line-height: 1.4;
+  }
+
+  .pedido-detail-mobile__hint-chip {
+    min-height: 28px;
+    padding: 0 10px;
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    background: #f8fafc;
+    color: #475569;
+    font-size: 0.74rem;
+    font-weight: 700;
+  }
+
+  .pedido-detail-mobile__primary-action button,
+  .pedido-detail-mobile__secondary-action button,
+  .pedido-detail-mobile__quick-actions button,
+  .pedido-detail-mobile__section-actions button {
+    width: 100%;
+    min-height: 46px;
+    border-radius: 16px;
+    font-weight: 800;
+  }
+
+  .pedido-detail-mobile__secondary-action {
+    margin-top: 8px;
+  }
+
+  .pedido-detail-mobile__toggle {
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    text-align: left;
+  }
+
+  .pedido-detail-mobile__toggle > div {
+    min-width: 0;
+    display: grid;
+    gap: 4px;
+  }
+
+  .pedido-detail-mobile__finance-inline {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 14px;
+  }
+
+  .pedido-detail-mobile__finance-inline div,
+  .pedido-detail-mobile__item-grid > div {
+    display: grid;
+    gap: 4px;
+  }
+
+  .pedido-detail-mobile__finance-inline span,
+  .pedido-detail-mobile__item-grid span {
+    color: #64748b;
+    font-size: 0.76rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .pedido-detail-mobile__finance-inline strong {
+    color: #0f172a;
+    font-size: 0.96rem;
+    font-weight: 800;
+  }
+
+  .pedido-detail-mobile__details {
+    display: grid;
+    gap: 12px;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(226, 232, 240, 0.9);
+  }
+
+  .pedido-detail-mobile__details app-auto-complete,
+  .pedido-detail-mobile__payment-form app-input-options,
+  .pedido-detail-mobile__payment-form app-input-moeda {
+    width: 100%;
+  }
+
+  .pedido-detail-mobile__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    color: #475569;
+    font-size: 0.88rem;
+    font-weight: 600;
+  }
+
+  .pedido-detail-mobile__row strong {
+    color: #0f172a;
+    font-weight: 800;
+  }
+
+  .pedido-detail-mobile__items,
+  .pedido-detail-mobile__payments,
+  .pedido-detail-mobile__quick-actions,
+  .pedido-detail-mobile__payment-form {
+    display: grid;
+    gap: 12px;
+  }
+
+  .pedido-detail-mobile__items {
+    margin-top: 14px;
+  }
+
+  .pedido-detail-mobile__item-card,
+  .pedido-detail-mobile__payment-card {
+    padding: 16px;
+    border-radius: 18px;
+    border: 1px solid rgba(226, 232, 240, 0.92);
+    background: #fff;
+  }
+
+  .pedido-detail-mobile__item-card {
+    display: grid;
+    gap: 14px;
+  }
+
+  .pedido-detail-mobile__item-card strong {
+    color: #0f172a;
+    font-size: 0.98rem;
+    font-weight: 800;
+    line-height: 1.35;
+  }
+
+  .pedido-detail-mobile__item-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .pedido-detail-mobile__item-title {
+    font-size: 1rem;
+  }
+
+  .pedido-detail-mobile__item-metric {
+    display: grid;
+    gap: 4px;
+  }
+
+  .pedido-detail-mobile__item-subtotal {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(226, 232, 240, 0.92);
+  }
+
+  .pedido-detail-mobile__item-subtotal span {
+    color: #64748b;
+    font-size: 0.76rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .pedido-detail-mobile__item-subtotal strong {
+    color: #0f172a;
+    font-size: 0.95rem;
+    font-weight: 800;
+  }
+
+  .pedido-detail-mobile__item-grid input {
+    width: 100%;
+    min-height: 38px;
+    padding: 0 10px;
+    border-radius: 12px;
+    border: 1px solid rgba(203, 213, 225, 0.92);
+    background: #fff;
+    color: #0f172a;
+    font-weight: 700;
+  }
+
+  .pedido-detail-mobile__client-summary {
+    display: grid;
+    gap: 4px;
+    margin-top: 14px;
+  }
+
+  .pedido-detail-mobile__client-summary strong {
+    color: #0f172a;
+    font-size: 0.98rem;
+    font-weight: 800;
+  }
+
+  .pedido-detail-mobile__field {
+    width: 100%;
+  }
+
+  .pedido-detail-mobile__inline-action {
+    justify-self: start;
+    margin-top: 8px;
+    min-height: 38px;
+    border-radius: 12px;
+    font-weight: 700;
+  }
+
+  .pedido-detail-mobile__note-preview {
+    margin: 14px 0 0;
+  }
+
+  .pedido-detail-mobile__note-preview--empty {
+    color: #94a3b8;
+  }
+
+  .pedido-detail-mobile__payment-card {
+    align-items: flex-start;
+  }
+
+  .pedido-detail-mobile__payment-card strong {
+    color: #0f172a;
+    font-size: 0.92rem;
+    font-weight: 800;
+  }
+
+  .pedido-detail-mobile__payment-meta {
+    flex-shrink: 0;
+  }
+
+  .pedido-detail-mobile__payment-form {
+    padding-top: 8px;
+  }
+
+  .pedido-detail-mobile__quick-actions {
+    margin-top: 14px;
+  }
+
+  .pedido-detail-mobile__quick-actions-primary,
+  .pedido-detail-mobile__quick-actions-secondary {
+    display: grid;
+    gap: 12px;
+  }
+
+  .pedido-detail-mobile__quick-actions-primary {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .pedido-detail-mobile__quick-actions-secondary {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .pedido-detail-mobile__quick-action-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 54px;
+    border-radius: 18px;
+    font-size: 1rem;
+    font-weight: 800;
+    box-shadow: 0 12px 24px rgba(37, 99, 235, 0.18);
+  }
+
+  .pedido-detail-mobile__quick-actions .btn-whatsapp {
+    color: #fff;
+    background: linear-gradient(135deg, #16a34a, #22c55e);
+    box-shadow: 0 14px 28px rgba(34, 197, 94, 0.22);
+  }
+
+  .pedido-detail-mobile__quick-actions-secondary button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 46px;
+    border-radius: 16px;
+    font-weight: 800;
+  }
+
+  .pedido-detail-mobile__section-actions--stack {
+    display: grid;
+    gap: 10px;
+  }
+
+  .pedido-detail-mobile__summary-content {
+    display: grid;
+    gap: 14px;
+  }
+
+  .pedido-detail-mobile__wa-sheet {
+    display: grid;
+    gap: 14px;
+  }
+
+  .pedido-detail-mobile__wa-meta {
+    display: grid;
+    gap: 2px;
+    padding: 2px 0 4px;
+  }
+
+  .pedido-detail-mobile__wa-meta strong {
+    color: #0f172a;
+    font-size: 0.96rem;
+    font-weight: 800;
+  }
+
+  .pedido-detail-mobile__wa-meta span {
+    color: #64748b;
+    font-size: 0.84rem;
+    font-weight: 600;
+  }
+
+  .pedido-detail-mobile__wa-preview {
+    max-height: min(42dvh, 360px);
+    overflow: auto;
+    padding: 14px;
+    border: 1px solid rgba(226, 232, 240, 0.92);
+    border-radius: 18px;
+    background: #f8fafc;
+    color: #334155;
+    font-size: 0.9rem;
+    line-height: 1.55;
+    white-space: pre-wrap;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .pedido-detail-mobile__wa-actions {
+    display: grid;
+    gap: 10px;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+  }
+
+  .pedido-detail-mobile__wa-actions button {
+    min-height: 48px;
+    border-radius: 16px;
+    font-weight: 800;
+  }
+
+  .pedido-detail-mobile__summary-header {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 12px;
+  }
+
+  .pedido-detail-mobile__summary-header strong {
+    color: #0f172a;
+    font-size: 1rem;
+    font-weight: 800;
+  }
+
+  .pedido-detail-mobile__summary-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .pedido-detail-mobile__summary-tile {
+    display: grid;
+    gap: 4px;
+    padding: 14px;
+    border-radius: 16px;
+    background: #f8fafc;
+  }
+
+  .pedido-detail-mobile__summary-tile:first-child {
+    background: #eff6ff;
+    border: 1px solid rgba(96, 165, 250, 0.16);
+  }
+
+  .pedido-detail-mobile__summary-tile span {
+    color: #64748b;
+    font-size: 0.74rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .pedido-detail-mobile__summary-tile strong {
+    color: #0f172a;
+    font-size: 0.98rem;
+    font-weight: 800;
+  }
+
+  .pedido-detail-mobile__summary-tile:first-child strong {
+    color: #1d4ed8;
+    font-size: 1.08rem;
+  }
+
+  .pedido-detail-mobile__summary-rows {
+    display: grid;
+    gap: 10px;
+    padding-top: 4px;
+  }
+
+  .pedido-detail-mobile__row--status {
+    align-items: center;
+    padding: 10px 12px;
+    border-radius: 14px;
+    background: #f8fafc;
+  }
+
+  .pedido-detail-mobile__row--status :host ::ng-deep .status-chip,
+  .pedido-detail-mobile__row--status ::ng-deep .status-chip {
+    max-width: none;
+  }
+
+  .pedido-detail-mobile__row--total {
+    padding-top: 10px;
+    border-top: 1px solid rgba(226, 232, 240, 0.9);
+  }
+
+  .pedido-detail-mobile__row--total span {
+    color: #64748b;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .pedido-detail-mobile__row--total strong {
+    color: #0f172a;
+    font-size: 1.05rem;
+  }
+}

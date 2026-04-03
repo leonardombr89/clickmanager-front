@@ -1,21 +1,33 @@
 .status-chip {
   display: inline-flex;
   align-items: center;
+  max-width: min(100%, 220px);
+  min-height: 32px;
   gap: 6px;
   padding: 6px 12px;
   border-radius: 999px;
   font-weight: 700;
   font-size: 12px;
   letter-spacing: 0.2px;
-  text-transform: uppercase;
+  line-height: 1;
+  white-space: nowrap;
   background: #e5e7eb;
   color: #374151;
+  box-sizing: border-box;
 }
 
 .status-chip mat-icon {
-  font-size: 18px;
-  height: 18px;
-  width: 18px;
+  flex: 0 0 auto;
+  font-size: 16px;
+  height: 16px;
+  width: 16px;
+}
+
+.status-chip .text {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .chip-rascunho {

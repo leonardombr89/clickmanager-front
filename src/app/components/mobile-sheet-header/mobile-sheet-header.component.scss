@@ -1,0 +1,33 @@
+:host {
+  display: block;
+}
+
+.mobile-sheet-header {
+  flex-shrink: 0;
+}
+
+.mobile-sheet-header__handle {
+  width: 44px;
+  height: 5px;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.44);
+  margin: 10px auto 4px;
+}
+
+.mobile-sheet-header__content {
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+}
+
+.mobile-sheet-header__title {
+  color: #0f172a;
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.mobile-sheet-header__hint {
+  margin-top: 4px;
+  color: #64748b;
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
