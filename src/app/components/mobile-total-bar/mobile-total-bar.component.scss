@@ -225,13 +225,20 @@
     }
 
     .mobile-total-bar__actions {
+      display: flex;
+      flex-direction: row;
+      align-items: stretch;
       justify-content: stretch;
+      gap: 8px;
     }
 
     .mobile-total-bar__secondary,
     .mobile-total-bar__cta {
       min-height: 50px;
-      width: 100%;
+      min-width: 0;
+      width: auto;
+      flex: 1 1 0;
+      font-size: 0.9rem;
     }
   }
 }
