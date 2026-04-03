@@ -1,3 +1,4 @@
+@if (!isMobileView()) {
 <app-page-card
   [titulo]="(pedido?.status === 'ORCAMENTO' ? pedido?.numeroOrcamento : pedido?.numero) || '—'"
   botaoTexto="Voltar"
@@ -14,11 +15,11 @@
         [renderCard]="true"
         [divider]="true"
         [inativo]="inativoStatus"
-        [isOrcamento]="pedido?.status === 'ORCAMENTO'"
-        [statusAtual]="pedido?.status || ''"
+        [isOrcamento]="pedido.status === 'ORCAMENTO'"
+        [statusAtual]="pedido.status || ''"
         [restaPagar]="restaPagar"
         [totalPago]="totalPago"
-        [temPagamentos]="(pedido?.pagamentos?.length || 0) > 0"
+        [temPagamentos]="(pedido.pagamentos?.length || 0) > 0"
         [isReadOnly]="!permissoes.status"
         [orcamentoVencido]="orcamentoVencido"
         [trocandoStatus]="trocandoStatus"
@@ -42,12 +43,12 @@
       </app-pedido-fluxo-controles>
 
       <app-resumo-financeiro-card
-        [total]="pedido?.total ?? 0"
-        [subtotal]="pedido?.subTotal ?? 0"
-        [pago]="pedido?.valorTotalPago ?? 0"
-        [frete]="pedido?.frete ?? 0"
-        [restaPagar]="pedido?.restaPagar ?? 0"
-        [desconto]="pedido?.desconto ?? 0"
+        [total]="pedido.total ?? 0"
+        [subtotal]="pedido.subTotal ?? 0"
+        [pago]="pedido.valorTotalPago ?? 0"
+        [frete]="pedido.frete ?? 0"
+        [restaPagar]="pedido.restaPagar ?? 0"
+        [desconto]="pedido.desconto ?? 0"
         [divider]="true"
         [inativo]="inativoResumo">
       </app-resumo-financeiro-card>
@@ -63,11 +64,11 @@
             </app-pedido-info-card>
 
             <app-cliente-selector-card
-                [cliente]="pedido?.cliente || null"
+                [cliente]="pedido.cliente || null"
                 [control]="clienteControl"
                 [displayWith]="mostrarCliente"
                 [buscarFn]="buscarClientes"
-                [editando]="trocandoCliente || !pedido?.cliente"
+                [editando]="trocandoCliente || !pedido.cliente"
                 [salvando]="salvandoCliente"
                 [inativo]="inativoCliente"
                 (editarCliente)="trocarCliente()"
@@ -77,11 +78,11 @@
             </app-cliente-selector-card>
 
             <app-itens-pedido-section
-                [itens]="pedido?.itens ?? []"
-                [subtotal]="pedido?.subTotal ?? 0"
-                [permitirAlterarQuantidade]="(pedido?.status || '').toUpperCase() === 'RASCUNHO'"
+                [itens]="pedido.itens ?? []"
+                [subtotal]="pedido.subTotal ?? 0"
+                [permitirAlterarQuantidade]="(pedido.status || '').toUpperCase() === 'RASCUNHO'"
                 [inativo]="inativoItens"
-                [mostrarAcoes]="['RASCUNHO','PENDENTE','ORCAMENTO'].includes((pedido?.status || '').toUpperCase())"
+                [mostrarAcoes]="['RASCUNHO','PENDENTE','ORCAMENTO'].includes((pedido.status || '').toUpperCase())"
                 (buscarProdutos)="onBuscarProdutos()"
                 (descreverItens)="onDescreverItens()"
                 (removerItem)="removerItemPedido($event)">
@@ -89,7 +90,7 @@
 
             <app-observacoes-card
                 [control]="observacoesControl"
-                [textoSalvo]="pedido?.observacoes || ''"
+                [textoSalvo]="pedido.observacoes || ''"
                 [salvando]="salvandoObs"
                 [salvo]="obsOk"
                 [inativo]="inativoObservacoes"
@@ -122,7 +123,7 @@
       <div id="pagamentos-section">
         <app-pagamentos-section
                 [pagamentoNovo]="pagamentoForm"
-                [pagamentosLista]="pedido?.pagamentos || []"
+                [pagamentosLista]="pedido.pagamentos || []"
                 [formasPagamento]="formasPagamento"
                 [pago]="totalPago"
                 [restante]="restaPagar"
@@ -137,3 +138,414 @@
     </div>
     }
 </app-page-card>
+} @else {
+@if (pedido) {
+<section class="pedido-detail-mobile">
+  <section class="pedido-detail-mobile__hero">
+    <div class="pedido-detail-mobile__headline">
+      <div>
+        <span class="pedido-detail-mobile__eyebrow">Pedido</span>
+        <strong>{{ pedidoNumeroExibicao }}</strong>
+      </div>
+      <app-status-badge [status]="pedido.status"></app-status-badge>
+    </div>
+
+    <div class="pedido-detail-mobile__summary">
+      <span>{{ pedido.total | currency:'BRL':'symbol':'1.2-2' }}</span>
+      <span>•</span>
+      <span>{{ formatarResumoPedidoMobile(pedido.dataCriacao) }}</span>
+    </div>
+
+    @if (mobileAtualizadoTexto) {
+    <div class="pedido-detail-mobile__meta">{{ mobileAtualizadoTexto }}</div>
+    }
+  </section>
+
+  <section class="pedido-detail-mobile__section pedido-detail-mobile__section--flow">
+    <div class="pedido-detail-mobile__section-head">
+      <div>
+        <span class="pedido-detail-mobile__section-eyebrow">Fluxo do pedido</span>
+        <strong>{{ mobileFlowStatusTexto }}</strong>
+      </div>
+      @if (flowHints.length) {
+      <span class="pedido-detail-mobile__hint-count">{{ flowHints.length }}</span>
+      }
+    </div>
+
+    <div class="pedido-detail-mobile__flow">
+      @for (step of mobileFlowSteps; track step) {
+      <div class="pedido-detail-mobile__flow-step" [class.is-active]="flowStepState(step) === 'active'"
+        [class.is-done]="flowStepState(step) === 'done'">
+        <span class="pedido-detail-mobile__flow-dot">
+          @if (flowStepState(step) === 'done') {
+          <mat-icon>check</mat-icon>
+          }
+        </span>
+        <span>{{ statusLabel(step) }}</span>
+      </div>
+      }
+    </div>
+
+    <div class="pedido-detail-mobile__flow-current">
+      <span class="pedido-detail-mobile__flow-current-label">Etapa atual</span>
+      <strong>{{ mobileFlowStatusTexto }}</strong>
+      <span>{{ mobileFlowHelperTexto }}</span>
+    </div>
+
+    @if (flowHints.length) {
+    <div class="pedido-detail-mobile__hints">
+      @for (hint of flowHints; track hint) {
+      <span class="pedido-detail-mobile__hint-chip">{{ hint }}</span>
+      }
+    </div>
+    }
+
+    <div class="pedido-detail-mobile__primary-action">
+      <button mat-flat-button color="primary" type="button" [disabled]="mobilePrimaryActionDisabled"
+        (click)="executarAcaoPrincipalMobile()">
+        {{ mobilePrimaryActionLabel }}
+      </button>
+    </div>
+
+    @if (mobilePodeCancelarPedido) {
+    <div class="pedido-detail-mobile__secondary-action">
+      <button mat-stroked-button color="warn" type="button" (click)="confirmarCancelarPedido()">
+        Cancelar pedido
+      </button>
+    </div>
+    }
+  </section>
+
+  <section class="pedido-detail-mobile__section">
+    <button type="button" class="pedido-detail-mobile__toggle" (click)="toggleMobileFinanceiro()">
+      <div>
+        <strong>Resumo financeiro</strong>
+        <span>Total: {{ pedido.total | currency:'BRL':'symbol':'1.2-2' }} • Pago: {{ totalPago | currency:'BRL':'symbol':'1.2-2' }}</span>
+      </div>
+      <mat-icon>{{ mobileFinanceiroAberto() ? 'expand_less' : 'expand_more' }}</mat-icon>
+    </button>
+
+    <div class="pedido-detail-mobile__finance-inline">
+      <div><span>Total</span><strong>{{ pedido.total | currency:'BRL':'symbol':'1.2-2' }}</strong></div>
+      <div><span>Pago</span><strong>{{ totalPago | currency:'BRL':'symbol':'1.2-2' }}</strong></div>
+      <div><span>Restante</span><strong>{{ restaPagar | currency:'BRL':'symbol':'1.2-2' }}</strong></div>
+    </div>
+
+    @if (mobileFinanceiroAberto()) {
+    <div class="pedido-detail-mobile__details" @expandCollapse>
+      <div class="pedido-detail-mobile__row"><span>Subtotal</span><strong>{{ pedido.subTotal | currency:'BRL':'symbol':'1.2-2' }}</strong></div>
+      <div class="pedido-detail-mobile__row"><span>Frete</span><strong>{{ pedido.frete ?? 0 | currency:'BRL':'symbol':'1.2-2' }}</strong></div>
+      <div class="pedido-detail-mobile__row"><span>Acréscimo</span><strong>{{ pedido.acrescimo ?? 0 | currency:'BRL':'symbol':'1.2-2' }}</strong></div>
+      <div class="pedido-detail-mobile__row"><span>Desconto</span><strong>{{ pedido.desconto ?? 0 | currency:'BRL':'symbol':'1.2-2' }}</strong></div>
+    </div>
+    }
+  </section>
+
+  <section class="pedido-detail-mobile__section">
+    <div class="pedido-detail-mobile__section-head">
+      <div>
+        <span class="pedido-detail-mobile__section-eyebrow">Itens</span>
+        <strong>Itens do pedido</strong>
+      </div>
+      @if (['RASCUNHO','PENDENTE','ORCAMENTO'].includes((pedido.status || '').toUpperCase())) {
+      <div class="pedido-detail-mobile__item-actions">
+        <button mat-stroked-button color="primary" type="button" (click)="onBuscarProdutos()">Adicionar</button>
+      </div>
+      }
+    </div>
+
+    <div class="pedido-detail-mobile__items">
+      @for (item of pedido.itens; track item.id; let i = $index) {
+      <article class="pedido-detail-mobile__item-card">
+        <strong class="pedido-detail-mobile__item-title">{{ item.descricao }}</strong>
+        <div class="pedido-detail-mobile__item-grid">
+          <div class="pedido-detail-mobile__item-metric">
+            <span>Qtd</span>
+            @if ((pedido.status || '').toUpperCase() === 'RASCUNHO') {
+            <input type="number" min="1" [value]="item.quantidade" (change)="alterarQuantidadeItemDetalhe(i, $any($event.target).value)" />
+            } @else {
+            <strong>{{ item.quantidade }}</strong>
+            }
+          </div>
+          <div class="pedido-detail-mobile__item-metric">
+            <span>Valor</span>
+            <strong>{{ item.valor | currency:'BRL':'symbol':'1.2-2' }}</strong>
+          </div>
+        </div>
+        <div class="pedido-detail-mobile__item-subtotal">
+          <span>Subtotal</span>
+          <strong>{{ item.subTotal | currency:'BRL':'symbol':'1.2-2' }}</strong>
+        </div>
+
+        @if (['RASCUNHO','PENDENTE','ORCAMENTO'].includes((pedido.status || '').toUpperCase())) {
+        <div class="pedido-detail-mobile__item-card-actions">
+          <button mat-button color="primary" type="button" (click)="onBuscarProdutos()">Editar</button>
+          <button mat-button color="warn" type="button" (click)="removerItemPedido(i)">Remover</button>
+        </div>
+        }
+      </article>
+      }
+    </div>
+  </section>
+
+  <section class="pedido-detail-mobile__section">
+    <button type="button" class="pedido-detail-mobile__toggle" (click)="toggleMobileCliente()">
+      <div>
+        <strong>Cliente</strong>
+        <span>{{ pedido.cliente?.nome || 'Cliente não definido' }}</span>
+      </div>
+      <mat-icon>{{ mobileClienteAberto() ? 'expand_less' : 'expand_more' }}</mat-icon>
+    </button>
+
+    <div class="pedido-detail-mobile__client-summary">
+      <strong>{{ pedido.cliente?.nome || 'Cliente não definido' }}</strong>
+      @for (linha of mobileClienteLinhas; track linha) {
+      <span>{{ linha }}</span>
+      }
+      @if (pedido.cliente && !mobileClienteAberto()) {
+      <button mat-stroked-button color="primary" type="button" class="pedido-detail-mobile__inline-action"
+        (click)="trocarCliente()" [disabled]="inativoCliente">
+        Trocar cliente
+      </button>
+      }
+    </div>
+
+    @if (mobileClienteAberto()) {
+    <div class="pedido-detail-mobile__details" @expandCollapse>
+      @if (trocandoCliente || !pedido.cliente) {
+      <app-auto-complete
+        [control]="clienteControl"
+        label="Buscar cliente"
+        [displayWith]="mostrarCliente"
+        [buscarFn]="buscarClientes">
+      </app-auto-complete>
+
+      <div class="pedido-detail-mobile__section-actions pedido-detail-mobile__section-actions--stack">
+        <button mat-flat-button color="primary" type="button" (click)="salvarClienteDoControle()" [disabled]="salvandoCliente || inativoCliente">
+          Usar cliente
+        </button>
+        <button mat-stroked-button color="primary" type="button" (click)="onCriarCliente()" [disabled]="salvandoCliente || inativoCliente">
+          Novo cliente
+        </button>
+      </div>
+      } @else {
+      @for (linha of mobileClienteDetalhes; track linha) {
+      <span class="pedido-detail-mobile__detail-line">{{ linha }}</span>
+      }
+
+      <div class="pedido-detail-mobile__section-actions">
+        <button mat-stroked-button color="primary" type="button" (click)="trocarCliente()" [disabled]="inativoCliente">
+          Trocar cliente
+        </button>
+      </div>
+      }
+    </div>
+    }
+  </section>
+
+  <section class="pedido-detail-mobile__section">
+    <button type="button" class="pedido-detail-mobile__toggle" (click)="toggleMobilePagamentos()">
+      <div>
+        <strong>Pagamentos</strong>
+        <span>Pago: {{ totalPago | currency:'BRL':'symbol':'1.2-2' }} • Restante: {{ restaPagar | currency:'BRL':'symbol':'1.2-2' }}</span>
+      </div>
+      <mat-icon>{{ mobilePagamentosAberto() ? 'expand_less' : 'expand_more' }}</mat-icon>
+    </button>
+
+    @if (mobilePagamentosAberto()) {
+    <div class="pedido-detail-mobile__details" @expandCollapse>
+      <div class="pedido-detail-mobile__payments">
+        @for (pg of pedido.pagamentos; track pg.id; let i = $index) {
+        <div class="pedido-detail-mobile__payment-card">
+          <div>
+            <strong>{{ pg.forma }}</strong>
+            <span>{{ pg.data | date:"dd/MM 'às' HH:mm" }}</span>
+          </div>
+          <div class="pedido-detail-mobile__payment-meta">
+            <strong>{{ pg.valor | currency:'BRL':'symbol':'1.2-2' }}</strong>
+            <button mat-icon-button color="warn" type="button" (click)="removerPagamento(i)" [disabled]="inativoPagamentos">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </div>
+        }
+      </div>
+
+      @if (!inativoPagamentos) {
+      <div class="pedido-detail-mobile__payment-form">
+        <app-input-options [control]="pagamentoFormaControl" label="Forma" placeholder="Selecione a forma" [options]="formasPagamento"></app-input-options>
+        <app-input-moeda [control]="pagamentoValorControl"></app-input-moeda>
+        <button mat-flat-button color="primary" type="button" (click)="adicionarPagamento()" [disabled]="pagamentoForm.invalid">
+          Adicionar pagamento
+        </button>
+      </div>
+      }
+    </div>
+    }
+  </section>
+
+  <section class="pedido-detail-mobile__section">
+    <button type="button" class="pedido-detail-mobile__toggle" (click)="toggleMobileObservacoes()">
+      <div>
+        <strong>Observações</strong>
+        <span>{{ pedido.observacoes ? 'Toque para editar' : 'Adicionar observação' }}</span>
+      </div>
+      <mat-icon>{{ mobileObservacoesAberto() ? 'expand_less' : 'expand_more' }}</mat-icon>
+    </button>
+
+    @if (pedido.observacoes) {
+    <p class="pedido-detail-mobile__note-preview">{{ pedido.observacoes }}</p>
+    } @else {
+    <p class="pedido-detail-mobile__note-preview pedido-detail-mobile__note-preview--empty">Nenhuma observação adicionada.</p>
+    }
+
+    @if (mobileObservacoesAberto()) {
+    <div class="pedido-detail-mobile__details" @expandCollapse>
+      <mat-form-field appearance="outline" class="pedido-detail-mobile__field">
+        <mat-label>Observações</mat-label>
+        <textarea matInput rows="3" [formControl]="observacoesControl" placeholder="Escreva instruções rápidas para produção ou entrega"></textarea>
+      </mat-form-field>
+
+      <div class="pedido-detail-mobile__section-actions">
+        <button mat-flat-button color="primary" type="button" (click)="salvarObservacoes()" [disabled]="inativoObservacoes || salvandoObs">
+          Salvar observação
+        </button>
+      </div>
+    </div>
+    }
+  </section>
+
+  <section class="pedido-detail-mobile__section pedido-detail-mobile__section--quick">
+    <div class="pedido-detail-mobile__section-head">
+      <div>
+        <span class="pedido-detail-mobile__section-eyebrow">Ações rápidas</span>
+        <strong>Impressão e envio</strong>
+      </div>
+    </div>
+
+    <div class="pedido-detail-mobile__quick-actions">
+      <div class="pedido-detail-mobile__quick-actions-primary">
+        <button mat-flat-button color="primary" type="button" class="pedido-detail-mobile__quick-action-primary"
+          (click)="imprimirPedidoCompleto()">
+          <mat-icon>description</mat-icon>
+          <span>Pedido completo</span>
+        </button>
+
+        <button mat-flat-button class="pedido-detail-mobile__quick-action-primary btn-whatsapp" type="button"
+          (click)="abrirWhatsApp()">
+          <mat-icon>chat</mat-icon>
+          <span>WhatsApp</span>
+        </button>
+      </div>
+
+      <div class="pedido-detail-mobile__quick-actions-secondary">
+        <button mat-stroked-button color="primary" type="button" (click)="imprimirPedidoDuasVias()">
+          <mat-icon>content_copy</mat-icon>
+          <span>Duas vias</span>
+        </button>
+        <button mat-stroked-button color="accent" type="button" (click)="imprimirEtiqueta()">
+          <mat-icon>sell</mat-icon>
+          <span>Etiqueta</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  @if (mobileWhatsAppAberto()) {
+  <app-mobile-summary-sheet
+    [open]="mobileWhatsAppAberto()"
+    bottomOffset="58px"
+    closeAriaLabel="Fechar prévia do WhatsApp"
+    [backdropZIndex]="53"
+    [sheetZIndex]="54"
+    (close)="fecharMobileWhatsApp()">
+    <div class="pedido-detail-mobile__wa-sheet">
+      <header class="pedido-detail-mobile__summary-header">
+        <div>
+          <span class="pedido-detail-mobile__section-eyebrow">WhatsApp</span>
+          <strong>Revisar mensagem</strong>
+        </div>
+      </header>
+
+      <div class="pedido-detail-mobile__wa-meta">
+        <strong>{{ pedido.cliente?.nome || 'Cliente' }}</strong>
+        @if (pedido.cliente?.telefone) {
+        <span>{{ pedido.cliente?.telefone }}</span>
+        }
+      </div>
+
+      <div class="pedido-detail-mobile__wa-preview">{{ mobileWhatsAppPreview }}</div>
+
+      <div class="pedido-detail-mobile__wa-actions">
+        <button mat-stroked-button color="primary" type="button" (click)="copiarMensagemWhatsAppMobile()">
+          <mat-icon>content_copy</mat-icon>
+          <span>Copiar</span>
+        </button>
+
+        <button mat-flat-button class="btn-whatsapp" type="button" (click)="enviarWhatsAppMobile()"
+          [disabled]="!pedido.cliente?.telefone">
+          <mat-icon>chat</mat-icon>
+          <span>Abrir WhatsApp</span>
+        </button>
+      </div>
+    </div>
+  </app-mobile-summary-sheet>
+  }
+
+  @if (mobileResumoAberto()) {
+  <app-mobile-summary-sheet
+    [open]="mobileResumoAberto()"
+    bottomOffset="132px"
+    closeAriaLabel="Fechar resumo do pedido"
+    [backdropZIndex]="53"
+    [sheetZIndex]="54"
+    (close)="fecharMobileResumo()">
+    <div class="pedido-detail-mobile__summary-content">
+    <header class="pedido-detail-mobile__summary-header">
+      <div>
+        <span class="pedido-detail-mobile__section-eyebrow">Resumo do pedido</span>
+        <strong>Detalhes do valor</strong>
+      </div>
+    </header>
+
+    <div class="pedido-detail-mobile__summary-grid">
+      <div class="pedido-detail-mobile__summary-tile">
+        <span>Pago</span>
+        <strong>{{ totalPago | currency:'BRL':'symbol':'1.2-2' }}</strong>
+      </div>
+      <div class="pedido-detail-mobile__summary-tile">
+        <span>Restante</span>
+        <strong>{{ restaPagar | currency:'BRL':'symbol':'1.2-2' }}</strong>
+      </div>
+    </div>
+
+    <div class="pedido-detail-mobile__summary-rows">
+      <div class="pedido-detail-mobile__row"><span>Subtotal</span><strong>{{ pedido.subTotal | currency:'BRL':'symbol':'1.2-2' }}</strong></div>
+      <div class="pedido-detail-mobile__row"><span>Acréscimo</span><strong>{{ pedido.acrescimo | currency:'BRL':'symbol':'1.2-2' }}</strong></div>
+      <div class="pedido-detail-mobile__row"><span>Frete</span><strong>{{ (pedido.frete || 0) | currency:'BRL':'symbol':'1.2-2' }}</strong></div>
+      <div class="pedido-detail-mobile__row"><span>Desconto</span><strong>{{ pedido.desconto | currency:'BRL':'symbol':'1.2-2' }}</strong></div>
+      <div class="pedido-detail-mobile__row pedido-detail-mobile__row--total"><span>Total</span><strong>{{ pedido.total | currency:'BRL':'symbol':'1.2-2' }}</strong></div>
+    </div>
+    </div>
+  </app-mobile-summary-sheet>
+  }
+
+  <app-mobile-total-bar
+    *ngIf="!mobileWhatsAppAberto()"
+    label="Total do pedido"
+    [valueText]="(pedido.total | currency:'BRL':'symbol':'1.2-2') || 'R$ 0,00'"
+    [status]="pedido.status"
+    [detailText]="mobileResumoBarraTexto"
+    [expanded]="mobileResumoAberto()"
+    [actionText]="mobilePrimaryActionLabel"
+    [actionDisabled]="mobilePrimaryActionDisabled"
+    expandAriaLabel="Abrir resumo do pedido"
+    actionAriaLabel="Executar ação principal do pedido"
+    bottomOffset="58px"
+    [attachedToBottomNav]="true"
+    (expand)="toggleMobileResumo()"
+    (action)="executarAcaoPrincipalMobile()">
+  </app-mobile-total-bar>
+</section>
+}
+}

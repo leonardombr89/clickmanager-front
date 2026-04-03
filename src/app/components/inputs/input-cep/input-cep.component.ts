@@ -3,6 +3,7 @@ import { ChangeDetectionStrategy, Component, Input, OnInit, ViewChild, ElementRe
 import { FormControl, ReactiveFormsModule, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
 import { debounceTime } from 'rxjs/operators';
 import { CepUtilService } from 'src/app/utils/cep-util.service';
 import { EnderecoViaCep } from 'src/app/models/endereco/endereco.viacep.model';
@@ -11,7 +12,7 @@ import { EnderecoViaCep } from 'src/app/models/endereco/endereco.viacep.model';
   selector: 'app-input-cep',
   standalone: true,
   templateUrl: './input-cep.component.html',
-  imports: [CommonModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule],
+  imports: [CommonModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatButtonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class InputCepComponent implements OnInit {
@@ -19,6 +20,8 @@ export class InputCepComponent implements OnInit {
   @Input() label: string = 'CEP';
   @Input() placeholder: string = '00000-000';
   @Input() autoBuscar = true;
+  @Input() showSearchButton = false;
+  @Input() searchButtonText = 'Buscar endereço';
   @Output() enderecoEncontrado = new EventEmitter<EnderecoViaCep | null>();
 
   @ViewChild('input') inputRef!: ElementRef<HTMLInputElement>;
@@ -53,7 +56,13 @@ export class InputCepComponent implements OnInit {
 
   onBlur(): void {
     if (!this.autoBuscar) return;
+    this.buscarEndereco();
+  }
+
+  buscarEndereco(): void {
     const raw = this.limpar(this.control.value ?? '');
+    this.control.markAsTouched();
+
     if (raw.length !== 8) {
       this.enderecoEncontrado.emit(null);
       return;
@@ -92,5 +101,10 @@ export class InputCepComponent implements OnInit {
     if (this.control.hasError('required')) return 'Campo obrigatório';
     if (this.control.hasError('cepInvalido')) return 'CEP inválido';
     return 'Valor inválido';
+  }
+
+  get canSearch(): boolean {
+    const raw = this.limpar(this.control.value ?? '');
+    return raw.length === 8 && !this.carregando;
   }
 }

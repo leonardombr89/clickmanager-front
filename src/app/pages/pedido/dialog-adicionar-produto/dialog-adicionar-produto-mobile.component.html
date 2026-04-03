@@ -1,0 +1,300 @@
+<div class="mobile-wizard">
+  <header class="mobile-wizard__header">
+    <button mat-icon-button type="button" (click)="goPrev()" aria-label="Voltar">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+
+    <div class="mobile-wizard__title">
+      <span class="mobile-wizard__eyebrow">Etapa {{ currentStep + 1 }} de {{ stepLabels.length }}</span>
+      <strong>{{ currentStepLabel }}</strong>
+    </div>
+
+    <button mat-icon-button type="button" (click)="close()" aria-label="Fechar">
+      <mat-icon>close</mat-icon>
+    </button>
+  </header>
+
+  <section class="mobile-wizard__body">
+    @switch (currentStep) {
+      @case (0) {
+        <section class="mobile-step" [formGroup]="selectForm">
+          <div class="mobile-step__intro">
+            <strong>Selecione o produto</strong>
+            <span>Escolha a base do item para continuar.</span>
+          </div>
+
+          <mat-form-field appearance="outline" class="mobile-field">
+            <mat-label>Buscar produto</mat-label>
+            <input matInput placeholder="Ex: adesivo, banner, cartão" [formControl]="searchCtrl">
+            @if (searchCtrl.value) {
+              <button mat-icon-button matSuffix type="button" aria-label="Limpar busca" (click)="searchCtrl.setValue('')">
+                <mat-icon>close</mat-icon>
+              </button>
+            } @else {
+              <mat-icon matSuffix>search</mat-icon>
+            }
+          </mat-form-field>
+
+          @if (loadingProdutos) {
+            <div class="mobile-state">
+              <mat-progress-spinner diameter="32" strokeWidth="4" mode="indeterminate"></mat-progress-spinner>
+              <span>Carregando produtos...</span>
+            </div>
+          } @else if (produtos.length) {
+            <div class="mobile-product-list">
+              @for (produto of produtos; track trackById($index, produto)) {
+                <button
+                  type="button"
+                  class="mobile-product-card"
+                  [class.is-selected]="produto.id === produtoIdSelecionado"
+                  (click)="selecionarProduto(produto)">
+                  <div class="mobile-product-card__content">
+                    <strong>{{ produto.nome }}</strong>
+                    <span>{{ produto.descricao || 'Sem descrição cadastrada.' }}</span>
+                    <small>{{ produto.variacoes?.length || 0 }} variações disponíveis</small>
+                  </div>
+                  <mat-icon>chevron_right</mat-icon>
+                </button>
+              }
+            </div>
+          } @else {
+            <div class="mobile-state mobile-state--empty">
+              <mat-icon>inventory_2</mat-icon>
+              <strong>Nenhum produto encontrado</strong>
+              <span>Tente ajustar a busca para encontrar o item.</span>
+            </div>
+          }
+        </section>
+      }
+
+      @case (1) {
+        <section class="mobile-step" [formGroup]="variacaoForm">
+          <div class="mobile-step__intro">
+            <strong>Escolha a variação</strong>
+            <span>Defina material, formato e cor para montar o item.</span>
+          </div>
+
+          @if (loadingVariacoes) {
+            <div class="mobile-state">
+              <mat-progress-spinner diameter="32" strokeWidth="4" mode="indeterminate"></mat-progress-spinner>
+              <span>Carregando variações...</span>
+            </div>
+          } @else {
+            <section class="mobile-option-group">
+              <header>
+                <strong>Material</strong>
+                <span>{{ materiais.length }} opções</span>
+              </header>
+              <div class="mobile-radio-list">
+                @for (material of materiais; track trackById($index, material)) {
+                  <button
+                    type="button"
+                    class="mobile-radio-item"
+                    [class.is-selected]="selMaterialId === material.id"
+                    (click)="onSelectMaterial(material.id)">
+                    <span class="mobile-radio-item__dot"></span>
+                    <span>{{ material.nome }}</span>
+                  </button>
+                }
+              </div>
+            </section>
+
+            <section class="mobile-option-group" [class.is-disabled]="!materiais.length">
+              <header>
+                <strong>Formato</strong>
+                <span>{{ formatos.length }} opções</span>
+              </header>
+              <div class="mobile-radio-list">
+                @for (formato of formatos; track trackById($index, formato)) {
+                  <button
+                    type="button"
+                    class="mobile-radio-item"
+                    [class.is-selected]="selFormatoId === formato.id"
+                    (click)="onSelectFormato(formato.id)">
+                    <span class="mobile-radio-item__dot"></span>
+                    <span>{{ formato.nome }}</span>
+                  </button>
+                }
+              </div>
+            </section>
+
+            <section class="mobile-option-group" [class.is-disabled]="!formatos.length">
+              <header>
+                <strong>Cor</strong>
+                <span>{{ cores.length }} opções</span>
+              </header>
+              <div class="mobile-radio-list">
+                @for (cor of cores; track trackById($index, cor)) {
+                  <button
+                    type="button"
+                    class="mobile-radio-item"
+                    [class.is-selected]="selCorId === cor.id"
+                    (click)="onSelectCor(cor.id)">
+                    <span class="mobile-radio-item__dot"></span>
+                    <span>{{ cor.nome }}</span>
+                  </button>
+                }
+              </div>
+            </section>
+
+            @if (selectedVariacao) {
+              <div class="mobile-selection-summary">
+                <strong>Variação selecionada</strong>
+                <span>{{ resumoVariacaoComAcab }}</span>
+              </div>
+
+              @if (acabamentosDisponiveis.length) {
+                <section class="mobile-option-group">
+                  <header>
+                    <strong>Acabamentos</strong>
+                    <span>Opcionais</span>
+                  </header>
+
+                  <div class="mobile-check-list">
+                    @for (acabamento of acabamentosDisponiveis; track trackById($index, acabamento)) {
+                      <label class="mobile-check-item">
+                        <mat-checkbox
+                          [checked]="isSelected(acabamentoIdsCtrl, acabamento.id)"
+                          (change)="toggleAcabamento(acabamento.id, $event.checked)">
+                        </mat-checkbox>
+                        <div>
+                          <strong>{{ acabamento.nome }}</strong>
+                          <span>{{ acabamento.descricao || precoResumo(acabamento.preco) }}</span>
+                        </div>
+                      </label>
+                    }
+                  </div>
+                </section>
+              }
+            }
+          }
+        </section>
+      }
+
+      @case (2) {
+        <section class="mobile-step" [formGroup]="configForm">
+          <div class="mobile-step__intro">
+            <strong>Configure o preço</strong>
+            <span>Informe quantidade e medidas para calcular o total.</span>
+          </div>
+
+          <app-configurar-preco-step
+            [produto]="produtoAtual"
+            [resumoPreco]="resumoPreco"
+            [baseResumoTexto]="baseResumoTexto"
+            [baseSubtotal]="baseSubtotal"
+            (configConcluida)="onConfigConcluida($event)"
+            (precoReadyChange)="onPrecoReady($event)">
+          </app-configurar-preco-step>
+        </section>
+      }
+
+      @case (3) {
+        <section class="mobile-step" [formGroup]="servicosForm">
+          <div class="mobile-step__intro">
+            <strong>Serviços</strong>
+            <span>Selecione serviços adicionais para este item.</span>
+          </div>
+
+          @if (servicosDisponiveis.length) {
+            <div class="mobile-check-list">
+              @for (servico of servicosDisponiveis; track trackById($index, servico)) {
+                <label class="mobile-check-item">
+                  <mat-checkbox
+                    [checked]="isSelected(servicoIdsCtrl, servico.id)"
+                    (change)="toggleServico(servico.id, $event.checked)">
+                  </mat-checkbox>
+                  <div>
+                    <strong>{{ servico.nome }}</strong>
+                    <span>{{ servico.descricao || precoResumo(servico.preco) }}</span>
+                  </div>
+                </label>
+              }
+            </div>
+          } @else {
+            <div class="mobile-state mobile-state--empty">
+              <mat-icon>construction</mat-icon>
+              <strong>Nenhum serviço disponível</strong>
+              <span>Você pode seguir para revisão sem serviços extras.</span>
+            </div>
+          }
+        </section>
+      }
+
+      @case (4) {
+        <section class="mobile-step mobile-step--review">
+          <div class="mobile-step__intro">
+            <strong>Revisão final</strong>
+            <span>Confira o item antes de adicionar ao pedido.</span>
+          </div>
+
+          <article class="mobile-review-card">
+            <div class="mobile-review-card__label">Produto</div>
+            <strong>{{ produtoBase?.nome || '—' }}</strong>
+            @if (produtoBase?.descricao) {
+              <span>{{ produtoBase?.descricao }}</span>
+            }
+          </article>
+
+          <article class="mobile-review-card">
+            <div class="mobile-review-card__label">Variação</div>
+            <strong>{{ resumoVariacaoComAcab || 'Selecione uma variação' }}</strong>
+          </article>
+
+          <article class="mobile-review-card">
+            <div class="mobile-review-grid">
+              <div>
+                <div class="mobile-review-card__label">Quantidade</div>
+                <strong>{{ baseQtd }}</strong>
+              </div>
+              <div>
+                <div class="mobile-review-card__label">Unitário</div>
+                <strong>{{ baseUnit !== null ? money(baseUnit) : '—' }}</strong>
+              </div>
+            </div>
+          </article>
+
+          @if (servicosSelecionadosDetalhe.length || acabamentosSelecionadosDetalhe.length) {
+            <article class="mobile-review-card">
+              <div class="mobile-review-card__label">Extras</div>
+              <div class="mobile-chip-list">
+                @for (acabamento of acabamentosSelecionadosDetalhe; track trackById($index, acabamento)) {
+                  <span class="mobile-chip">{{ acabamento.nome }}</span>
+                }
+                @for (servico of servicosSelecionadosDetalhe; track trackById($index, servico)) {
+                  <span class="mobile-chip">{{ servico.nome }}</span>
+                }
+              </div>
+            </article>
+          }
+
+          <article class="mobile-review-total">
+            <span>Total estimado</span>
+            <strong>{{ currentValueText }}</strong>
+          </article>
+        </section>
+      }
+    }
+  </section>
+
+  <footer class="mobile-wizard__footer">
+    <div class="mobile-wizard__footer-value">
+      <span>Total estimado</span>
+      <strong>{{ currentValueText }}</strong>
+      <small>{{ currentFooterHint }}</small>
+    </div>
+
+    <button
+      mat-flat-button
+      color="primary"
+      type="button"
+      class="mobile-wizard__footer-action"
+      [disabled]="!canAdvance || isFinishing"
+      (click)="goNext()">
+      @if (isFinishing) {
+        <mat-progress-spinner diameter="18" strokeWidth="3" mode="indeterminate"></mat-progress-spinner>
+      }
+      <span>{{ currentActionLabel }}</span>
+    </button>
+  </footer>
+</div>

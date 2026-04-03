@@ -1,4 +1,4 @@
-import { Component, signal, computed, OnInit } from '@angular/core';
+import { Component, signal, OnInit, HostListener } from '@angular/core';
 import {
   Validators,
   FormsModule,
@@ -17,12 +17,12 @@ import { PedidoService } from '../pedido.service';
 import { SharedComponentsModule } from "../../../components/shared-components.module";
 import { map, Observable, take } from 'rxjs';
 import { DialogAdicionarProdutoComponent } from '../dialog-adicionar-produto/dialog-adicionar-produto.component';
+import { DialogAdicionarProdutoMobileComponent } from '../dialog-adicionar-produto/dialog-adicionar-produto-mobile.component';
 import { DialogDescreverItemComponent } from '../dialog-descrever-item/dialog-descrever-item.component';
 import { PedidoRequest } from 'src/app/models/pedido/pedido-request.model';
 import { PedidoListagem } from 'src/app/models/pedido/pedido-listagem.model';
 import { PedidoItemRequest } from 'src/app/models/pedido/pedido-item-request.model';
 import { AuthService } from 'src/app/services/auth.service';
-import { InputTextareaComponent } from "../../../components/inputs/input-textarea/input-textarea.component";
 import { FormaPagamento } from 'src/app/utils/forma-pagamento.enum';
 import { InputOptionsComponent } from "../../../components/inputs/input-options/input-options.component";
 import { ToastrService } from 'ngx-toastr';
@@ -36,7 +36,6 @@ import {
   animate
 } from '@angular/animations';
 import { ItemTipo } from 'src/app/models/pedido/item-tipo.enum';
-import { CardHeaderComponent } from "src/app/components/card-header/card-header.component";
 import { PageCardComponent } from "src/app/components/page-card/page-card.component";
 import { PagamentosSectionComponent } from "src/app/components/pagamentos-section/pagamentos-section.component";
 import { ItensPedidoSectionComponent } from "src/app/components/itens-pedido-section/itens-pedido-section.component";
@@ -44,6 +43,8 @@ import { ClienteSelectorCardComponent } from "src/app/components/cliente-selecto
 import { ObservacoesCardComponent } from "src/app/components/observacoes-card/observacoes-card.component";
 import { ConfirmDialogComponent } from "src/app/components/dialog/confirm-dialog/confirm-dialog.component";
 import { ClienteService } from "../../cliente/cliente.service";
+import { MobileTotalBarComponent } from "src/app/components/mobile-total-bar/mobile-total-bar.component";
+import { MobileSummarySheetComponent } from "src/app/components/mobile-summary-sheet/mobile-summary-sheet.component";
 
 @Component({
   selector: 'app-form-pedido',
@@ -56,17 +57,16 @@ import { ClienteService } from "../../cliente/cliente.service";
     ReactiveFormsModule,
     TablerIconsModule,
     SharedComponentsModule,
-    InputTextareaComponent,
     InputOptionsComponent,
     InputDataComponent,
-    CardHeaderComponent,
     SectionCardComponent,
     PageCardComponent,
     PagamentosSectionComponent,
     ItensPedidoSectionComponent,
     ClienteSelectorCardComponent,
     ObservacoesCardComponent,
-    ConfirmDialogComponent
+    MobileTotalBarComponent,
+    MobileSummarySheetComponent
   ],
   templateUrl: './form-pedido.component.html',
   styleUrls: ['./form-pedido.component.scss'],
@@ -90,6 +90,16 @@ import { ClienteService } from "../../cliente/cliente.service";
   ]
 })
 export class FormPedidoComponent implements OnInit {
+  readonly mobileFlowSteps: Array<{ key: 'cliente' | 'itens' | 'ajustes' | 'pagamento'; label: string }> = [
+    { key: 'cliente', label: 'Cliente' },
+    { key: 'itens', label: 'Itens' },
+    { key: 'ajustes', label: 'Ajustes' },
+    { key: 'pagamento', label: 'Pagamento' }
+  ];
+  readonly isMobileView = signal(false);
+  readonly mobileStep = signal<'cliente' | 'itens' | 'ajustes' | 'pagamento' | null>('cliente');
+  readonly mobileResumoAberto = signal(false);
+  readonly mobileObservacoesAberto = signal(false);
 
   addForm!: FormGroup;
   rows!: FormArray;
@@ -124,6 +134,7 @@ export class FormPedidoComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
+    this.atualizarViewport();
     this.addForm = this.fb.group({
       clienteId: [null, Validators.required],
       acrescimo: [0],
@@ -140,8 +151,14 @@ export class FormPedidoComponent implements OnInit {
     this.rows.push(this.createItemFormGroup());
 
     this.addForm.valueChanges.subscribe(() => this.recalcularTotais());
+    this.orcamentoControl.valueChanges.subscribe(() => this.sincronizarEtapaMobile());
 
     this.observacoesControl.valueChanges.subscribe(() => this.obsSalvo = false);
+  }
+
+  @HostListener('window:resize')
+  onWindowResize(): void {
+    this.atualizarViewport();
   }
 
   addPagamento(): void {
@@ -243,9 +260,18 @@ export class FormPedidoComponent implements OnInit {
   }
 
   onBuscarProdutos(): void {
-    const dialogRef = this.dialog.open(DialogAdicionarProdutoComponent, {
-      panelClass: 'dialog-grande'
-    });
+    const isMobile = globalThis?.matchMedia?.('(max-width: 900px)')?.matches ?? false;
+    const dialogRef = isMobile
+      ? this.dialog.open(DialogAdicionarProdutoMobileComponent, {
+          width: '100vw',
+          maxWidth: '100vw',
+          height: '100dvh',
+          maxHeight: '100dvh',
+          panelClass: 'dialog-mobile-fullscreen',
+        })
+      : this.dialog.open(DialogAdicionarProdutoComponent, {
+          panelClass: 'dialog-grande'
+        });
 
     dialogRef.afterClosed().subscribe((result: any[] | null) => {
       if (!Array.isArray(result) || result.length === 0) return;
@@ -320,6 +346,7 @@ export class FormPedidoComponent implements OnInit {
 
       this.pedidoItens = [...this.pedidoItens, ...novos];
       this.recalcularTotais();
+      this.avancarEtapaMobile();
     });
 
   }
@@ -348,6 +375,7 @@ export class FormPedidoComponent implements OnInit {
 
         this.pedidoItens = [...this.pedidoItens, novoItem];
         this.recalcularTotais();
+        this.avancarEtapaMobile();
       }
     });
   }
@@ -355,6 +383,7 @@ export class FormPedidoComponent implements OnInit {
   removerItem(index: number): void {
     this.pedidoItens.splice(index, 1);
     this.recalcularTotais();
+    this.sincronizarEtapaMobile();
   }
 
   onCriarCliente(): void {
@@ -363,8 +392,8 @@ export class FormPedidoComponent implements OnInit {
     });
   }
 
-  saveDetail(event: Event): void {
-    event.preventDefault();
+  saveDetail(event?: Event): void {
+    event?.preventDefault();
 
     const form = this.addForm.value;
 
@@ -494,6 +523,7 @@ export class FormPedidoComponent implements OnInit {
         this.clienteControl.markAsDirty();
         this.clienteControl.updateValueAndValidity({ emitEvent: false });
         this.toastr.success('Cliente selecionado para o pedido.');
+        this.avancarEtapaMobile();
       },
       error: () => {
         this.toastr.warning('Não foi possível carregar os dados completos do cliente. Tente novamente.');
@@ -504,6 +534,7 @@ export class FormPedidoComponent implements OnInit {
   iniciarTrocaCliente(): void {
     this.trocandoCliente = true;
     this.clienteControl.reset(null, { emitEvent: false });
+    this.sincronizarEtapaMobile();
   }
 
   cancelarTrocaCliente(): void {
@@ -540,11 +571,305 @@ export class FormPedidoComponent implements OnInit {
     return this.pagamentosControls[index].get('valor') as FormControl;
   }
 
+  get pagamentoNovoValorControl(): FormControl {
+    return this.pagamentoNovo.get('valor') as FormControl;
+  }
+
   get totalPago(): number {
     return this.pagamentosControls.reduce((acc, pg) => {
       const valor = Number(pg.get('valor')?.value || 0);
       return acc + valor;
     }, 0);
+  }
+
+  get etapasConcluidasMobile(): number {
+    if (!this.addForm) return 0;
+
+    let etapas = 0;
+    if (this.etapaConcluida('cliente')) etapas += 1;
+    if (this.etapaConcluida('itens')) etapas += 1;
+    if (this.etapaConcluida('ajustes')) etapas += 1;
+    if (this.etapaConcluida('pagamento')) etapas += 1;
+    return etapas;
+  }
+
+  get clienteSelecionado(): boolean {
+    return !!this.clienteConfirmado && !this.trocandoCliente && !!this.addForm.get('clienteId')?.value?.id;
+  }
+
+  get podeSalvarPedido(): boolean {
+    return !this.addForm.invalid
+      && this.pedidoItens.length > 0
+      && !!this.addForm.get('clienteId')?.value
+      && (!this.orcamentoControl.value || (!!this.nomeOrcamentoControl.value && !!this.vencimentoOrcamentoControl.value));
+  }
+
+  get mostrarPagamentoMobile(): boolean {
+    return this.pedidoItens.length > 0 && !this.orcamentoControl.value;
+  }
+
+  get observacoesPossuemConteudo(): boolean {
+    return !!String(this.observacoesControl.value || '').trim();
+  }
+
+  progressoMobilePercentual(): number {
+    return (this.etapasConcluidasMobile / this.mobileFlowSteps.length) * 100;
+  }
+
+  etapaConcluida(step: 'cliente' | 'itens' | 'ajustes' | 'pagamento'): boolean {
+    if (!this.addForm) return false;
+
+    if (step === 'cliente') {
+      return !!this.clienteConfirmado && !this.trocandoCliente;
+    }
+
+    if (step === 'itens') {
+      return this.pedidoItens.length > 0;
+    }
+
+    if (step === 'ajustes') {
+      return this.clienteSelecionado && this.pedidoItens.length > 0 && (this.temAjustesAplicados() || this.mobileStep() === 'pagamento' || this.podeSalvarPedido);
+    }
+
+    if (step === 'pagamento') {
+      return this.orcamentoControl.value || this.pagamentosControls.length > 0 || this.podeSalvarPedido;
+    }
+
+    return false;
+  }
+
+  etapaAtiva(step: 'cliente' | 'itens' | 'ajustes' | 'pagamento'): boolean {
+    return this.mobileStep() === step;
+  }
+
+  etapaPendente(step: 'cliente' | 'itens' | 'ajustes' | 'pagamento'): boolean {
+    return !this.etapaConcluida(step) && !this.etapaAtiva(step);
+  }
+
+  abrirEtapaMobile(step: 'cliente' | 'itens' | 'ajustes' | 'pagamento'): void {
+    if (step === 'pagamento' && !this.mostrarPagamentoMobile) {
+      return;
+    }
+
+    if (this.mobileStep() === step) {
+      this.mobileStep.set(null);
+      return;
+    }
+
+    this.mobileStep.set(step);
+  }
+
+  toggleResumoMobile(): void {
+    this.mobileResumoAberto.set(!this.mobileResumoAberto());
+  }
+
+  fecharResumoMobile(): void {
+    this.mobileResumoAberto.set(false);
+  }
+
+  salvarPedidoMobile(): void {
+    this.saveDetail();
+  }
+
+  toggleObservacoesMobile(): void {
+    this.mobileObservacoesAberto.set(!this.mobileObservacoesAberto());
+  }
+
+  resumoClienteMobile(): string {
+    if (!this.clienteConfirmado) {
+      return 'Selecione o cliente';
+    }
+
+    const telefone = this.clienteConfirmado.telefone ? ` • ${this.clienteConfirmado.telefone}` : '';
+    return `${this.clienteConfirmado.nome || 'Cliente'}${telefone}`;
+  }
+
+  resumoItensMobile(): string {
+    if (!this.pedidoItens.length) {
+      return 'Adicione ao menos um item.';
+    }
+
+    const totalItens = this.pedidoItens.length;
+    return `${totalItens} ${totalItens === 1 ? 'item adicionado' : 'itens adicionados'}`;
+  }
+
+  resumoAjustesMobile(): string {
+    if (this.orcamentoControl.value) {
+      return 'Orçamento configurado.';
+    }
+
+    if (this.temAjustesFinanceiros()) {
+      return 'Valores extras já aplicados.';
+    }
+
+    return 'Sem ajustes aplicados';
+  }
+
+  resumoObservacoesMobile(): string {
+    if (!this.observacoesPossuemConteudo) {
+      return 'Observações opcionais';
+    }
+
+    const texto = String(this.observacoesControl.value || '').trim();
+    return texto.length > 64 ? `${texto.slice(0, 64)}...` : texto;
+  }
+
+  resumoBarraMobile(): string {
+    return this.podeSalvarPedido ? 'Pedido pronto para salvar' : 'Ver resumo';
+  }
+
+  statusResumoMobile(): string {
+    return this.podeSalvarPedido ? 'Pedido pronto para salvar' : 'O que falta para concluir';
+  }
+
+  faltasResumoMobile(): string[] {
+    const faltas: string[] = [];
+
+    if (!this.clienteSelecionado) {
+      faltas.push('Selecione um cliente para continuar');
+    }
+
+    if (!this.pedidoItens.length) {
+      faltas.push('Adicione ao menos 1 item');
+    }
+
+    if (this.orcamentoControl.value) {
+      if (!this.nomeOrcamentoControl.value || !this.vencimentoOrcamentoControl.value) {
+        faltas.push('Complete os dados do orçamento');
+      }
+    }
+
+    return faltas;
+  }
+
+  resumoPagamentoMobile(): string {
+    if (!this.pagamentosControls.length) {
+      return 'Nenhum pagamento informado.';
+    }
+
+    return `${this.pagamentosControls.length} ${this.pagamentosControls.length === 1 ? 'pagamento' : 'pagamentos'} adicionado(s)`;
+  }
+
+  itensBaseMobile(): PedidoItemRequest[] {
+    return this.pedidoItens.filter(item => item.tipo === ItemTipo.BASE || item.tipo === ItemTipo.MANUAL);
+  }
+
+  removerItemMobile(index: number): void {
+    const itensBase = this.itensBaseMobile();
+    const item = itensBase[index];
+    if (!item) return;
+
+    if (item.grupoKey) {
+      this.pedidoItens = this.pedidoItens.filter(existente => existente.grupoKey !== item.grupoKey);
+    } else {
+      const idx = this.pedidoItens.indexOf(item);
+      if (idx >= 0) {
+        this.pedidoItens.splice(idx, 1);
+      }
+    }
+
+    this.recalcularTotais();
+    this.sincronizarEtapaMobile();
+  }
+
+  alterarQuantidadeMobile(index: number, quantidade: any): void {
+    const itensBase = this.itensBaseMobile();
+    const item = itensBase[index];
+    if (!item) return;
+
+    const qtd = Math.max(1, Number(quantidade) || 1);
+    const grupoKey = item.grupoKey;
+
+    this.pedidoItens = this.pedidoItens.map(existente => {
+      if (grupoKey && existente.grupoKey === grupoKey) {
+        const valorAtual = Number(existente.valor ?? 0);
+        const atual = { ...existente, quantidade: qtd };
+
+        if (existente.tipo === ItemTipo.BASE || existente.tipo === ItemTipo.MANUAL) {
+          atual.subTotal = valorAtual * qtd;
+        }
+
+        return atual;
+      }
+
+      if (!grupoKey && existente === item) {
+        const valorAtual = Number(existente.valor ?? 0);
+        return { ...existente, quantidade: qtd, subTotal: valorAtual * qtd };
+      }
+
+      return existente;
+    });
+
+    this.recalcularTotais();
+  }
+
+  focarQuantidadeMobile(index: number): void {
+    if (typeof document === 'undefined') {
+      return;
+    }
+
+    const input = document.querySelector<HTMLInputElement>(`[data-item-qty="${index}"]`);
+    input?.focus();
+    input?.select();
+  }
+
+  trackItemPedido(_: number, item: PedidoItemRequest): string {
+    return `${item.grupoKey || item.descricao}-${item.tipo}`;
+  }
+
+  private atualizarViewport(): void {
+    this.isMobileView.set(typeof window !== 'undefined' ? window.innerWidth <= 768 : false);
+  }
+
+  private avancarEtapaMobile(): void {
+    if (!this.isMobileView()) {
+      return;
+    }
+
+    if (this.mobileStep() === 'cliente' && this.clienteSelecionado) {
+      this.mobileStep.set('itens');
+      return;
+    }
+
+    if (this.mobileStep() === 'itens' && this.pedidoItens.length) {
+      this.mobileStep.set('ajustes');
+      return;
+    }
+
+    if (this.mobileStep() === 'ajustes' && this.mostrarPagamentoMobile) {
+      this.mobileStep.set('pagamento');
+    }
+  }
+
+  private sincronizarEtapaMobile(): void {
+    if (!this.isMobileView()) {
+      return;
+    }
+
+    if (!this.clienteSelecionado) {
+      this.mobileStep.set('cliente');
+      return;
+    }
+
+    if (!this.pedidoItens.length && this.mobileStep() !== 'cliente') {
+      this.mobileStep.set('itens');
+      return;
+    }
+
+    if (this.mobileStep() === 'pagamento' && !this.mostrarPagamentoMobile) {
+      this.mobileStep.set('ajustes');
+    }
+  }
+
+  private temAjustesAplicados(): boolean {
+    return this.temAjustesFinanceiros()
+      || !!this.observacoesControl.value;
+  }
+
+  private temAjustesFinanceiros(): boolean {
+    return Number(this.acrescimoControl.value || 0) > 0
+      || Number(this.freteControl.value || 0) > 0
+      || Number(this.descontoControl.value || 0) > 0;
   }
 
 }

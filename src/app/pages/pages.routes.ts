@@ -14,7 +14,7 @@ import { FormFormatoComponent } from './cadastro-tecnico/formatos/form-formato/f
 import { ListarFormatoComponent } from './cadastro-tecnico/formatos/listar-formato/listar-formato.component';
 import { ListarProdutosComponent } from './cadastro-tecnico/produtos/listar-produtos/listar-produtos.component';
 import { FormPedidoComponent } from './pedido/form-pedido/form-pedido.component';
-import { ListarPedidoComponent } from './pedido/listar-pedido/listar-pedido.component';
+import { ListarPedidoComponent } from 'src/app/pages/pedido/listar-pedido/listar-pedido.component';
 import { FormClienteComponent } from './cliente/form-cliente/form-cliente.component';
 import { ListarClienteComponent } from './cliente/listar-cliente/listar-cliente.component';
 import { DetalhesPedidoComponent } from 'src/app/pages/pedido/detalhes-pedido/detalhes-pedido.component';

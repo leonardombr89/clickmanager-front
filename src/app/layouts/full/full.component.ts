@@ -187,6 +187,7 @@ export class FullComponent implements OnInit, OnDestroy {
 
     return (
       url.startsWith('/smartcalc') ||
+      url.startsWith('/page/pedido') ||
       url.startsWith('/dashboards/dashboard1/grafico') ||
       url.startsWith('/onboarding') ||
       url.includes('/form') ||
@@ -742,6 +743,7 @@ export class FullComponent implements OnInit, OnDestroy {
   private resolveCurrentPageTitle(url: string): string {
     if (url.startsWith('/smartcalc')) return 'SmartCalc';
     if (url.startsWith('/dashboards/dashboard1/grafico')) return 'Gráfico';
+    if (this.isPedidosListRoute(url)) return 'Pedidos';
 
     const exactMatch = this.findNavLabel(url, true);
     if (exactMatch) return exactMatch;
@@ -776,6 +778,10 @@ export class FullComponent implements OnInit, OnDestroy {
     };
 
     return search(this.navItemsFiltrados);
+  }
+
+  private isPedidosListRoute(url: string): boolean {
+    return url.startsWith('/page/pedido') && !url.includes('/criar') && !url.includes('/editar') && !url.includes('/detalhe/');
   }
 
   private syncBodyScroll(): void {
