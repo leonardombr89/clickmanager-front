@@ -175,17 +175,14 @@
     }
   </div>
 
-  <button
+  <app-mobile-fab-action
     *temPermissao="'PEDIDOS_CADASTRAR'"
-    mat-flat-button
-    type="button"
-    class="pedido-mobile__fab"
-    [class.pedido-mobile__fab--compact]="mobileFabCompact()"
-    (click)="abrirCriacaoPedido()"
-    aria-label="Criar novo pedido">
-    <mat-icon>add</mat-icon>
-    <span>Novo Pedido</span>
-  </button>
+    label="Novo Pedido"
+    icon="add"
+    [compact]="mobileFabCompact()"
+    ariaLabel="Criar novo pedido"
+    (action)="abrirCriacaoPedido()">
+  </app-mobile-fab-action>
 </section>
 
 <mat-menu #pedidoMenu="matMenu">

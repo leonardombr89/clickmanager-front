@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
@@ -10,6 +10,9 @@ import { MatCardModule } from '@angular/material/card';
 import { CardHeaderComponent } from "src/app/components/card-header/card-header.component";
 import { SharedComponentsModule } from 'src/app/components/shared-components.module';
 import { extrairMensagemErro } from 'src/app/utils/mensagem.util';
+import { PageCardComponent } from 'src/app/components/page-card/page-card.component';
+import { SectionCardComponent } from 'src/app/components/section-card/section-card.component';
+import { MobileTotalBarComponent } from 'src/app/components/mobile-total-bar/mobile-total-bar.component';
 
 @Component({
   selector: 'app-form-cores',
@@ -21,7 +24,10 @@ import { extrairMensagemErro } from 'src/app/utils/mensagem.util';
     MatCardModule,
     MatButtonModule,
     CardHeaderComponent,
-    SharedComponentsModule
+    SharedComponentsModule,
+    PageCardComponent,
+    SectionCardComponent,
+    MobileTotalBarComponent
 ],
   templateUrl: './form-cores.component.html',
   styleUrl: './form-cores.component.scss'
@@ -30,6 +36,7 @@ export class FormCoresComponent implements OnInit{
   form!: FormGroup;
   isEditMode = false;
   corId!: number;
+  isMobileView = false;
 
   constructor(
     private fb: FormBuilder,
@@ -40,6 +47,7 @@ export class FormCoresComponent implements OnInit{
   ) {}
 
   ngOnInit(): void {
+    this.atualizarViewport();
     this.form = this.fb.group({
       nome: ['', Validators.required],
       descricao: ['', Validators.required]
@@ -53,6 +61,11 @@ export class FormCoresComponent implements OnInit{
         this.carregarCor(this.corId);
       }
     });
+  }
+
+  @HostListener('window:resize')
+  onWindowResize(): void {
+    this.atualizarViewport();
   }
 
   carregarCor(id: number): void {
@@ -117,5 +130,25 @@ export class FormCoresComponent implements OnInit{
 
   get descricaoControl(): FormControl {
     return this.form.get('descricao') as FormControl;
+  }
+
+  get tituloPagina(): string {
+    return this.isEditMode ? 'Editar Cor' : 'Nova Cor';
+  }
+
+  get textoAcaoPrincipal(): string {
+    return this.isEditMode ? 'Atualizar' : 'Salvar';
+  }
+
+  voltar(): void {
+    this.router.navigate(['/page/cadastro-tecnico/cores']);
+  }
+
+  private atualizarViewport(): void {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    this.isMobileView = window.innerWidth <= 768;
   }
 }

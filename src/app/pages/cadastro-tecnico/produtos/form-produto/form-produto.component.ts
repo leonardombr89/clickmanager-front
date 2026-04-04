@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import {
-  Component, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef
+  Component, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef, ElementRef, ViewChild
 } from '@angular/core';
 import {
   ReactiveFormsModule, FormsModule, FormGroup, FormBuilder, Validators, FormControl
@@ -9,12 +9,8 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 
 import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
-import { MatDividerModule } from '@angular/material/divider';
-import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
-import { MatInputModule } from '@angular/material/input';
-import { MatTabsModule } from '@angular/material/tabs';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { TablerIconsModule } from 'angular-tabler-icons';
 import { ToastrService } from 'ngx-toastr';
 
@@ -29,7 +25,10 @@ import { VariacaoProdutoRequest } from 'src/app/models/produto/variacao-produto-
 import { PoliticaRevenda } from 'src/app/models/politica-revenda.model';
 import { PoliticaRevendaComponent } from './politica-revenda/politica-revenda.component';
 import { ProdutoResponse } from 'src/app/models/produto/produto-response.model';
-import { CardHeaderComponent } from "src/app/components/card-header/card-header.component";
+import { PageCardComponent } from 'src/app/components/page-card/page-card.component';
+import { SectionCardComponent } from 'src/app/components/section-card/section-card.component';
+import { InputTextareaComponent } from 'src/app/components/inputs/input-textarea/input-textarea.component';
+import { MobileTotalBarComponent } from 'src/app/components/mobile-total-bar/mobile-total-bar.component';
 
 @Component({
   selector: 'app-form-produto',
@@ -40,28 +39,36 @@ import { CardHeaderComponent } from "src/app/components/card-header/card-header.
     RouterModule,
     ReactiveFormsModule,
     FormsModule,
-    MatCardModule,
-    MatFormFieldModule,
-    MatInputModule,
     MatButtonModule,
-    MatTabsModule,
     MatIconModule,
-    MatDividerModule,
+    MatTooltipModule,
     TablerIconsModule,
     SharedComponentsModule,
     VariacoesProdutoComponent,
     PoliticaRevendaComponent,
-    CardHeaderComponent
+    PageCardComponent,
+    SectionCardComponent,
+    InputTextareaComponent,
+    MobileTotalBarComponent
   ],
   templateUrl: './form-produto.component.html',
   styleUrls: ['./form-produto.component.scss'],
 })
 export class FormProdutoComponent implements OnInit, OnDestroy {
+  @ViewChild('wizardTop') wizardTop?: ElementRef<HTMLElement>;
+  readonly totalSteps = 4;
+  readonly wizardSteps = [
+    { key: 'produto', label: 'Produto' },
+    { key: 'estrutura', label: 'Estrutura' },
+    { key: 'preco', label: 'Preço' },
+    { key: 'revisao', label: 'Revisão' },
+  ] as const;
 
   form!: FormGroup;
   isEditMode = false;
   produtoId!: number;
   politicaDoProduto: PoliticaRevenda | null = null;
+  currentStep = 1;
 
   /** estado local das variações (o filho emite alterações) */
   variacoes: VariacaoProduto[] = [];
@@ -101,6 +108,7 @@ export class FormProdutoComponent implements OnInit, OnDestroy {
     // Garantir sempre estrutura de objeto; não aceitamos strings
     this.variacoes = (Array.isArray(lista) ? lista : [])
       .filter(v => typeof v === 'object' && v !== null) as VariacaoProduto[];
+    this.cdr.markForCheck();
   }
 
   // ================= init/load =================
@@ -195,6 +203,8 @@ export class FormProdutoComponent implements OnInit, OnDestroy {
       politicaRevenda: this.politicaDoProduto ?? null,
     }));
 
+    this.variacoes = [...this.variacoesIniciais];
+
     this.cdr.markForCheck();
   }
 
@@ -271,6 +281,116 @@ export class FormProdutoComponent implements OnInit, OnDestroy {
     this.cdr.markForCheck();
   }
 
+  goToStep(step: number): void {
+    if (step < 1 || step > this.totalSteps) return;
+    if (step > this.maxAccessibleStep) return;
+    this.currentStep = step;
+    this.cdr.markForCheck();
+    this.scrollToWizardTop();
+  }
+
+  nextStep(): void {
+    if (this.currentStep === 1) {
+      this.nomeControl.markAsTouched();
+      this.descricaoControl.markAsTouched();
+      if (!this.stepProdutoCompleta) {
+        this.toastr.error('Preencha nome e descrição para continuar.');
+        return;
+      }
+    }
+
+    if (this.currentStep === 2 && !this.stepEstruturaCompleta) {
+      this.toastr.error('Gere ao menos uma variação antes de continuar.');
+      return;
+    }
+
+    if (this.currentStep === 3 && !this.stepPrecoCompleta) {
+      this.toastr.error('Defina o preço das variações antes de revisar o cadastro.');
+      return;
+    }
+
+    this.currentStep = Math.min(this.currentStep + 1, this.totalSteps);
+    this.cdr.markForCheck();
+    this.scrollToWizardTop();
+  }
+
+  previousStep(): void {
+    this.currentStep = Math.max(this.currentStep - 1, 1);
+    this.cdr.markForCheck();
+    this.scrollToWizardTop();
+  }
+
+  get showMobileWizardFooter(): boolean {
+    return this.currentStep !== 2;
+  }
+
+  get mobileWizardFooterLabel(): string {
+    return `Etapa ${this.currentStep} de ${this.totalSteps}`;
+  }
+
+  get mobileWizardFooterValueText(): string {
+    switch (this.currentStep) {
+      case 1:
+        return 'Produto';
+      case 3:
+        return 'Preço';
+      case 4:
+        return 'Revisão';
+      default:
+        return '';
+    }
+  }
+
+  get mobileWizardFooterSecondaryActionText(): string {
+    return this.currentStep > 1 ? 'Voltar' : '';
+  }
+
+  get mobileWizardFooterActionText(): string {
+    if (this.currentStep === 4) {
+      return this.loading ? 'Salvando...' : (this.isEditMode ? 'Atualizar produto' : 'Salvar produto');
+    }
+
+    if (this.currentStep === 3) {
+      return 'Revisar produto →';
+    }
+
+    return 'Próximo';
+  }
+
+  get mobileWizardFooterActionDisabled(): boolean {
+    if (this.loading) {
+      return true;
+    }
+
+    switch (this.currentStep) {
+      case 1:
+        return !this.stepProdutoCompleta;
+      case 3:
+        return !this.stepPrecoCompleta;
+      case 4:
+        return !this.prontoParaSalvar;
+      default:
+        return false;
+    }
+  }
+
+  onMobileWizardPrimaryAction(): void {
+    if (this.currentStep === 4) {
+      this.onSubmit();
+      return;
+    }
+
+    this.nextStep();
+  }
+
+  onMobileWizardSecondaryAction(): void {
+    if (this.currentStep <= 1) {
+      return;
+    }
+
+    this.previousStep();
+  }
+
   // ================= mapping helpers =================
 
   private toProdutoRequest(formValue: any): ProdutoRequest {
@@ -280,6 +400,15 @@ export class FormProdutoComponent implements OnInit, OnDestroy {
       variacoes: this.toVariacoesRequest(this.variacoes),
       politicaRevenda: this.buildPoliticaRevendaPayload() ?? undefined, // envia só se existir
     };
+  }
+
+  private scrollToWizardTop(): void {
+    setTimeout(() => {
+      this.wizardTop?.nativeElement.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }, 30);
   }
 
   private buildPoliticaRevendaPayload(): ProdutoRequest['politicaRevenda'] | null {
@@ -423,5 +552,132 @@ export class FormProdutoComponent implements OnInit, OnDestroy {
   }
   get descricaoControl(): FormControl {
     return this.form.get('descricao') as FormControl;
+  }
+
+  get variacoesCount(): number {
+    return this.variacoes.length;
+  }
+
+  get resumoNome(): string {
+    const nome = String(this.nomeControl.value ?? '').trim();
+    return nome || 'Pendente';
+  }
+
+  get prontoParaSalvar(): boolean {
+    return this.stepProdutoCompleta && this.stepEstruturaCompleta && this.stepPrecoCompleta;
+  }
+
+  get statusRevisaoTitulo(): string {
+    return this.prontoParaSalvar ? 'Pronto para salvar' : 'Ainda falta revisar';
+  }
+
+  get statusRevisaoDescricao(): string {
+    if (this.prontoParaSalvar) {
+      return 'O produto já tem base, estrutura e preço. Está pronto para concluir o cadastro.';
+    }
+
+    return 'Revise os dados principais, gere as variações e aplique o preço antes de salvar.';
+  }
+
+  get resumoPolitica(): string {
+    if (!this.politicaDoProduto) {
+      return 'Opcional';
+    }
+
+    return this.politicaDoProduto.percentual ? 'Percentual configurado' : 'Preço fixo configurado';
+  }
+
+  get pendenciasSalvamento(): string[] {
+    const pendencias: string[] = [];
+
+    if (!String(this.nomeControl.value ?? '').trim()) {
+      pendencias.push('Informe o nome do produto.');
+    }
+
+    if (!String(this.descricaoControl.value ?? '').trim()) {
+      pendencias.push('Descreva o produto para facilitar a identificação.');
+    }
+
+    if (!this.variacoesCount) {
+      pendencias.push('Gere ao menos uma variação antes de salvar.');
+    }
+
+    if (this.variacoesSemPrecoCount > 0) {
+      pendencias.push('Aplique uma regra de preço em todas as variações.');
+    }
+
+    return pendencias;
+  }
+
+  get variacoesRenderizadas(): VariacaoProduto[] {
+    return this.variacoes.length ? this.variacoes : this.variacoesIniciais;
+  }
+
+  get stepProdutoCompleta(): boolean {
+    return this.form.valid;
+  }
+
+  get stepEstruturaCompleta(): boolean {
+    return this.variacoesCount > 0;
+  }
+
+  get stepPrecoCompleta(): boolean {
+    return this.variacoesCount > 0 && this.variacoesSemPrecoCount === 0;
+  }
+
+  get variacoesSemPrecoCount(): number {
+    return this.variacoes.filter(v => !v?.preco?.tipo).length;
+  }
+
+  get resumoPreco(): string {
+    if (!this.variacoesCount) {
+      return 'Pendente';
+    }
+
+    const tipos = Array.from(new Set(this.variacoes.map(v => v?.preco?.tipo).filter(Boolean)));
+    if (!tipos.length) {
+      return 'Sem preço definido';
+    }
+
+    if (tipos.length > 1) {
+      return 'Múltiplas regras';
+    }
+
+    return this.traduzirTipoPreco(tipos[0] as string);
+  }
+
+  get statusValidacao(): string {
+    return this.prontoParaSalvar ? 'Pronto para salvar' : 'Em revisão';
+  }
+
+  get progressPercent(): number {
+    return (this.completedStepsCount / this.totalSteps) * 100;
+  }
+
+  get completedStepsCount(): number {
+    return [this.stepProdutoCompleta, this.stepEstruturaCompleta, this.stepPrecoCompleta, this.prontoParaSalvar]
+      .filter(Boolean).length;
+  }
+
+  get maxAccessibleStep(): number {
+    if (!this.stepProdutoCompleta) return 1;
+    if (!this.stepEstruturaCompleta) return 2;
+    if (!this.stepPrecoCompleta) return 3;
+    return 4;
+  }
+
+  isStepComplete(step: number): boolean {
+    return [this.stepProdutoCompleta, this.stepEstruturaCompleta, this.stepPrecoCompleta, this.prontoParaSalvar][step - 1] ?? false;
+  }
+
+  private traduzirTipoPreco(tipo: string): string {
+    switch (tipo) {
+      case 'FIXO': return 'Preço fixo';
+      case 'QUANTIDADE': return 'Preço por quantidade';
+      case 'DEMANDA': return 'Preço por demanda';
+      case 'METRO': return 'Preço por metro';
+      case 'HORA': return 'Preço por hora';
+      default: return tipo;
+    }
   }
 }

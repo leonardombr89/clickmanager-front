@@ -1,8 +1,11 @@
+import { BreakpointObserver } from '@angular/cdk/layout';
 import {
+  ChangeDetectorRef,
   Component,
   ElementRef,
   EventEmitter,
   Input,
+  OnDestroy,
   Output,
   SimpleChanges,
   ViewChild
@@ -17,32 +20,28 @@ import {
 } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-
-import { MatAccordion, MatExpansionModule, MatExpansionPanel } from '@angular/material/expansion';
-import { MatButtonModule } from '@angular/material/button';
-import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatChipsModule } from '@angular/material/chips';
-import { MatOptionModule } from '@angular/material/core';
-import { MatDividerModule } from '@angular/material/divider';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatIconModule } from '@angular/material/icon';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { MatCardModule } from '@angular/material/card';
-import { MatTable, MatTableDataSource, MatTableModule } from '@angular/material/table';
-
+import { Subject, takeUntil } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
 
-import { AutoCompleteComponent } from 'src/app/components/inputs/auto-complete/auto-complete.component';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatExpansionModule } from '@angular/material/expansion';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTable, MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatDialog } from '@angular/material/dialog';
+
 import { InputMultiSelectComponent } from 'src/app/components/inputs/input-multi-select/input-multi-select-component';
 import { PrecoSelectorComponent } from 'src/app/components/preco/preco-selector.component';
-import { NomeDePipe } from 'src/app/pipe/nomeDe.pipe';
-
+import { MobileTotalBarComponent } from 'src/app/components/mobile-total-bar/mobile-total-bar.component';
 import { AcabamentoVariacaoResponse } from 'src/app/models/acabamento/acabamento-variacao-response.model';
 import { AcabamentoVariacaoHelperService } from './variacoes-acabamento-helper.service';
 import { TipoAplicacaoAcabamento } from 'src/app/models/acabamento/tipo-aplicacao-acabamento.enum';
-import { of } from 'rxjs';
 import { requireAtLeastOneSelected } from 'src/app/components/validators/require-at-least-one-selected';
+import {
+  AcabamentoVariacaoDialogComponent,
+  AcabamentoVariacaoDialogResult
+} from 'src/app/components/dialog/acabamento-variacao-dialog/acabamento-variacao-dialog.component';
 
 export interface AcabamentoVariacaoForm {
   id?: number;
@@ -53,392 +52,243 @@ export interface AcabamentoVariacaoForm {
   ativo?: boolean;
 }
 
+type AcabamentoSelectorPanel = 'materiais' | 'formatos' | 'aplicacoes';
+type MobileEstruturaView = 'overview' | 'selector' | 'variations';
+
 @Component({
   standalone: true,
   selector: 'app-variacoes-acabamento',
   templateUrl: './variacoes-acabamento.component.html',
+  styleUrls: ['./variacoes-acabamento.component.scss'],
   imports: [
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
-    MatFormFieldModule,
-    MatSelectModule,
-    MatInputModule,
-    MatIconModule,
-    MatDividerModule,
     MatButtonModule,
-    MatCheckboxModule,
-    MatChipsModule,
-    MatOptionModule,
     MatCardModule,
-    MatTableModule,
     MatExpansionModule,
-    MatAccordion,
-    AutoCompleteComponent,
+    MatTableModule,
+    MatIconModule,
+    MatTooltipModule,
     InputMultiSelectComponent,
     PrecoSelectorComponent,
-    NomeDePipe
+    MobileTotalBarComponent
   ],
-  styleUrl: './variacoes-acabamento.component.scss'
 })
-export class VariacoesAcabamentoComponent {
-
-  @ViewChild(MatAccordion) accordion?: MatAccordion;
-  @ViewChild('novaVarPanel') novaVarPanel?: MatExpansionPanel;
+export class VariacoesAcabamentoComponent implements OnDestroy {
   @ViewChild(MatTable) table!: MatTable<AcabamentoVariacaoForm>;
   @ViewChild('variacoesSalvasCard') variacoesSalvasCard?: ElementRef<HTMLElement>;
+
+  @Input() etapa: 'estrutura' | 'preco' = 'estrutura';
+  @Input() isEditMode = false;
+  @Input() variacoesIniciais: AcabamentoVariacaoForm[] | AcabamentoVariacaoResponse[] | null = null;
+  @Input() currentStep = 2;
+  @Input() totalSteps = 4;
+  @Input() completedStepsCount = 0;
+  @Input() progressPercent = 0;
+
+  @Output() variacoesChange = new EventEmitter<AcabamentoVariacaoForm[]>();
+  @Output() previousStepRequest = new EventEmitter<void>();
+  @Output() nextStepRequest = new EventEmitter<void>();
 
   materiais: any[] = [];
   formatos: any[] = [];
 
-  @Input() variacoesIniciais: AcabamentoVariacaoResponse[] | null = null;
-
-  @Output() variacoesChange = new EventEmitter<AcabamentoVariacaoForm[]>();
-
-  formVariacaoAtual!: FormGroup;
-  formPrecoEmLote!: FormGroup;
-  formEdicaoRapida!: FormGroup;
-  formDuplicarVariacao!: FormGroup;
-  indicesSelecionados = new Set<number>();
-  editandoIndex: number | null = null;
-  duplicandoIndex: number | null = null;
-  mostrarEditorLote = false;
+  formEstrutura!: FormGroup;
+  formPrecoGlobal!: FormGroup;
 
   dataSource = new MatTableDataSource<AcabamentoVariacaoForm>([]);
-  displayedColumns: string[] = ['selecionar', 'material', 'formato', 'tipoAplicacao', 'preco', 'acoes'];
+  displayedColumnsEstrutura: string[] = ['variacao', 'preco', 'acoes'];
+  displayedColumnsPreco: string[] = ['variacao', 'preco', 'status', 'acoes'];
 
-  TipoAplicacaoAcabamento = TipoAplicacaoAcabamento;
+  expandedSelectorPanel: AcabamentoSelectorPanel | null = 'materiais';
+  mobileView: MobileEstruturaView = 'overview';
+  activeMobileGroup: AcabamentoSelectorPanel | null = null;
+  isMobile = false;
+  carregandoOpcoes = true;
+  gerandoVariacoes = false;
+
+  readonly TipoAplicacaoAcabamento = TipoAplicacaoAcabamento;
+
+  private readonly destroy$ = new Subject<void>();
 
   constructor(
     private readonly fb: FormBuilder,
     private readonly helperService: AcabamentoVariacaoHelperService,
-    private readonly toastr: ToastrService
+    private readonly toastr: ToastrService,
+    private readonly dialog: MatDialog,
+    private readonly cdr: ChangeDetectorRef,
+    private readonly breakpointObserver: BreakpointObserver
   ) { }
 
   ngOnInit(): void {
-    this.helperService.carregarDadosIniciais().subscribe(({ materiais, formatos }) => {
-      this.materiais = materiais;
-      this.formatos = formatos;
-    });
+    this.breakpointObserver.observe(['(max-width: 768px)'])
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(result => {
+        this.isMobile = result.matches;
+        if (!this.isMobile) {
+          this.mobileView = 'overview';
+          this.activeMobileGroup = null;
+        } else {
+          this.syncMobileEntryFlow();
+        }
+        this.cdr.markForCheck();
+      });
 
-    this.iniciarFormulario();
+    this.helperService.carregarDadosIniciais()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(({ materiais, formatos }) => {
+        this.materiais = [...materiais];
+        this.formatos = [...formatos];
+        this.carregandoOpcoes = false;
+        this.sincronizarEstruturaComVariacoes();
+        this.cdr.markForCheck();
+      });
+
+    this.iniciarFormularios();
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['variacoesIniciais'] && this.variacoesIniciais) {
-      const mapped: AcabamentoVariacaoForm[] =
-        (this.variacoesIniciais ?? []).map(v => ({
-          id: v.id,
-          materialId: v.materialId ?? null,
-          formatoId: v.formatoId ?? null,
-          tipoAplicacao: TipoAplicacaoAcabamento.toValue(v.tipoAplicacao) ?? v.tipoAplicacao,
-          preco: v.preco,
-          ativo: v.ativo,
-        }));
+    if (changes['variacoesIniciais']) {
+      this.dataSource.data = [...this.normalizarVariacoes(this.variacoesIniciais ?? [])];
+      this.sincronizarEstruturaComVariacoes();
+    }
 
-      this.dataSource.data = mapped;
-      this.emitirVariacoes();
+    if (changes['currentStep']) {
+      this.syncMobileEntryFlow();
     }
   }
 
-
-  iniciarFormulario(): void {
-    this.formVariacaoAtual = this.fb.group({
-      materiaisIds: this.fb.control<any[]>([], { nonNullable: true }),
+  iniciarFormularios(): void {
+    this.formEstrutura = this.fb.group({
+      materiaisIds: this.fb.control<any[]>([], { validators: [Validators.required], nonNullable: true }),
       formatosIds: this.fb.control<any[]>([], { nonNullable: true }),
       tiposAplicacao: this.fb.control<any[]>([], { validators: [requireAtLeastOneSelected], nonNullable: true }),
-      preco: this.fb.group({}),  // <app-preco-selector> preenche/valida
     });
 
-    this.formPrecoEmLote = this.fb.group({
-      preco: this.fb.group({}),
-    });
-
-    this.formEdicaoRapida = this.fb.group({
-      preco: this.fb.group({}),
-    });
-
-    this.formDuplicarVariacao = this.fb.group({
-      materialId: [null],
-      formatoId: [null],
-      tipoAplicacao: [null, Validators.required],
-      preco: this.fb.group({}),
-    });
+    this.formPrecoGlobal = this.fb.group({});
   }
 
-  // ======= Adicionar / Remover =======
-
   gerarVariacoes(): void {
-    this.markBuilderAsTouched();
+    this.formEstrutura.markAllAsTouched();
 
-    const precoFG = this.formVariacaoAtual.get('preco') as FormGroup | null;
-    precoFG?.updateValueAndValidity();
-
-    if (!this.tiposAplicacaoSelecionados.length || this.formVariacaoAtual.invalid || precoFG?.invalid) {
-      const msgPreco = (precoFG?.errors as any)?.precoInvalido?.msg;
-      this.toastr.error(msgPreco || 'Selecione ao menos um tipo de aplicação e configure o preço.', 'Gerador incompleto');
+    if (!this.tiposAplicacaoSelecionados.length || this.formEstrutura.invalid) {
+      this.toastr.error('Selecione materiais e aplicações para gerar as combinações.', 'Estrutura incompleta');
       this.scrollToFirstInvalid();
       return;
     }
 
-    const raw = this.formVariacaoAtual.getRawValue();
-    const precoClonado = this.cloneValue(raw.preco);
+    this.gerandoVariacoes = true;
 
-    const materiais = this.materiaisSelecionados.length
-      ? this.materiaisSelecionados.map(item => this.extractId(item))
-      : [null];
+    setTimeout(() => {
+      const materiais = this.materiaisSelecionados.length
+        ? this.materiaisSelecionados.map(item => this.extractId(item))
+        : [null];
+      const formatos = this.formatosSelecionados.length
+        ? this.formatosSelecionados.map(item => this.extractId(item))
+        : [null];
 
-    const formatos = this.formatosSelecionados.length
-      ? this.formatosSelecionados.map(item => this.extractId(item))
-      : [null];
+      const novasVariacoes: AcabamentoVariacaoForm[] = [];
 
-    const novasVariacoes: AcabamentoVariacaoForm[] = [];
+      for (const materialId of materiais) {
+        for (const formatoId of formatos) {
+          for (const tipoAplicacao of this.tiposAplicacaoSelecionados) {
+            if (this.combinacaoJaExiste(materialId, formatoId, tipoAplicacao)) {
+              continue;
+            }
 
-    for (const materialId of materiais) {
-      for (const formatoId of formatos) {
-        for (const tipoAplicacao of this.tiposAplicacaoSelecionados) {
-          const existe = this.combinacaoJaExiste(materialId, formatoId, tipoAplicacao);
-
-          if (existe) {
-            continue;
+            novasVariacoes.push({
+              materialId,
+              formatoId,
+              tipoAplicacao,
+              preco: null,
+              ativo: true,
+            });
           }
-
-          novasVariacoes.push({
-            materialId,
-            formatoId,
-            tipoAplicacao,
-            preco: this.cloneValue(precoClonado),
-            ativo: true,
-          });
         }
       }
-    }
 
-    if (!novasVariacoes.length) {
-      this.toastr.info('Todas as combinações geradas já estavam cadastradas.');
+      this.gerandoVariacoes = false;
+
+      if (!novasVariacoes.length) {
+        this.toastr.info('Todas as combinações geradas já estavam cadastradas.');
+        return;
+      }
+
+      this.dataSource.data = [...this.dataSource.data, ...novasVariacoes];
+      this.emitirVariacoes();
+      this.focusVariacoesGeradas();
+      this.toastr.success('Combinações geradas com sucesso.');
+      this.syncMobileEntryFlow();
+      this.cdr.markForCheck();
+    }, 140);
+  }
+
+  aplicarPrecoGlobal(): void {
+    this.formPrecoGlobal.markAllAsTouched();
+    this.formPrecoGlobal.updateValueAndValidity();
+
+    if (!this.variacoesGeradasCount) {
+      this.toastr.info('Gere combinações antes de aplicar o preço.');
       return;
     }
 
-    this.dataSource.data = [...this.dataSource.data, ...novasVariacoes];
-    this.emitirVariacoes();
-    this.mostrarEditorLote = false;
-    this.limparSelecao();
-    this.novaVarPanel?.close();
-    this.focusVariacoesGeradas();
-
-    const duplicadas = this.totalCombinacoes - novasVariacoes.length;
-    if (duplicadas > 0) {
-      this.toastr.success(`${novasVariacoes.length} combinação(ões) gerada(s). ${duplicadas} já existia(m) e foram ignorada(s).`);
-    } else {
-      this.toastr.success(`${novasVariacoes.length} combinação(ões) gerada(s) com sucesso!`);
+    if (this.formPrecoGlobal.invalid) {
+      this.toastr.error('Defina um preço válido antes de continuar.', 'Preço incompleto');
+      this.scrollToFirstInvalid();
+      return;
     }
+
+    const precoBase = this.cloneValue(this.formPrecoGlobal.getRawValue());
+    this.dataSource.data = this.dataSource.data.map(v => ({
+      ...v,
+      preco: this.cloneValue(precoBase),
+    }));
+
+    this.emitirVariacoes();
+    this.toastr.success(`Preço aplicado em ${this.dataSource.data.length} variação(ões).`);
+  }
+
+  verVariacao(variacao: AcabamentoVariacaoForm): void {
+    this.openVariacaoDialog('view', variacao);
+  }
+
+  editarVariacao(variacao: AcabamentoVariacaoForm, index: number): void {
+    const dialogRef = this.openVariacaoDialog('edit', variacao);
+
+    dialogRef.afterClosed()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((result?: AcabamentoVariacaoDialogResult) => {
+        if (!result?.variacao) {
+          return;
+        }
+
+        const arr = [...this.dataSource.data];
+        arr[index] = result.variacao;
+        this.dataSource.data = arr;
+        this.emitirVariacoes();
+        this.toastr.success('Variação atualizada com sucesso.');
+        this.cdr.markForCheck();
+      });
   }
 
   removerVariacao(index: number): void {
     const arr = [...this.dataSource.data];
     arr.splice(index, 1);
     this.dataSource.data = arr;
-    this.reindexarSelecaoAposRemocao(index);
-    if (this.editandoIndex === index) {
-      this.cancelarEdicaoRapida();
-    } else if (this.editandoIndex != null && this.editandoIndex > index) {
-      this.editandoIndex -= 1;
-    }
-    if (this.duplicandoIndex === index) {
-      this.cancelarDuplicarVariacao();
-    } else if (this.duplicandoIndex != null && this.duplicandoIndex > index) {
-      this.duplicandoIndex -= 1;
-    }
     this.emitirVariacoes();
     this.toastr.info('Variação removida.');
-  }
-
-  toggleSelecionarTodos(checked: boolean): void {
-    if (checked) {
-      this.indicesSelecionados = new Set(this.dataSource.data.map((_, index) => index));
-      return;
-    }
-
-    this.limparSelecao();
-  }
-
-  toggleSelecionarLinha(index: number, checked: boolean): void {
-    const selecionados = new Set(this.indicesSelecionados);
-    if (checked) {
-      selecionados.add(index);
-    } else {
-      selecionados.delete(index);
-    }
-    this.indicesSelecionados = selecionados;
-  }
-
-  abrirEditorLote(): void {
-    if (!this.selectedCount) {
-      this.toastr.info('Selecione ao menos uma variação para aplicar preço em lote.');
-      return;
-    }
-
-    this.cancelarEdicaoRapida();
-    this.formPrecoEmLote.reset();
-    this.mostrarEditorLote = true;
-  }
-
-  cancelarEditorLote(): void {
-    this.mostrarEditorLote = false;
-    this.formPrecoEmLote.reset();
-  }
-
-  aplicarPrecoEmLote(): void {
-    const precoFG = this.formPrecoEmLote.get('preco') as FormGroup | null;
-    precoFG?.updateValueAndValidity();
-    this.formPrecoEmLote.markAllAsTouched();
-
-    if (!this.selectedCount || this.formPrecoEmLote.invalid || precoFG?.invalid) {
-      const msgPreco = (precoFG?.errors as any)?.precoInvalido?.msg;
-      this.toastr.error(msgPreco || 'Configure um preço válido para aplicar em lote.', 'Preço em lote');
-      return;
-    }
-
-    const precoClonado = this.cloneValue(this.formPrecoEmLote.getRawValue().preco);
-    this.dataSource.data = this.dataSource.data.map((item, index) =>
-      this.indicesSelecionados.has(index)
-        ? { ...item, preco: this.cloneValue(precoClonado) }
-        : item
-    );
-
-    this.emitirVariacoes();
-    this.cancelarEditorLote();
-    this.toastr.success(`Preço aplicado em ${this.selectedCount} variação(ões).`);
-  }
-
-  abrirEdicaoRapida(index: number): void {
-    this.cancelarEditorLote();
-    this.cancelarDuplicarVariacao();
-    this.editandoIndex = index;
-    this.formEdicaoRapida.reset({
-      preco: this.cloneValue(this.dataSource.data[index]?.preco ?? {})
-    });
-  }
-
-  cancelarEdicaoRapida(): void {
-    this.editandoIndex = null;
-    this.formEdicaoRapida.reset();
-  }
-
-  salvarEdicaoRapida(): void {
-    if (this.editandoIndex == null) {
-      return;
-    }
-
-    const precoFG = this.formEdicaoRapida.get('preco') as FormGroup | null;
-    precoFG?.updateValueAndValidity();
-    this.formEdicaoRapida.markAllAsTouched();
-
-    if (this.formEdicaoRapida.invalid || precoFG?.invalid) {
-      const msgPreco = (precoFG?.errors as any)?.precoInvalido?.msg;
-      this.toastr.error(msgPreco || 'Configure um preço válido para salvar a edição.', 'Editar preço');
-      return;
-    }
-
-    const atualizadas = [...this.dataSource.data];
-    atualizadas[this.editandoIndex] = {
-      ...atualizadas[this.editandoIndex],
-      preco: this.cloneValue(this.formEdicaoRapida.getRawValue().preco)
-    };
-    this.dataSource.data = atualizadas;
-    this.emitirVariacoes();
-    this.cancelarEdicaoRapida();
-    this.toastr.success('Preço da variação atualizado.');
-  }
-
-  abrirDuplicarVariacao(index: number): void {
-    const variacao = this.dataSource.data[index];
-    if (!variacao) {
-      return;
-    }
-
-    this.cancelarEditorLote();
-    this.cancelarEdicaoRapida();
-    this.duplicandoIndex = index;
-    this.formDuplicarVariacao.reset({
-      materialId: this.buscarItemPorId(this.materiais, variacao.materialId),
-      formatoId: this.buscarItemPorId(this.formatos, variacao.formatoId),
-      tipoAplicacao: TipoAplicacaoAcabamento.toValue(variacao.tipoAplicacao),
-      preco: this.cloneValue(variacao.preco)
-    });
-  }
-
-  cancelarDuplicarVariacao(): void {
-    this.duplicandoIndex = null;
-    this.formDuplicarVariacao.reset();
-  }
-
-  salvarDuplicarVariacao(): void {
-    const precoFG = this.formDuplicarVariacao.get('preco') as FormGroup | null;
-    const tipoAplicacaoControl = this.formDuplicarVariacao.get('tipoAplicacao');
-    precoFG?.updateValueAndValidity();
-    tipoAplicacaoControl?.markAsTouched();
-    this.formDuplicarVariacao.markAllAsTouched();
-
-    if (this.formDuplicarVariacao.invalid || precoFG?.invalid) {
-      const msgPreco = (precoFG?.errors as any)?.precoInvalido?.msg;
-      this.toastr.error(msgPreco || 'Preencha os dados da cópia antes de salvar.', 'Duplicar variação');
-      return;
-    }
-
-    const raw = this.formDuplicarVariacao.getRawValue();
-    const materialId = this.extractId(raw.materialId);
-    const formatoId = this.extractId(raw.formatoId);
-    const tipoAplicacao = TipoAplicacaoAcabamento.toValue(raw.tipoAplicacao);
-
-    if (!tipoAplicacao) {
-      this.toastr.error('Selecione um tipo de aplicação válido.', 'Duplicar variação');
-      return;
-    }
-
-    if (this.combinacaoJaExiste(materialId, formatoId, tipoAplicacao)) {
-      this.toastr.warning('Já existe uma variação com essa combinação. Ajuste material, formato ou aplicação.');
-      return;
-    }
-
-    this.dataSource.data = [
-      ...this.dataSource.data,
-      {
-        materialId,
-        formatoId,
-        tipoAplicacao,
-        preco: this.cloneValue(raw.preco),
-        ativo: true
-      }
-    ];
-
-    this.emitirVariacoes();
-    this.cancelarDuplicarVariacao();
-    this.toastr.success('Cópia criada com sucesso.');
+    this.cdr.markForCheck();
   }
 
   emitirVariacoes(): void {
     this.variacoesChange.emit(this.dataSource.data);
   }
-
-  abrirGerador(): void {
-    this.novaVarPanel?.open();
-  }
-
-  // ======= Busca / labels =======
-
-  buscarMateriais = (filtro: string) => this.helperService.buscarMateriais(filtro);
-  buscarFormatos = (filtro: string) => this.helperService.buscarFormatos(filtro);
-  buscarTiposAplicacao = (filtro: string) => of(TipoAplicacaoAcabamento.buscar(filtro));
-
-  mostrarDescricaoMaterial = (x: any) => x?.nome || '';
-  mostrarDescricaoFormato = (x: any) => x?.nome || '';
-  displayTipoAplicacao = (item: any): string => TipoAplicacaoAcabamento.label(item);
-
-  mostrarTipoAplicacao = (item: any): string =>
-    TipoAplicacaoAcabamento.label(item);
-
-  // ======= Helpers form =======
 
   getFormControl(control: AbstractControl | null): FormControl {
     return control as FormControl;
@@ -448,55 +298,20 @@ export class VariacoesAcabamentoComponent {
     return control as FormGroup;
   }
 
-  private scrollToFirstInvalid(): void {
-    setTimeout(() => {
-      const el = document.querySelector(
-        'mat-form-field .ng-invalid, .ng-invalid input, .ng-invalid textarea, .ng-invalid select'
-      ) as HTMLElement | null;
-      el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      (el as any)?.focus?.();
-    }, 0);
+  get materiaisSelecionados(): any[] {
+    const ids = this.formEstrutura?.get('materiaisIds')?.value ?? [];
+    return ids.map((id: any) => this.buscarItemPorId(this.materiais, id)).filter((item: any) => item != null);
   }
 
-  // ======= Resumo preço =======
-
-  precoResumo(preco: any): string {
-    if (!preco?.tipo) return '—';
-    switch (preco.tipo) {
-      case 'FIXO':
-        return this.moeda(preco.valor);
-      case 'HORA':
-        return `${this.moeda(preco.valorHora)}/h`;
-      case 'QUANTIDADE': {
-        const faixas = preco.faixas ?? [];
-        if (!faixas.length) return '—';
-        const first = faixas[0];
-        return `${faixas.length} faixa(s) (ex.: ${first.quantidade} → ${this.moeda(first.valor)})`;
-      }
-      case 'DEMANDA': {
-        const faixas = preco.faixas ?? [];
-        if (!faixas.length) return '—';
-        const first = faixas[0];
-        const head = `${first.de}–${first.ate} → ${this.moeda(first.valorUnitario)}`;
-        return faixas.length > 1 ? `${head} (+${faixas.length - 1})` : head;
-      }
-      case 'METRO': {
-        const modo = preco.modoCobranca === 'LINEAR' ? 'm' : 'm²';
-        return `${this.moeda(preco.precoMetro)}/${modo}`;
-      }
-      default:
-        return '—';
-    }
+  get formatosSelecionados(): any[] {
+    const ids = this.formEstrutura?.get('formatosIds')?.value ?? [];
+    return ids.map((id: any) => this.buscarItemPorId(this.formatos, id)).filter((item: any) => item != null);
   }
 
-  private moeda(v: any): string {
-    const n = Number(v);
-    if (isNaN(n)) return '—';
-    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(n);
-  }
-
-  trackByIndex(index: number, _row: any): number {
-    return index;
+  get tiposAplicacaoSelecionados(): TipoAplicacaoAcabamento[] {
+    return (this.formEstrutura?.get('tiposAplicacao')?.value ?? [])
+      .map((tipo: any) => TipoAplicacaoAcabamento.toValue(tipo))
+      .filter((tipo: TipoAplicacaoAcabamento | null): tipo is TipoAplicacaoAcabamento => tipo != null);
   }
 
   get materiaisSelecionadosCount(): number {
@@ -512,127 +327,80 @@ export class VariacoesAcabamentoComponent {
   }
 
   get totalCombinacoes(): number {
-    const materiais = this.materiaisSelecionadosCount || 1;
+    const materiais = this.materiaisSelecionadosCount || 0;
     const formatos = this.formatosSelecionadosCount || 1;
     const aplicacoes = this.tiposAplicacaoSelecionadosCount || 0;
     return materiais * formatos * aplicacoes;
   }
 
   get podeGerarCombinacoes(): boolean {
-    return this.tiposAplicacaoSelecionadosCount > 0 && !this.formVariacaoAtual.invalid && !!this.totalCombinacoes;
+    return this.materiaisSelecionadosCount > 0 && this.tiposAplicacaoSelecionadosCount > 0 && !this.formEstrutura.invalid;
   }
 
   get resumoGeracao(): string {
-    if (!this.tiposAplicacaoSelecionadosCount) {
-      return 'Selecione ao menos um tipo de aplicação para iniciar a geração.';
-    }
-
-    return `Você está prestes a gerar ${this.totalCombinacoes} variação(ões) (${this.materiaisSelecionadosCount || 1} material(is) × ${this.formatosSelecionadosCount || 1} formato(s) × ${this.tiposAplicacaoSelecionadosCount} aplicação(ões)).`;
-  }
-
-  get mensagemGeracaoBloqueada(): string {
-    if (!this.tiposAplicacaoSelecionadosCount) {
-      return 'Selecione ao menos um tipo de aplicação para gerar variações.';
-    }
-
-    const precoFG = this.formVariacaoAtual?.get('preco') as FormGroup | null;
-    if (!precoFG?.value || !Object.keys(precoFG.getRawValue() || {}).length || precoFG.invalid) {
-      return 'Defina um preço base válido antes de gerar as combinações.';
-    }
-
-    return '';
+    return `${this.materiaisSelecionadosCount || 0} materiais • ${this.formatosSelecionadosCount || 0} formatos • ${this.tiposAplicacaoSelecionadosCount || 0} aplicações → ${this.totalCombinacoes || 0} combinações`;
   }
 
   get ctaGeracaoLabel(): string {
-    return this.totalCombinacoes
-      ? `Gerar ${this.totalCombinacoes} variação(ões)`
-      : 'Gerar variações';
+    return this.gerandoVariacoes ? 'Gerando combinações...' : 'Gerar combinações';
   }
 
-  get tituloAjustes(): string {
-    if (!this.dataSource.data.length) {
-      return 'Ajustar variações geradas';
+  get variacoesGeradasCount(): number {
+    return this.dataSource.data.length;
+  }
+
+  get variacoesComPrecoCount(): number {
+    return this.dataSource.data.filter(v => !!v.preco?.tipo).length;
+  }
+
+  get variacoesSemPrecoCount(): number {
+    return this.variacoesGeradasCount - this.variacoesComPrecoCount;
+  }
+
+  get resumoAplicacaoPreco(): string {
+    if (!this.variacoesGeradasCount) {
+      return 'Gere as combinações primeiro para depois aplicar a regra de preço.';
     }
 
-    return 'Variações geradas';
+    return 'Aplique uma regra geral ou edite variações individualmente.';
   }
 
-  get subtituloAjustes(): string {
-    if (!this.dataSource.data.length) {
-      return 'Gere as primeiras combinações acima para começar a revisar e ajustar.';
+  get mobilePrimaryActionText(): string {
+    return this.variacoesGeradasCount ? 'Próximo' : 'Gerar combinações';
+  }
+
+  get mobilePrimaryActionDisabled(): boolean {
+    if (this.variacoesGeradasCount) {
+      return false;
     }
 
-    return `${this.dataSource.data.length} variação(ões) pronta(s) para revisão e ajustes finais.`;
+    return !this.podeGerarCombinacoes || this.gerandoVariacoes;
   }
 
-  get selectedCount(): number {
-    return this.indicesSelecionados.size;
+  get mobileBarValueText(): string {
+    return this.variacoesGeradasCount
+      ? `${this.variacoesGeradasCount} variação(ões)`
+      : `${this.totalCombinacoes || 0} combinações`;
   }
 
-  get allSelected(): boolean {
-    return !!this.dataSource.data.length && this.selectedCount === this.dataSource.data.length;
-  }
-
-  get someSelected(): boolean {
-    return this.selectedCount > 0 && !this.allSelected;
-  }
-
-  private markBuilderAsTouched(): void {
-    this.formVariacaoAtual.markAllAsTouched();
-  }
-
-  private extractId(value: any): number | null {
-    if (value == null) return null;
-    if (typeof value === 'number') return value;
-    if (typeof value === 'string' && /^\d+$/.test(value)) return Number(value);
-    if (typeof value === 'object' && value.id != null) return Number(value.id);
-    return null;
-  }
-
-  private cloneValue<T>(value: T): T {
-    return JSON.parse(JSON.stringify(value));
-  }
-
-  private combinacaoJaExiste(
-    materialId: number | null,
-    formatoId: number | null,
-    tipoAplicacao: TipoAplicacaoAcabamento | string
-  ): boolean {
-    return this.dataSource.data.some(v =>
-      this.extractId(v.materialId) === materialId &&
-      this.extractId(v.formatoId) === formatoId &&
-      TipoAplicacaoAcabamento.toValue(v.tipoAplicacao) === TipoAplicacaoAcabamento.toValue(tipoAplicacao)
-    );
-  }
-
-  private buscarItemPorId(collection: any[], value: any): any | null {
-    const id = this.extractId(value);
-    if (id == null) {
-      return null;
+  get mobileBarDetailText(): string {
+    if (this.gerandoVariacoes) {
+      return 'Gerando combinações...';
     }
 
-    return collection.find(item => this.extractId(item) === id) ?? null;
+    if (this.variacoesGeradasCount) {
+      return 'Pronto para definir preços';
+    }
+
+    if (this.podeGerarCombinacoes) {
+      return `${this.totalCombinacoes} combinações serão criadas`;
+    }
+
+    return 'Selecione materiais e aplicações';
   }
 
-  get materiaisSelecionados(): any[] {
-    const ids = this.formVariacaoAtual?.get('materiaisIds')?.value ?? [];
-    return ids
-      .map((id: any) => this.buscarItemPorId(this.materiais, id))
-      .filter((item: any) => item != null);
-  }
-
-  get formatosSelecionados(): any[] {
-    const ids = this.formVariacaoAtual?.get('formatosIds')?.value ?? [];
-    return ids
-      .map((id: any) => this.buscarItemPorId(this.formatos, id))
-      .filter((item: any) => item != null);
-  }
-
-  get tiposAplicacaoSelecionados(): TipoAplicacaoAcabamento[] {
-    const values = this.formVariacaoAtual?.get('tiposAplicacao')?.value ?? [];
-    return values
-      .map((value: any) => TipoAplicacaoAcabamento.toValue(value))
-      .filter((item: TipoAplicacaoAcabamento | null): item is TipoAplicacaoAcabamento => item != null);
+  get resumoPrecoMobile(): string {
+    return `${this.variacoesGeradasCount} variações • ${this.variacoesComPrecoCount} com preço • ${this.variacoesSemPrecoCount} pendentes`;
   }
 
   get materiaisOptions(): { id: any; nome: string }[] {
@@ -643,33 +411,340 @@ export class VariacoesAcabamentoComponent {
     return (this.formatos ?? []).map(item => ({ id: item.id, nome: item.nome }));
   }
 
-  get tiposAplicacaoOptions(): { id: any; nome: string }[] {
-    return TipoAplicacaoAcabamento.options().map(item => ({ id: item.value, nome: item.label }));
+  get tiposAplicacaoOptions(): { id: TipoAplicacaoAcabamento; nome: string }[] {
+    return TipoAplicacaoAcabamento.options().map(option => ({
+      id: option.value,
+      nome: option.label,
+    }));
   }
 
-  private limparSelecao(): void {
-    this.indicesSelecionados = new Set<number>();
+  get activeMobileGroupTitle(): string {
+    switch (this.activeMobileGroup) {
+      case 'materiais': return 'Materiais';
+      case 'formatos': return 'Formatos';
+      case 'aplicacoes': return 'Aplicações';
+      default: return 'Seleção';
+    }
   }
 
-  private reindexarSelecaoAposRemocao(indexRemovido: number): void {
-    const atualizado = new Set<number>();
-    this.indicesSelecionados.forEach(index => {
-      if (index < indexRemovido) {
-        atualizado.add(index);
+  get mobileSubstepLabel(): string {
+    if (this.mobileView === 'selector') {
+      return this.activeMobileGroupTitle;
+    }
+
+    if (this.mobileView === 'variations') {
+      return 'Variações geradas';
+    }
+
+    return 'Seleção de grupos';
+  }
+
+  get activeMobileGroupHint(): string {
+    switch (this.activeMobileGroup) {
+      case 'materiais': return 'Escolha os materiais que entram nas combinações.';
+      case 'formatos': return 'Selecione os formatos disponíveis para esse acabamento.';
+      case 'aplicacoes': return 'Defina os tipos de aplicação usados nas combinações.';
+      default: return '';
+    }
+  }
+
+  get activeMobileSelectorLabel(): string {
+    switch (this.activeMobileGroup) {
+      case 'materiais': return 'Materiais obrigatórios';
+      case 'formatos': return 'Formatos principais';
+      case 'aplicacoes': return 'Aplicações principais';
+      default: return 'Selecionar';
+    }
+  }
+
+  get activeMobileSearchPlaceholder(): string {
+    switch (this.activeMobileGroup) {
+      case 'materiais': return 'Buscar material';
+      case 'formatos': return 'Buscar formato';
+      case 'aplicacoes': return 'Buscar aplicação';
+      default: return 'Buscar opção';
+    }
+  }
+
+  get activeMobileControl(): FormControl {
+    switch (this.activeMobileGroup) {
+      case 'materiais': return this.getFormControl(this.formEstrutura.get('materiaisIds'));
+      case 'formatos': return this.getFormControl(this.formEstrutura.get('formatosIds'));
+      case 'aplicacoes': return this.getFormControl(this.formEstrutura.get('tiposAplicacao'));
+      default: return new FormControl<any[]>([], { nonNullable: true });
+    }
+  }
+
+  get activeMobileOptions(): { id: any; nome: string }[] {
+    switch (this.activeMobileGroup) {
+      case 'materiais': return this.materiaisOptions;
+      case 'formatos': return this.formatosOptions;
+      case 'aplicacoes': return this.tiposAplicacaoOptions;
+      default: return [];
+    }
+  }
+
+  get mobileGroups(): Array<{ key: AcabamentoSelectorPanel; label: string; count: number }> {
+    return [
+      { key: 'materiais', label: 'Materiais', count: this.materiaisSelecionadosCount },
+      { key: 'formatos', label: 'Formatos', count: this.formatosSelecionadosCount },
+      { key: 'aplicacoes', label: 'Aplicações', count: this.tiposAplicacaoSelecionadosCount },
+    ];
+  }
+
+  concluirBloco(panel: AcabamentoSelectorPanel): void {
+    const flow: AcabamentoSelectorPanel[] = ['materiais', 'formatos', 'aplicacoes'];
+    const currentIndex = flow.indexOf(panel);
+    const nextPanel = flow[currentIndex + 1] ?? null;
+    this.expandedSelectorPanel = nextPanel;
+
+    if (this.isMobile) {
+      if (nextPanel) {
+        this.activeMobileGroup = nextPanel;
+        this.mobileView = 'selector';
+      } else {
+        this.mobileView = 'overview';
+        this.activeMobileGroup = null;
       }
-      if (index > indexRemovido) {
-        atualizado.add(index - 1);
+      this.cdr.markForCheck();
+    }
+  }
+
+  onMobileBack(): void {
+    if (this.mobileView === 'overview') {
+      this.previousStepRequest.emit();
+      return;
+    }
+
+    this.mobileView = 'overview';
+    this.activeMobileGroup = null;
+    this.cdr.markForCheck();
+  }
+
+  openMobileGroup(panel: AcabamentoSelectorPanel): void {
+    this.activeMobileGroup = panel;
+    this.mobileView = 'selector';
+    this.cdr.markForCheck();
+  }
+
+  openMobileVariations(): void {
+    if (!this.variacoesGeradasCount) {
+      return;
+    }
+
+    this.mobileView = 'variations';
+    this.activeMobileGroup = null;
+    this.cdr.markForCheck();
+  }
+
+  onMobilePrimaryAction(): void {
+    if (this.variacoesGeradasCount) {
+      this.nextStepRequest.emit();
+      return;
+    }
+
+    this.gerarVariacoes();
+  }
+
+  onMobileSelectorConclude(): void {
+    if (!this.activeMobileGroup) {
+      this.mobileView = 'overview';
+      this.cdr.markForCheck();
+      return;
+    }
+
+    this.concluirBloco(this.activeMobileGroup);
+  }
+
+  tituloVariacao(v: AcabamentoVariacaoForm): string {
+    const partes = [
+      this.resolveLabel(v.materialId, this.materiais),
+      this.resolveLabel(v.formatoId, this.formatos),
+      this.mostrarTipoAplicacao(v.tipoAplicacao),
+    ].filter(Boolean);
+    return partes.join(' • ') || 'Variação';
+  }
+
+  statusPreco(v: AcabamentoVariacaoForm): string {
+    return v.preco?.tipo ? 'Definido' : 'Pendente';
+  }
+
+  mostrarTipoAplicacao(item: any): string {
+    return TipoAplicacaoAcabamento.label(item);
+  }
+
+  precoResumo(preco: any): string {
+    if (!preco?.tipo) return 'Pendente';
+    switch (preco.tipo) {
+      case 'FIXO':
+        return this.moeda(preco.valor);
+      case 'HORA':
+        return `${this.moeda(preco.valorHora)}/h`;
+      case 'QUANTIDADE': {
+        const faixas = preco.faixas ?? [];
+        if (!faixas.length) return 'Pendente';
+        const first = faixas[0];
+        const head = `${this.moeda(first.valor)} (${first.quantidade})`;
+        return faixas.length > 1 ? `${head} (+${faixas.length - 1})` : head;
       }
+      case 'DEMANDA': {
+        const faixas = preco.faixas ?? [];
+        if (!faixas.length) return 'Pendente';
+        const first = faixas[0];
+        const head = `${this.moeda(first.valorUnitario)} (${first.de}–${first.ate})`;
+        return faixas.length > 1 ? `${head} (+${faixas.length - 1})` : head;
+      }
+      case 'METRO': {
+        const modo = preco.modoCobranca === 'LINEAR' ? 'm' : 'm²';
+        return `${this.moeda(preco.precoMetro)}/${modo}`;
+      }
+      default:
+        return 'Pendente';
+    }
+  }
+
+  trackByIndex(index: number, _row: any): number {
+    return index;
+  }
+
+  private syncMobileEntryFlow(): void {
+    if (!this.isMobile || this.etapa !== 'estrutura') {
+      return;
+    }
+
+    if (this.isEditMode || this.variacoesGeradasCount) {
+      this.mobileView = 'overview';
+      this.activeMobileGroup = null;
+      return;
+    }
+
+    this.mobileView = 'selector';
+    this.activeMobileGroup = 'materiais';
+  }
+
+  private openVariacaoDialog(mode: 'view' | 'edit', variacao: AcabamentoVariacaoForm) {
+    return this.dialog.open(AcabamentoVariacaoDialogComponent, {
+      width: this.isMobile ? 'calc(100vw - 12px)' : 'min(880px, calc(100vw - 48px))',
+      maxWidth: this.isMobile ? '100vw' : '880px',
+      maxHeight: this.isMobile ? '92dvh' : '90vh',
+      position: this.isMobile ? { bottom: '0' } : undefined,
+      panelClass: this.isMobile ? ['mobile-variation-edit-sheet'] : undefined,
+      data: {
+        mode,
+        variacao,
+        lookups: {
+          materiais: this.materiais ?? [],
+          formatos: this.formatos ?? [],
+        }
+      },
     });
-    this.indicesSelecionados = atualizado;
+  }
+
+  private normalizarVariacoes(lista: Array<AcabamentoVariacaoForm | AcabamentoVariacaoResponse>): AcabamentoVariacaoForm[] {
+    return (lista ?? []).map((v: any) => ({
+      id: v.id,
+      materialId: v.materialId ?? null,
+      formatoId: v.formatoId ?? null,
+      tipoAplicacao: TipoAplicacaoAcabamento.toValue(v.tipoAplicacao) ?? v.tipoAplicacao,
+      preco: v.preco ?? null,
+      ativo: v.ativo ?? true,
+    }));
+  }
+
+  private sincronizarEstruturaComVariacoes(): void {
+    if (!this.formEstrutura || this.carregandoOpcoes) {
+      return;
+    }
+
+    const materiaisIds = this.uniqueIds(this.dataSource.data.map(v => this.extractId(v.materialId)));
+    const formatosIds = this.uniqueIds(this.dataSource.data.map(v => this.extractId(v.formatoId)));
+    const tiposAplicacao = Array.from(
+      new Set(
+        this.dataSource.data
+          .map(v => TipoAplicacaoAcabamento.toValue(v.tipoAplicacao))
+          .filter((tipo): tipo is TipoAplicacaoAcabamento => tipo != null)
+      )
+    );
+
+    this.formEstrutura.patchValue({
+      materiaisIds,
+      formatosIds,
+      tiposAplicacao,
+    }, { emitEvent: false });
+
+    if (!this.isEditMode && this.dataSource.data.length) {
+      this.expandedSelectorPanel = null;
+    }
+
+    this.cdr.markForCheck();
+  }
+
+  private scrollToFirstInvalid(): void {
+    setTimeout(() => {
+      const el = document.querySelector(
+        'mat-form-field .ng-invalid, .ng-invalid input, .ng-invalid textarea, .ng-invalid select'
+      ) as HTMLElement | null;
+      el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      (el as any)?.focus?.();
+    }, 0);
   }
 
   private focusVariacoesGeradas(): void {
     setTimeout(() => {
-      this.variacoesSalvasCard?.nativeElement.scrollIntoView({
+      this.variacoesSalvasCard?.nativeElement?.scrollIntoView({
         behavior: 'smooth',
-        block: 'start',
+        block: 'start'
       });
-    }, 50);
+    }, 80);
+  }
+
+  private combinacaoJaExiste(materialId: number | null, formatoId: number | null, tipoAplicacao: TipoAplicacaoAcabamento | string): boolean {
+    const targetTipo = TipoAplicacaoAcabamento.toValue(tipoAplicacao) ?? tipoAplicacao;
+    return this.dataSource.data.some(item => {
+      const itemTipo = TipoAplicacaoAcabamento.toValue(item.tipoAplicacao) ?? item.tipoAplicacao;
+      return this.extractId(item.materialId) === materialId
+        && this.extractId(item.formatoId) === formatoId
+        && itemTipo === targetTipo;
+    });
+  }
+
+  private uniqueIds(ids: Array<number | null>): number[] {
+    return Array.from(new Set(ids.filter((id): id is number => id != null)));
+  }
+
+  private buscarItemPorId(lista: any[], valor: any): any | null {
+    const id = this.extractId(valor);
+    if (id == null) {
+      return null;
+    }
+    return lista.find(item => Number(item.id) === Number(id)) ?? null;
+  }
+
+  private extractId(val: any): number | null {
+    if (val == null) return null;
+    if (typeof val === 'number') return Number(val);
+    if (typeof val === 'string' && /^\d+$/.test(val)) return Number(val);
+    if (typeof val === 'object') {
+      if ('id' in val && val.id != null) return Number(val.id);
+      if ('value' in val && val.value != null) return Number(val.value);
+    }
+    return null;
+  }
+
+  private resolveLabel(val: any, options: any[]): string {
+    if (val == null) return 'Todos';
+    const id = typeof val === 'object' ? val.id : val;
+    const found = options?.find(o => String(o.id) === String(id));
+    return found?.nome ?? found?.descricao ?? 'Todos';
+  }
+
+  private moeda(v: any): string {
+    const n = Number(v);
+    if (isNaN(n)) return '—';
+    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(n);
+  }
+
+  private cloneValue<T>(value: T): T {
+    return JSON.parse(JSON.stringify(value));
   }
 }

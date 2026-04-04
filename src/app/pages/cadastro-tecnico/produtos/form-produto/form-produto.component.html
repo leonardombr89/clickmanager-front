@@ -1,82 +1,342 @@
-<mat-card class="cardWithShadow produto-form">
+<div #wizardTop></div>
+<app-page-card
+  class="produto-page-card"
+  [titulo]="isEditMode ? 'Editar Produto' : 'Novo Produto'"
+  subtitulo="Fluxo guiado em 4 etapas."
+  [helpRota]="['/page/ajuda']"
+  helpFragment="produtos"
+  helpTexto=""
+  helpIcone="help_outline"
+  botaoTexto="Voltar"
+  botaoIcone="arrow_back"
+  botaoCor="primary"
+  [botaoRota]="['/page/cadastro-tecnico/produtos']"
+  [mostrarDivisor]="true">
 
-  <!-- Cabeçalho com botão voltar -->
-  <app-card-header
-    [titulo]="isEditMode ? 'Editar Produto' : 'Novo Produto'"
-    botaoTexto="Voltar"
-    botaoIcone="arrow_back"
-    [botaoRota]="['/page/cadastro-tecnico/produtos']"
-    [mostrarDivisor]="true"
-    [helpRota]="['/page/ajuda']"
-    helpFragment="pedidos"
-    helpTexto="Manual do Produto"
-    helpIcone="help_outline">
-  </app-card-header>
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <app-section-card
+      *ngIf="!isEditMode"
+      class="wizard-progress-card"
+      titulo="Fluxo do cadastro"
+      subtitulo="Uma decisão por vez, com revisão no final."
+      [divider]="true">
 
-  <mat-card-content>
+      <div class="wizard-progress-shell">
+        <div class="wizard-progress-head">
+          <div>
+            <div class="wizard-progress-label">Cadastro guiado</div>
+            <div class="wizard-progress-value">{{ completedStepsCount }}/{{ totalSteps }} etapas concluídas</div>
+          </div>
+          <div class="wizard-progress-label">Etapa {{ currentStep }} de {{ totalSteps }}</div>
+        </div>
 
-    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+        <div class="wizard-progress-bar">
+          <span [style.width.%]="progressPercent"></span>
+        </div>
 
-      <mat-tab-group class="tabs-responsive">
+        <div class="wizard-steps-nav">
+          <button
+            *ngFor="let step of wizardSteps; let i = index"
+            type="button"
+            class="wizard-step-chip"
+            [class.wizard-step-chip--active]="currentStep === i + 1"
+            [class.wizard-step-chip--done]="isStepComplete(i + 1)"
+            [disabled]="i + 1 > maxAccessibleStep"
+            (click)="goToStep(i + 1)">
+            <span class="wizard-step-chip__index">{{ isStepComplete(i + 1) ? '✓' : (i + 1) }}</span>
+            <span class="wizard-step-chip__label">{{ step.label }}</span>
+          </button>
+        </div>
+      </div>
+    </app-section-card>
 
-        <!-- Aba Geral -->
-        <mat-tab label="Geral">
-          <mat-card class="cardWithShadow tab-card">
-            <mat-card-content>
-
-              <app-input-texto-restrito class="m-b-16" [control]="nomeControl" label="Nome" placeholder="Digite o nome do produto">
-              </app-input-texto-restrito>
-
-              <app-input-texto-restrito class="m-b-16" [control]="descricaoControl" label="Descrição"
-                placeholder="Digite uma descrição do produto">
-              </app-input-texto-restrito>
-
-            </mat-card-content>
-          </mat-card>
-        </mat-tab>
-
-        <!-- Aba Política de Revenda -->
-        <mat-tab label="Política de Revenda">
-          <mat-card class="cardWithShadow tab-card">
-            <mat-card-content>
-              <app-politica-revenda [formGroup]="form" [value]="politicaDoProduto"
-                (valueChange)="onPoliticaChange($event)">
-              </app-politica-revenda>
-            </mat-card-content>
-          </mat-card>
-        </mat-tab>
-
-        <!-- Aba Variações -->
-        <mat-tab label="Variações">
-          <mat-card class="cardWithShadow tab-card">
-            <mat-card-content>
-              <app-variacoes-produto [variacoesIniciais]="variacoesIniciais" [politicaProduto]="politicaDoProduto"
-                (variacoesChange)="onVariacoesChange($event)">
-              </app-variacoes-produto>
-            </mat-card-content>
-          </mat-card>
-        </mat-tab>
-
-      </mat-tab-group>
-
-      <!-- Botões -->
-      <div class="actions m-t-24">
-
-        <!-- CANCELAR -->
-        <button mat-flat-button class="bg-error text-white" type="button"
-          [routerLink]="['/page/cadastro-tecnico/produtos']">
-          Cancelar
-        </button>
-
-        <!-- SALVAR -->
-        <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || loading">
-          {{ isEditMode ? 'Atualizar' : 'Salvar' }}
-        </button>
-
+    <app-section-card
+      *ngIf="currentStep === 1"
+      class="wizard-step-card"
+      titulo="Produto"
+      subtitulo="Defina a base do cadastro."
+      [divider]="false">
+      <div class="mobile-step-head mobile-step-head--card">
+        <div class="mobile-step-head__title">Produto</div>
+        <div class="mobile-step-head__substep">Nome e descrição</div>
+        <div class="mobile-step-head__progress">
+          <div class="mobile-step-head__meta">
+            <span>{{ completedStepsCount }}/{{ totalSteps }} concluídas</span>
+            <span>Etapa 1 de {{ totalSteps }}</span>
+          </div>
+          <div class="mobile-step-head__bar">
+            <span [style.width.%]="progressPercent"></span>
+          </div>
+        </div>
       </div>
 
-    </form>
+      <div class="flow-step-header">
+        <span class="flow-step-badge">Etapa 1</span>
+        <div class="flow-step-copy">
+          <h3>Dados principais</h3>
+          <button
+            type="button"
+            mat-icon-button
+            class="flow-step-help"
+            matTooltip="Aqui entram apenas nome e descrição para identificar o produto.">
+            <mat-icon>help_outline</mat-icon>
+          </button>
+        </div>
+      </div>
 
-  </mat-card-content>
+      <div class="step-copy">Comece pelo essencial. O restante do cadastro vem nas próximas etapas.</div>
 
-</mat-card>
+      <div class="row g-3">
+        <div class="col-12 col-md-6">
+          <app-input-texto-restrito
+            [control]="nomeControl"
+            label="Nome"
+            placeholder="Ex.: Adesivo vitrine premium"
+            [maxlength]="120">
+          </app-input-texto-restrito>
+        </div>
+
+        <div class="col-12">
+          <app-input-textarea
+            [control]="descricaoControl"
+            label="Descrição"
+            placeholder="Explique a aplicação, diferenciais e contexto de uso do produto."
+            [rows]="5"
+            [maxlength]="1000">
+          </app-input-textarea>
+        </div>
+      </div>
+
+      <div class="step-actions">
+        <button mat-stroked-button color="primary" type="button" [routerLink]="['/page/cadastro-tecnico/produtos']">
+          Voltar
+        </button>
+        <button mat-flat-button color="primary" type="button" (click)="nextStep()">
+          Próximo
+        </button>
+      </div>
+    </app-section-card>
+
+    <app-section-card
+      *ngIf="currentStep === 2"
+      class="section-card--mobile-estrutura"
+      titulo="Estrutura"
+      subtitulo="Monte as combinações do produto."
+      [divider]="false">
+      <div class="flow-step-header flow-step-header--mobile-hidden">
+        <span class="flow-step-badge">Etapa 2</span>
+        <div class="flow-step-copy">
+          <h3>Variações</h3>
+          <button
+            type="button"
+            mat-icon-button
+            class="flow-step-help"
+            matTooltip="Escolha os grupos que compõem o produto e gere automaticamente as combinações.">
+            <mat-icon>help_outline</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <app-variacoes-produto
+        etapa="estrutura"
+        [isEditMode]="isEditMode"
+        [variacoesIniciais]="variacoesRenderizadas"
+        [politicaProduto]="politicaDoProduto"
+        [currentStep]="currentStep"
+        [totalSteps]="totalSteps"
+        [completedStepsCount]="completedStepsCount"
+        [progressPercent]="progressPercent"
+        (previousStepRequest)="previousStep()"
+        (nextStepRequest)="nextStep()"
+        (variacoesChange)="onVariacoesChange($event)">
+      </app-variacoes-produto>
+
+      <div class="step-actions step-actions--mobile-hidden">
+        <button mat-stroked-button color="primary" type="button" (click)="previousStep()">
+          Voltar
+        </button>
+        <button mat-flat-button color="primary" type="button" (click)="nextStep()">
+          Definir preços →
+        </button>
+      </div>
+    </app-section-card>
+
+    <app-section-card
+      *ngIf="currentStep === 3"
+      class="wizard-step-card"
+      titulo="Preço"
+      subtitulo="Defina a regra comercial."
+      [divider]="false">
+      <div class="mobile-step-head mobile-step-head--card">
+        <div class="mobile-step-head__title">Preço</div>
+        <div class="mobile-step-head__substep">Preço base e política</div>
+        <div class="mobile-step-head__progress">
+          <div class="mobile-step-head__meta">
+            <span>{{ completedStepsCount }}/{{ totalSteps }} concluídas</span>
+            <span>Etapa 3 de {{ totalSteps }}</span>
+          </div>
+          <div class="mobile-step-head__bar">
+            <span [style.width.%]="progressPercent"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="flow-step-header">
+        <span class="flow-step-badge">Etapa 3</span>
+        <div class="flow-step-copy">
+          <h3>Preço e política</h3>
+          <button
+            type="button"
+            mat-icon-button
+            class="flow-step-help"
+            matTooltip="Aplique a regra de preço nas variações geradas e, se necessário, configure a política de revenda.">
+            <mat-icon>help_outline</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <app-variacoes-produto
+        etapa="preco"
+        [isEditMode]="isEditMode"
+        [variacoesIniciais]="variacoesRenderizadas"
+        [politicaProduto]="politicaDoProduto"
+        (variacoesChange)="onVariacoesChange($event)">
+      </app-variacoes-produto>
+
+      <div class="price-policy-card">
+        <div class="price-policy-card__title">Política de revenda</div>
+        <div class="price-policy-card__copy">Opcional. Configure aqui a estratégia comercial padrão do produto.</div>
+
+        <app-politica-revenda
+          [formGroup]="form"
+          [value]="politicaDoProduto"
+          (valueChange)="onPoliticaChange($event)">
+        </app-politica-revenda>
+      </div>
+
+      <div class="step-actions">
+        <button mat-stroked-button color="primary" type="button" (click)="previousStep()">
+          Voltar
+        </button>
+        <button mat-flat-button color="primary" type="button" (click)="nextStep()">
+          Revisar produto →
+        </button>
+      </div>
+    </app-section-card>
+
+    <app-section-card
+      *ngIf="currentStep === 4"
+      class="wizard-step-card"
+      titulo="Revisão"
+      subtitulo="Confira antes de salvar."
+      [divider]="false">
+      <div class="mobile-step-head mobile-step-head--card">
+        <div class="mobile-step-head__title">Revisão</div>
+        <div class="mobile-step-head__substep">Resumo final</div>
+        <div class="mobile-step-head__progress">
+          <div class="mobile-step-head__meta">
+            <span>{{ completedStepsCount }}/{{ totalSteps }} concluídas</span>
+            <span>Etapa 4 de {{ totalSteps }}</span>
+          </div>
+          <div class="mobile-step-head__bar">
+            <span [style.width.%]="progressPercent"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="flow-step-header flow-step-header--compact">
+        <span class="flow-step-badge">Etapa 4</span>
+        <div class="flow-step-copy">
+          <h3>{{ statusRevisaoTitulo }}</h3>
+          <button
+            type="button"
+            mat-icon-button
+            class="flow-step-help"
+            [matTooltip]="statusRevisaoDescricao">
+            <mat-icon>help_outline</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <div class="review-summary-grid">
+        <div class="review-summary-card review-summary-card--highlight">
+          <span class="review-summary-label">Produto</span>
+          <strong class="review-summary-value">{{ resumoNome }}</strong>
+          <span class="review-summary-helper" *ngIf="resumoNome !== 'Pendente'">Base principal definida.</span>
+          <span class="review-summary-helper" *ngIf="resumoNome === 'Pendente'">Defina o nome para seguir.</span>
+        </div>
+
+        <div class="review-summary-card">
+          <span class="review-summary-label">Variações</span>
+          <strong class="review-summary-value">{{ variacoesCount }}</strong>
+          <span class="review-summary-helper">
+            {{ variacoesCount ? 'Estrutura gerada com sucesso.' : 'Ainda não há variações geradas.' }}
+          </span>
+        </div>
+
+        <div class="review-summary-card">
+          <span class="review-summary-label">Preço</span>
+          <strong class="review-summary-value">{{ resumoPreco }}</strong>
+          <span class="review-summary-helper">
+            {{ variacoesSemPrecoCount ? (variacoesSemPrecoCount + ' variação(ões) sem preço.') : 'Todas as variações estão com preço.' }}
+          </span>
+        </div>
+
+        <div class="review-summary-card">
+          <span class="review-summary-label">Política de revenda</span>
+          <strong class="review-summary-value">{{ resumoPolitica }}</strong>
+          <span class="review-summary-helper">
+            {{ politicaDoProduto ? 'Estratégia comercial configurada.' : 'Opcional. Pode salvar sem política.' }}
+          </span>
+        </div>
+
+        <div class="review-summary-card">
+          <span class="review-summary-label">Status</span>
+          <strong class="review-summary-value">{{ statusValidacao }}</strong>
+          <span class="review-summary-helper">{{ statusRevisaoDescricao }}</span>
+        </div>
+      </div>
+
+      <div class="review-pendencias" *ngIf="pendenciasSalvamento.length">
+        <div class="review-pendencias__title">O que falta para concluir</div>
+        <ul>
+          <li *ngFor="let pendencia of pendenciasSalvamento">{{ pendencia }}</li>
+        </ul>
+      </div>
+
+      <div class="step-actions step-actions--review">
+        <button mat-stroked-button color="primary" type="button" (click)="previousStep()">
+          Voltar
+        </button>
+
+        <div class="actions-row__buttons">
+          <button
+            mat-flat-button
+            color="primary"
+            type="submit"
+            [disabled]="!prontoParaSalvar || loading">
+            {{ loading ? 'Salvando...' : (isEditMode ? 'Atualizar produto' : 'Salvar produto') }}
+          </button>
+        </div>
+      </div>
+    </app-section-card>
+
+    <app-mobile-total-bar
+      *ngIf="showMobileWizardFooter"
+      class="mobile-wizard-footer"
+      [label]="mobileWizardFooterLabel"
+      [valueText]="mobileWizardFooterValueText"
+      detailText=""
+      [expandable]="false"
+      [attachedToBottomNav]="true"
+      bottomOffset="calc(var(--mobile-bottom-nav-height, 0px) + 6px)"
+      [secondaryActionText]="mobileWizardFooterSecondaryActionText"
+      [actionText]="mobileWizardFooterActionText"
+      [actionDisabled]="mobileWizardFooterActionDisabled"
+      secondaryActionAriaLabel="Voltar etapa do cadastro"
+      actionAriaLabel="Avançar etapa do cadastro"
+      (secondaryAction)="onMobileWizardSecondaryAction()"
+      (action)="onMobileWizardPrimaryAction()">
+    </app-mobile-total-bar>
+  </form>
+</app-page-card>

@@ -1,36 +1,30 @@
+@if (!isMobileView) {
 <mat-card class="cardWithShadow">
-
-  <!-- Cabeçalho padrão com botão "Novo Material" -->
   <app-card-header titulo="Materiais" botaoTexto="Novo Material" botaoIcone="add"
-    [botaoRota]="['/page/cadastro-tecnico/materiais/nova']" [mostrarDivisor]="true" permissao="GERENCIAR_PRODUTOS">
+    [botaoRota]="['/page/cadastro-tecnico/materiais/nova']"
+    [helpRota]="['/page/ajuda']"
+    helpFragment="produtos"
+    helpTexto=""
+    helpIcone="help_outline"
+    [mostrarDivisor]="true" permissao="GERENCIAR_PRODUTOS">
   </app-card-header>
 
   <mat-card-content>
-    <!-- Pesquisa -->
     <app-input-pesquisa placeholder="Ex: nome do material" (valorAlterado)="onPesquisar($event)">
     </app-input-pesquisa>
 
-    <!-- Tabela de materiais -->
     <div class="table-responsive">
       <table mat-table [dataSource]="materiais" class="mat-elevation-z1 no-wrap m-t-0 v-middle w-100">
-
-        <!-- Nome -->
         <ng-container matColumnDef="nome">
           <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">Nome</th>
-          <td mat-cell *matCellDef="let material" class="f-s-14">
-            {{ material.nome }}
-          </td>
+          <td mat-cell *matCellDef="let material" class="f-s-14">{{ material.nome }}</td>
         </ng-container>
 
-        <!-- Descrição -->
         <ng-container matColumnDef="descricao">
           <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">Descrição</th>
-          <td mat-cell *matCellDef="let material" class="f-s-14">
-            {{ material.descricao }}
-          </td>
+          <td mat-cell *matCellDef="let material" class="f-s-14">{{ material.descricao }}</td>
         </ng-container>
 
-        <!-- Ações -->
         <ng-container matColumnDef="acoes">
           <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">Ações</th>
           <td mat-cell *matCellDef="let material" class="action-link">
@@ -52,5 +46,69 @@
       </mat-paginator>
     </div>
   </mat-card-content>
-
 </mat-card>
+} @else {
+<section class="cadastro-mobile">
+  <div class="cadastro-mobile__sticky">
+    <div class="cadastro-mobile__search">
+      <mat-icon>search</mat-icon>
+      <input type="search" placeholder="Buscar material..." (input)="onPesquisar($any($event.target).value)" />
+    </div>
+  </div>
+
+  <div class="cadastro-mobile__list">
+    @if (carregando) {
+    <div class="cadastro-mobile__state">
+      <mat-spinner diameter="28"></mat-spinner>
+      <span>Carregando materiais...</span>
+    </div>
+    } @else if (!materiais.length) {
+    <div class="cadastro-mobile__state cadastro-mobile__state--empty">
+      <strong>Nenhum material encontrado</strong>
+      <span>Tente ajustar a busca ou cadastre um novo material.</span>
+    </div>
+    } @else {
+      @for (material of materiais; track material.id) {
+      <article class="cadastro-mobile-card" matRipple [matRippleColor]="'rgba(37, 99, 235, 0.08)'" (click)="editar(material)">
+        <div class="cadastro-mobile-card__head">
+          <div class="cadastro-mobile-card__identity">
+            <strong>{{ material.nome }}</strong>
+            <span>{{ material.descricao || 'Sem descrição cadastrada' }}</span>
+          </div>
+
+          <button
+            mat-icon-button
+            type="button"
+            class="cadastro-mobile-card__menu"
+            [matMenuTriggerFor]="materialMenu"
+            (click)="selecionarMaterialMenu(material, $event)"
+            aria-label="Abrir ações do material">
+            <mat-icon>more_vert</mat-icon>
+          </button>
+        </div>
+      </article>
+      }
+    }
+  </div>
+
+  <app-mobile-fab-action
+    *temPermissao="'GERENCIAR_PRODUTOS'"
+    label="Novo Material"
+    icon="add"
+    [compact]="mobileFabCompact"
+    ariaLabel="Criar novo material"
+    (action)="navegarCriacao()">
+  </app-mobile-fab-action>
+</section>
+
+<mat-menu #materialMenu="matMenu">
+  <button mat-menu-item type="button" (click)="editar(materialSelecionadoMenu!)" [disabled]="!materialSelecionadoMenu">
+    <mat-icon>edit</mat-icon>
+    <span>Editar</span>
+  </button>
+  <button mat-menu-item type="button" (click)="excluir(materialSelecionadoMenu!)" [disabled]="!materialSelecionadoMenu">
+    <mat-icon>delete</mat-icon>
+    <span>Excluir</span>
+  </button>
+</mat-menu>
+}

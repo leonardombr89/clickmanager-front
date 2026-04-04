@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, HostListener, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatPaginator, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
@@ -8,7 +8,9 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { Router, RouterModule } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
+import { MatMenuModule } from '@angular/material/menu';
 import { ToastrService } from 'ngx-toastr';
+import { MatRippleModule } from '@angular/material/core';
 import { TablerIconsModule } from 'angular-tabler-icons';
 import { TemPermissaoDirective } from 'src/app/diretivas/tem-permissao.directive';
 import { InputPesquisaComponent } from 'src/app/components/inputs/input-pesquisa/input-pesquisa.component';
@@ -17,6 +19,7 @@ import { ServicoListagem } from 'src/app/models/servico/servico-listagem.model';
 import { ConfirmDialogComponent } from 'src/app/components/dialog/confirm-dialog/confirm-dialog.component';
 import { CardHeaderComponent } from "src/app/components/card-header/card-header.component";
 import { Preco } from 'src/app/models/preco/preco-response.model';
+import { MobileFabActionComponent } from 'src/app/components/mobile-fab-action/mobile-fab-action.component';
 
 @Component({
   selector: 'app-listar-servicos',
@@ -29,13 +32,17 @@ import { Preco } from 'src/app/models/preco/preco-response.model';
     MatProgressSpinnerModule,
     MatIconModule,
     MatButtonModule,
+    MatMenuModule,
+    MatRippleModule,
     TablerIconsModule,
     RouterModule,
     TemPermissaoDirective,
     InputPesquisaComponent,
-    CardHeaderComponent
+    CardHeaderComponent,
+    MobileFabActionComponent
 ],
-  templateUrl: './listar-servicos.component.html'
+  templateUrl: './listar-servicos.component.html',
+  styleUrl: './listar-servicos.component.scss'
 })
 export class ListarServicoComponent implements OnInit {
 
@@ -46,6 +53,9 @@ export class ListarServicoComponent implements OnInit {
   tamanhoPagina = 10;
   termoPesquisa: string = '';
   colunasExibidas = ['nome', 'descricao', 'preco', 'acoes'];
+  isMobileView = false;
+  mobileFabCompact = false;
+  servicoSelecionadoMenu: ServicoListagem | null = null;
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
@@ -57,7 +67,18 @@ export class ListarServicoComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.atualizarViewport();
     this.carregarServicos();
+  }
+
+  @HostListener('window:resize')
+  onWindowResize(): void {
+    this.atualizarViewport();
+  }
+
+  @HostListener('window:scroll')
+  onWindowScroll(): void {
+    this.mobileFabCompact = (window.scrollY || document.documentElement.scrollTop || 0) > 96;
   }
 
   carregarServicos(): void {
@@ -128,5 +149,23 @@ export class ListarServicoComponent implements OnInit {
       return (preco as any).valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
     }
     return preco.tipo;
+  }
+
+  navegarCriacao(): void {
+    this.router.navigate(['/page/cadastro-tecnico/servico/criar']);
+  }
+
+  selecionarServicoMenu(servico: ServicoListagem, event: Event): void {
+    event.stopPropagation();
+    this.servicoSelecionadoMenu = servico;
+  }
+
+  private atualizarViewport(): void {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    this.isMobileView = window.innerWidth <= 768;
+    this.tamanhoPagina = this.isMobileView ? 20 : 10;
   }
 }

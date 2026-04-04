@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, HostListener, OnInit, ViewChild } from '@angular/core';
 import { Formato } from 'src/app/models/formato.model';
 import { MatCardModule } from '@angular/material/card';
 import { MatTableModule } from '@angular/material/table';
@@ -8,14 +8,17 @@ import { MatPaginator, MatPaginatorModule, PageEvent } from '@angular/material/p
 import { MatIconModule } from '@angular/material/icon';
 import { Router, RouterModule } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
+import { MatMenuModule } from '@angular/material/menu';
 import { ConfirmDialogComponent } from 'src/app/components/dialog/confirm-dialog/confirm-dialog.component';
 import { ToastrService } from 'ngx-toastr';
 import { MatButtonModule } from '@angular/material/button';
+import { MatRippleModule } from '@angular/material/core';
 import { TablerIconsModule } from 'angular-tabler-icons';
 import { FormatoService } from '../../services/formato.service';
 import { TemPermissaoDirective } from 'src/app/diretivas/tem-permissao.directive';
 import { CardHeaderComponent } from "src/app/components/card-header/card-header.component";
 import { InputPesquisaComponent } from 'src/app/components/inputs/input-pesquisa/input-pesquisa.component';
+import { MobileFabActionComponent } from 'src/app/components/mobile-fab-action/mobile-fab-action.component';
 
 @Component({
   selector: 'app-listar-formato',
@@ -28,11 +31,14 @@ import { InputPesquisaComponent } from 'src/app/components/inputs/input-pesquisa
     MatProgressSpinnerModule,
     MatIconModule,
     MatButtonModule,
+    MatMenuModule,
+    MatRippleModule,
     TablerIconsModule,
     RouterModule,
     TemPermissaoDirective,
     CardHeaderComponent,
-    InputPesquisaComponent
+    InputPesquisaComponent,
+    MobileFabActionComponent
 ],
   templateUrl: './listar-formato.component.html',
   styleUrl: './listar-formato.component.scss'
@@ -45,6 +51,9 @@ export class ListarFormatoComponent implements OnInit {
   tamanhoPagina = 10;
   termoPesquisa = '';
   colunasExibidas = ['nome', 'tamanho', 'areaUtil', 'acoes'];
+  isMobileView = false;
+  mobileFabCompact = false;
+  formatoSelecionadoMenu: Formato | null = null;
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
@@ -56,7 +65,18 @@ export class ListarFormatoComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.atualizarViewport();
     this.carregarFormatos();
+  }
+
+  @HostListener('window:resize')
+  onWindowResize(): void {
+    this.atualizarViewport();
+  }
+
+  @HostListener('window:scroll')
+  onWindowScroll(): void {
+    this.mobileFabCompact = (window.scrollY || document.documentElement.scrollTop || 0) > 96;
   }
 
   carregarFormatos(): void {
@@ -114,5 +134,35 @@ export class ListarFormatoComponent implements OnInit {
         });
       }
     });
+  }
+
+  navegarCriacao(): void {
+    this.router.navigate(['/page/cadastro-tecnico/formatos/criar']);
+  }
+
+  selecionarFormatoMenu(formato: Formato, event: Event): void {
+    event.stopPropagation();
+    this.formatoSelecionadoMenu = formato;
+  }
+
+  tamanhoResumo(formato: Formato): string {
+    return `${formato.larguraCm}cm × ${formato.alturaCm}cm`;
+  }
+
+  areaUtilResumo(formato: Formato): string {
+    if (formato.larguraUtilCm == null || formato.alturaUtilCm == null) {
+      return 'Área útil não informada';
+    }
+
+    return `Área útil ${formato.larguraUtilCm}cm × ${formato.alturaUtilCm}cm`;
+  }
+
+  private atualizarViewport(): void {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    this.isMobileView = window.innerWidth <= 768;
+    this.tamanhoPagina = this.isMobileView ? 20 : 10;
   }
 }

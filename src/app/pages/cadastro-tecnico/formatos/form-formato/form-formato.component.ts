@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
@@ -12,6 +12,9 @@ import { FormatoService } from '../../services/formato.service';
 import { CardHeaderComponent } from "src/app/components/card-header/card-header.component";
 import { SharedComponentsModule } from 'src/app/components/shared-components.module';
 import { InputNumericoComponent } from 'src/app/components/inputs/input-numerico/input-numerico.component';
+import { PageCardComponent } from 'src/app/components/page-card/page-card.component';
+import { SectionCardComponent } from 'src/app/components/section-card/section-card.component';
+import { MobileTotalBarComponent } from 'src/app/components/mobile-total-bar/mobile-total-bar.component';
 
 @Component({
   selector: 'app-form-formato',
@@ -26,7 +29,10 @@ import { InputNumericoComponent } from 'src/app/components/inputs/input-numerico
     MatButtonModule,
     CardHeaderComponent,
     SharedComponentsModule,
-    InputNumericoComponent
+    InputNumericoComponent,
+    PageCardComponent,
+    SectionCardComponent,
+    MobileTotalBarComponent
 ],
   templateUrl: './form-formato.component.html',
   styleUrl: './form-formato.component.scss'
@@ -35,6 +41,7 @@ export class FormFormatoComponent implements OnInit {
   form!: FormGroup;
   isEditMode = false;
   formatoId!: number;
+  isMobileView = false;
 
   constructor(
     private fb: FormBuilder,
@@ -45,6 +52,7 @@ export class FormFormatoComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.atualizarViewport();
     this.form = this.fb.group({
       nome: ['', Validators.required],
       larguraCm: [null, [Validators.required, Validators.min(0.1)]],
@@ -61,6 +69,11 @@ export class FormFormatoComponent implements OnInit {
         this.carregarFormato(this.formatoId);
       }
     });
+  }
+
+  @HostListener('window:resize')
+  onWindowResize(): void {
+    this.atualizarViewport();
   }
 
   carregarFormato(id: number): void {
@@ -143,5 +156,25 @@ export class FormFormatoComponent implements OnInit {
 
   get larguraUtilControl(): FormControl {
     return this.form.get('larguraUtilCm') as FormControl;
+  }
+
+  get tituloPagina(): string {
+    return this.isEditMode ? 'Editar Formato' : 'Novo Formato';
+  }
+
+  get textoAcaoPrincipal(): string {
+    return this.isEditMode ? 'Atualizar' : 'Salvar';
+  }
+
+  voltar(): void {
+    this.router.navigate(['/page/cadastro-tecnico/formatos']);
+  }
+
+  private atualizarViewport(): void {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    this.isMobileView = window.innerWidth <= 768;
   }
 }

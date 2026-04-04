@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, HostListener, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
@@ -7,6 +7,8 @@ import { MatTableModule } from '@angular/material/table';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatRippleModule } from '@angular/material/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog } from '@angular/material/dialog';
 import { TablerIconsModule } from 'angular-tabler-icons';
@@ -16,11 +18,10 @@ import { ConfirmDialogComponent } from 'src/app/components/dialog/confirm-dialog
 import { TemPermissaoDirective } from 'src/app/diretivas/tem-permissao.directive';
 import { InputPesquisaComponent } from 'src/app/components/inputs/input-pesquisa/input-pesquisa.component';
 import { CardHeaderComponent } from 'src/app/components/card-header/card-header.component';
+import { MobileFabActionComponent } from 'src/app/components/mobile-fab-action/mobile-fab-action.component';
 
 import { AcabamentoService } from '../acabamento.service';
-import { AcabamentoResponse } from 'src/app/models/acabamento/acabamento-response.model';
 import { AcabamentoListResponse } from 'src/app/models/acabamento/acabamento-listagem.response.model';
-import { AcabamentoVariacaoResponse } from 'src/app/models/acabamento/acabamento-variacao-response.model';
 
 @Component({
   selector: 'app-listar-acabamento',
@@ -34,17 +35,19 @@ import { AcabamentoVariacaoResponse } from 'src/app/models/acabamento/acabamento
     MatProgressSpinnerModule,
     MatIconModule,
     MatButtonModule,
+    MatMenuModule,
+    MatRippleModule,
     MatTooltipModule,
     TablerIconsModule,
     TemPermissaoDirective,
     InputPesquisaComponent,
-    CardHeaderComponent
+    CardHeaderComponent,
+    MobileFabActionComponent
   ],
   templateUrl: './listar-acabamento.component.html',
   styleUrl: './listar-acabamento.component.scss'
 })
 export class ListarAcabamentoComponent implements OnInit {
-
   acabamentos: AcabamentoListResponse[] = [];
   totalAcabamentos = 0;
   carregando = false;
@@ -52,6 +55,9 @@ export class ListarAcabamentoComponent implements OnInit {
   pagina = 0;
   tamanhoPagina = 10;
   termoPesquisa = '';
+  isMobileView = false;
+  mobileFabCompact = false;
+  acabamentoSelecionadoMenu: AcabamentoListResponse | null = null;
 
   colunasExibidas = ['nome', 'descricao', 'variacoes', 'acoes'];
 
@@ -65,7 +71,18 @@ export class ListarAcabamentoComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
+    this.atualizarViewport();
     this.carregarAcabamentos();
+  }
+
+  @HostListener('window:resize')
+  onWindowResize(): void {
+    this.atualizarViewport();
+  }
+
+  @HostListener('window:scroll')
+  onWindowScroll(): void {
+    this.mobileFabCompact = (window.scrollY || document.documentElement.scrollTop || 0) > 96;
   }
 
   carregarAcabamentos(): void {
@@ -75,8 +92,7 @@ export class ListarAcabamentoComponent implements OnInit {
       .listar(this.pagina, this.tamanhoPagina, undefined, this.termoPesquisa)
       .subscribe({
         next: (res) => {
-          const content = res.content || [];
-          this.acabamentos = content;
+          this.acabamentos = res.content || [];
           this.totalAcabamentos = res.totalElements;
           this.carregando = false;
         },
@@ -115,21 +131,30 @@ export class ListarAcabamentoComponent implements OnInit {
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        this.acabamentoService.excluir(acabamento.id!).subscribe({
-          next: () => {
-            this.toastr.success('Acabamento excluído com sucesso!');
-            this.carregarAcabamentos();
-          },
-          error: () => {
-            this.toastr.error('Erro ao excluir o acabamento.');
-          }
-        });
+      if (!result) {
+        return;
       }
+
+      this.acabamentoService.excluir(acabamento.id!).subscribe({
+        next: () => {
+          this.toastr.success('Acabamento excluído com sucesso!');
+          this.carregarAcabamentos();
+        },
+        error: () => {
+          this.toastr.error('Erro ao excluir o acabamento.');
+        }
+      });
     });
   }
 
-  // ========= Helpers de exibição das variações =========
+  navegarCriacao(): void {
+    this.router.navigate(['/page/cadastro-tecnico/acabamentos/criar']);
+  }
+
+  selecionarAcabamentoMenu(acabamento: AcabamentoListResponse, event: Event): void {
+    event.stopPropagation();
+    this.acabamentoSelecionadoMenu = acabamento;
+  }
 
   variacoesPreview(acabamento: AcabamentoListResponse): string[] {
     const arr = acabamento?.variacoes ?? [];
@@ -139,5 +164,22 @@ export class ListarAcabamentoComponent implements OnInit {
   tooltipVariacoes(acabamento: AcabamentoListResponse): string | null {
     const arr = acabamento?.variacoes ?? [];
     return arr.length > 5 ? arr.join('\n') : null;
+  }
+
+  variacoesResumoMobile(acabamento: AcabamentoListResponse): string[] {
+    return (acabamento?.variacoes ?? []).slice(0, 2);
+  }
+
+  variacoesRestantesMobile(acabamento: AcabamentoListResponse): number {
+    return Math.max((acabamento?.variacoes?.length ?? 0) - 2, 0);
+  }
+
+  private atualizarViewport(): void {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    this.isMobileView = window.innerWidth <= 768;
+    this.tamanhoPagina = this.isMobileView ? 20 : 10;
   }
 }

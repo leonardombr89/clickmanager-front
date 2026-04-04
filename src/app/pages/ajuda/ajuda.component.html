@@ -1,4 +1,71 @@
-<div class="ajuda-container">
+<div class="ajuda-container" [class.ajuda-container--mobile]="isMobileView">
+  @if (isMobileView) {
+  <section class="ajuda-mobile-hero">
+    <div class="ajuda-mobile-hero__title">Central de Ajuda</div>
+    <div class="ajuda-mobile-hero__subtitle">Encontre respostas rápidas e acesse os principais guias do sistema.</div>
+
+    <div class="ajuda-mobile-search">
+      <mat-icon>search</mat-icon>
+      <input
+        type="search"
+        placeholder="Buscar assunto, tela ou funcionalidade..."
+        [value]="filtro"
+        (input)="filtro = $any($event.target).value" />
+      <button *ngIf="filtro" type="button" class="ajuda-mobile-search__clear" (click)="filtro = ''" aria-label="Limpar busca">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <div class="ajuda-mobile-topics">
+      @for (topic of visibleQuickTopics; track topic.id) {
+      <button type="button" class="ajuda-mobile-chip" (click)="rolarPara(topic.id)">
+        <mat-icon>{{ topic.icon }}</mat-icon>
+        <span>{{ topic.label }}</span>
+      </button>
+      }
+      @if (hasHiddenQuickTopics || showAllQuickTopics) {
+      <button type="button" class="ajuda-mobile-chip ajuda-mobile-chip--ghost" (click)="toggleQuickTopics()">
+        <mat-icon>{{ showAllQuickTopics ? 'expand_less' : 'expand_more' }}</mat-icon>
+        <span>{{ showAllQuickTopics ? 'Ver menos' : 'Ver mais' }}</span>
+      </button>
+      }
+    </div>
+  </section>
+
+  @if (featuredSecao) {
+  <section class="ajuda-mobile-featured" [id]="featuredSecao.id">
+    <div class="ajuda-mobile-featured__eyebrow">Tópico em destaque</div>
+    <div class="ajuda-mobile-featured__header">
+      <div>
+        <h3>{{ featuredSecao.titulo }}</h3>
+        <p>{{ featuredSecao.descricao }}</p>
+      </div>
+      @if (featuredSecao.icon) {
+      <mat-icon>{{ featuredSecao.icon }}</mat-icon>
+      }
+    </div>
+
+    <div class="ajuda-mobile-featured__body">
+      @if (featuredSecao.passos?.length) {
+      <ol class="passos passos--mobile">
+        <li *ngFor="let passo of featuredSecao.passos">{{ passo }}</li>
+      </ol>
+      }
+
+      @if (featuredSecao.itens?.length) {
+      <div class="itens itens--mobile">
+        <div class="item" *ngFor="let item of featuredSecao.itens">
+          <h4>{{ item.titulo }}</h4>
+          <ul>
+            <li *ngFor="let det of item.detalhes">{{ det }}</li>
+          </ul>
+        </div>
+      </div>
+      }
+    </div>
+  </section>
+  }
+  } @else {
   <header class="ajuda-header">
     <div>
       <h2 class="titulo">Central de Ajuda</h2>
@@ -52,16 +119,22 @@
       </mat-form-field>
     </div>
   </header>
+  }
 
   <div class="secoes">
     <mat-accordion multi>
-      <mat-expansion-panel *ngFor="let secao of filteredSecoes" [id]="secao.id" [expanded]="expandedId === secao.id">
+      <mat-expansion-panel
+        *ngFor="let secao of (isMobileView ? remainingSecoes : filteredSecoes)"
+        [id]="secao.id"
+        [expanded]="expandedId === secao.id"
+        class="ajuda-panel"
+        [class.ajuda-panel--mobile]="isMobileView">
         <mat-expansion-panel-header>
           <mat-panel-title>
             <mat-icon class="secao-icon" *ngIf="secao.icon">{{ secao.icon }}</mat-icon>
             {{ secao.titulo }}
           </mat-panel-title>
-          <mat-panel-description>{{ secao.descricao }}</mat-panel-description>
+          <mat-panel-description *ngIf="!isMobileView">{{ secao.descricao }}</mat-panel-description>
         </mat-expansion-panel-header>
 
         <div class="conteudo">

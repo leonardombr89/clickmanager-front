@@ -1,305 +1,518 @@
-<mat-accordion [multi]="false" #accordion="matAccordion">
-  <mat-expansion-panel #novaVarPanel class="cardWithShadow" [expanded]="false">
-    <mat-expansion-panel-header>
-      <mat-panel-title class="f-w-600">Gerar variações</mat-panel-title>
-      <mat-panel-description class="f-s-14">
-        Monte grupos e gere em lote
-      </mat-panel-description>
-    </mat-expansion-panel-header>
-
-    <div *ngIf="formVariacaoAtual" class="builder-shell p-16">
-      <div class="builder-intro">
-        <div>
-          <div class="builder-title">Selecione grupos e preço base</div>
-        </div>
-        <button
-          type="button"
-          mat-icon-button
-          class="builder-help"
-          matTooltip="Deixe materiais ou formatos em branco quando a regra precisar valer para todos.">
-          <mat-icon>help_outline</mat-icon>
-        </button>
-      </div>
-
-      <div class="builder-status">
-        <span class="builder-status-item">{{ materiaisSelecionadosCount || 'Todos' }} materiais</span>
-        <span class="builder-status-divider">•</span>
-        <span class="builder-status-item">{{ formatosSelecionadosCount || 'Todos' }} formatos</span>
-        <span class="builder-status-divider">•</span>
-        <span class="builder-status-item">{{ tiposAplicacaoSelecionadosCount }} aplicações</span>
-        <span class="builder-status-divider">→</span>
-        <span class="builder-status-item builder-status-item--highlight">{{ totalCombinacoes }} combinações</span>
-      </div>
-
-      <div class="row g-3 m-b-16">
-        <div class="col-md-4">
-          <app-input-multi-select
-            [control]="getFormControl(formVariacaoAtual.get('materiaisIds'))"
-            [label]="'Materiais' + (materiaisSelecionadosCount ? ' (' + materiaisSelecionadosCount + ')' : ' (opcional)')"
-            [options]="materiaisOptions"
-            [cardMinHeight]="280"
-            [listHeight]="220"
-            [searchPlaceholder]="'Buscar material'"
-            [showSelectedCount]="false"
-            [visualStyle]="'subtle'">
-          </app-input-multi-select>
-        </div>
-
-        <div class="col-md-4">
-          <app-input-multi-select
-            [control]="getFormControl(formVariacaoAtual.get('formatosIds'))"
-            [label]="'Formatos' + (formatosSelecionadosCount ? ' (' + formatosSelecionadosCount + ')' : ' (opcional)')"
-            [options]="formatosOptions"
-            [cardMinHeight]="280"
-            [listHeight]="220"
-            [searchPlaceholder]="'Buscar formato'"
-            [showSelectedCount]="false"
-            [visualStyle]="'subtle'">
-          </app-input-multi-select>
-        </div>
-
-        <div class="col-md-4">
-          <app-input-multi-select
-            [control]="getFormControl(formVariacaoAtual.get('tiposAplicacao'))"
-            [label]="'Tipos de aplicação' + (tiposAplicacaoSelecionadosCount ? ' (' + tiposAplicacaoSelecionadosCount + ')' : '')"
-            [options]="tiposAplicacaoOptions"
-            [cardMinHeight]="280"
-            [listHeight]="220"
-            [searchPlaceholder]="'Buscar aplicação'"
-            [showSelectedCount]="false"
-            [visualStyle]="'subtle'">
-          </app-input-multi-select>
-        </div>
-
-      </div>
-
-      <div class="builder-pricing-card">
-        <div class="builder-pricing-head">
+<ng-container [ngSwitch]="etapa">
+  <ng-container *ngSwitchCase="'estrutura'">
+    <ng-container *ngIf="formEstrutura">
+      <div *ngIf="!isMobile; else mobileEstrutura" class="wizard-shell">
+        <div class="wizard-intro">
           <div>
-            <div class="builder-pricing-title">Preço base das combinações</div>
+            <div class="wizard-title">Defina as combinações do acabamento</div>
+            <div class="wizard-copy">Escolha materiais, formatos e aplicações para gerar automaticamente as combinações.</div>
+          </div>
+        </div>
+
+        <mat-card class="wizard-summary-card">
+          <div class="wizard-summary-highlight">{{ resumoGeracao }}</div>
+        </mat-card>
+
+        <div class="wizard-group-heading" [class.wizard-group-heading--flat]="isEditMode">
+          <div class="wizard-group-heading__title">Base do acabamento</div>
+          <div class="wizard-group-heading__copy">Selecione os grupos usados nas combinações automáticas.</div>
+        </div>
+
+        <mat-accordion class="wizard-selectors" [class.wizard-selectors--flat]="isEditMode" [multi]="false">
+          <mat-expansion-panel
+            class="wizard-selector-panel wizard-selector-panel--primary"
+            [class.wizard-selector-panel--flat]="isEditMode"
+            [expanded]="expandedSelectorPanel === 'materiais'"
+            (opened)="expandedSelectorPanel = 'materiais'">
+            <mat-expansion-panel-header>
+              <mat-panel-title>Materiais</mat-panel-title>
+              <mat-panel-description>{{ materiaisSelecionadosCount }} selecionado(s)</mat-panel-description>
+            </mat-expansion-panel-header>
+
+            <app-input-multi-select
+              [control]="getFormControl(formEstrutura.get('materiaisIds'))"
+              [label]="'Materiais obrigatórios'"
+              [options]="materiaisOptions"
+              [cardMinHeight]="420"
+              [listHeight]="180"
+              [searchPlaceholder]="'Buscar material'"
+              [showSelectedCount]="false"
+              [showStickyFooter]="true"
+              [footerSelectionLabel]="'selecionado(s)'"
+              [concludeButtonText]="'Confirmar seleção'"
+              (conclude)="concluirBloco('materiais')"
+              [visualStyle]="'subtle'">
+            </app-input-multi-select>
+          </mat-expansion-panel>
+
+          <mat-expansion-panel
+            class="wizard-selector-panel wizard-selector-panel--primary"
+            [class.wizard-selector-panel--flat]="isEditMode"
+            [expanded]="expandedSelectorPanel === 'formatos'"
+            (opened)="expandedSelectorPanel = 'formatos'">
+            <mat-expansion-panel-header>
+              <mat-panel-title>Formatos</mat-panel-title>
+              <mat-panel-description>{{ formatosSelecionadosCount }} selecionado(s)</mat-panel-description>
+            </mat-expansion-panel-header>
+
+            <app-input-multi-select
+              [control]="getFormControl(formEstrutura.get('formatosIds'))"
+              [label]="'Formatos principais'"
+              [options]="formatosOptions"
+              [cardMinHeight]="420"
+              [listHeight]="180"
+              [searchPlaceholder]="'Buscar formato'"
+              [showSelectedCount]="false"
+              [showStickyFooter]="true"
+              [footerSelectionLabel]="'selecionado(s)'"
+              [concludeButtonText]="'Confirmar seleção'"
+              (conclude)="concluirBloco('formatos')"
+              [visualStyle]="'subtle'">
+            </app-input-multi-select>
+          </mat-expansion-panel>
+
+          <mat-expansion-panel
+            class="wizard-selector-panel wizard-selector-panel--primary"
+            [class.wizard-selector-panel--flat]="isEditMode"
+            [expanded]="expandedSelectorPanel === 'aplicacoes'"
+            (opened)="expandedSelectorPanel = 'aplicacoes'">
+            <mat-expansion-panel-header>
+              <mat-panel-title>Aplicações</mat-panel-title>
+              <mat-panel-description>{{ tiposAplicacaoSelecionadosCount }} selecionado(s)</mat-panel-description>
+            </mat-expansion-panel-header>
+
+            <app-input-multi-select
+              [control]="getFormControl(formEstrutura.get('tiposAplicacao'))"
+              [label]="'Aplicações principais'"
+              [options]="tiposAplicacaoOptions"
+              [cardMinHeight]="420"
+              [listHeight]="180"
+              [searchPlaceholder]="'Buscar aplicação'"
+              [showSelectedCount]="false"
+              [showStickyFooter]="true"
+              [footerSelectionLabel]="'selecionado(s)'"
+              [concludeButtonText]="'Confirmar seleção'"
+              (conclude)="concluirBloco('aplicacoes')"
+              [visualStyle]="'subtle'">
+            </app-input-multi-select>
+          </mat-expansion-panel>
+        </mat-accordion>
+
+        <div class="wizard-action-card" *ngIf="!isEditMode">
+          <div class="wizard-action-copy">
+            <div class="wizard-title wizard-title--small">Combinações automáticas</div>
+            <div class="wizard-copy">As combinações serão montadas com base na estrutura escolhida.</div>
           </div>
 
-          <div class="builder-footer">
-            <div class="generation-preview">{{ resumoGeracao }}</div>
+          <button
+            type="button"
+            mat-flat-button
+            color="primary"
+            class="wizard-main-cta"
+            (click)="gerarVariacoes()"
+            [disabled]="!podeGerarCombinacoes">
+            <mat-icon>auto_awesome</mat-icon>
+            {{ ctaGeracaoLabel }}
+          </button>
+        </div>
+      </div>
 
-            <button type="button" mat-flat-button color="primary" (click)="gerarVariacoes()"
-              [disabled]="!podeGerarCombinacoes">
-              <mat-icon>auto_awesome</mat-icon>
-              {{ ctaGeracaoLabel }}
+      <ng-template #mobileEstrutura>
+        <div class="mobile-estrutura-shell">
+          <ng-container [ngSwitch]="mobileView">
+            <div *ngSwitchCase="'overview'" class="mobile-estrutura-overview">
+              <div class="mobile-step-head mobile-step-head--card">
+                <div class="mobile-step-head__title">Estrutura</div>
+                <div class="mobile-step-head__substep">{{ mobileSubstepLabel }}</div>
+                <div class="mobile-step-head__progress">
+                  <div class="mobile-step-head__meta">
+                    <span>{{ completedStepsCount }}/{{ totalSteps }} concluídas</span>
+                    <span>Etapa {{ currentStep }} de {{ totalSteps }}</span>
+                  </div>
+                  <div class="mobile-step-head__bar">
+                    <span [style.width.%]="progressPercent"></span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mobile-estrutura-summary">{{ resumoGeracao }}</div>
+
+              <div class="mobile-estrutura-section">
+                <button
+                  *ngFor="let group of mobileGroups"
+                  type="button"
+                  class="mobile-group-row mobile-group-row--primary"
+                  (click)="openMobileGroup(group.key)">
+                  <div>
+                    <div class="mobile-group-row__title">{{ group.label }}</div>
+                    <div class="mobile-group-row__meta">{{ group.count }} selecionado(s)</div>
+                  </div>
+                  <mat-icon>chevron_right</mat-icon>
+                </button>
+              </div>
+
+              <mat-card class="mobile-generated-card" *ngIf="variacoesGeradasCount; else mobileGeneratedEmpty">
+                <div class="mobile-generated-card__title">Variações geradas ({{ variacoesGeradasCount }})</div>
+                <button type="button" mat-stroked-button color="primary" (click)="openMobileVariations()">
+                  Ver variações
+                </button>
+              </mat-card>
+
+              <ng-template #mobileGeneratedEmpty>
+                <div class="variacoes-empty-state variacoes-empty-state--mobile">
+                  <div class="variacoes-empty-copy">Selecione materiais, formatos e aplicações para gerar combinações automaticamente.</div>
+                </div>
+              </ng-template>
+            </div>
+
+            <div *ngSwitchCase="'selector'" class="mobile-estrutura-selector">
+              <div class="mobile-step-head mobile-step-head--card">
+                <div class="mobile-step-head__title">Estrutura</div>
+                <div class="mobile-step-head__substep">{{ mobileSubstepLabel }}</div>
+                <div class="mobile-step-head__progress">
+                  <div class="mobile-step-head__meta">
+                    <span>{{ completedStepsCount }}/{{ totalSteps }} concluídas</span>
+                    <span>Etapa {{ currentStep }} de {{ totalSteps }}</span>
+                  </div>
+                  <div class="mobile-step-head__bar">
+                    <span [style.width.%]="progressPercent"></span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mobile-selector-hint">{{ activeMobileGroupHint }}</div>
+
+              <app-input-multi-select
+                [control]="activeMobileControl"
+                [label]="activeMobileSelectorLabel"
+                [options]="activeMobileOptions"
+                [cardMinHeight]="0"
+                [listHeight]="320"
+                [searchPlaceholder]="activeMobileSearchPlaceholder"
+                [showSelectedCount]="false"
+                [showStickyFooter]="true"
+                [footerSelectionLabel]="'selecionado(s)'"
+                [concludeButtonText]="'Confirmar'"
+                [visualStyle]="'subtle'"
+                (conclude)="onMobileSelectorConclude()">
+              </app-input-multi-select>
+            </div>
+
+            <div *ngSwitchCase="'variations'" class="mobile-variations-list">
+              <div class="mobile-step-head mobile-step-head--card">
+                <div class="mobile-step-head__title">Estrutura</div>
+                <div class="mobile-step-head__substep">{{ mobileSubstepLabel }}</div>
+                <div class="mobile-step-head__progress">
+                  <div class="mobile-step-head__meta">
+                    <span>{{ completedStepsCount }}/{{ totalSteps }} concluídas</span>
+                    <span>Etapa {{ currentStep }} de {{ totalSteps }}</span>
+                  </div>
+                  <div class="mobile-step-head__bar">
+                    <span [style.width.%]="progressPercent"></span>
+                  </div>
+                </div>
+              </div>
+
+              <div *ngIf="dataSource.data.length; else emptyMobileVariations" class="mobile-variations-stack">
+                <mat-card class="mobile-variation-card" *ngFor="let v of dataSource.data; let i = index; trackBy: trackByIndex">
+                  <div class="mobile-variation-card__title">{{ tituloVariacao(v) }}</div>
+                  <div class="mobile-variation-card__subtitle">{{ precoResumo(v.preco) }}</div>
+
+                  <div class="mobile-variation-card__actions">
+                    <button type="button" mat-stroked-button color="primary" (click)="verVariacao(v)">Visualizar</button>
+                    <button type="button" mat-stroked-button color="primary" (click)="editarVariacao(v, i)">Editar</button>
+                    <button type="button" mat-stroked-button color="warn" (click)="removerVariacao(i)">Excluir</button>
+                  </div>
+                </mat-card>
+              </div>
+
+              <ng-template #emptyMobileVariations>
+                <div class="variacoes-empty-state variacoes-empty-state--mobile">
+                  <div class="variacoes-empty-copy">Nenhuma variação gerada ainda.</div>
+                </div>
+              </ng-template>
+            </div>
+          </ng-container>
+
+          <app-mobile-total-bar
+            *ngIf="mobileView === 'overview'"
+            [label]="'Estrutura do acabamento'"
+            [valueText]="mobileBarValueText"
+            [detailText]="mobileBarDetailText"
+            [expandable]="false"
+            [attachedToBottomNav]="true"
+            [bottomOffset]="'var(--mobile-bottom-nav-height, 0px)'"
+            [secondaryActionText]="variacoesGeradasCount ? 'Ver variações' : ''"
+            [actionText]="mobilePrimaryActionText"
+            [actionDisabled]="mobilePrimaryActionDisabled"
+            (secondaryAction)="openMobileVariations()"
+            (action)="onMobilePrimaryAction()">
+          </app-mobile-total-bar>
+
+          <app-mobile-total-bar
+            *ngIf="mobileView === 'variations'"
+            [label]="'Variações geradas'"
+            [valueText]="variacoesGeradasCount + ' variação(ões)'"
+            [detailText]="'Revise antes de continuar'"
+            [expandable]="false"
+            [attachedToBottomNav]="true"
+            [bottomOffset]="'var(--mobile-bottom-nav-height, 0px)'"
+            [secondaryActionText]="'Voltar'"
+            [actionText]="'Próximo'"
+            [actionDisabled]="!variacoesGeradasCount"
+            (secondaryAction)="onMobileBack()"
+            (action)="nextStepRequest.emit()">
+          </app-mobile-total-bar>
+        </div>
+      </ng-template>
+    </ng-container>
+  </ng-container>
+
+  <ng-container *ngSwitchCase="'preco'">
+    <ng-container *ngIf="!isMobile; else mobilePreco">
+      <div class="wizard-shell">
+        <div class="wizard-intro">
+          <div>
+            <div class="wizard-title">Configuração de preço para {{ variacoesGeradasCount }} variações</div>
+            <div class="wizard-copy">{{ resumoAplicacaoPreco }}</div>
+          </div>
+        </div>
+
+        <mat-card class="wizard-summary-card">
+          <div class="wizard-summary-grid wizard-summary-grid--price">
+            <div class="wizard-summary-kpi wizard-summary-kpi--interactive" tabindex="0">
+              <span class="wizard-summary-label">Variações</span>
+              <strong>{{ variacoesGeradasCount }}</strong>
+            </div>
+            <div class="wizard-summary-kpi wizard-summary-kpi--interactive" tabindex="0">
+              <span class="wizard-summary-label">Com preço</span>
+              <strong>{{ variacoesComPrecoCount }}</strong>
+            </div>
+            <div class="wizard-summary-kpi wizard-summary-kpi--interactive" tabindex="0">
+              <span class="wizard-summary-label">Pendentes</span>
+              <strong>{{ variacoesSemPrecoCount }}</strong>
+            </div>
+          </div>
+        </mat-card>
+
+        <mat-card class="wizard-price-card">
+          <div class="wizard-title wizard-title--small">Preço base</div>
+          <div class="wizard-copy">Aplicar a mesma regra para todas as variações. Você pode ajustar individualmente depois.</div>
+
+          <app-preco-selector
+            [formGroup]="formPrecoGlobal"
+            [tiposDisponiveis]="['FIXO', 'QUANTIDADE', 'DEMANDA', 'METRO', 'HORA']">
+          </app-preco-selector>
+
+          <div class="wizard-price-footer">
+            <button
+              type="button"
+              mat-flat-button
+              color="primary"
+              class="wizard-main-cta"
+              (click)="aplicarPrecoGlobal()"
+              [disabled]="!variacoesGeradasCount">
+              <mat-icon>sell</mat-icon>
+              Aplicar preço
             </button>
           </div>
-        </div>
-
-        <div class="builder-cta-helper" *ngIf="mensagemGeracaoBloqueada">
-          {{ mensagemGeracaoBloqueada }}
-        </div>
-
-        <app-preco-selector [formGroup]="getFormGroup(formVariacaoAtual.get('preco')!)"
-          [tiposDisponiveis]="['FIXO', 'QUANTIDADE', 'DEMANDA', 'METRO', 'HORA']">
-        </app-preco-selector>
+        </mat-card>
       </div>
-    </div>
-  </mat-expansion-panel>
-</mat-accordion>
+    </ng-container>
 
-<mat-card class="p-16 m-t-16 cardWithShadow" #variacoesSalvasCard>
+    <ng-template #mobilePreco>
+      <div class="mobile-price-shell">
+        <div class="mobile-price-summary">{{ resumoPrecoMobile }}</div>
+
+        <mat-card class="wizard-price-card wizard-price-card--mobile">
+          <div class="wizard-title wizard-title--small">Preço base</div>
+          <div class="wizard-copy">Aplicar a mesma regra para todas as variações. Ajustes individuais podem ser feitos depois.</div>
+
+          <app-preco-selector
+            [formGroup]="formPrecoGlobal"
+            [tiposDisponiveis]="['FIXO', 'QUANTIDADE', 'DEMANDA', 'METRO', 'HORA']">
+          </app-preco-selector>
+
+          <div class="wizard-price-footer wizard-price-footer--mobile">
+            <button
+              type="button"
+              mat-flat-button
+              color="primary"
+              class="wizard-main-cta"
+              (click)="aplicarPrecoGlobal()"
+              [disabled]="!variacoesGeradasCount">
+              <mat-icon>sell</mat-icon>
+              Aplicar preço
+            </button>
+          </div>
+        </mat-card>
+
+        <div *ngIf="dataSource.data.length; else emptyMobilePriceVariations" class="mobile-price-variations">
+          <mat-card
+            class="mobile-price-variation-card"
+            *ngFor="let v of dataSource.data; let i = index; trackBy: trackByIndex"
+            (click)="editarVariacao(v, i)">
+            <div class="mobile-price-variation-card__title">{{ tituloVariacao(v) }}</div>
+            <div class="mobile-price-variation-card__price">{{ precoResumo(v.preco) }}</div>
+            <div class="mobile-price-variation-card__actions">
+              <button
+                type="button"
+                mat-stroked-button
+                color="primary"
+                (click)="$event.stopPropagation(); editarVariacao(v, i)">
+                Editar
+              </button>
+              <button
+                type="button"
+                mat-stroked-button
+                color="warn"
+                (click)="$event.stopPropagation(); removerVariacao(i)">
+                Excluir
+              </button>
+            </div>
+          </mat-card>
+        </div>
+
+        <ng-template #emptyMobilePriceVariations>
+          <div class="variacoes-empty-state variacoes-empty-state--mobile variacoes-empty-state--price-mobile">
+            <div class="variacoes-empty-copy">Gere combinações na etapa anterior para começar a precificação.</div>
+          </div>
+        </ng-template>
+      </div>
+    </ng-template>
+  </ng-container>
+</ng-container>
+
+<mat-card class="p-16 m-t-16 cardWithShadow" #variacoesSalvasCard *ngIf="!(isMobile && (etapa === 'estrutura' || etapa === 'preco'))">
   <div class="saved-section-header">
     <div>
-      <mat-card-title class="f-s-16 f-w-600 m-b-8">{{ tituloAjustes }}</mat-card-title>
-      <div class="saved-section-subtitle">{{ subtituloAjustes }}</div>
+      <mat-card-title class="f-s-16 f-w-600 m-b-8">
+        {{ etapa === 'estrutura' ? ('Variações geradas (' + variacoesGeradasCount + ')') : ('Variações para precificar (' + variacoesGeradasCount + ')') }}
+      </mat-card-title>
+      <div class="saved-section-subtitle">
+        {{ etapa === 'estrutura'
+          ? (variacoesGeradasCount ? 'Revise antes de continuar.' : 'Selecione materiais, formatos e aplicações para gerar combinações.')
+          : (variacoesGeradasCount ? 'Aplique uma regra geral ou ajuste exceções individualmente.' : 'Gere variações na etapa anterior para começar a precificação.') }}
+      </div>
     </div>
   </div>
 
-  <div class="saved-toolbar" *ngIf="dataSource.data.length">
-    <div>
-      <div class="saved-summary">{{ dataSource.data.length }} variação(ões) prontas.</div>
-      <div class="saved-hint" *ngIf="selectedCount; else semSelecaoHint">
-        Use a ação em lote para atualizar as {{ selectedCount }} selecionadas.
-      </div>
-      <ng-template #semSelecaoHint>
-        <div class="saved-hint">Selecione linhas para aplicar preço em lote.</div>
-      </ng-template>
-    </div>
-
-    <div class="saved-actions">
-      <div class="selected-counter" *ngIf="selectedCount">
-        {{ selectedCount }} selecionada(s)
-      </div>
-      <button type="button" mat-stroked-button color="primary" (click)="abrirEditorLote()" [disabled]="!selectedCount">
-        <mat-icon>layers</mat-icon>
-        Aplicar preço em lote
+  <div class="variacoes-action-bar" *ngIf="etapa === 'estrutura' && isEditMode">
+    <div class="variacoes-action-bar__title">Variações ({{ variacoesGeradasCount }})</div>
+    <div class="variacoes-action-bar__actions">
+      <button
+        type="button"
+        mat-flat-button
+        color="primary"
+        class="variacoes-action-bar__primary"
+        (click)="gerarVariacoes()"
+        [disabled]="!podeGerarCombinacoes">
+        <mat-icon>add</mat-icon>
+        Gerar variações automaticamente
       </button>
     </div>
   </div>
 
-  <mat-card class="inline-editor-card m-b-16" *ngIf="mostrarEditorLote">
-    <mat-card-title class="f-s-16 f-w-600">Aplicar preço em lote</mat-card-title>
-    <div class="inline-editor-copy">
-      O preço abaixo será aplicado nas {{ selectedCount }} selecionadas.
-    </div>
-
-    <app-preco-selector [formGroup]="getFormGroup(formPrecoEmLote.get('preco')!)"
-      [tiposDisponiveis]="['FIXO', 'QUANTIDADE', 'DEMANDA', 'METRO', 'HORA']">
-    </app-preco-selector>
-
-    <div class="inline-editor-actions">
-      <button type="button" mat-stroked-button (click)="cancelarEditorLote()">Cancelar</button>
-      <button type="button" mat-flat-button color="primary" (click)="aplicarPrecoEmLote()">Aplicar preço</button>
-    </div>
-  </mat-card>
-
-  <mat-card class="inline-editor-card m-b-16" *ngIf="editandoIndex !== null">
-    <mat-card-title class="f-s-16 f-w-600">Editar preço da variação</mat-card-title>
-    <div class="inline-editor-copy">
-      Ajuste só esta combinação.
-    </div>
-
-    <app-preco-selector [formGroup]="getFormGroup(formEdicaoRapida.get('preco')!)"
-      [tiposDisponiveis]="['FIXO', 'QUANTIDADE', 'DEMANDA', 'METRO', 'HORA']">
-    </app-preco-selector>
-
-    <div class="inline-editor-actions">
-      <button type="button" mat-stroked-button (click)="cancelarEdicaoRapida()">Cancelar</button>
-      <button type="button" mat-flat-button color="primary" (click)="salvarEdicaoRapida()">Salvar ajuste</button>
-    </div>
-  </mat-card>
-
-  <mat-card class="inline-editor-card m-b-16" *ngIf="duplicandoIndex !== null" [formGroup]="formDuplicarVariacao">
-    <mat-card-title class="f-s-16 f-w-600">Duplicar com ajustes</mat-card-title>
-    <div class="inline-editor-copy">
-      Crie uma nova variação sem repetir combinações já existentes.
-    </div>
-
-    <div class="row g-3 m-b-16">
-      <div class="col-md-4">
-        <app-auto-complete [control]="getFormControl(formDuplicarVariacao.get('materialId'))"
-          label="Material (opcional)" [displayWith]="mostrarDescricaoMaterial" [buscarFn]="buscarMateriais"
-          [minimoCaracteres]="0">
-        </app-auto-complete>
-      </div>
-
-      <div class="col-md-4">
-        <app-auto-complete [control]="getFormControl(formDuplicarVariacao.get('formatoId'))"
-          label="Formato (opcional)" [displayWith]="mostrarDescricaoFormato" [buscarFn]="buscarFormatos"
-          [minimoCaracteres]="0">
-        </app-auto-complete>
-      </div>
-
-      <div class="col-md-4">
-        <mat-label class="f-s-14 f-w-600 m-b-8 d-block">
-          Tipo de Aplicação
-          <span style="color: #ff110094">*</span>
-        </mat-label>
-        <mat-form-field appearance="outline" class="w-100">
-          <mat-select formControlName="tipoAplicacao">
-            <mat-option *ngFor="let tipo of TipoAplicacaoAcabamento.options()" [value]="tipo.value">
-              {{ tipo.label }}
-            </mat-option>
-          </mat-select>
-          <mat-error *ngIf="formDuplicarVariacao.get('tipoAplicacao')?.invalid && formDuplicarVariacao.get('tipoAplicacao')?.touched">
-            Campo obrigatório
-          </mat-error>
-        </mat-form-field>
-      </div>
-    </div>
-
-    <app-preco-selector [formGroup]="getFormGroup(formDuplicarVariacao.get('preco')!)"
-      [tiposDisponiveis]="['FIXO', 'QUANTIDADE', 'DEMANDA', 'METRO', 'HORA']">
-    </app-preco-selector>
-
-    <div class="inline-editor-actions">
-      <button type="button" mat-stroked-button (click)="cancelarDuplicarVariacao()">Cancelar</button>
-      <button type="button" mat-flat-button color="primary" (click)="salvarDuplicarVariacao()">Criar cópia</button>
-    </div>
-  </mat-card>
-
   <ng-container *ngIf="dataSource.data.length; else emptyVariacoes">
-  <table mat-table [dataSource]="dataSource" class="w-100 f-s-14">
+    <div class="table-responsive">
+      <table mat-table [dataSource]="dataSource" class="w-100 f-s-14 variacoes-table" *ngIf="etapa === 'estrutura'; else precoTable">
+        <ng-container matColumnDef="variacao">
+          <th mat-header-cell *matHeaderCellDef>Variação</th>
+          <td mat-cell *matCellDef="let v">
+            <div class="variacao-main-cell">
+              <div class="variacao-main-cell__title">{{ tituloVariacao(v) }}</div>
+            </div>
+          </td>
+        </ng-container>
 
-    <ng-container matColumnDef="selecionar">
-      <th mat-header-cell *matHeaderCellDef>
-        <mat-checkbox
-          [checked]="allSelected"
-          [indeterminate]="someSelected"
-          (change)="toggleSelecionarTodos($event.checked)"
-          aria-label="Selecionar todas as variações">
-        </mat-checkbox>
-      </th>
-      <td mat-cell *matCellDef="let _v; let i = index">
-        <mat-checkbox
-          [checked]="indicesSelecionados.has(i)"
-          (change)="toggleSelecionarLinha(i, $event.checked)"
-          aria-label="Selecionar variação">
-        </mat-checkbox>
-      </td>
-    </ng-container>
+        <ng-container matColumnDef="preco">
+          <th mat-header-cell *matHeaderCellDef>Preço</th>
+          <td mat-cell *matCellDef="let v">{{ precoResumo(v.preco) }}</td>
+        </ng-container>
 
-    <!-- Material -->
-    <ng-container matColumnDef="material">
-      <th mat-header-cell *matHeaderCellDef>Material</th>
-      <td mat-cell *matCellDef="let v">
-        {{ v.materialId | nomeDe: materiais }}
-      </td>
-    </ng-container>
+        <ng-container matColumnDef="acoes">
+          <th mat-header-cell *matHeaderCellDef></th>
+          <td mat-cell *matCellDef="let v; let i = index">
+            <div class="variacao-actions">
+              <button type="button" mat-icon-button color="primary" (click)="verVariacao(v)" matTooltip="Visualizar">
+                <mat-icon>visibility</mat-icon>
+              </button>
+              <button type="button" mat-icon-button color="primary" (click)="editarVariacao(v, i)" matTooltip="Editar">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button type="button" mat-icon-button color="warn" (click)="removerVariacao(i)" matTooltip="Excluir">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          </td>
+        </ng-container>
 
-    <!-- Formato -->
-    <ng-container matColumnDef="formato">
-      <th mat-header-cell *matHeaderCellDef>Formato</th>
-      <td mat-cell *matCellDef="let v">
-        {{ v.formatoId | nomeDe: formatos }}
-      </td>
-    </ng-container>
+        <tr mat-header-row *matHeaderRowDef="displayedColumnsEstrutura"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumnsEstrutura; trackBy: trackByIndex"></tr>
+      </table>
 
-    <!-- Tipo de Aplicação -->
-    <ng-container matColumnDef="tipoAplicacao">
-      <th mat-header-cell *matHeaderCellDef>Aplicação</th>
-      <td mat-cell *matCellDef="let v">
-        {{ mostrarTipoAplicacao(v.tipoAplicacao) || '—' }}
-      </td>
-    </ng-container>
+      <ng-template #precoTable>
+        <table mat-table [dataSource]="dataSource" class="w-100 f-s-14 variacoes-table variacoes-table--price">
+          <ng-container matColumnDef="variacao">
+            <th mat-header-cell *matHeaderCellDef>Variação</th>
+            <td mat-cell *matCellDef="let v">
+              <div class="variacao-main-cell">
+                <div class="variacao-main-cell__title">{{ tituloVariacao(v) }}</div>
+              </div>
+            </td>
+          </ng-container>
 
-    <!-- Preço -->
-    <ng-container matColumnDef="preco">
-      <th mat-header-cell *matHeaderCellDef>Preço</th>
-      <td mat-cell *matCellDef="let v">
-        {{ precoResumo(v.preco) }}
-      </td>
-    </ng-container>
+          <ng-container matColumnDef="preco">
+            <th mat-header-cell *matHeaderCellDef>Preço</th>
+            <td mat-cell *matCellDef="let v">{{ precoResumo(v.preco) }}</td>
+          </ng-container>
 
-    <!-- Ações -->
-    <ng-container matColumnDef="acoes">
-      <th mat-header-cell *matHeaderCellDef></th>
-      <td mat-cell *matCellDef="let v; let i = index">
-        <button type="button" mat-icon-button color="accent" (click)="abrirDuplicarVariacao(i)">
-          <mat-icon>content_copy</mat-icon>
-        </button>
-        <button type="button" mat-icon-button color="primary" (click)="abrirEdicaoRapida(i)">
-          <mat-icon>edit</mat-icon>
-        </button>
-        <button type="button" mat-icon-button color="warn" (click)="removerVariacao(i)">
-          <mat-icon>delete</mat-icon>
-        </button>
-      </td>
-    </ng-container>
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let v">
+              <span class="price-status-chip" [class.price-status-chip--ok]="statusPreco(v) === 'Definido'">
+                {{ statusPreco(v) }}
+              </span>
+            </td>
+          </ng-container>
 
-    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-    <tr mat-row *matRowDef="let row; columns: displayedColumns; trackBy: trackByIndex">
-    </tr>
-  </table>
+          <ng-container matColumnDef="acoes">
+            <th mat-header-cell *matHeaderCellDef></th>
+            <td mat-cell *matCellDef="let v; let i = index">
+              <div class="variacao-actions">
+                <button type="button" mat-icon-button color="primary" (click)="verVariacao(v)" matTooltip="Visualizar">
+                  <mat-icon>visibility</mat-icon>
+                </button>
+                <button type="button" mat-icon-button color="primary" (click)="editarVariacao(v, i)" matTooltip="Editar">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button type="button" mat-icon-button color="warn" (click)="removerVariacao(i)" matTooltip="Excluir">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumnsPreco"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumnsPreco; trackBy: trackByIndex"></tr>
+        </table>
+      </ng-template>
+    </div>
   </ng-container>
 
   <ng-template #emptyVariacoes>
     <div class="variacoes-empty-state">
       <div class="variacoes-empty-icon">
-        <mat-icon>auto_awesome</mat-icon>
+        <mat-icon>{{ etapa === 'estrutura' ? 'auto_awesome' : 'sell' }}</mat-icon>
       </div>
-      <div class="variacoes-empty-title">Nenhuma variação gerada ainda</div>
+      <div class="variacoes-empty-title">
+        {{ etapa === 'estrutura' ? 'Nenhuma variação gerada ainda' : 'Nenhuma variação para precificar' }}
+      </div>
       <div class="variacoes-empty-copy">
-        Use o gerador acima para criar as primeiras combinações.
+        {{ etapa === 'estrutura'
+          ? 'Selecione materiais, formatos e aplicações para gerar combinações automaticamente.'
+          : 'Volte para a etapa Estrutura e gere as combinações antes de definir o preço.' }}
       </div>
-      <button type="button" mat-stroked-button color="primary" (click)="abrirGerador()">
-        Abrir gerador
-      </button>
     </div>
   </ng-template>
 </mat-card>

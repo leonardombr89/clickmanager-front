@@ -188,6 +188,14 @@ export class FullComponent implements OnInit, OnDestroy {
     return (
       url.startsWith('/smartcalc') ||
       url.startsWith('/page/pedido') ||
+      url.startsWith('/page/cadastro-tecnico/acabamentos') ||
+      url.startsWith('/page/cadastro-tecnico/cores') ||
+      url.startsWith('/page/cadastro-tecnico/formatos') ||
+      url.startsWith('/page/cadastro-tecnico/materiais') ||
+      url.startsWith('/page/cadastro-tecnico/produtos') ||
+      url.startsWith('/page/ajuda') ||
+      url.startsWith('/page/cadastro-tecnico/servico') ||
+      url.startsWith('/page/cadastro-tecnico/servicos') ||
       url.startsWith('/dashboards/dashboard1/grafico') ||
       url.startsWith('/onboarding') ||
       url.includes('/form') ||
@@ -202,6 +210,10 @@ export class FullComponent implements OnInit, OnDestroy {
     }
 
     return this.currentRoute.startsWith('/dashboards/dashboard1');
+  }
+
+  get hideMobileBottomNav(): boolean {
+    return false;
   }
 
   get mobileProfileSubtitle(): string {

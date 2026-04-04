@@ -1,0 +1,95 @@
+<h2 mat-dialog-title class="edit-head">
+  <div class="edit-head__copy">
+    <strong>Editar variação</strong>
+    <span class="edit-head__summary">{{ estruturaResumo }}</span>
+  </div>
+  <button type="button" mat-icon-button aria-label="Fechar edição" (click)="cancel()">
+    <mat-icon>close</mat-icon>
+  </button>
+</h2>
+
+<mat-dialog-content class="edit-content">
+  <section class="edit-section edit-section--readonly">
+    <div class="edit-section__title">Base</div>
+    <div class="readonly-chip-row">
+      <span class="readonly-chip">
+        <small>Material</small>
+        <strong>{{ materialLabel }}</strong>
+      </span>
+      <span class="readonly-chip">
+        <small>Formato</small>
+        <strong>{{ formatoLabel }}</strong>
+      </span>
+      <span class="readonly-chip">
+        <small>Cor</small>
+        <strong>{{ corLabel }}</strong>
+      </span>
+    </div>
+  </section>
+
+  <mat-divider></mat-divider>
+
+  <section class="edit-section" [formGroup]="form">
+    <div class="edit-section__heading">
+      <div class="edit-section__title">Acabamentos</div>
+      <span class="edit-section__meta">{{ selectedAcabamentosCount }} selecionado(s)</span>
+    </div>
+    <app-input-multi-select
+      [control]="acabamentosControl"
+      [label]="'Selecionar acabamentos'"
+      [options]="acabamentoOptions"
+      [cardMinHeight]="0"
+      [listHeight]="180"
+      [searchPlaceholder]="'Buscar acabamento'"
+      [showSelectedCount]="false"
+      [hideSelectedFromList]="true"
+      [visualStyle]="'subtle'">
+    </app-input-multi-select>
+  </section>
+
+  <section class="edit-section" [formGroup]="form">
+    <div class="edit-section__heading">
+      <div class="edit-section__title">Serviços</div>
+      <span class="edit-section__meta">{{ selectedServicosCount }} selecionado(s)</span>
+    </div>
+    <app-input-multi-select
+      [control]="servicosControl"
+      [label]="'Selecionar serviços'"
+      [options]="servicoOptions"
+      [cardMinHeight]="0"
+      [listHeight]="180"
+      [searchPlaceholder]="'Buscar serviço'"
+      [showSelectedCount]="false"
+      [hideSelectedFromList]="true"
+      [visualStyle]="'subtle'">
+    </app-input-multi-select>
+  </section>
+
+  <section class="edit-section edit-section--price">
+    <div class="edit-section__heading">
+      <div class="edit-section__title">Preço</div>
+      <span class="edit-section__meta">{{ priceSummary }}</span>
+    </div>
+    <div class="price-card">
+      <app-preco-selector [formGroup]="precoForm"></app-preco-selector>
+    </div>
+  </section>
+
+  <section class="edit-section edit-section--policy">
+    <div class="edit-section__title">Revenda</div>
+    <div class="policy-note">
+      <mat-icon>info</mat-icon>
+      <span>{{ politicaResumo }}</span>
+    </div>
+  </section>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="edit-actions">
+  <div class="edit-actions__summary">
+    {{ selectedAcabamentosCount }} acab. • {{ selectedServicosCount }} serv.
+  </div>
+  <div class="edit-actions__buttons">
+    <button type="button" mat-stroked-button (click)="cancel()">Cancelar</button>
+    <button type="button" mat-flat-button color="primary" (click)="save()">Salvar alterações</button>
+  </div>
+</mat-dialog-actions>
