@@ -421,7 +421,7 @@
     @if (mobileResumoAberto()) {
     <app-mobile-summary-sheet
       [open]="mobileResumoAberto()"
-      bottomOffset="58px"
+      bottomOffset="var(--mobile-bottom-nav-height, 0px)"
       closeAriaLabel="Fechar resumo"
       (close)="fecharResumoMobile()">
       <div class="pedido-mobile-summary-content">
@@ -482,7 +482,7 @@
       [actionDisabled]="!podeSalvarPedido"
       expandAriaLabel="Abrir resumo financeiro"
       actionAriaLabel="Criar pedido"
-      bottomOffset="58px"
+      bottomOffset="var(--mobile-bottom-nav-height, 0px)"
       [attachedToBottomNav]="true"
       (expand)="toggleResumoMobile()"
       (action)="salvarPedidoMobile()">

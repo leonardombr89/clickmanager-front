@@ -1,33 +1,31 @@
+@if (!isMobileView) {
 <mat-card class="cardWithShadow">
 
-    <!-- Cabeçalho padrão -->
     <app-card-header titulo="Cores" botaoTexto="Nova Cor" botaoIcone="add" botaoCor="primary"
-        [botaoRota]="['/page/cadastro-tecnico/cores/nova']" permissao="GERENCIAR_PRODUTOS" [mostrarDivisor]="true">
+        [botaoRota]="['/page/cadastro-tecnico/cores/nova']"
+        [helpRota]="['/page/ajuda']"
+        helpFragment="produtos"
+        helpTexto=""
+        helpIcone="help_outline"
+        permissao="GERENCIAR_PRODUTOS" [mostrarDivisor]="true">
     </app-card-header>
 
     <mat-card-content>
-
-        <!-- Pesquisa -->
         <app-input-pesquisa placeholder="Ex: nome da cor" (valorAlterado)="onPesquisar($event)">
         </app-input-pesquisa>
 
-        <!-- Tabela de cores -->
         <div class="table-responsive">
             <table mat-table [dataSource]="cores" class="mat-elevation-z1 no-wrap m-t-0 v-middle w-100">
-
-                <!-- Nome -->
                 <ng-container matColumnDef="nome">
                     <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">Nome</th>
                     <td mat-cell *matCellDef="let cor" class="f-s-14">{{ cor.nome }}</td>
                 </ng-container>
 
-                <!-- Descrição -->
                 <ng-container matColumnDef="descricao">
                     <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">Descrição</th>
                     <td mat-cell *matCellDef="let cor" class="f-s-14">{{ cor.descricao }}</td>
                 </ng-container>
 
-                <!-- Ações -->
                 <ng-container matColumnDef="acoes">
                     <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">Ações</th>
                     <td mat-cell *matCellDef="let cor" class="action-link">
@@ -43,14 +41,76 @@
 
                 <tr mat-header-row *matHeaderRowDef="colunasExibidas"></tr>
                 <tr mat-row *matRowDef="let row; columns: colunasExibidas"></tr>
-
             </table>
 
             <mat-paginator [length]="totalCores" [pageSize]="tamanhoPagina" (page)="onPaginaAlterada($event)"
                 showFirstLastButtons>
             </mat-paginator>
-
         </div>
-
     </mat-card-content>
 </mat-card>
+} @else {
+<section class="cadastro-mobile">
+    <div class="cadastro-mobile__sticky">
+        <div class="cadastro-mobile__search">
+            <mat-icon>search</mat-icon>
+            <input type="search" placeholder="Buscar cor..." (input)="onPesquisar($any($event.target).value)" />
+        </div>
+    </div>
+
+    <div class="cadastro-mobile__list">
+        @if (carregando) {
+        <div class="cadastro-mobile__state">
+            <mat-spinner diameter="28"></mat-spinner>
+            <span>Carregando cores...</span>
+        </div>
+        } @else if (!cores.length) {
+        <div class="cadastro-mobile__state cadastro-mobile__state--empty">
+            <strong>Nenhuma cor encontrada</strong>
+            <span>Tente ajustar a busca ou cadastre uma nova cor.</span>
+        </div>
+        } @else {
+            @for (cor of cores; track cor.id) {
+            <article class="cadastro-mobile-card" matRipple [matRippleColor]="'rgba(37, 99, 235, 0.08)'" (click)="editar(cor)">
+                <div class="cadastro-mobile-card__head">
+                    <div class="cadastro-mobile-card__identity">
+                        <strong>{{ cor.nome }}</strong>
+                        <span>{{ cor.descricao || 'Sem descrição cadastrada' }}</span>
+                    </div>
+
+                    <button
+                        mat-icon-button
+                        type="button"
+                        class="cadastro-mobile-card__menu"
+                        [matMenuTriggerFor]="corMenu"
+                        (click)="selecionarCorMenu(cor, $event)"
+                        aria-label="Abrir ações da cor">
+                        <mat-icon>more_vert</mat-icon>
+                    </button>
+                </div>
+            </article>
+            }
+        }
+    </div>
+
+    <app-mobile-fab-action
+        *temPermissao="'GERENCIAR_PRODUTOS'"
+        label="Nova Cor"
+        icon="add"
+        [compact]="mobileFabCompact"
+        ariaLabel="Criar nova cor"
+        (action)="navegarCriacao()">
+    </app-mobile-fab-action>
+</section>
+
+<mat-menu #corMenu="matMenu">
+    <button mat-menu-item type="button" (click)="editar(corSelecionadaMenu!)" [disabled]="!corSelecionadaMenu">
+        <mat-icon>edit</mat-icon>
+        <span>Editar</span>
+    </button>
+    <button mat-menu-item type="button" (click)="excluir(corSelecionadaMenu!)" [disabled]="!corSelecionadaMenu">
+        <mat-icon>delete</mat-icon>
+        <span>Excluir</span>
+    </button>
+</mat-menu>
+}

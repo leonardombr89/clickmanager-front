@@ -1,6 +1,10 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, HostListener, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
+import { MatRippleModule } from '@angular/material/core';
+import { MatIconModule } from '@angular/material/icon';
+import { MatMenuModule } from '@angular/material/menu';
 import { MatPaginator, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatTableModule } from '@angular/material/table';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -12,8 +16,8 @@ import { ConfirmDialogComponent } from 'src/app/components/dialog/confirm-dialog
 import { ProdutoService } from '../../services/produto.service';
 import { TemPermissaoDirective } from 'src/app/diretivas/tem-permissao.directive';
 import { InputPesquisaComponent } from 'src/app/components/inputs/input-pesquisa/input-pesquisa.component';
+import { MobileFabActionComponent } from 'src/app/components/mobile-fab-action/mobile-fab-action.component';
 import { ProdutoListagem } from 'src/app/models/produto/produto-listagem.model';
-import { Produto } from 'src/app/models/produto/produto.model';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { CardHeaderComponent } from "src/app/components/card-header/card-header.component";
 
@@ -22,7 +26,11 @@ import { CardHeaderComponent } from "src/app/components/card-header/card-header.
   standalone: true,
   imports: [
     CommonModule,
+    MatButtonModule,
     MatCardModule,
+    MatRippleModule,
+    MatIconModule,
+    MatMenuModule,
     MatPaginatorModule,
     MatTableModule,
     MatProgressSpinnerModule,
@@ -30,6 +38,7 @@ import { CardHeaderComponent } from "src/app/components/card-header/card-header.
     RouterModule,
     TemPermissaoDirective,
     InputPesquisaComponent,
+    MobileFabActionComponent,
     MatTooltipModule,
     CardHeaderComponent
 ],
@@ -49,6 +58,9 @@ export class ListarProdutosComponent implements OnInit {
   // ✅ agora só nome, descricao, variacoes, acoes
   colunasExibidas = ['nome', 'descricao', 'variacoes', 'acoes'];
   maxChips = 4; // mostra até 4 variações; o resto vira “+N”
+  isMobileView = false;
+  mobileFabCompact = false;
+  produtoSelecionadoMenu: ProdutoListagem | null = null;
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
@@ -60,7 +72,18 @@ export class ListarProdutosComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
+    this.atualizarViewport();
     this.carregarProdutos();
+  }
+
+  @HostListener('window:resize')
+  onWindowResize(): void {
+    this.atualizarViewport();
+  }
+
+  @HostListener('window:scroll')
+  onWindowScroll(): void {
+    this.mobileFabCompact = (window.scrollY || document.documentElement.scrollTop || 0) > 96;
   }
 
   carregarProdutos(): void {
@@ -83,11 +106,11 @@ export class ListarProdutosComponent implements OnInit {
     this.carregarProdutos();
   }
 
-  editar(produto: Produto): void {
+  editar(produto: ProdutoListagem): void {
     this.router.navigate(['/page/cadastro-tecnico/produtos/editar', produto.id]);
   }
 
-  excluir(produto: Produto): void {
+  excluir(produto: ProdutoListagem): void {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
@@ -132,5 +155,31 @@ export class ListarProdutosComponent implements OnInit {
   tooltipVariacoes(produto: ProdutoListagem): string | null {
     const arr = produto?.variacoes ?? [];
     return arr.length > 5 ? arr.join('\n') : null;
+  }
+
+  variacoesResumoMobile(produto: ProdutoListagem): string[] {
+    return (produto?.variacoes ?? []).slice(0, 2);
+  }
+
+  variacoesRestantesMobile(produto: ProdutoListagem): number {
+    return Math.max((produto?.variacoes?.length ?? 0) - 2, 0);
+  }
+
+  navegarCriacao(): void {
+    this.router.navigate(['/page/cadastro-tecnico/produtos/criar']);
+  }
+
+  selecionarProdutoMenu(produto: ProdutoListagem, event: Event): void {
+    event.stopPropagation();
+    this.produtoSelecionadoMenu = produto;
+  }
+
+  private atualizarViewport(): void {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    this.isMobileView = window.innerWidth <= 768;
+    this.tamanhoPagina = this.isMobileView ? 20 : 10;
   }
 }

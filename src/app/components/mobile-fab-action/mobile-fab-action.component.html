@@ -1,0 +1,10 @@
+<button
+  mat-flat-button
+  type="button"
+  class="mobile-fab-action"
+  [class.mobile-fab-action--compact]="compact"
+  [attr.aria-label]="ariaLabel || label"
+  (click)="emitAction()">
+  <mat-icon>{{ icon }}</mat-icon>
+  <span>{{ label }}</span>
+</button>

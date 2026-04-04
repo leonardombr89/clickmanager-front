@@ -1,7 +1,11 @@
 import { CommonModule } from '@angular/common';
 import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
-  OnInit
+  ElementRef,
+  OnInit,
+  ViewChild
 } from '@angular/core';
 import {
   FormBuilder,
@@ -22,7 +26,6 @@ import { Observable } from 'rxjs';
 import { AcabamentoService } from '../acabamento.service';
 import { AcabamentoRequest } from 'src/app/models/acabamento/acabamento-request.model';
 import { AcabamentoResponse } from 'src/app/models/acabamento/acabamento-response.model';
-import { AcabamentoVariacaoResponse } from 'src/app/models/acabamento/acabamento-variacao-response.model';
 import { AcabamentoVariacaoRequest } from 'src/app/models/acabamento/acabamento-variacao-request.model';
 import { PrecoRequest } from 'src/app/models/preco/preco.model';
 
@@ -32,10 +35,13 @@ import { extrairMensagemErro } from 'src/app/utils/mensagem.util';
 import { PageCardComponent } from 'src/app/components/page-card/page-card.component';
 import { SectionCardComponent } from 'src/app/components/section-card/section-card.component';
 import { InputTextareaComponent } from 'src/app/components/inputs/input-textarea/input-textarea.component';
+import { MobileTotalBarComponent } from 'src/app/components/mobile-total-bar/mobile-total-bar.component';
+import { TipoAplicacaoAcabamento } from 'src/app/models/acabamento/tipo-aplicacao-acabamento.enum';
 
 @Component({
   selector: 'app-form-acabamento',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     RouterModule,
@@ -47,22 +53,30 @@ import { InputTextareaComponent } from 'src/app/components/inputs/input-textarea
     VariacoesAcabamentoComponent,
     PageCardComponent,
     SectionCardComponent,
-    InputTextareaComponent
+    InputTextareaComponent,
+    MobileTotalBarComponent
   ],
   templateUrl: './form-acabamento.component.html',
   styleUrl: './form-acabamento.component.scss'
 })
 export class FormAcabamentoComponent implements OnInit {
+  @ViewChild('wizardTop') wizardTop?: ElementRef<HTMLElement>;
+
+  readonly totalSteps = 4;
+  readonly wizardSteps = [
+    { key: 'base', label: 'Base' },
+    { key: 'estrutura', label: 'Estrutura' },
+    { key: 'preco', label: 'Preço' },
+    { key: 'revisao', label: 'Revisão' },
+  ] as const;
 
   form!: FormGroup;
   isEditMode = false;
   acabamentoId!: number;
+  currentStep = 1;
 
-  /** variações atuais (emitidas pelo filho) */
   variacoes: AcabamentoVariacaoForm[] = [];
-
-  /** seed para edição (preenche o componente de variações) */
-  variacoesIniciais: AcabamentoVariacaoResponse[] = [];
+  variacoesIniciais: AcabamentoVariacaoForm[] = [];
 
   loading = false;
 
@@ -71,10 +85,9 @@ export class FormAcabamentoComponent implements OnInit {
     private readonly route: ActivatedRoute,
     private readonly router: Router,
     private readonly acabamentoService: AcabamentoService,
-    private readonly toastr: ToastrService
+    private readonly toastr: ToastrService,
+    private readonly cdr: ChangeDetectorRef
   ) { }
-
-  // ============ lifecycle ============
 
   ngOnInit(): void {
     this.buildForm();
@@ -104,20 +117,21 @@ export class FormAcabamentoComponent implements OnInit {
     this.carregarAcabamento(this.acabamentoId);
   }
 
-  // ============ load ============
-
   private carregarAcabamento(id: number): void {
     this.loading = true;
+    this.cdr.markForCheck();
 
     this.acabamentoService.buscarPorId(id).subscribe({
       next: (acabamento: AcabamentoResponse) => {
         this.patchAcabamento(acabamento);
         this.loading = false;
+        this.cdr.markForCheck();
       },
       error: (err) => {
         this.loading = false;
         this.toastr.error(extrairMensagemErro(err, 'Erro ao carregar acabamento.'));
         this.router.navigate(['/page/cadastro-tecnico/acabamentos']);
+        this.cdr.markForCheck();
       }
     });
   }
@@ -128,18 +142,24 @@ export class FormAcabamentoComponent implements OnInit {
       descricao: acabamento?.descricao ?? '',
     });
 
-    this.variacoesIniciais = acabamento.variacoes ?? [];
-  }
+    this.variacoesIniciais = (acabamento.variacoes ?? []).map(v => ({
+      id: v.id,
+      materialId: v.materialId ?? null,
+      formatoId: v.formatoId ?? null,
+      tipoAplicacao: TipoAplicacaoAcabamento.toValue(v.tipoAplicacao) ?? v.tipoAplicacao,
+      preco: v.preco ?? null,
+      ativo: v.ativo,
+    }));
 
-  // ============ variações (filho) ============
+    this.variacoes = [...this.variacoesIniciais];
+  }
 
   onVariacoesChange(lista: AcabamentoVariacaoForm[]): void {
     this.variacoes = Array.isArray(lista)
       ? lista.filter(v => v && typeof v === 'object')
       : [];
+    this.cdr.markForCheck();
   }
-
-  // ============ submit ============
 
   onSubmit(): void {
     if (this.form.invalid) {
@@ -153,16 +173,16 @@ export class FormAcabamentoComponent implements OnInit {
       return;
     }
 
-    // Valida se todas as variações possuem tipoAplicacao e preço válido
     const invalid = this.variacoes.find(v => this.isInvalidVariacao(v));
     if (invalid) {
-      this.toastr.error('Há variações com dados inválidos. Verifique tipo de aplicação, material, formato e preço.');
+      this.toastr.error('Há variações com dados inválidos. Verifique aplicação e preço.');
       return;
     }
 
     const payload = this.toAcabamentoRequest(this.form.getRawValue());
 
     this.loading = true;
+    this.cdr.markForCheck();
 
     const acao: Observable<AcabamentoResponse> = this.isEditMode
       ? this.acabamentoService.atualizar(this.acabamentoId, payload)
@@ -174,16 +194,126 @@ export class FormAcabamentoComponent implements OnInit {
         this.toastr.success(`Acabamento ${mensagem} com sucesso!`);
         this.loading = false;
         this.router.navigate(['/page/cadastro-tecnico/acabamentos']);
+        this.cdr.markForCheck();
       },
       error: (err) => {
         const mensagem = this.isEditMode ? 'atualizar' : 'criar';
         this.loading = false;
         this.toastr.error(extrairMensagemErro(err, `Erro ao ${mensagem} acabamento.`));
+        this.cdr.markForCheck();
       }
     });
   }
 
-  // ============ mapeamento payload ============
+  goToStep(step: number): void {
+    if (step < 1 || step > this.totalSteps || step > this.maxAccessibleStep) {
+      return;
+    }
+
+    this.currentStep = step;
+    this.cdr.markForCheck();
+    this.scrollToWizardTop();
+  }
+
+  nextStep(): void {
+    if (this.currentStep === 1 && !this.stepBaseCompleta) {
+      this.nomeControl.markAsTouched();
+      this.descricaoControl.markAsTouched();
+      this.toastr.error('Preencha nome e descrição para continuar.');
+      return;
+    }
+
+    if (this.currentStep === 2 && !this.stepEstruturaCompleta) {
+      this.toastr.error('Gere ao menos uma combinação antes de continuar.');
+      return;
+    }
+
+    if (this.currentStep === 3 && !this.stepPrecoCompleta) {
+      this.toastr.error('Defina o preço das variações antes de revisar o cadastro.');
+      return;
+    }
+
+    this.currentStep = Math.min(this.currentStep + 1, this.totalSteps);
+    this.cdr.markForCheck();
+    this.scrollToWizardTop();
+  }
+
+  previousStep(): void {
+    this.currentStep = Math.max(this.currentStep - 1, 1);
+    this.cdr.markForCheck();
+    this.scrollToWizardTop();
+  }
+
+  get showMobileWizardFooter(): boolean {
+    return this.currentStep !== 2;
+  }
+
+  get mobileWizardFooterLabel(): string {
+    return `Etapa ${this.currentStep} de ${this.totalSteps}`;
+  }
+
+  get mobileWizardFooterValueText(): string {
+    switch (this.currentStep) {
+      case 1:
+        return 'Base';
+      case 3:
+        return 'Preço';
+      case 4:
+        return 'Revisão';
+      default:
+        return '';
+    }
+  }
+
+  get mobileWizardFooterSecondaryActionText(): string {
+    return this.currentStep > 1 ? 'Voltar' : '';
+  }
+
+  get mobileWizardFooterActionText(): string {
+    if (this.currentStep === 4) {
+      return this.loading ? 'Salvando...' : (this.isEditMode ? 'Atualizar acabamento' : 'Salvar acabamento');
+    }
+
+    if (this.currentStep === 3) {
+      return 'Revisar acabamento →';
+    }
+
+    return 'Próximo';
+  }
+
+  get mobileWizardFooterActionDisabled(): boolean {
+    if (this.loading) {
+      return true;
+    }
+
+    switch (this.currentStep) {
+      case 1:
+        return !this.stepBaseCompleta;
+      case 3:
+        return !this.stepPrecoCompleta;
+      case 4:
+        return !this.prontoParaSalvar;
+      default:
+        return false;
+    }
+  }
+
+  onMobileWizardPrimaryAction(): void {
+    if (this.currentStep === 4) {
+      this.onSubmit();
+      return;
+    }
+
+    this.nextStep();
+  }
+
+  onMobileWizardSecondaryAction(): void {
+    if (this.currentStep <= 1) {
+      return;
+    }
+
+    this.previousStep();
+  }
 
   private toAcabamentoRequest(formValue: any): AcabamentoRequest {
     return {
@@ -200,11 +330,6 @@ export class FormAcabamentoComponent implements OnInit {
 
       if (!v.tipoAplicacao) {
         throw new Error('Variação inválida: tipoAplicacao é obrigatório.');
-      }
-
-      if (!materialId && !formatoId) {
-        // Se quiser forçar pelo menos um deles:
-        // throw new Error('Variação inválida: informe material, formato ou ambos.');
       }
 
       if (!v.preco?.tipo) {
@@ -257,9 +382,7 @@ export class FormAcabamentoComponent implements OnInit {
           ...(p.precoMinimo != null ? { precoMinimo: this.num(p.precoMinimo) } : {}),
           ...(p.alturaMaxima != null ? { alturaMaxima: this.num(p.alturaMaxima) } : {}),
           ...(p.larguraMaxima != null ? { larguraMaxima: this.num(p.larguraMaxima) } : {}),
-          ...(p.largurasLinearesPermitidas
-            ? { largurasLinearesPermitidas: String(p.largurasLinearesPermitidas) }
-            : {}),
+          ...(p.largurasLinearesPermitidas ? { largurasLinearesPermitidas: String(p.largurasLinearesPermitidas) } : {}),
         } as PrecoRequest;
 
       case 'HORA':
@@ -273,15 +396,19 @@ export class FormAcabamentoComponent implements OnInit {
     }
   }
 
-  // ============ helpers ============
+  private scrollToWizardTop(): void {
+    setTimeout(() => {
+      this.wizardTop?.nativeElement.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }, 30);
+  }
 
   private isInvalidVariacao(v: AcabamentoVariacaoForm): boolean {
     if (!v || typeof v !== 'object') return true;
-
     if (!v.tipoAplicacao) return true;
     if (!v.preco || !v.preco.tipo) return true;
-
-    // materialId e formatoId são opcionais (podem ser genéricos), então não valido aqui
     return false;
   }
 
@@ -306,8 +433,6 @@ export class FormAcabamentoComponent implements OnInit {
     Object.values(this.form.controls).forEach(control => control.markAsTouched());
   }
 
-  // ============ getters convenientes p/ template ============
-
   get nomeControl(): FormControl {
     return this.form.get('nome') as FormControl;
   }
@@ -316,20 +441,81 @@ export class FormAcabamentoComponent implements OnInit {
     return this.form.get('descricao') as FormControl;
   }
 
+  get variacoesRenderizadas(): AcabamentoVariacaoForm[] {
+    return this.variacoes.length ? this.variacoes : this.variacoesIniciais;
+  }
+
   get variacoesCount(): number {
     return this.variacoes.length;
+  }
+
+  get variacoesComPrecoCount(): number {
+    return this.variacoes.filter(variacao => !!variacao.preco?.tipo).length;
+  }
+
+  get variacoesSemPrecoCount(): number {
+    return this.variacoesCount - this.variacoesComPrecoCount;
   }
 
   get dadosPrincipaisProntos(): boolean {
     return this.nomeControl.valid && this.descricaoControl.valid;
   }
 
+  get stepBaseCompleta(): boolean {
+    return this.dadosPrincipaisProntos;
+  }
+
+  get stepEstruturaCompleta(): boolean {
+    return this.variacoesCount > 0;
+  }
+
+  get stepPrecoCompleta(): boolean {
+    return this.variacoesCount > 0 && this.variacoesSemPrecoCount === 0;
+  }
+
+  get completedStepsCount(): number {
+    let count = 0;
+    if (this.stepBaseCompleta) count += 1;
+    if (this.stepEstruturaCompleta) count += 1;
+    if (this.stepPrecoCompleta) count += 1;
+    if (this.prontoParaSalvar) count += 1;
+    return count;
+  }
+
+  get maxAccessibleStep(): number {
+    if (!this.stepBaseCompleta) return 1;
+    if (!this.stepEstruturaCompleta) return 2;
+    if (!this.stepPrecoCompleta) return 3;
+    return 4;
+  }
+
+  get progressPercent(): number {
+    return (this.currentStep / this.totalSteps) * 100;
+  }
+
   get prontoParaSalvar(): boolean {
-    return this.dadosPrincipaisProntos && this.variacoesCount > 0;
+    return this.dadosPrincipaisProntos && this.stepEstruturaCompleta && this.stepPrecoCompleta;
   }
 
   get resumoNome(): string {
     return (this.nomeControl.value || '').trim() || 'Pendente';
+  }
+
+  get resumoPreco(): string {
+    if (!this.variacoesCount) {
+      return 'Sem preço';
+    }
+    if (!this.variacoesComPrecoCount) {
+      return 'Pendente';
+    }
+    if (this.variacoesSemPrecoCount) {
+      return `${this.variacoesComPrecoCount}/${this.variacoesCount} com preço`;
+    }
+    return 'Completo';
+  }
+
+  get statusValidacao(): string {
+    return this.prontoParaSalvar ? 'Pronto para salvar' : 'Em revisão';
   }
 
   get statusRevisaoTitulo(): string {
@@ -349,7 +535,11 @@ export class FormAcabamentoComponent implements OnInit {
       return 'Revise nome e descrição para deixar o acabamento pronto para ser salvo.';
     }
 
-    return 'Gere ao menos uma variação para concluir o cadastro deste acabamento.';
+    if (!this.stepEstruturaCompleta) {
+      return 'Gere ao menos uma variação para concluir o cadastro deste acabamento.';
+    }
+
+    return 'Defina o preço das variações antes de concluir o cadastro.';
   }
 
   get pendenciasSalvamento(): string[] {
@@ -365,6 +555,10 @@ export class FormAcabamentoComponent implements OnInit {
 
     if (!this.variacoesCount) {
       pendencias.push('Gerar ao menos uma variação antes de salvar.');
+    }
+
+    if (this.variacoesSemPrecoCount) {
+      pendencias.push(`Definir preço para ${this.variacoesSemPrecoCount} variação(ões).`);
     }
 
     return pendencias;

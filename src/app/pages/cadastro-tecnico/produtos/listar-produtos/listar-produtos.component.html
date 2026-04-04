@@ -1,51 +1,43 @@
+@if (!isMobileView) {
 <mat-card class="cardWithShadow">
 
-  <!-- Cabeçalho padrão -->
   <app-card-header titulo="Produtos" botaoTexto="Novo Produto" botaoIcone="add"
     [botaoRota]="['/page/cadastro-tecnico/produtos/criar']" *temPermissao="'GERENCIAR_PRODUTOS'"
+    [helpRota]="['/page/ajuda']"
+    helpFragment="produtos"
+    helpTexto=""
+    helpIcone="help_outline"
     [mostrarDivisor]="true">
   </app-card-header>
 
   <mat-card-content>
-
-    <!-- Pesquisa -->
     <app-input-pesquisa placeholder="Ex: nome do produto" (valorAlterado)="onPesquisar($event)">
     </app-input-pesquisa>
 
-    <!-- Tabela -->
     <div class="table-responsive">
       <table mat-table [dataSource]="produtos" class="mat-elevation-z1 no-wrap m-t-0 v-middle w-100">
-
-        <!-- Nome -->
         <ng-container matColumnDef="nome">
           <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">Nome</th>
           <td mat-cell *matCellDef="let p" class="f-s-14">{{ p.nome }}</td>
         </ng-container>
 
-        <!-- Descrição -->
         <ng-container matColumnDef="descricao">
           <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">Descrição</th>
           <td mat-cell *matCellDef="let p" class="f-s-14">{{ p.descricao }}</td>
         </ng-container>
 
-        <!-- Variações -->
         <ng-container matColumnDef="variacoes">
           <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">Variações</th>
           <td mat-cell *matCellDef="let p" class="f-s-14">
-
             <div class="variacoes-cell" [matTooltip]="(p?.variacoes?.length ?? 0) > 5 ? p.variacoes!.join('\n') : ''"
               [matTooltipDisabled]="!((p?.variacoes?.length ?? 0) > 5)" matTooltipShowDelay="300">
-
               <div *ngFor="let linha of variacoesPreview(p)" class="variacao-linha">
                 {{ linha }}
               </div>
-
             </div>
-
           </td>
         </ng-container>
 
-        <!-- Ações -->
         <ng-container matColumnDef="acoes">
           <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">Ações</th>
           <td mat-cell *matCellDef="let p" class="action-link">
@@ -60,14 +52,101 @@
 
         <tr mat-header-row *matHeaderRowDef="colunasExibidas"></tr>
         <tr mat-row *matRowDef="let row; columns: colunasExibidas"></tr>
-
       </table>
 
       <mat-paginator [length]="totalProdutos" [pageSize]="tamanhoPagina" (page)="onPaginaAlterada($event)"
         showFirstLastButtons>
       </mat-paginator>
     </div>
-
   </mat-card-content>
-
 </mat-card>
+} @else {
+<section class="produto-mobile">
+  <div class="produto-mobile__sticky">
+    <div class="produto-mobile__search">
+      <mat-icon>search</mat-icon>
+      <input
+        type="search"
+        placeholder="Buscar produto..."
+        (input)="onPesquisar($any($event.target).value)" />
+    </div>
+  </div>
+
+  <div class="produto-mobile__list">
+    @if (carregando) {
+    <div class="produto-mobile__state">
+      <mat-spinner diameter="28"></mat-spinner>
+      <span>Carregando produtos...</span>
+    </div>
+    } @else if (!produtos.length) {
+    <div class="produto-mobile__state produto-mobile__state--empty">
+      <strong>Nenhum produto encontrado</strong>
+      <span>Tente ajustar a busca ou cadastre um novo produto.</span>
+    </div>
+    } @else {
+      @for (produto of produtos; track produto.id) {
+      <article class="produto-mobile-card" matRipple [matRippleColor]="'rgba(37, 99, 235, 0.08)'" (click)="editar(produto)">
+        <div class="produto-mobile-card__content">
+          <div class="produto-mobile-card__head">
+            <div class="produto-mobile-card__identity">
+              <strong>{{ produto.nome }}</strong>
+              <span>{{ produto.descricao || 'Sem descrição cadastrada' }}</span>
+            </div>
+
+            <button
+              mat-icon-button
+              type="button"
+              class="produto-mobile-card__menu"
+              [matMenuTriggerFor]="produtoMenu"
+              (click)="selecionarProdutoMenu(produto, $event)"
+              aria-label="Abrir ações do produto">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+          </div>
+
+          <div class="produto-mobile-card__variacoes">
+            @for (variacao of variacoesResumoMobile(produto); track variacao) {
+            <div class="produto-mobile-card__variacao">{{ variacao }}</div>
+            }
+
+            @if (variacoesRestantesMobile(produto) > 0) {
+            <span class="produto-mobile-card__more">+{{ variacoesRestantesMobile(produto) }} variações</span>
+            }
+          </div>
+        </div>
+
+        <div class="produto-mobile-card__footer">
+          <span class="produto-mobile-card__label">Variações</span>
+          <span class="produto-mobile-card__count">{{ produto.variacoes?.length || 0 }}</span>
+        </div>
+      </article>
+      }
+    }
+  </div>
+
+  <app-mobile-fab-action
+    *temPermissao="'GERENCIAR_PRODUTOS'"
+    label="Novo Produto"
+    icon="add"
+    [compact]="mobileFabCompact"
+    ariaLabel="Criar novo produto"
+    (action)="navegarCriacao()">
+  </app-mobile-fab-action>
+</section>
+
+<mat-menu #produtoMenu="matMenu">
+  <button mat-menu-item type="button" (click)="editar(produtoSelecionadoMenu!)" [disabled]="!produtoSelecionadoMenu">
+    <mat-icon>edit</mat-icon>
+    <span>Editar</span>
+  </button>
+  <button
+    *temPermissao="'GERENCIAR_PRODUTOS'"
+    mat-menu-item
+    type="button"
+    (click)="excluir(produtoSelecionadoMenu!)"
+    [disabled]="!produtoSelecionadoMenu">
+    <mat-icon>delete</mat-icon>
+    <span>Excluir</span>
+  </button>
+</mat-menu>
+}

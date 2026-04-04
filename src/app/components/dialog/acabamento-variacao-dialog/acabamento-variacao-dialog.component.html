@@ -1,0 +1,36 @@
+<h2 mat-dialog-title class="edit-head">
+  <div class="edit-head__copy">
+    <strong>{{ title }}</strong>
+    <span class="edit-head__summary">{{ estruturaResumo }}</span>
+  </div>
+  <button type="button" mat-icon-button aria-label="Fechar edição" (click)="cancel()">
+    <mat-icon>close</mat-icon>
+  </button>
+</h2>
+
+<mat-dialog-content class="edit-content">
+  <section class="edit-section">
+    <div class="edit-section__title">Estrutura base</div>
+    <div class="readonly-chip-row">
+      <span class="readonly-chip">{{ materialLabel }}</span>
+      <span class="readonly-chip">{{ formatoLabel }}</span>
+      <span class="readonly-chip">{{ aplicacaoLabel }}</span>
+    </div>
+  </section>
+
+  <section class="edit-section edit-section--price">
+    <div class="edit-section__title">{{ readOnly ? 'Preço configurado' : 'Preço da variação' }}</div>
+    <div class="price-card">
+      <app-preco-selector [formGroup]="precoForm"></app-preco-selector>
+    </div>
+  </section>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="edit-actions">
+  <button type="button" mat-stroked-button (click)="cancel()">
+    {{ readOnly ? 'Fechar' : 'Cancelar' }}
+  </button>
+  <button *ngIf="!readOnly" type="button" mat-flat-button color="primary" (click)="save()">
+    Salvar alterações
+  </button>
+</mat-dialog-actions>

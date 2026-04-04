@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatExpansionModule } from '@angular/material/expansion';
@@ -8,6 +8,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
+import { MatRippleModule } from '@angular/material/core';
 
 type AjudaSecao = {
   id: string;
@@ -21,13 +22,15 @@ type AjudaSecao = {
 @Component({
   selector: 'app-ajuda',
   standalone: true,
-  imports: [CommonModule, MatCardModule, MatExpansionModule, MatButtonModule, MatIconModule, MatFormFieldModule, MatInputModule],
+  imports: [CommonModule, MatCardModule, MatExpansionModule, MatButtonModule, MatIconModule, MatFormFieldModule, MatInputModule, MatRippleModule],
   templateUrl: './ajuda.component.html',
   styleUrls: ['./ajuda.component.scss'],
 })
 export class AjudaComponent implements OnInit, OnDestroy {
   filtro = '';
   expandedId: string | null = null;
+  isMobileView = false;
+  showAllQuickTopics = false;
   private fragSub?: Subscription;
   secoes: AjudaSecao[] = [
     {
@@ -45,14 +48,88 @@ export class AjudaComponent implements OnInit, OnDestroy {
       ],
     },
     {
-      id: 'pedidos',
-      titulo: 'Cadastro de Produtos (variações e preços)',
-      descricao: 'Como o sistema organiza produtos e variações para o SmartCalc.',
+      id: 'produtos',
+      titulo: 'Produtos e catálogo técnico',
+      descricao: 'Manual principal para produtos, materiais, formatos, cores, serviços e acabamentos.',
       icon: 'inventory_2',
-      passos: [
-        'Produto = modelo base. Variação = combinação de material, formato e cor com um tipo de preço. Cada variação define como o SmartCalc calcula (fixo por peça, m², faixa de quantidade ou demanda).',
-        'No cadastro do produto, crie uma ou mais variações. Exemplo: “Adesivo Vinil” com material Vinil, formato A4, cor Brilho e preço por m². Outra variação pode ser A3, ou cor Fosco, etc.',
-        'Associe serviços e acabamentos disponíveis para cada variação (ex.: laminação, corte, instalação). Isso habilita opcionais na montagem do item.',
+      itens: [
+        {
+          titulo: '1) Como pensar o cadastro',
+          detalhes: [
+            'Produto é o modelo comercial. Variação é a combinação técnica usada no SmartCalc e no pedido.',
+            'Cada variação junta material, formato e cor. Depois você adiciona serviços e acabamentos compatíveis.',
+            'A ideia é cadastrar uma base reutilizável para o time vender rápido, sem montar preço manual toda vez.',
+          ],
+        },
+        {
+          titulo: '2) O que cadastrar antes do produto',
+          detalhes: [
+            'Materiais: definem a base física do item, como Vinil brilho, Couché 180g ou Lona.',
+            'Formatos: definem as dimensões e área útil, como A4, A3, SRA3 ou tamanhos próprios.',
+            'Cores: representam o padrão de impressão, como 4x0, 4x4, 1x0.',
+            'Serviços: representam cobranças adicionais, como instalação, arte, embalagem ou aplicação.',
+            'Acabamentos: representam complementos técnicos, como laminação, verniz, corte especial ou dobra.',
+          ],
+        },
+        {
+          titulo: '3) Como criar um produto',
+          detalhes: [
+            'Etapa 1: preencha nome e descrição. Use um nome claro para o time localizar rápido.',
+            'Etapa 2: monte a estrutura escolhendo materiais, formatos e cores. O sistema gera as combinações automaticamente.',
+            'Etapa 3: defina o preço base das variações. Você pode aplicar uma regra geral e depois ajustar exceções.',
+            'Etapa 4: revise o resumo final e salve.',
+          ],
+        },
+        {
+          titulo: '4) Como funcionam as variações',
+          detalhes: [
+            'Cada variação representa uma combinação vendável, por exemplo: Vinil Brilho • A4 • 4x0.',
+            'A variação carrega o tipo de preço e determina como o SmartCalc vai calcular no pedido.',
+            'Você pode editar uma variação individualmente sem precisar apagar e recriar todas as outras.',
+          ],
+        },
+        {
+          titulo: '5) Tipos de preço e quando usar',
+          detalhes: [
+            'Preço fixo: use quando cada peça tem um valor fechado.',
+            'Preço por metro quadrado: use quando o valor depende de largura x altura.',
+            'Preço por quantidade/faixas: use quando o valor muda conforme o volume.',
+            'Preço por demanda: use quando a regra depende de intervalos ou cenários específicos do produto.',
+          ],
+        },
+        {
+          titulo: '6) Serviços e acabamentos no produto',
+          detalhes: [
+            'Serviços e acabamentos ficam vinculados às variações para aparecerem como opcionais no SmartCalc.',
+            'Use serviços para cobranças operacionais e acabamentos para complementos técnicos do item.',
+            'Nem toda variação precisa ter os mesmos extras; ajuste só onde fizer sentido.',
+          ],
+        },
+        {
+          titulo: '7) Como editar depois',
+          detalhes: [
+            'Na edição, revise primeiro as variações já existentes. O foco principal deve ser gerenciar o que já está configurado.',
+            'Você pode gerar novas combinações sem perder as atuais, desde que não crie duplicidades.',
+            'Também é possível editar preço, serviços e acabamentos de uma variação específica.',
+          ],
+        },
+        {
+          titulo: '8) Como isso aparece no pedido',
+          detalhes: [
+            'No pedido, o usuário escolhe o produto, depois a variação compatível.',
+            'O SmartCalc usa a configuração da variação para calcular valor, quantidade e opcionais.',
+            'Se o catálogo estiver bem montado, a criação do pedido fica rápida e padronizada.',
+          ],
+        },
+        {
+          titulo: '9) Boas práticas',
+          detalhes: [
+            'Use nomes simples e consistentes em materiais, formatos e cores.',
+            'Gere combinações em lote primeiro e ajuste exceções depois.',
+            'Evite duplicar produtos quando a diferença for só material, formato, cor ou preço.',
+            'Revise sempre as variações antes de salvar para evitar combinações desnecessárias.',
+          ],
+        },
       ],
     },
     {
@@ -604,15 +681,65 @@ export class AjudaComponent implements OnInit, OnDestroy {
     });
   }
 
+  get featuredSecao(): AjudaSecao | null {
+    const base = this.filteredSecoes;
+    if (!base.length) {
+      return null;
+    }
+
+    const smartcalc = base.find(secao => secao.id === 'smartcalc');
+    return smartcalc ?? base[0];
+  }
+
+  get remainingSecoes(): AjudaSecao[] {
+    const featuredId = this.featuredSecao?.id;
+    return this.filteredSecoes.filter(secao => secao.id !== featuredId);
+  }
+
+  get quickTopics(): { id: string; label: string; icon: string }[] {
+    const topics = [
+      { id: 'smartcalc', label: 'SmartCalc', icon: 'calculate' },
+      { id: 'produtos', label: 'Produtos', icon: 'inventory_2' },
+      { id: 'fluxo-pedido', label: 'Pedidos', icon: 'assignment' },
+      { id: 'acabamentos', label: 'Acabamentos', icon: 'auto_awesome' },
+      { id: 'notificacoes', label: 'Notificações', icon: 'notifications' },
+      { id: 'funcionarios', label: 'Funcionários', icon: 'badge' },
+      { id: 'folha-pagamento', label: 'Folha', icon: 'payments' },
+      { id: 'folha-configuracao', label: 'Config. Folha', icon: 'tune' },
+      { id: 'status-pedido', label: 'Fluxo do pedido', icon: 'sync_alt' },
+      { id: 'catalogo', label: 'Catálogo', icon: 'category' },
+    ];
+
+    return topics.filter(topic => this.secoes.some(secao => secao.id === topic.id));
+  }
+
+  get visibleQuickTopics(): { id: string; label: string; icon: string }[] {
+    if (!this.isMobileView || this.showAllQuickTopics) {
+      return this.quickTopics;
+    }
+
+    return this.quickTopics.slice(0, 6);
+  }
+
+  get hasHiddenQuickTopics(): boolean {
+    return this.isMobileView && this.quickTopics.length > this.visibleQuickTopics.length;
+  }
+
   constructor(private route: ActivatedRoute) {}
 
   ngOnInit(): void {
+    this.atualizarViewport();
     this.fragSub = this.route.fragment.subscribe(frag => {
       if (frag) {
         this.expandedId = frag;
         setTimeout(() => this.rolarPara(frag), 50);
       }
     });
+  }
+
+  @HostListener('window:resize')
+  onWindowResize(): void {
+    this.atualizarViewport();
   }
 
   ngOnDestroy(): void {
@@ -623,5 +750,17 @@ export class AjudaComponent implements OnInit, OnDestroy {
     const el = document.getElementById(id);
     this.expandedId = id;
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  toggleQuickTopics(): void {
+    this.showAllQuickTopics = !this.showAllQuickTopics;
+  }
+
+  private atualizarViewport(): void {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    this.isMobileView = window.innerWidth <= 768;
   }
 }

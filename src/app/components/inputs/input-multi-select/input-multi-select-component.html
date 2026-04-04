@@ -1,6 +1,7 @@
 <mat-card
     class="cardWithShadow h-100 d-flex flex-column smart-card"
     [class.smart-card--subtle]="visualStyle === 'subtle'"
+    [class.smart-card--no-min-height]="cardMinHeight <= 0"
     [style.min-height.px]="cardMinHeight">
     <mat-card-header>
         <mat-card-title class="f-s-16 f-w-600">
@@ -17,20 +18,59 @@
         </mat-form-field>
     </div>
 
+    <div class="smart-selected px-12">
+        <div class="smart-selected__label">Selecionados</div>
+        <mat-chip-set class="smart-selected__chips" *ngIf="selectedOptions.length; else emptySelected">
+            <mat-chip-row *ngFor="let option of selectedOptions; trackBy: trackById">
+                {{ option.nome }}
+                <button matChipRemove type="button" (click)="removeSelected(option.id)" aria-label="Remover seleção">
+                    <mat-icon>close</mat-icon>
+                </button>
+            </mat-chip-row>
+        </mat-chip-set>
+        <ng-template #emptySelected>
+            <div class="smart-selected__empty" aria-hidden="true"></div>
+        </ng-template>
+    </div>
+
     <!-- scroll aqui garante barra colada à borda direita do card -->
-    <mat-card-content class="smart-card-content" [style.height.px]="listHeight">
+    <mat-card-content
+        class="smart-card-content"
+        [class.smart-card-content--no-scroll]="disableListScroll || listHeight <= 0"
+        [style.max-height.px]="disableListScroll || listHeight <= 0 ? null : listHeight">
         <ng-container *ngIf="options?.length; else vazio">
             <mat-selection-list [formControl]="control" class="smart-list">
-                <mat-list-option *ngFor="let option of filteredOptions; trackBy: trackById" [value]="option.id">
+                <mat-list-option
+                    *ngFor="let option of filteredOptions; trackBy: trackById"
+                    [value]="option.id"
+                    [class.smart-list-option--hidden]="shouldHideOption(option)">
                     {{ option.nome }}
                 </mat-list-option>
             </mat-selection-list>
+            <div *ngIf="filteredOptions.length && !hasVisibleFilteredOptions" class="text-body f-s-12 px-12 py-8">
+                Todos os itens encontrados já estão selecionados.
+            </div>
             <div *ngIf="!filteredOptions.length" class="text-body f-s-12 px-12 py-8">Nenhum resultado encontrado.</div>
         </ng-container>
         <ng-template #vazio>
             <div class="text-body f-s-12 px-12 py-8">Nenhuma opção disponível.</div>
         </ng-template>
     </mat-card-content>
+
+    <div class="smart-footer px-12" *ngIf="showStickyFooter">
+        <div class="smart-footer__count">
+            {{ selectedCount }} {{ footerSelectionLabel }}
+        </div>
+        <button
+            type="button"
+            mat-flat-button
+            color="primary"
+            class="smart-footer__action"
+            [disabled]="concludeButtonDisabled"
+            (click)="onConclude()">
+            {{ concludeButtonText }}
+        </button>
+    </div>
 </mat-card>
 
 <div *ngIf="control?.invalid && control?.touched" class="text-body f-s-12 text-error mt-4">

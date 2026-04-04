@@ -197,7 +197,7 @@
         [actionDisabled]="!podeAvancarMobile"
         [secondaryActionText]="mobileStep === 1 ? 'Voltar' : ''"
         secondaryActionAriaLabel="Voltar etapa"
-        bottomOffset="68px"
+        bottomOffset="calc(var(--mobile-bottom-nav-height, 0px) + 8px)"
         [attachedToBottomNav]="true"
         (secondaryAction)="voltarMobile()"
         (action)="salvarMobile()">

@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, HostListener, OnInit, ViewChild } from '@angular/core';
 import { Cor } from 'src/app/models/cor.model';
 import { MatCardModule } from '@angular/material/card';
 import { MatTableModule } from '@angular/material/table';
@@ -8,14 +8,17 @@ import { MatPaginator, MatPaginatorModule, PageEvent } from '@angular/material/p
 import { MatIconModule } from '@angular/material/icon';
 import { Router, RouterModule } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
+import { MatMenuModule } from '@angular/material/menu';
 import { ConfirmDialogComponent } from 'src/app/components/dialog/confirm-dialog/confirm-dialog.component';
 import { ToastrService } from 'ngx-toastr';
 import { TemPermissaoDirective } from 'src/app/diretivas/tem-permissao.directive';
 import { InputPesquisaComponent } from 'src/app/components/inputs/input-pesquisa/input-pesquisa.component';
 import { MatButtonModule } from '@angular/material/button';
+import { MatRippleModule } from '@angular/material/core';
 import { TablerIconsModule } from 'angular-tabler-icons';
 import { CorService } from '../../services/cor.service';
 import { CardHeaderComponent } from "src/app/components/card-header/card-header.component";
+import { MobileFabActionComponent } from 'src/app/components/mobile-fab-action/mobile-fab-action.component';
 
 @Component({
   selector: 'app-listar-cores',
@@ -29,11 +32,14 @@ import { CardHeaderComponent } from "src/app/components/card-header/card-header.
     MatProgressSpinnerModule,
     MatIconModule,
     MatButtonModule,
+    MatMenuModule,
+    MatRippleModule,
     TablerIconsModule,
     RouterModule,
     TemPermissaoDirective,
     InputPesquisaComponent,
-    CardHeaderComponent
+    CardHeaderComponent,
+    MobileFabActionComponent
 ],
   templateUrl: './listar-cores.component.html',
   styleUrl: './listar-cores.component.scss'
@@ -46,13 +52,27 @@ export class ListarCoresComponent implements OnInit{
   tamanhoPagina = 10;
   termoPesquisa = '';
   colunasExibidas = ['nome', 'descricao', 'acoes'];
+  isMobileView = false;
+  mobileFabCompact = false;
+  corSelecionadaMenu: Cor | null = null;
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
   constructor(private coresService: CorService, private router: Router, private dialog: MatDialog, private toastrService: ToastrService) {}
 
   ngOnInit(): void {
+    this.atualizarViewport();
     this.carregarCores();
+  }
+
+  @HostListener('window:resize')
+  onWindowResize(): void {
+    this.atualizarViewport();
+  }
+
+  @HostListener('window:scroll')
+  onWindowScroll(): void {
+    this.mobileFabCompact = (window.scrollY || document.documentElement.scrollTop || 0) > 96;
   }
 
   carregarCores(): void {
@@ -109,5 +129,23 @@ export class ListarCoresComponent implements OnInit{
         });
       }
     });
+  }
+
+  navegarCriacao(): void {
+    this.router.navigate(['/page/cadastro-tecnico/cores/nova']);
+  }
+
+  selecionarCorMenu(cor: Cor, event: Event): void {
+    event.stopPropagation();
+    this.corSelecionadaMenu = cor;
+  }
+
+  private atualizarViewport(): void {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    this.isMobileView = window.innerWidth <= 768;
+    this.tamanhoPagina = this.isMobileView ? 20 : 10;
   }
 }

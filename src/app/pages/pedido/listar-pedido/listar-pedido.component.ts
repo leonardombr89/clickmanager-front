@@ -18,6 +18,7 @@ import { PageCardComponent } from 'src/app/components/page-card/page-card.compon
 import { PedidoTabelaComponent } from 'src/app/components/pedido-tabela/pedido-tabela.component';
 import { SectionCardComponent } from 'src/app/components/section-card/section-card.component';
 import { StatusBadgeComponent } from 'src/app/components/status-badge/status-badge.component';
+import { MobileFabActionComponent } from 'src/app/components/mobile-fab-action/mobile-fab-action.component';
 import { TemPermissaoDirective } from 'src/app/diretivas/tem-permissao.directive';
 import { PedidoListagem } from 'src/app/models/pedido/pedido-listagem.model';
 import { PedidoService } from '../pedido.service';
@@ -46,6 +47,7 @@ import { PedidoService } from '../pedido.service';
     FiltroPesquisaCardComponent,
     SectionCardComponent,
     StatusBadgeComponent,
+    MobileFabActionComponent,
     PedidoTabelaComponent
   ],
   animations: [

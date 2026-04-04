@@ -1,5 +1,4 @@
-<mat-card class="cardWithShadow">
-  <mat-card-content>
+<div class="price-selector-shell">
     <ng-container *ngIf="formGroup.get('tipo') as tipoCtrl">
       <mat-form-field appearance="outline" class="w-100">
         <mat-label>Tipo de Preço</mat-label>
@@ -12,17 +11,17 @@
     </ng-container>
 
     <!-- Preço Fixo -->
-    <mat-card class="cardWithShadow" *ngIf="formGroup.get('tipo')?.value === 'FIXO'">
-      <mat-card-content>
+    <div class="price-selector-mode" *ngIf="formGroup.get('tipo')?.value === 'FIXO'">
+      <div class="price-selector-mode__content">
         <ng-container *ngIf="formGroup.get('valor') as valorCtrl">
           <app-input-moeda [control]="getControl('valor')" label="Valor" placeholder="Valor" />
         </ng-container>
-      </mat-card-content>
-    </mat-card>
+      </div>
+    </div>
 
     <!-- Preço por Quantidade -->
-    <mat-card *ngIf="formGroup.get('tipo')?.value === 'QUANTIDADE' && formGroup.get('faixas')">
-      <mat-card-content>
+    <div class="price-selector-mode" *ngIf="formGroup.get('tipo')?.value === 'QUANTIDADE' && formGroup.get('faixas')">
+      <div class="price-selector-mode__content">
         <div [formGroup]="formGroup">
           <div formArrayName="faixas">
             <div *ngFor="let grupo of faixas.controls; let i = index" [formGroupName]="i" class="mb-4">
@@ -60,12 +59,12 @@
           <mat-icon class="me-1">add</mat-icon> Adicionar Faixa
         </button>
 
-      </mat-card-content>
-    </mat-card>
+      </div>
+    </div>
 
     <!-- Preço por Metro -->
-    <mat-card *ngIf="formGroup.get('tipo')?.value === 'METRO'">
-      <mat-card-content>
+    <div class="price-selector-mode" *ngIf="formGroup.get('tipo')?.value === 'METRO'">
+      <div class="price-selector-mode__content">
         <div class="row g-3">
           <div class="col-md-6">
             <label class="f-s-14 f-w-600 d-block m-b-8">Modo de Cobrança</label>
@@ -102,13 +101,13 @@
 
           </div>
         </div>
-      </mat-card-content>
+      </div>
 
-    </mat-card>
+    </div>
 
     <!-- Preço por Demanda -->
-    <mat-card *ngIf="formGroup.get('tipo')?.value === 'DEMANDA' && formGroup.get('faixas')">
-      <mat-card-content>
+    <div class="price-selector-mode" *ngIf="formGroup.get('tipo')?.value === 'DEMANDA' && formGroup.get('faixas')">
+      <div class="price-selector-mode__content">
         <div [formGroup]="formGroup">
           <div formArrayName="faixas">
             <div *ngFor="let grupo of faixas.controls; let i = index" [formGroupName]="i" class="mb-4">
@@ -141,12 +140,12 @@
           <mat-icon>add</mat-icon>
           <span>Adicionar Faixa</span>
         </button>
-      </mat-card-content>
-    </mat-card>
+      </div>
+    </div>
 
     <!-- Preço por Hora -->
-    <mat-card *ngIf="formGroup.get('tipo')?.value === 'HORA'">
-      <mat-card-content>
+    <div class="price-selector-mode" *ngIf="formGroup.get('tipo')?.value === 'HORA'">
+      <div class="price-selector-mode__content">
         <div class="row g-3">
           <div class="col-md-6">
             <app-input-moeda [control]="getControl('valorHora')" label="Valor Hora" placeholder="Ex: R$ 50,00" />
@@ -156,7 +155,6 @@
               placeholder="Ex: 30" />
           </div>
         </div>
-      </mat-card-content>
-    </mat-card>
-  </mat-card-content>
-</mat-card>
+      </div>
+    </div>
+</div>

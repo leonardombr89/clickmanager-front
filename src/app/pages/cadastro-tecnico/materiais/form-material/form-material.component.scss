@@ -1,0 +1,21 @@
+.cadastro-form-grid {
+  display: grid;
+  gap: 18px;
+}
+
+.cadastro-form-grid--single {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.cadastro-form-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+@media (max-width: 768px) {
+  :host ::ng-deep .cadastro-form-page .mat-mdc-card-content {
+    padding-bottom: 220px;
+  }
+}

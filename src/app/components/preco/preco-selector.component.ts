@@ -21,6 +21,7 @@ import { InputTextoRestritoComponent } from '../inputs/input-texto/input-texto-r
   selector: 'app-preco-selector',
   standalone: true,
   templateUrl: './preco-selector.component.html',
+  styleUrls: ['./preco-selector.component.scss'],
   imports: [
     CommonModule,
     ReactiveFormsModule,

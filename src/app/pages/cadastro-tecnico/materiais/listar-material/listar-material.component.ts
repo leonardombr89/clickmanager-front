@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, HostListener, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatPaginator, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
@@ -8,7 +8,9 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { Router, RouterModule } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
+import { MatMenuModule } from '@angular/material/menu';
 import { ToastrService } from 'ngx-toastr';
+import { MatRippleModule } from '@angular/material/core';
 import { TablerIconsModule } from 'angular-tabler-icons';
 import { ConfirmDialogComponent } from 'src/app/components/dialog/confirm-dialog/confirm-dialog.component';
 import { MaterialService } from '../../services/material.service';
@@ -16,6 +18,7 @@ import { Material } from 'src/app/models/material.model';
 import { TemPermissaoDirective } from 'src/app/diretivas/tem-permissao.directive';
 import { CardHeaderComponent } from "src/app/components/card-header/card-header.component";
 import { InputPesquisaComponent } from 'src/app/components/inputs/input-pesquisa/input-pesquisa.component';
+import { MobileFabActionComponent } from 'src/app/components/mobile-fab-action/mobile-fab-action.component';
 
 @Component({
   selector: 'app-listar-material',
@@ -28,11 +31,14 @@ import { InputPesquisaComponent } from 'src/app/components/inputs/input-pesquisa
     MatProgressSpinnerModule,
     MatIconModule,
     MatButtonModule,
+    MatMenuModule,
+    MatRippleModule,
     TablerIconsModule,
     RouterModule,
     TemPermissaoDirective,
     CardHeaderComponent,
-    InputPesquisaComponent
+    InputPesquisaComponent,
+    MobileFabActionComponent
 ],
   templateUrl: './listar-material.component.html',
   styleUrl: './listar-material.component.scss'
@@ -45,6 +51,9 @@ export class ListarMaterialComponent implements OnInit {
   tamanhoPagina = 10;
   termoPesquisa = '';
   colunasExibidas = ['nome', 'descricao', 'acoes'];
+  isMobileView = false;
+  mobileFabCompact = false;
+  materialSelecionadoMenu: Material | null = null;
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
@@ -56,7 +65,18 @@ export class ListarMaterialComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.atualizarViewport();
     this.carregarMateriais();
+  }
+
+  @HostListener('window:resize')
+  onWindowResize(): void {
+    this.atualizarViewport();
+  }
+
+  @HostListener('window:scroll')
+  onWindowScroll(): void {
+    this.mobileFabCompact = (window.scrollY || document.documentElement.scrollTop || 0) > 96;
   }
 
   carregarMateriais(): void {
@@ -113,5 +133,23 @@ export class ListarMaterialComponent implements OnInit {
         });
       }
     });
+  }
+
+  navegarCriacao(): void {
+    this.router.navigate(['/page/cadastro-tecnico/materiais/nova']);
+  }
+
+  selecionarMaterialMenu(material: Material, event: Event): void {
+    event.stopPropagation();
+    this.materialSelecionadoMenu = material;
+  }
+
+  private atualizarViewport(): void {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    this.isMobileView = window.innerWidth <= 768;
+    this.tamanhoPagina = this.isMobileView ? 20 : 10;
   }
 }

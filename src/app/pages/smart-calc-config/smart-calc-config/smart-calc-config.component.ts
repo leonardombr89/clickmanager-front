@@ -1,43 +1,42 @@
-import { Component, OnInit, DestroyRef, inject, signal } from '@angular/core';
+import { Component, HostListener, OnInit, DestroyRef, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormControl, ReactiveFormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { finalize } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
 
-import { MatCardModule } from '@angular/material/card';
-import { MatTabsModule } from '@angular/material/tabs';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
-import { RouterModule } from '@angular/router';
-
-
-type ProdutoOption = { id: number; nome: string };
+import { ActivatedRoute, RouterModule } from '@angular/router';
 
 import { CalculadoraConfigService } from '../calculadora-config.service';
 import { CalculadoraConfigResponse } from 'src/app/models/calculadora/calculadora-config-response.model';
 import { CalculadoraConfigRequest } from 'src/app/models/calculadora/calculadora-config-request.model';
-import { CardHeaderComponent } from "src/app/components/card-header/card-header.component";
-import { MatDivider } from "@angular/material/divider";
 import { extrairMensagemErro } from 'src/app/utils/mensagem.util';
+import { ProdutoOption } from 'src/app/models/produto/produto-option.model';
+import { PageCardComponent } from 'src/app/components/page-card/page-card.component';
+import { SectionCardComponent } from 'src/app/components/section-card/section-card.component';
+import { InputMultiSelectComponent } from 'src/app/components/inputs/input-multi-select/input-multi-select-component';
+import { MobileTotalBarComponent } from 'src/app/components/mobile-total-bar/mobile-total-bar.component';
 
 @Component({
     selector: 'app-calculadora-config',
     standalone: true,
     imports: [
-    CommonModule, ReactiveFormsModule,
-    MatCardModule, MatTabsModule, MatFormFieldModule, MatInputModule,
-    MatSlideToggleModule, MatSelectModule, MatButtonModule,
-    MatProgressSpinnerModule, MatIconModule,
-    RouterModule,
-    CardHeaderComponent,
-    MatDivider
-],
+      CommonModule,
+      ReactiveFormsModule,
+      MatSlideToggleModule,
+      MatButtonModule,
+      MatProgressSpinnerModule,
+      MatIconModule,
+      RouterModule,
+      PageCardComponent,
+      SectionCardComponent,
+      InputMultiSelectComponent,
+      MobileTotalBarComponent
+    ],
     templateUrl: './smart-calc-config.component.html',
     styleUrls: ['./smart-calc-config.component.scss']
 })
@@ -46,9 +45,12 @@ export class CalculadoraConfigComponent implements OnInit {
     private destroyRef = inject(DestroyRef);
     private calculadoraService = inject(CalculadoraConfigService);
     private toastr = inject(ToastrService);
+    private route = inject(ActivatedRoute);
 
     carregando = signal<boolean>(true);
     salvando = signal<boolean>(false);
+    isMobileView = false;
+    isEditMode = false;
 
     produtoOptions: ProdutoOption[] = [];
     configAtual?: CalculadoraConfigResponse;
@@ -59,8 +61,15 @@ export class CalculadoraConfigComponent implements OnInit {
     });
 
     ngOnInit(): void {
+        this.atualizarViewport();
+        this.isEditMode = this.route.snapshot.routeConfig?.path?.includes('editar') ?? false;
         this.carregando.set(true);
         this.loadConfig();
+    }
+
+    @HostListener('window:resize')
+    onWindowResize(): void {
+        this.atualizarViewport();
     }
 
     private loadConfig(): void {
@@ -137,4 +146,41 @@ export class CalculadoraConfigComponent implements OnInit {
     }
 
     trackById = (_: number, item: ProdutoOption) => item.id;
+
+    get tituloPagina(): string {
+        return this.isEditMode ? 'Editar SmartCalc' : 'Configuração SmartCalc';
+    }
+
+    get textoAcaoPrincipal(): string {
+        return this.salvando() ? 'Salvando...' : 'Salvar';
+    }
+
+    get resumoProdutos(): string {
+        const total = this.produtoIdsControl.value?.length ?? 0;
+        return total === 1 ? '1 produto habilitado' : `${total} produtos habilitados`;
+    }
+
+    get resumoProdutosCurto(): string {
+        const total = this.produtoIdsControl.value?.length ?? 0;
+        return total === 1 ? '1 produto' : `${total} produtos`;
+    }
+
+    get produtoIdsControl(): FormControl<number[]> {
+        return this.form.get('produtoIds') as FormControl<number[]>;
+    }
+
+    voltar(): void {
+        if (typeof window !== 'undefined' && window.history.length > 1) {
+            window.history.back();
+            return;
+        }
+    }
+
+    private atualizarViewport(): void {
+        if (typeof window === 'undefined') {
+            return;
+        }
+
+        this.isMobileView = window.innerWidth <= 768;
+    }
 }

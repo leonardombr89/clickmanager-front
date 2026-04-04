@@ -1,46 +1,36 @@
+@if (!isMobileView) {
 <mat-card class="cardWithShadow">
-
-  <!-- Cabeçalho padrão -->
   <app-card-header titulo="Formatos" botaoTexto="Novo Formato" botaoIcone="add"
-    [botaoRota]="['/page/cadastro-tecnico/formatos/criar']" botaoCor="primary" permissao="GERENCIAR_PRODUTOS"
+    [botaoRota]="['/page/cadastro-tecnico/formatos/criar']"
+    [helpRota]="['/page/ajuda']"
+    helpFragment="produtos"
+    helpTexto=""
+    helpIcone="help_outline"
+    botaoCor="primary" permissao="GERENCIAR_PRODUTOS"
     [mostrarDivisor]="true">
   </app-card-header>
 
   <mat-card-content>
-
-    <!-- Pesquisa -->
     <app-input-pesquisa placeholder="Ex: nome do formato" (valorAlterado)="onPesquisar($event)">
     </app-input-pesquisa>
 
-    <!-- Tabela de formatos -->
     <div class="table-responsive">
       <table mat-table [dataSource]="formatos" class="mat-elevation-z1 no-wrap m-t-0 v-middle w-100">
-
-        <!-- Nome -->
         <ng-container matColumnDef="nome">
           <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">Nome</th>
-          <td mat-cell *matCellDef="let f" class="f-s-14">
-            {{ f.nome }}
-          </td>
+          <td mat-cell *matCellDef="let f" class="f-s-14">{{ f.nome }}</td>
         </ng-container>
 
-        <!-- Tamanho -->
         <ng-container matColumnDef="tamanho">
           <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">Tamanho</th>
-          <td mat-cell *matCellDef="let f" class="f-s-14">
-            {{ f.larguraCm }}cm x {{ f.alturaCm }}cm
-          </td>
+          <td mat-cell *matCellDef="let f" class="f-s-14">{{ f.larguraCm }}cm x {{ f.alturaCm }}cm</td>
         </ng-container>
 
-        <!-- Área útil -->
         <ng-container matColumnDef="areaUtil">
           <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">Área Útil</th>
-          <td mat-cell *matCellDef="let f" class="f-s-14">
-            {{ f.larguraUtilCm }}cm x {{ f.alturaUtilCm }}cm
-          </td>
+          <td mat-cell *matCellDef="let f" class="f-s-14">{{ f.larguraUtilCm }}cm x {{ f.alturaUtilCm }}cm</td>
         </ng-container>
 
-        <!-- Ações -->
         <ng-container matColumnDef="acoes">
           <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">Ações</th>
           <td mat-cell *matCellDef="let f" class="action-link">
@@ -61,7 +51,71 @@
         showFirstLastButtons>
       </mat-paginator>
     </div>
-
   </mat-card-content>
-
 </mat-card>
+} @else {
+<section class="cadastro-mobile">
+  <div class="cadastro-mobile__sticky">
+    <div class="cadastro-mobile__search">
+      <mat-icon>search</mat-icon>
+      <input type="search" placeholder="Buscar formato..." (input)="onPesquisar($any($event.target).value)" />
+    </div>
+  </div>
+
+  <div class="cadastro-mobile__list">
+    @if (carregando) {
+    <div class="cadastro-mobile__state">
+      <mat-spinner diameter="28"></mat-spinner>
+      <span>Carregando formatos...</span>
+    </div>
+    } @else if (!formatos.length) {
+    <div class="cadastro-mobile__state cadastro-mobile__state--empty">
+      <strong>Nenhum formato encontrado</strong>
+      <span>Tente ajustar a busca ou cadastre um novo formato.</span>
+    </div>
+    } @else {
+      @for (formato of formatos; track formato.id) {
+      <article class="cadastro-mobile-card" matRipple [matRippleColor]="'rgba(37, 99, 235, 0.08)'" (click)="editar(formato)">
+        <div class="cadastro-mobile-card__head">
+          <div class="cadastro-mobile-card__identity">
+            <strong>{{ formato.nome }}</strong>
+            <span>{{ tamanhoResumo(formato) }}</span>
+            <small>{{ areaUtilResumo(formato) }}</small>
+          </div>
+
+          <button
+            mat-icon-button
+            type="button"
+            class="cadastro-mobile-card__menu"
+            [matMenuTriggerFor]="formatoMenu"
+            (click)="selecionarFormatoMenu(formato, $event)"
+            aria-label="Abrir ações do formato">
+            <mat-icon>more_vert</mat-icon>
+          </button>
+        </div>
+      </article>
+      }
+    }
+  </div>
+
+  <app-mobile-fab-action
+    *temPermissao="'GERENCIAR_PRODUTOS'"
+    label="Novo Formato"
+    icon="add"
+    [compact]="mobileFabCompact"
+    ariaLabel="Criar novo formato"
+    (action)="navegarCriacao()">
+  </app-mobile-fab-action>
+</section>
+
+<mat-menu #formatoMenu="matMenu">
+  <button mat-menu-item type="button" (click)="editar(formatoSelecionadoMenu!)" [disabled]="!formatoSelecionadoMenu">
+    <mat-icon>edit</mat-icon>
+    <span>Editar</span>
+  </button>
+  <button mat-menu-item type="button" (click)="excluir(formatoSelecionadoMenu!)" [disabled]="!formatoSelecionadoMenu">
+    <mat-icon>delete</mat-icon>
+    <span>Excluir</span>
+  </button>
+</mat-menu>
+}

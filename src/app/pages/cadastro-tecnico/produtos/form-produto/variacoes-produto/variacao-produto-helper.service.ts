@@ -7,12 +7,13 @@ import { ApiService } from 'src/app/services/api.service';
 export class VariacaoProdutoHelperService {
   constructor(private api: ApiService) {}
 
-  carregarDadosIniciais(): Observable<{ materiais: any[]; formatos: any[]; servicos: any[]; acabamentos: any[] }> {
+  carregarDadosIniciais(): Observable<{ materiais: any[]; formatos: any[]; servicos: any[]; acabamentos: any[]; cores: any[] }> {
     return forkJoin({
       materiais: this.api.get<any>('api/materiais?page=0&size=500').pipe(map(res => res.content || [])),
       formatos: this.api.get<any>('api/formatos?page=0&size=500').pipe(map(res => res.content || [])),
       servicos: this.api.get<any>('api/servicos?page=0&size=500').pipe(map(res => res.content || [])),
-      acabamentos: this.api.get<any>('api/acabamentos?page=0&size=500').pipe(map(res => res.content || []))
+      acabamentos: this.api.get<any>('api/acabamentos?page=0&size=500').pipe(map(res => res.content || [])),
+      cores: this.api.get<any>('api/cores?page=0&size=500').pipe(map(res => res.content || []))
     });
   }
 

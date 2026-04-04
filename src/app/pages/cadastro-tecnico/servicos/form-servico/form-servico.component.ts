@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ServicoService } from '../../services/servico.service';
@@ -11,14 +11,17 @@ import { ServicoRequest } from 'src/app/models/servico/servico-request.model';
 import { ServicoResponse } from 'src/app/models/servico/servico-response.model';
 import { SharedComponentsModule } from 'src/app/components/shared-components.module';
 import { InputTextareaComponent } from "../../../../components/inputs/input-textarea/input-textarea.component";
-import { InputMultiSelectComponent } from "../../../../components/inputs/input-multi-select/input-multi-select-component";
 import { PrecoSelectorComponent } from "../../../../components/preco/preco-selector.component";
 import { CardHeaderComponent } from "src/app/components/card-header/card-header.component";
+import { PageCardComponent } from 'src/app/components/page-card/page-card.component';
+import { SectionCardComponent } from 'src/app/components/section-card/section-card.component';
+import { MobileTotalBarComponent } from 'src/app/components/mobile-total-bar/mobile-total-bar.component';
 
 @Component({
   selector: 'app-form-servico',
   standalone: true,
   templateUrl: './form-servico.component.html',
+  styleUrl: './form-servico.component.scss',
   imports: [
     CommonModule,
     RouterModule,
@@ -29,7 +32,10 @@ import { CardHeaderComponent } from "src/app/components/card-header/card-header.
     SharedComponentsModule,
     InputTextareaComponent,
     PrecoSelectorComponent,
-    CardHeaderComponent
+    CardHeaderComponent,
+    PageCardComponent,
+    SectionCardComponent,
+    MobileTotalBarComponent
 ]
 })
 export class FormServicoComponent implements OnInit {
@@ -37,6 +43,7 @@ export class FormServicoComponent implements OnInit {
   form!: FormGroup;
   isEditMode = false;
   servicoId!: number;
+  isMobileView = false;
 
   constructor(
     private fb: FormBuilder,
@@ -47,8 +54,14 @@ export class FormServicoComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
+    this.atualizarViewport();
     this.inicializarFormulario();
     this.verificarModoEdicao();
+  }
+
+  @HostListener('window:resize')
+  onWindowResize(): void {
+    this.atualizarViewport();
   }
 
   inicializarFormulario(): void {
@@ -114,6 +127,26 @@ export class FormServicoComponent implements OnInit {
 
   get precoControl(): FormGroup {
     return this.form.get('preco') as FormGroup;
+  }
+
+  get tituloPagina(): string {
+    return this.isEditMode ? 'Editar Serviço' : 'Novo Serviço';
+  }
+
+  get textoAcaoPrincipal(): string {
+    return this.isEditMode ? 'Atualizar' : 'Salvar';
+  }
+
+  voltar(): void {
+    this.router.navigate(['/page/cadastro-tecnico/servico']);
+  }
+
+  private atualizarViewport(): void {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    this.isMobileView = window.innerWidth <= 768;
   }
 
 }

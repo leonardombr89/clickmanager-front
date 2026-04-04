@@ -1,151 +1,321 @@
+<div #wizardTop></div>
 <app-page-card
+  class="acabamento-page-card"
   [titulo]="isEditMode ? 'Editar Acabamento' : 'Novo Acabamento'"
-  subtitulo="Cadastre o acabamento e configure as variações."
+  subtitulo="Fluxo guiado em 4 etapas."
+  [helpRota]="['/page/ajuda']"
+  helpFragment="produtos"
+  helpTexto=""
+  helpIcone="help_outline"
   botaoTexto="Voltar"
   botaoIcone="arrow_back"
   botaoCor="primary"
   [botaoRota]="['/page/cadastro-tecnico/acabamentos']"
   [mostrarDivisor]="true">
 
-  <app-section-card
-    titulo="Dados principais"
-    subtitulo="Defina a base do cadastro."
-    [divider]="true">
-    <div class="flow-step-header">
-      <span class="flow-step-badge">Etapa 1</span>
-      <div class="flow-step-copy">
-        <h3>Defina a base do cadastro</h3>
-        <button
-          type="button"
-          mat-icon-button
-          class="flow-step-help"
-          matTooltip="Use um nome fácil de reconhecer e uma descrição curta para diferenciar este acabamento depois.">
-          <mat-icon>help_outline</mat-icon>
-        </button>
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <app-section-card
+      *ngIf="!isEditMode"
+      class="wizard-progress-card"
+      titulo="Fluxo do cadastro"
+      subtitulo="Uma decisão por vez, com revisão no final."
+      [divider]="true">
+
+      <div class="wizard-progress-shell">
+        <div class="wizard-progress-head">
+          <div>
+            <div class="wizard-progress-label">Cadastro guiado</div>
+            <div class="wizard-progress-value">{{ completedStepsCount }}/{{ totalSteps }} etapas concluídas</div>
+          </div>
+          <div class="wizard-progress-label">Etapa {{ currentStep }} de {{ totalSteps }}</div>
+        </div>
+
+        <div class="wizard-progress-bar">
+          <span [style.width.%]="progressPercent"></span>
+        </div>
+
+        <div class="wizard-steps-nav">
+          <button
+            *ngFor="let step of wizardSteps; let i = index"
+            type="button"
+            class="wizard-step-chip"
+            [class.wizard-step-chip--active]="currentStep === i + 1"
+            [class.wizard-step-chip--done]="i + 1 <= completedStepsCount"
+            [disabled]="i + 1 > maxAccessibleStep"
+            (click)="goToStep(i + 1)">
+            <span class="wizard-step-chip__index">{{ i + 1 <= completedStepsCount ? '✓' : (i + 1) }}</span>
+            <span class="wizard-step-chip__label">{{ step.label }}</span>
+          </button>
+        </div>
       </div>
-    </div>
+    </app-section-card>
 
-    <form class="row g-3" [formGroup]="form">
-      <div class="col-12 col-md-6">
-        <app-input-texto-restrito
-          [control]="nomeControl"
-          label="Nome"
-          placeholder="Ex.: Laminação fosca premium"
-          [maxlength]="120">
-        </app-input-texto-restrito>
-      </div>
-
-      <div class="col-12">
-        <app-input-textarea
-          [control]="descricaoControl"
-          label="Descrição"
-          placeholder="Explique a aplicação, características e contexto de uso do acabamento."
-          [rows]="5"
-          [maxlength]="1000">
-        </app-input-textarea>
-      </div>
-    </form>
-  </app-section-card>
-
-  <app-section-card
-    titulo="Variações"
-    subtitulo="Gere e ajuste as combinações."
-    [divider]="true">
-    <div class="flow-step-header">
-      <span class="flow-step-badge">Etapas 2 e 3</span>
-      <div class="flow-step-copy">
-        <h3>Gerar primeiro, ajustar depois</h3>
-        <button
-          type="button"
-          mat-icon-button
-          class="flow-step-help"
-          matTooltip="Selecione os grupos, defina o preço base e gere as combinações automaticamente. Depois ajuste só as exceções.">
-          <mat-icon>help_outline</mat-icon>
-        </button>
-      </div>
-    </div>
-
-    <app-variacoes-acabamento
-      [variacoesIniciais]="variacoesIniciais"
-      (variacoesChange)="onVariacoesChange($event)">
-    </app-variacoes-acabamento>
-  </app-section-card>
-
-  <app-section-card
-    titulo="Revisar e salvar"
-    subtitulo="Confira e conclua."
-    [divider]="false">
-    <div class="flow-step-header flow-step-header--compact">
-      <span class="flow-step-badge">Etapa 4</span>
-      <div class="flow-step-copy">
-        <h3>{{ statusRevisaoTitulo }}</h3>
-        <button
-          type="button"
-          mat-icon-button
-          class="flow-step-help"
-          [matTooltip]="statusRevisaoDescricao">
-          <mat-icon>help_outline</mat-icon>
-        </button>
-      </div>
-    </div>
-
-    <div class="review-summary-grid">
-      <div class="review-summary-card review-summary-card--highlight">
-        <span class="review-summary-label">Acabamento</span>
-        <strong class="review-summary-value">{{ resumoNome }}</strong>
-        <span class="review-summary-helper" *ngIf="resumoNome !== 'Pendente'">Identificação principal pronta para salvar.</span>
-        <span class="review-summary-helper" *ngIf="resumoNome === 'Pendente'">Defina o nome para identificar o acabamento.</span>
+    <app-section-card
+      *ngIf="currentStep === 1"
+      class="wizard-step-card"
+      titulo="Base"
+      subtitulo="Defina a base do cadastro."
+      [divider]="false">
+      <div class="mobile-step-head mobile-step-head--card">
+        <div class="mobile-step-head__title">Base</div>
+        <div class="mobile-step-head__substep">Nome e descrição</div>
+        <div class="mobile-step-head__progress">
+          <div class="mobile-step-head__meta">
+            <span>{{ completedStepsCount }}/{{ totalSteps }} concluídas</span>
+            <span>Etapa 1 de {{ totalSteps }}</span>
+          </div>
+          <div class="mobile-step-head__bar">
+            <span [style.width.%]="progressPercent"></span>
+          </div>
+        </div>
       </div>
 
-      <div class="review-summary-card">
-        <span class="review-summary-label">Variações configuradas</span>
-        <strong class="review-summary-value">{{ variacoesCount }}</strong>
-        <span class="review-summary-helper">
-          {{ variacoesCount ? 'Lista pronta para revisão e salvamento.' : 'Gere ao menos uma variação para continuar.' }}
-        </span>
+      <div class="flow-step-header">
+        <span class="flow-step-badge">Etapa 1</span>
+        <div class="flow-step-copy">
+          <h3>Dados principais</h3>
+          <button
+            type="button"
+            mat-icon-button
+            class="flow-step-help"
+            matTooltip="Aqui entram apenas nome e descrição para identificar o acabamento.">
+            <mat-icon>help_outline</mat-icon>
+          </button>
+        </div>
       </div>
 
-      <div class="review-summary-card">
-        <span class="review-summary-label">Status do preenchimento</span>
-        <strong class="review-summary-value" [class.review-summary-value--warning]="!prontoParaSalvar">
-          {{ prontoParaSalvar ? 'Completo' : 'Em revisão' }}
-        </strong>
-        <span class="review-summary-helper">
-          {{ prontoParaSalvar ? 'Tudo certo para concluir o cadastro.' : 'Ainda existem pendências antes de salvar.' }}
-        </span>
+      <div class="step-copy">Comece pelo essencial. O restante do cadastro vem nas próximas etapas.</div>
+
+      <div class="row g-3">
+        <div class="col-12 col-md-6">
+          <app-input-texto-restrito
+            [control]="nomeControl"
+            label="Nome"
+            placeholder="Ex.: Laminação fosca premium"
+            [maxlength]="120">
+          </app-input-texto-restrito>
+        </div>
+
+        <div class="col-12">
+          <app-input-textarea
+            [control]="descricaoControl"
+            label="Descrição"
+            placeholder="Explique a aplicação, características e contexto de uso do acabamento."
+            [rows]="5"
+            [maxlength]="1000">
+          </app-input-textarea>
+        </div>
       </div>
-    </div>
 
-    <div class="review-pendencias" *ngIf="pendenciasSalvamento.length">
-      <div class="review-pendencias__title">O que falta para avançar</div>
-      <ul>
-        <li *ngFor="let pendencia of pendenciasSalvamento">{{ pendencia }}</li>
-      </ul>
-    </div>
-
-    <div class="actions-row">
-      <div class="actions-row__hint" *ngIf="!prontoParaSalvar">
-        Falta revisar alguns pontos antes de salvar.
-      </div>
-
-      <div class="actions-row__buttons">
-        <button
-          mat-flat-button
-          color="primary"
-          type="button"
-          (click)="onSubmit()"
-          [disabled]="!prontoParaSalvar || loading">
-          {{ loading ? 'Salvando...' : (isEditMode ? 'Atualizar acabamento' : 'Salvar acabamento') }}
-        </button>
-
-        <button
-          mat-stroked-button
-          color="primary"
-          type="button"
-          [routerLink]="['/page/cadastro-tecnico/acabamentos']">
+      <div class="step-actions">
+        <button mat-stroked-button color="primary" type="button" [routerLink]="['/page/cadastro-tecnico/acabamentos']">
           Voltar
         </button>
+        <button mat-flat-button color="primary" type="button" (click)="nextStep()">
+          Próximo
+        </button>
       </div>
-    </div>
-  </app-section-card>
+    </app-section-card>
+
+    <app-section-card
+      *ngIf="currentStep === 2"
+      class="section-card--mobile-estrutura"
+      titulo="Estrutura"
+      subtitulo="Monte as combinações do acabamento."
+      [divider]="false">
+      <div class="flow-step-header flow-step-header--mobile-hidden">
+        <span class="flow-step-badge">Etapa 2</span>
+        <div class="flow-step-copy">
+          <h3>Estrutura</h3>
+          <button
+            type="button"
+            mat-icon-button
+            class="flow-step-help"
+            matTooltip="Escolha materiais, formatos e aplicações para gerar automaticamente as combinações do acabamento.">
+            <mat-icon>help_outline</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <app-variacoes-acabamento
+        etapa="estrutura"
+        [isEditMode]="isEditMode"
+        [variacoesIniciais]="variacoesRenderizadas"
+        [currentStep]="currentStep"
+        [totalSteps]="totalSteps"
+        [completedStepsCount]="completedStepsCount"
+        [progressPercent]="progressPercent"
+        (previousStepRequest)="previousStep()"
+        (nextStepRequest)="nextStep()"
+        (variacoesChange)="onVariacoesChange($event)">
+      </app-variacoes-acabamento>
+
+      <div class="step-actions step-actions--mobile-hidden">
+        <button mat-stroked-button color="primary" type="button" (click)="previousStep()">
+          Voltar
+        </button>
+        <button mat-flat-button color="primary" type="button" (click)="nextStep()">
+          Definir preços →
+        </button>
+      </div>
+    </app-section-card>
+
+    <app-section-card
+      *ngIf="currentStep === 3"
+      class="wizard-step-card"
+      titulo="Preço"
+      subtitulo="Defina a regra comercial."
+      [divider]="false">
+      <div class="mobile-step-head mobile-step-head--card">
+        <div class="mobile-step-head__title">Preço</div>
+        <div class="mobile-step-head__substep">Preço base e ajustes</div>
+        <div class="mobile-step-head__progress">
+          <div class="mobile-step-head__meta">
+            <span>{{ completedStepsCount }}/{{ totalSteps }} concluídas</span>
+            <span>Etapa 3 de {{ totalSteps }}</span>
+          </div>
+          <div class="mobile-step-head__bar">
+            <span [style.width.%]="progressPercent"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="flow-step-header">
+        <span class="flow-step-badge">Etapa 3</span>
+        <div class="flow-step-copy">
+          <h3>Preço</h3>
+          <button
+            type="button"
+            mat-icon-button
+            class="flow-step-help"
+            matTooltip="Aplique a regra de preço nas variações geradas e ajuste exceções individualmente quando precisar.">
+            <mat-icon>help_outline</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <app-variacoes-acabamento
+        etapa="preco"
+        [isEditMode]="isEditMode"
+        [variacoesIniciais]="variacoesRenderizadas"
+        (variacoesChange)="onVariacoesChange($event)">
+      </app-variacoes-acabamento>
+
+      <div class="step-actions">
+        <button mat-stroked-button color="primary" type="button" (click)="previousStep()">
+          Voltar
+        </button>
+        <button mat-flat-button color="primary" type="button" (click)="nextStep()">
+          Revisar acabamento →
+        </button>
+      </div>
+    </app-section-card>
+
+    <app-section-card
+      *ngIf="currentStep === 4"
+      class="wizard-step-card"
+      titulo="Revisão"
+      subtitulo="Confira antes de salvar."
+      [divider]="false">
+      <div class="mobile-step-head mobile-step-head--card">
+        <div class="mobile-step-head__title">Revisão</div>
+        <div class="mobile-step-head__substep">Resumo final</div>
+        <div class="mobile-step-head__progress">
+          <div class="mobile-step-head__meta">
+            <span>{{ completedStepsCount }}/{{ totalSteps }} concluídas</span>
+            <span>Etapa 4 de {{ totalSteps }}</span>
+          </div>
+          <div class="mobile-step-head__bar">
+            <span [style.width.%]="progressPercent"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="flow-step-header flow-step-header--compact">
+        <span class="flow-step-badge">Etapa 4</span>
+        <div class="flow-step-copy">
+          <h3>{{ statusRevisaoTitulo }}</h3>
+          <button
+            type="button"
+            mat-icon-button
+            class="flow-step-help"
+            [matTooltip]="statusRevisaoDescricao">
+            <mat-icon>help_outline</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <div class="review-summary-grid">
+        <div class="review-summary-card review-summary-card--highlight">
+          <span class="review-summary-label">Acabamento</span>
+          <strong class="review-summary-value">{{ resumoNome }}</strong>
+          <span class="review-summary-helper" *ngIf="resumoNome !== 'Pendente'">Base principal definida.</span>
+          <span class="review-summary-helper" *ngIf="resumoNome === 'Pendente'">Defina o nome para seguir.</span>
+        </div>
+
+        <div class="review-summary-card">
+          <span class="review-summary-label">Variações</span>
+          <strong class="review-summary-value">{{ variacoesCount }}</strong>
+          <span class="review-summary-helper">
+            {{ variacoesCount ? 'Estrutura configurada com sucesso.' : 'Ainda não há variações geradas.' }}
+          </span>
+        </div>
+
+        <div class="review-summary-card">
+          <span class="review-summary-label">Preço</span>
+          <strong class="review-summary-value">{{ resumoPreco }}</strong>
+          <span class="review-summary-helper">
+            {{ variacoesSemPrecoCount ? (variacoesSemPrecoCount + ' variação(ões) sem preço.') : 'Todas as variações estão com preço.' }}
+          </span>
+        </div>
+
+        <div class="review-summary-card">
+          <span class="review-summary-label">Status</span>
+          <strong class="review-summary-value">{{ statusValidacao }}</strong>
+          <span class="review-summary-helper">{{ statusRevisaoDescricao }}</span>
+        </div>
+      </div>
+
+      <div class="review-pendencias" *ngIf="pendenciasSalvamento.length">
+        <div class="review-pendencias__title">O que falta para concluir</div>
+        <ul>
+          <li *ngFor="let pendencia of pendenciasSalvamento">{{ pendencia }}</li>
+        </ul>
+      </div>
+
+      <div class="step-actions step-actions--review">
+        <button mat-stroked-button color="primary" type="button" (click)="previousStep()">
+          Voltar
+        </button>
+
+        <div class="actions-row__buttons">
+          <button
+            mat-flat-button
+            color="primary"
+            type="submit"
+            [disabled]="!prontoParaSalvar || loading">
+            {{ loading ? 'Salvando...' : (isEditMode ? 'Atualizar acabamento' : 'Salvar acabamento') }}
+          </button>
+        </div>
+      </div>
+    </app-section-card>
+
+    <app-mobile-total-bar
+      *ngIf="showMobileWizardFooter"
+      class="mobile-wizard-footer"
+      [label]="mobileWizardFooterLabel"
+      [valueText]="mobileWizardFooterValueText"
+      detailText=""
+      [expandable]="false"
+      [attachedToBottomNav]="true"
+      bottomOffset="calc(var(--mobile-bottom-nav-height, 0px) + 6px)"
+      [secondaryActionText]="mobileWizardFooterSecondaryActionText"
+      [actionText]="mobileWizardFooterActionText"
+      [actionDisabled]="mobileWizardFooterActionDisabled"
+      secondaryActionAriaLabel="Voltar etapa do cadastro"
+      actionAriaLabel="Avançar etapa do cadastro"
+      (secondaryAction)="onMobileWizardSecondaryAction()"
+      (action)="onMobileWizardPrimaryAction()">
+    </app-mobile-total-bar>
+  </form>
 </app-page-card>

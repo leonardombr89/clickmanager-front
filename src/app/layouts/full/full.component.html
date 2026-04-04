@@ -156,7 +156,8 @@
       <div class="pageContent" [ngClass]="{
         'm-t-30': !isMobileLayout,
         'p-l-24 p-r-24': options.horizontal,
-        'pageContent--mobile': isMobileLayout
+        'pageContent--mobile': isMobileLayout,
+        'pageContent--mobile-no-nav': isMobileLayout && hideMobileBottomNav
       }">
         <div class="onboarding-resume-banner m-b-20" *ngIf="exibirAvisoOnboarding">
           <div class="onboarding-resume-banner__copy">
@@ -423,6 +424,7 @@
   </div>
 </section>
 
+@if(!hideMobileBottomNav) {
 <nav class="mobile-bottom-nav" aria-label="Navegação principal">
   @for(item of mobileBottomNavItems; track item.key) {
   <button
@@ -438,4 +440,5 @@
   </button>
   }
 </nav>
+}
 }
