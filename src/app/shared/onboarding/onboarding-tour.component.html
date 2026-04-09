@@ -1,0 +1,61 @@
+@if (active() && step()) {
+  @if (rect(); as highlight) {
+  <div class="tour-overlay" aria-hidden="true">
+    <div class="tour-overlay__mask tour-overlay__mask--top" [style.height.px]="overlayTop()"></div>
+    <div class="tour-overlay__mask tour-overlay__mask--left" [style.top.px]="highlight.top" [style.width.px]="overlayLeft()" [style.height.px]="highlight.height"></div>
+    <div class="tour-overlay__mask tour-overlay__mask--right" [style.top.px]="highlight.top" [style.width.px]="overlayRight()" [style.height.px]="highlight.height"></div>
+    <div class="tour-overlay__mask tour-overlay__mask--bottom" [style.height.px]="overlayBottom()"></div>
+
+    <div
+      class="tour-overlay__spotlight"
+      [style.top.px]="highlight.top"
+      [style.left.px]="highlight.left"
+      [style.width.px]="highlight.width"
+      [style.height.px]="highlight.height">
+    </div>
+  </div>
+
+  <section
+    #tooltipCard
+    class="tour-card"
+    [class.tour-card--mobile]="isMobile()"
+    [class.tour-card--top]="placement() === 'top'"
+    [class.tour-card--right]="placement() === 'right'"
+    [class.tour-card--bottom]="placement() === 'bottom'"
+    [class.tour-card--left]="placement() === 'left'"
+    [ngStyle]="tooltipStyles()"
+    (touchstart)="onTouchStart($event)"
+    (touchend)="onTouchEnd($event)"
+    role="dialog"
+    aria-modal="false"
+    [attr.aria-label]="step()?.title">
+    <div class="tour-card__eyebrow">Guia rápido</div>
+    <div class="tour-card__title">{{ step()?.title }}</div>
+    <p class="tour-card__description">{{ step()?.description }}</p>
+    <div class="tour-card__progressbar" aria-hidden="true">
+      <div class="tour-card__progressbar-fill" [style.width.%]="progressPercent()"></div>
+    </div>
+
+    <div class="tour-card__footer">
+      <div class="tour-card__progress">{{ progressLabel() }}</div>
+
+      <div class="tour-card__actions">
+        <button mat-button type="button" (click)="skip()">Explorar sozinho</button>
+        @if (canGoBack() && !isMobile()) {
+          <button mat-stroked-button type="button" (click)="previous()">Voltar</button>
+        }
+
+        @if (isLastStep()) {
+          <button mat-flat-button color="primary" type="button" (click)="finish()">Concluir</button>
+        } @else {
+          <button mat-flat-button color="primary" type="button" (click)="next()">Próximo</button>
+        }
+      </div>
+    </div>
+
+    @if (step()?.ctaHint && isMobile()) {
+      <div class="tour-card__hint">{{ step()?.ctaHint }}</div>
+    }
+  </section>
+  }
+}

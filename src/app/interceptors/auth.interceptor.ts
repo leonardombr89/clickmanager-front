@@ -24,6 +24,10 @@ export class AuthInterceptor implements HttpInterceptor {
   ) {}
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+    if (this.isDemoEndpoint(req.url)) {
+      return next.handle(req);
+    }
+
     const isAuthRequest = this.isAuthEndpoint(req.url);
     const token = isAuthRequest ? null : this.tokenStorage.getToken();
     const authReq = token ? this.addTokenHeader(req, token) : req;
@@ -110,5 +114,9 @@ export class AuthInterceptor implements HttpInterceptor {
 
   private isAuthEndpoint(url: string): boolean {
     return url.includes('/auth/login') || url.includes('/auth/refresh');
+  }
+
+  private isDemoEndpoint(url: string): boolean {
+    return url.includes('/api/demo/');
   }
 }

@@ -1,0 +1,86 @@
+<section class="demo-home">
+  <app-section-card class="demo-home__hero" titulo="Veja o SmartCalc funcionando em menos de 1 minuto"
+    subtitulo="Escolha um adesivo, ajuste o tamanho, aplique acabamentos e acompanhe o cálculo até o pedido com WhatsApp.">
+    <div class="demo-home__grid">
+      <div class="demo-home__lead">
+        <div class="demo-home__chips">
+          @for (item of highlights; track item) {
+            <span class="demo-home__chip">{{ item }}</span>
+          }
+        </div>
+
+        <div class="demo-home__cta">
+          <button mat-flat-button color="primary" type="button" (click)="iniciar()">
+            Começar demo
+          </button>
+          <button mat-stroked-button color="primary" type="button" (click)="verProduto()">
+            Ver o produto
+          </button>
+        </div>
+      </div>
+
+      <div class="demo-home__preview">
+        <div class="demo-home__preview-card">
+          <div class="demo-home__preview-label">Produto demo</div>
+          <strong>{{ demo.produto.nome }}</strong>
+          <span>{{ demo.produto.descricao }}</span>
+          <div class="demo-home__preview-metrics">
+            <div>
+              <small>Formatos</small>
+              <strong>{{ demo.formatos.length }}</strong>
+            </div>
+            <div>
+              <small>Acabamentos</small>
+              <strong>{{ demo.acabamentos.length }}</strong>
+            </div>
+            <div>
+              <small>Preço inicial</small>
+              <strong>{{ demo.formatCurrency(demo.unitPrice()) }}</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </app-section-card>
+
+  <div class="demo-home__steps">
+    <app-section-card titulo="Como funciona a demo" subtitulo="Tudo guiado, sem login e sem salvar nada.">
+      <div class="demo-home__step-list">
+        <div class="demo-home__step">
+          <span>1</span>
+          <div>
+            <strong>Monte o item</strong>
+            <p>Escolha A4 ou A3, ajuste tamanho e marque os acabamentos.</p>
+          </div>
+        </div>
+
+        <div class="demo-home__step">
+          <span>2</span>
+          <div>
+            <strong>Veja o cálculo</strong>
+            <p>O total muda na hora para mostrar o valor percebido do SmartCalc.</p>
+          </div>
+        </div>
+
+        <div class="demo-home__step">
+          <span>3</span>
+          <div>
+            <strong>Pedido + WhatsApp</strong>
+            <p>Veja como o sistema transforma o cálculo em pedido e mensagem pronta.</p>
+          </div>
+        </div>
+      </div>
+    </app-section-card>
+  </div>
+</section>
+
+<app-mobile-total-bar
+  label="Demo SmartCalc"
+  valueText="1 minuto"
+  detailText="Sem login • sem salvar nada"
+  [expandable]="false"
+  secondaryActionText="Ver produto"
+  actionText="Começar demo"
+  (secondaryAction)="verProduto()"
+  (action)="iniciar()">
+</app-mobile-total-bar>

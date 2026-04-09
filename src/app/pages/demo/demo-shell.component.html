@@ -1,0 +1,61 @@
+<div class="demo-shell">
+  @if (!immersiveMode) {
+    <header class="demo-shell__header" [class.demo-shell__header--mobile]="mobileViewport">
+      <div class="demo-shell__header-main">
+        @if (showBack) {
+          <button mat-icon-button type="button" class="demo-shell__back" (click)="voltar()" aria-label="Voltar">
+            <mat-icon>arrow_back</mat-icon>
+          </button>
+        }
+
+        <div class="demo-shell__title-wrap" [class.demo-shell__title-wrap--with-back]="showBack">
+          @if (!mobileViewport) {
+            <div class="demo-shell__eyebrow">{{ headerEyebrow }}</div>
+          }
+          <div class="demo-shell__title">{{ headerTitle }}</div>
+        </div>
+      </div>
+
+      <div class="demo-shell__actions">
+        @if (!mobileViewport) {
+          <button mat-stroked-button color="primary" type="button" (click)="abrirCadastro()">
+            Criar conta
+          </button>
+        } @else {
+          <button mat-button color="primary" type="button" (click)="abrirCadastro()">
+            Criar conta
+          </button>
+        }
+      </div>
+    </header>
+  }
+
+  <main class="demo-shell__content" [class.demo-shell__content--immersive]="immersiveMode">
+    <router-outlet></router-outlet>
+  </main>
+
+  @if (showExitConfirm) {
+    <div class="demo-shell__confirm-backdrop" (click)="cancelarSaida()"></div>
+    <section class="demo-shell__confirm" role="dialog" aria-modal="true" aria-labelledby="demo-exit-title">
+      <button
+        mat-icon-button
+        type="button"
+        class="demo-shell__confirm-close"
+        aria-label="Fechar"
+        (click)="cancelarSaida()">
+        <mat-icon>close</mat-icon>
+      </button>
+
+      <div class="demo-shell__confirm-eyebrow">Sair da demo</div>
+      <h2 class="demo-shell__confirm-title" id="demo-exit-title">Deseja mesmo voltar para a landing?</h2>
+      <p class="demo-shell__confirm-copy">
+        Você vai sair da demonstração atual e voltar para a página principal.
+      </p>
+
+      <div class="demo-shell__confirm-actions">
+        <button mat-stroked-button type="button" (click)="cancelarSaida()">Continuar na demo</button>
+        <button mat-flat-button color="primary" type="button" (click)="confirmarSaida()">Sair da demo</button>
+      </div>
+    </section>
+  }
+</div>
