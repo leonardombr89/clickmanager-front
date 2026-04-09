@@ -16,6 +16,7 @@ import { ToastrService } from 'ngx-toastr';
 @Injectable()
 export class BillingInterceptor implements HttpInterceptor {
   private ignoredPaths = [
+    '/api/demo/',
     '/auth/',
     '/authentication/',
     '/assets/',

@@ -179,6 +179,13 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'demo',
+        loadChildren: () =>
+          import('./pages/demo/demo.routes').then(
+            (m) => m.DemoRoutes
+          ),
+      },
+      {
         path: 'onboarding',
         component: OnboardingPageComponent,
         canActivate: [AuthGuard],

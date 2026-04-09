@@ -1,0 +1,107 @@
+<div class="wa-container" [class.wa-container--mobile]="mobileViewport()">
+  <app-section-card
+    titulo="Mensagem para WhatsApp"
+    subtitulo="Pré-visualização e ações"
+    [divider]="true">
+      <div actions class="wa-header__actions">
+        <button mat-stroked-button type="button" (click)="abrirTutorial()">
+          <mat-icon>play_circle</mat-icon>
+          Ver tutorial
+        </button>
+        <a mat-stroked-button routerLink="/demo/pedido">Voltar</a>
+      </div>
+
+      <div class="wa-meta">
+        <strong>Número:</strong> {{ displayNumero }} |
+        <strong>Status:</strong> {{ status }}
+      </div>
+
+      <textarea class="wa-preview" rows="16" [value]="mensagem" readonly data-tour="demo-whatsapp-preview"></textarea>
+
+      <div class="wa-actions">
+        <button mat-stroked-button type="button" data-tour="demo-whatsapp-copy" (click)="copiar()">
+          <mat-icon>content_copy</mat-icon>
+          Copiar
+        </button>
+        <button mat-flat-button color="primary" type="button" data-tour="demo-whatsapp-send" (click)="abrirWhatsApp()">
+          <mat-icon>chat</mat-icon>
+          Abrir no WhatsApp
+          <span class="wa-phone">({{ telefone }})</span>
+        </button>
+      </div>
+  </app-section-card>
+</div>
+
+@if (mobileViewport()) {
+  <app-mobile-summary-sheet
+    [open]="mobileSheetOpen()"
+    bottomOffset="58px"
+    closeAriaLabel="Fechar prévia do WhatsApp"
+    [backdropZIndex]="53"
+    [sheetZIndex]="54"
+    (close)="fecharMobileSheet()">
+    <div class="wa-mobile-sheet">
+      <header class="wa-mobile-sheet__header">
+        <div>
+          <span class="wa-mobile-sheet__eyebrow">WhatsApp</span>
+          <strong>Revisar mensagem</strong>
+        </div>
+      </header>
+
+      <div class="wa-mobile-sheet__meta">
+        <strong>{{ demo.pedidoSimulado()?.clienteNome || 'Cliente' }}</strong>
+        <span>{{ telefone }}</span>
+      </div>
+
+      <div class="wa-mobile-sheet__preview" data-tour="demo-whatsapp-preview">{{ mensagem }}</div>
+
+      <div class="wa-mobile-sheet__actions">
+        <button mat-stroked-button color="primary" type="button" data-tour="demo-whatsapp-copy" (click)="copiar()">
+          <mat-icon>content_copy</mat-icon>
+          <span>Copiar</span>
+        </button>
+
+        <button mat-flat-button class="btn-whatsapp" type="button" data-tour="demo-whatsapp-send-mobile" (click)="abrirWhatsApp()">
+          <mat-icon>chat</mat-icon>
+          <span>Abrir WhatsApp</span>
+        </button>
+      </div>
+    </div>
+  </app-mobile-summary-sheet>
+}
+
+@if (!showConversionCta()) {
+<div data-tour="demo-whatsapp-send-mobile">
+  <app-mobile-total-bar
+    label="Mensagem pronta"
+    [valueText]="demo.formatCurrency(demo.pedidoSimulado()?.total ?? 0)"
+    detailText="Pré-visualização e ações"
+    [expandable]="false"
+    secondaryActionText="Tutorial"
+    actionText="Abrir WhatsApp"
+    (secondaryAction)="abrirTutorial()"
+    (action)="abrirWhatsApp()">
+  </app-mobile-total-bar>
+</div>
+}
+
+@if (showConversionCta()) {
+  <div class="demo-conversion-backdrop" (click)="fecharConversao()"></div>
+  <section class="demo-conversion-modal" role="dialog" aria-modal="true" aria-label="Conversão da demo">
+    <button mat-icon-button type="button" class="demo-conversion-modal__close" aria-label="Fechar conversão"
+      (click)="fecharConversao()">
+      <mat-icon>close</mat-icon>
+    </button>
+
+    <div class="demo-conversion-modal__eyebrow">Próximo passo</div>
+    <h2>Agora imagine isso com seus clientes</h2>
+    <p>Use esse fluxo com o seu catálogo real, sem planilha e com atendimento mais rápido.</p>
+
+    <div class="demo-conversion-modal__actions">
+      <button mat-flat-button color="primary" type="button" (click)="abrirCadastro()">Criar conta grátis</button>
+      <button mat-stroked-button type="button" (click)="falarComEspecialista()">Falar com especialista</button>
+    </div>
+  </section>
+}
+
+<app-onboarding-tour></app-onboarding-tour>

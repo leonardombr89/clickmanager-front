@@ -1,0 +1,322 @@
+@if (pedidoView; as pedido) {
+<div class="demo-pedido-page smartcalc">
+  <header class="sc-page-header">
+    <div class="sc-page-header__main">
+      <span class="sc-page-header__icon">
+        <mat-icon>receipt_long</mat-icon>
+      </span>
+      <div class="sc-page-header__copy">
+        @if (!mobileViewport()) {
+        <span class="sc-page-header__eyebrow">SmartCalc</span>
+        }
+        <h1>{{ mobileViewport() ? 'Pedido pronto' : 'Seu orçamento virou pedido automaticamente' }}</h1>
+        <p>{{ mobileViewport() ? 'Calculado e pronto para revisar antes do WhatsApp.' : 'Tudo já calculado — sem planilha, sem erro.' }}</p>
+      </div>
+    </div>
+
+    <div class="sc-page-header__meta">
+      <button mat-stroked-button type="button" class="sc-page-header__tutorial" (click)="toggleHowItWorks()">
+        <mat-icon>{{ howItWorksExpanded() ? 'visibility_off' : 'help_outline' }}</mat-icon>
+        <span>{{ mobileViewport() ? 'Guia rápido' : 'Como funciona' }}</span>
+      </button>
+      <button mat-stroked-button type="button" class="sc-page-header__tutorial" (click)="abrirTutorial()">
+        <mat-icon>play_circle</mat-icon>
+        <span>Ver tutorial</span>
+      </button>
+      <div class="badge badge--ok subtle">{{ mobileViewport() ? 'Demo' : 'Pedido demo' }}</div>
+    </div>
+  </header>
+
+  @if (!howItWorksDismissed()) {
+  <section class="demo-how-it-works" [class.demo-how-it-works--expanded]="howItWorksExpanded()">
+    <div class="demo-how-it-works__summary">
+      <div class="demo-how-it-works__copy">
+        <span class="demo-how-it-works__eyebrow">Veja como funciona</span>
+        <div class="demo-how-it-works__steps">
+          <span>{{ mobileViewport() ? '1. Revise' : '1. Revise o pedido' }}</span>
+          <span>{{ mobileViewport() ? '2. Cliente' : '2. Confira o cliente' }}</span>
+          <span>{{ mobileViewport() ? '3. WhatsApp' : '3. Envie no WhatsApp' }}</span>
+        </div>
+      </div>
+
+      <div class="demo-how-it-works__actions">
+        <button mat-button type="button" (click)="toggleHowItWorks()">
+          {{ howItWorksExpanded() ? 'Fechar' : 'Detalhar' }}
+        </button>
+        <button mat-icon-button type="button" aria-label="Fechar explicação" (click)="dismissHowItWorks()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    @if (howItWorksExpanded()) {
+    <div class="demo-how-it-works__detail">
+      <div class="demo-how-it-works__detail-item">
+        <strong>Pedido pronto</strong>
+        <p>O orçamento já vira pedido estruturado automaticamente.</p>
+      </div>
+      <div class="demo-how-it-works__detail-item">
+        <strong>Cliente organizado</strong>
+        <p>Os dados comerciais ficam prontos para revisar e enviar.</p>
+      </div>
+      <div class="demo-how-it-works__detail-item">
+        <strong>WhatsApp direto</strong>
+        <p>O próximo passo prepara a mensagem pronta para atendimento.</p>
+      </div>
+    </div>
+    }
+  </section>
+  }
+
+  <div class="top-grid top-grid--desktop" data-tour="demo-pedido-resumo">
+    <app-section-card titulo="Fluxo do pedido" [divider]="true">
+      <div class="demo-flow">
+        <div class="demo-flow__top">
+          <app-status-badge status="RASCUNHO"></app-status-badge>
+          <span class="demo-flow__chip">Aguardando pagamento</span>
+        </div>
+
+        <div class="demo-flow__text">
+          Rascunho: revise itens e confirme antes de finalizar.
+        </div>
+
+        <div class="demo-flow__line">
+          <span class="active">Rascunho</span>
+          <span>Aguardando Pagamento</span>
+          <span>Pendente</span>
+          <span>Em Produção</span>
+          <span>Pronto</span>
+          <span>Entregue</span>
+        </div>
+      </div>
+    </app-section-card>
+
+    <app-resumo-financeiro-card
+      [total]="pedido.total"
+      [subtotal]="pedido.subTotal"
+      [pago]="totalPago"
+      [frete]="pedido.frete ?? 0"
+      [restaPagar]="restaPagar"
+      [desconto]="pedido.desconto ?? 0"
+      [divider]="true">
+    </app-resumo-financeiro-card>
+  </div>
+
+  <div class="detalhes-grid detalhes-grid--desktop">
+    <div class="main-column">
+      <app-pedido-info-card
+        titulo="Dados do pedido"
+        [renderCard]="true"
+        [pedido]="pedido">
+      </app-pedido-info-card>
+
+      <app-section-card titulo="Dados do cliente" [divider]="true" data-tour="demo-pedido-cliente">
+        <div class="demo-client">
+          <div class="demo-client__grid">
+            <div><span>Nome</span><strong>{{ pedido.cliente.nome }}</strong></div>
+            <div><span>E-mail</span><strong>{{ pedido.cliente.email }}</strong></div>
+            <div><span>Telefone</span><strong>{{ pedido.cliente.telefone }}</strong></div>
+            <div><span>Documento</span><strong>{{ pedido.cliente.documento }}</strong></div>
+            <div><span>Logradouro</span><strong>-</strong></div>
+            <div><span>Número</span><strong>-</strong></div>
+            <div><span>Bairro</span><strong>-</strong></div>
+            <div><span>Cidade / UF</span><strong>-</strong></div>
+          </div>
+
+          <div class="demo-client__actions">
+            <button mat-stroked-button color="primary" type="button" (click)="noop()">
+              Trocar cliente
+            </button>
+          </div>
+        </div>
+      </app-section-card>
+
+      <div data-tour="demo-pedido-itens">
+      <app-itens-pedido-section
+        [itens]="pedido.itens"
+        [subtotal]="pedido.subTotal"
+        [permitirAlterarQuantidade]="false"
+        [mostrarAcoes]="false">
+      </app-itens-pedido-section>
+      </div>
+
+      <app-observacoes-card
+        [control]="observacoesControl"
+        [textoSalvo]="pedido.observacoes || ''"
+        [salvando]="false"
+        [salvo]="false"
+        [inativo]="false"
+        (salvar)="noop()">
+      </app-observacoes-card>
+    </div>
+
+    <div class="side-column">
+      <app-section-card titulo="Ações de impressão" [divider]="true" data-tour="demo-pedido-print">
+        <div class="print-actions vertical">
+          <button mat-stroked-button color="primary" type="button" (click)="abrirPdf('duas-vias')">
+            <mat-icon class="m-r-4">description</mat-icon>
+            Duas vias
+          </button>
+          <button mat-flat-button color="primary" type="button" (click)="abrirPdf('completo')">
+            <mat-icon class="m-r-4">description</mat-icon>
+            Pedido completo
+          </button>
+          <button mat-stroked-button color="accent" type="button" (click)="abrirPdf('etiquetas')">
+            <mat-icon class="m-r-4">label</mat-icon>
+            Etiqueta
+          </button>
+          <button mat-flat-button class="btn-whatsapp" type="button" data-tour="demo-pedido-whatsapp" (click)="abrirWhatsapp()">
+            <mat-icon class="m-r-4">chat</mat-icon>
+            WhatsApp
+          </button>
+        </div>
+      </app-section-card>
+
+      <app-section-card titulo="Próximo passo" [divider]="true">
+        <div class="demo-next">
+          <p>Envie o pedido direto no WhatsApp.</p>
+          <small>Mensagem pronta, é só enviar.</small>
+          <button mat-flat-button color="primary" type="button" (click)="abrirWhatsapp()">
+            Ver mensagem do WhatsApp
+          </button>
+        </div>
+      </app-section-card>
+    </div>
+  </div>
+
+  <div class="pedido-mobile" data-tour="demo-pedido-mobile-shell">
+    <app-section-card [titulo]="mobileViewport() ? 'Resumo' : 'Fluxo do pedido'" [divider]="true" data-tour="demo-pedido-resumo">
+      <div class="demo-flow">
+        <div class="demo-flow__top">
+          <app-status-badge status="RASCUNHO"></app-status-badge>
+          <span class="demo-flow__chip">Aguardando pagamento</span>
+        </div>
+
+        <div class="demo-flow__text">
+          Rascunho pronto para virar atendimento e venda.
+        </div>
+      </div>
+    </app-section-card>
+
+    <app-resumo-financeiro-card
+      [total]="pedido.total"
+      [subtotal]="pedido.subTotal"
+      [pago]="totalPago"
+      [frete]="pedido.frete ?? 0"
+      [restaPagar]="restaPagar"
+      [desconto]="pedido.desconto ?? 0"
+      [divider]="true">
+    </app-resumo-financeiro-card>
+
+    <app-pedido-info-card
+      [titulo]="mobileViewport() ? 'Pedido' : 'Dados do pedido'"
+      [renderCard]="true"
+      [pedido]="pedido">
+    </app-pedido-info-card>
+
+    <app-section-card [titulo]="mobileViewport() ? 'Cliente pronto para envio' : 'Cliente'" [divider]="true" data-tour="demo-pedido-cliente">
+      <div class="demo-client demo-client--mobile">
+        <div class="demo-client__grid demo-client__grid--mobile">
+          <div><span>Nome</span><strong>{{ pedido.cliente.nome }}</strong></div>
+          <div><span>Telefone</span><strong>{{ pedido.cliente.telefone }}</strong></div>
+          <div><span>E-mail</span><strong>{{ pedido.cliente.email }}</strong></div>
+          <div><span>Cidade / UF</span><strong>-</strong></div>
+        </div>
+      </div>
+    </app-section-card>
+
+    <div data-tour="demo-pedido-itens">
+      <app-itens-pedido-section
+        [itens]="pedido.itens"
+        [subtotal]="pedido.subTotal"
+        [permitirAlterarQuantidade]="false"
+        [mostrarAcoes]="false">
+      </app-itens-pedido-section>
+    </div>
+
+    <app-section-card data-tour="demo-pedido-print">
+      <div class="pedido-detail-mobile__section-head">
+        <div>
+          <span class="pedido-detail-mobile__section-eyebrow">Ações rápidas</span>
+          <strong>Impressão e envio</strong>
+        </div>
+      </div>
+
+      <div class="pedido-detail-mobile__quick-actions">
+        <div class="pedido-detail-mobile__quick-actions-primary">
+          <button mat-flat-button color="primary" type="button" class="pedido-detail-mobile__quick-action-primary"
+            (click)="abrirPdf('completo')">
+            <mat-icon>description</mat-icon>
+            <span>Pedido completo</span>
+          </button>
+
+          <button mat-flat-button class="pedido-detail-mobile__quick-action-primary btn-whatsapp" type="button"
+            data-tour="demo-pedido-mobile-whatsapp" (click)="abrirWhatsapp()">
+            <mat-icon>chat</mat-icon>
+            <span>WhatsApp</span>
+          </button>
+        </div>
+
+        <div class="pedido-detail-mobile__quick-actions-secondary">
+          <button mat-stroked-button color="primary" type="button" (click)="abrirPdf('duas-vias')">
+            <mat-icon>content_copy</mat-icon>
+            <span>Duas vias</span>
+          </button>
+          <button mat-stroked-button color="accent" type="button" (click)="abrirPdf('etiquetas')">
+            <mat-icon>sell</mat-icon>
+            <span>Etiqueta</span>
+          </button>
+        </div>
+      </div>
+    </app-section-card>
+
+    <app-observacoes-card
+      [control]="observacoesControl"
+      [textoSalvo]="pedido.observacoes || ''"
+      [salvando]="false"
+      [salvo]="false"
+      [inativo]="false"
+      (salvar)="noop()">
+    </app-observacoes-card>
+  </div>
+</div>
+} @else {
+<div class="demo-loading-state">
+  Carregando pedido demo...
+</div>
+}
+
+<div data-tour="demo-pedido-mobile-footer">
+  <app-mobile-total-bar
+    label="Pedido demo"
+    [valueText]="demo.formatCurrency(pedidoAtual?.total ?? 0)"
+    status="RASCUNHO"
+    detailText="Mensagem pronta, é só enviar"
+    [expandable]="false"
+    secondaryActionText="Tutorial"
+    actionText="Ver no WhatsApp"
+    (secondaryAction)="abrirTutorial()"
+    (action)="abrirWhatsapp()">
+  </app-mobile-total-bar>
+</div>
+
+@if (showConversionCta()) {
+  <div class="demo-conversion-backdrop" (click)="fecharConversao()"></div>
+  <section class="demo-conversion-modal" role="dialog" aria-modal="true" aria-label="Conversão da demo">
+    <button mat-icon-button type="button" class="demo-conversion-modal__close" aria-label="Fechar conversão"
+      (click)="fecharConversao()">
+      <mat-icon>close</mat-icon>
+    </button>
+
+    <div class="demo-conversion-modal__eyebrow">Próximo passo</div>
+    <h2>Agora imagine isso com seus clientes</h2>
+    <p>Use esse fluxo com o seu catálogo real, sem planilha e com atendimento mais rápido.</p>
+
+    <div class="demo-conversion-modal__actions">
+      <button mat-flat-button color="primary" type="button" (click)="abrirCadastro()">Criar conta grátis</button>
+      <button mat-stroked-button type="button" (click)="falarComEspecialista()">Falar com especialista</button>
+    </div>
+  </section>
+}
+
+<app-onboarding-tour></app-onboarding-tour>
