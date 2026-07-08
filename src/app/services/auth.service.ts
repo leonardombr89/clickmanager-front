@@ -11,6 +11,7 @@ import { UsuarioService } from './usuario.service';
 import { AuthTokenStorageService } from './auth-token-storage.service';
 import { AuthApiService } from './auth-api.service';
 import { AuthTokens } from '../models/auth-tokens.interface';
+import { resolveTipoEmpresa, TipoEmpresa } from '../models/empresa/tipo-empresa.enum';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -87,7 +88,10 @@ export class AuthService {
 
   private carregarPermissoes(usuario: Usuario): void {
     const perfil = usuario.perfil;
-    if (!perfil || !Array.isArray(perfil.permissoes)) return;
+    if (!perfil || !Array.isArray(perfil.permissoes)) {
+      this.permissionsService.flushPermissions();
+      return;
+    }
 
     const permissoesChave = perfil.permissoes
       .map(p => p?.chave)
@@ -97,12 +101,27 @@ export class AuthService {
   }
 
   logout(): void {
+    const hadSession = Boolean(
+      this.tokenStorage.getAccessToken() ||
+      this.tokenStorage.getRefreshToken() ||
+      this.usuarioSubject.value
+    );
+
     this.tokenStorage.limparTokens();
     this.jwtPayload = null;
     this.usuarioSubject.next(null);
     this.permissionsService.flushPermissions();
-    this.toastr.info('Você saiu do sistema.');
+    if (hadSession) {
+      this.toastr.info('Você saiu do sistema.');
+    }
     setTimeout(() => this.router.navigateByUrl('/authentication/login'), 200);
+  }
+
+  clearSession(): void {
+    this.tokenStorage.limparTokens();
+    this.jwtPayload = null;
+    this.usuarioSubject.next(null);
+    this.permissionsService.flushPermissions();
   }
 
   temPermissao(permissao: string): boolean {
@@ -118,7 +137,21 @@ export class AuthService {
   }
 
   isAuthenticated(): boolean {
-    return !!this.tokenStorage.getToken();
+    const accessToken = this.tokenStorage.getToken();
+    if (!accessToken) {
+      return false;
+    }
+
+    if (!this.isAccessTokenExpired(accessToken)) {
+      return true;
+    }
+
+    if (this.hasValidRefreshToken()) {
+      return true;
+    }
+
+    this.clearSession();
+    return false;
   }
 
   getUsuario(): Usuario {
@@ -129,6 +162,27 @@ export class AuthService {
 
   getUsuarioNome(): string | null {
     return this.usuarioSubject.value?.nome || null;
+  }
+
+  getTipoEmpresa(usuario?: Usuario | null): TipoEmpresa {
+    return resolveTipoEmpresa((usuario || this.usuarioSubject.value)?.empresa?.tipoEmpresa);
+  }
+
+  getDefaultRouteForUsuario(usuario?: Usuario | null): string {
+    return this.getTipoEmpresa(usuario) === TipoEmpresa.DEPOSITO
+      ? '/page/deposito/itens'
+      : '/dashboards/dashboard1';
+  }
+
+  getOnboardingRouteForUsuario(onboardingConcluido = false, usuario?: Usuario | null): string {
+    const tipoEmpresa = this.getTipoEmpresa(usuario);
+    if (tipoEmpresa === TipoEmpresa.DEPOSITO) {
+      return this.getDefaultRouteForUsuario(usuario);
+    }
+
+    return onboardingConcluido
+      ? this.getDefaultRouteForUsuario(usuario)
+      : '/onboarding';
   }
 
   getJwtPayload(): JwtPayload | null {

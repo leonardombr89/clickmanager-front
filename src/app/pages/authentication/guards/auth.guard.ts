@@ -29,13 +29,13 @@ export class AuthGuard implements CanActivate {
         map(() => true),
         catchError(() => {
           this.authService.logout();
-          return of(this.router.createUrlTree(['/login']));
+          return of(this.router.createUrlTree(['/authentication/login']));
         })
       );
     }
 
     this.authService.logout();
-    return of(this.router.createUrlTree(['/login']));
+    return of(this.router.createUrlTree(['/authentication/login']));
   }
 
   private estaExpirado(token: string, auth: any): boolean {

@@ -1,0 +1,42 @@
+<section class="deposito-dashboard">
+  <mat-card class="cardWithShadow">
+    <app-card-header
+      titulo="Dashboard do depósito"
+      subtitulo="Uma visão inicial do módulo, pronta para receber indicadores e atalhos comerciais."
+      [mostrarDivisor]="true">
+    </app-card-header>
+
+    <div class="deposito-dashboard__hero">
+      <div class="deposito-dashboard__hero-copy">
+        <div class="deposito-dashboard__eyebrow">Visão geral</div>
+        <h1>Central do depósito</h1>
+        <p>
+          Esta página já está reservada para consolidar catálogo, operação comercial e administração em um único painel.
+        </p>
+      </div>
+
+      <div class="deposito-dashboard__hero-grid">
+        <article class="deposito-dashboard__metric deposito-dashboard__metric--{{ indicador.accent }}" *ngFor="let indicador of indicadores">
+          <div class="deposito-dashboard__metric-head">
+            <span>{{ indicador.label }}</span>
+            <i-tabler [name]="indicador.icon" class="icon-20 d-flex"></i-tabler>
+          </div>
+          <strong>{{ indicador.valor }}</strong>
+          <small>{{ indicador.detalhe }}</small>
+        </article>
+      </div>
+    </div>
+  </mat-card>
+
+  <div class="row">
+    <div class="col-lg-4" *ngFor="let destaque of destaques">
+      <mat-card class="deposito-dashboard__card cardWithShadow">
+      <div class="deposito-dashboard__icon">
+        <i-tabler [name]="destaque.icon" class="icon-24 d-flex"></i-tabler>
+      </div>
+      <h2>{{ destaque.titulo }}</h2>
+      <p>{{ destaque.descricao }}</p>
+    </mat-card>
+    </div>
+  </div>
+</section>

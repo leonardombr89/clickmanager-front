@@ -1,3 +1,5 @@
+import { TipoEmpresa } from 'src/app/models/empresa/tipo-empresa.enum';
+
 export interface NavItem {
     displayName?: string;
     disabled?: boolean;
@@ -14,4 +16,5 @@ export interface NavItem {
     ddType?: string;
     bgcolor?:string;
     requiredPermission?: string[];
+    allowedEmpresaTipos?: TipoEmpresa[];
 }

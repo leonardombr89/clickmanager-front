@@ -2,11 +2,9 @@ import {
   Component,
   HostBinding,
   Input,
-  OnInit,
   OnChanges,
   Output,
   EventEmitter,
-  effect,
 } from '@angular/core';
 import { NavItem } from './nav-item';
 import { Router } from '@angular/router';
@@ -62,15 +60,41 @@ export class AppNavItemComponent implements OnChanges {
   }
 
   updateExpandedState() {
-    const url = this.navService.currentUrl();
-    if (this.item?.route && url) {
-      this.expanded = url.indexOf(`/${this.item.route}`) === 0;
-      this.ariaExpanded = this.expanded;
+    this.expanded = this.hasActiveChild(this.item);
+    this.ariaExpanded = this.expanded;
+  }
+
+  isItemActive(item: NavItem): boolean {
+    if (item.route && this.router.isActive(item.route, false)) {
+      return true;
     }
+
+    return this.hasActiveChild(item);
+  }
+
+  private hasActiveChild(item: NavItem | undefined): boolean {
+    if (!item?.children?.length) {
+      return false;
+    }
+
+    return item.children.some((child) => {
+      if (child.route && this.router.isActive(child.route, false)) {
+        return true;
+      }
+
+      return this.hasActiveChild(child);
+    });
   }
 
   onItemSelected(item: NavItem) {
+    if (item.disabled) {
+      return;
+    }
+
     if (!item.children || !item.children.length) {
+      if (!item.route) {
+        return;
+      }
       this.router.navigate([item.route]);
       
     }
@@ -91,6 +115,10 @@ export class AppNavItemComponent implements OnChanges {
   }
 
   onSubItemSelected(item: NavItem) {
+    if (item.disabled) {
+      return;
+    }
+
     if (!item.children || !item.children.length){
       if (this.expanded && window.innerWidth < 1024) {
         this.notify.emit();

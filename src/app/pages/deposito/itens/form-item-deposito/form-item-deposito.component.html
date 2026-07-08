@@ -1,0 +1,285 @@
+<app-page-card
+  class="cadastro-form-page"
+  [titulo]="tituloPagina"
+  subtitulo="Cadastre o produto do catálogo com contexto comercial, mídia e listas auxiliares."
+  botaoTexto="Voltar"
+  botaoIcone="arrow_back"
+  botaoCor="primary"
+  [botaoRota]="['/page/deposito/itens']"
+  [mostrarDivisor]="true">
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <app-section-card titulo="Dados principais" subtitulo="Defina identificação, categoria, marca e ordem de exibição.">
+      <div class="cadastro-form-grid">
+        <div class="cadastro-form-grid cadastro-form-grid--triple">
+          <app-input-texto-restrito
+            [control]="codigoControl"
+            label="Código"
+            placeholder="Ex.: PORC-001">
+          </app-input-texto-restrito>
+
+          <app-input-texto-restrito
+            [control]="nomeControl"
+            label="Nome"
+            placeholder="Ex.: Porcelanato Acetinado">
+          </app-input-texto-restrito>
+
+          <div class="w-100">
+            <mat-label class="f-s-14 f-w-600 m-b-8 d-block">Slug</mat-label>
+            <mat-form-field appearance="outline" class="w-100">
+              <input
+                matInput
+                [formControl]="slugControl"
+                placeholder="Ex.: porcelanato-acetinado"
+                (input)="onSlugInput()" />
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="cadastro-form-grid cadastro-form-grid--triple">
+          <div class="w-100">
+            <mat-label class="f-s-14 f-w-600 m-b-8 d-block">Categoria</mat-label>
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-select [formControl]="categoriaIdControl" [disabled]="carregandoCategorias">
+                <mat-option [value]="null">Sem categoria</mat-option>
+                <mat-option *ngFor="let categoria of categorias" [value]="categoria.id">
+                  {{ categoriaLabel(categoria) }}
+                </mat-option>
+              </mat-select>
+              <mat-hint *ngIf="carregandoCategorias">Carregando categorias...</mat-hint>
+            </mat-form-field>
+          </div>
+
+          <div class="w-100">
+            <mat-label class="f-s-14 f-w-600 m-b-8 d-block">Marca</mat-label>
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-select [formControl]="marcaIdControl" [disabled]="carregandoMarcas">
+                <mat-option [value]="null">Sem marca</mat-option>
+                <mat-option *ngFor="let marca of marcas" [value]="marca.id">
+                  {{ marcaLabel(marca) }}
+                </mat-option>
+              </mat-select>
+              <mat-hint *ngIf="carregandoMarcas">Carregando marcas...</mat-hint>
+            </mat-form-field>
+          </div>
+
+          <div class="w-100">
+            <mat-label class="f-s-14 f-w-600 m-b-8 d-block">Ordem</mat-label>
+            <mat-form-field appearance="outline" class="w-100">
+              <input matInput type="number" min="0" [formControl]="ordemControl" placeholder="Ex.: 1" />
+            </mat-form-field>
+          </div>
+        </div>
+      </div>
+    </app-section-card>
+
+    <app-section-card titulo="Descrição comercial" subtitulo="Controle o resumo e o detalhamento usado no catálogo.">
+      <div class="cadastro-form-grid">
+        <app-input-textarea
+          [control]="descricaoCurtaControl"
+          label="Descrição curta"
+          placeholder="Resumo rápido para cards e resultados de busca"
+          [rows]="3"
+          [maxlength]="255">
+        </app-input-textarea>
+
+        <app-input-textarea
+          [control]="descricaoCompletaControl"
+          label="Descrição completa"
+          placeholder="Detalhes completos, diferenciais e contexto do item"
+          [rows]="5">
+        </app-input-textarea>
+      </div>
+    </app-section-card>
+
+    <app-section-card titulo="Comercial / Preço" subtitulo="Defina como esse item aparece comercialmente no catálogo e no site.">
+      <div class="cadastro-form-grid">
+        <div class="cadastro-form-grid cadastro-form-grid--triple">
+          <div class="w-100">
+            <mat-label class="f-s-14 f-w-600 m-b-8 d-block">Preço de venda</mat-label>
+            <mat-form-field appearance="outline" class="w-100">
+              <input
+                matInput
+                type="number"
+                min="0"
+                step="0.01"
+                [formControl]="precoVendaControl"
+                [disabled]="sobConsultaControl.value"
+                placeholder="Ex.: 129.90" />
+            </mat-form-field>
+          </div>
+
+          <div class="w-100">
+            <mat-label class="f-s-14 f-w-600 m-b-8 d-block">Preço promocional</mat-label>
+            <mat-form-field appearance="outline" class="w-100">
+              <input
+                matInput
+                type="number"
+                min="0"
+                step="0.01"
+                [formControl]="precoPromocionalControl"
+                [disabled]="sobConsultaControl.value"
+                placeholder="Ex.: 99.90" />
+            </mat-form-field>
+          </div>
+
+          <div class="w-100">
+            <mat-label class="f-s-14 f-w-600 m-b-8 d-block">Unidade de venda</mat-label>
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-select [formControl]="unidadeVendaControl">
+                <mat-option *ngFor="let unidade of unidadesVenda" [value]="unidade.value">
+                  {{ unidade.label }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="cadastro-form-helper">
+          <p>"Sob consulta" mostra o produto sem preço aberto.</p>
+          <p>"Exibir preço" permite mostrar o valor no site.</p>
+        </div>
+
+        <div class="cadastro-form-toggle-grid">
+          <div class="cadastro-form-toggle">
+            <mat-slide-toggle [formControl]="exibirPrecoControl">
+              Exibir preço no site
+            </mat-slide-toggle>
+            <small>Desative quando o produto existir no catálogo, mas sem valor público na vitrine.</small>
+          </div>
+
+          <div class="cadastro-form-toggle">
+            <mat-slide-toggle [formControl]="sobConsultaControl">
+              Sob consulta
+            </mat-slide-toggle>
+            <small>Use quando o preço depender de negociação ou orçamento antes da venda.</small>
+          </div>
+        </div>
+      </div>
+    </app-section-card>
+
+    <app-section-card titulo="Mídia e contato" subtitulo="Envie a imagem principal, organize a galeria e ajuste o contato comercial.">
+      <div class="cadastro-form-grid">
+        <app-deposito-imagem-upload
+          [empresaSlug]="empresaSlug"
+          context="produtos"
+          label="Imagem principal"
+          [imagemAtual]="imagemPrincipalSelecionada"
+          [principal]="true"
+          (imagemSelecionada)="onImagemPrincipalSelecionada($event)"
+          (uploadingChange)="onUploadingImagemPrincipalChange($event)">
+        </app-deposito-imagem-upload>
+
+        <app-deposito-imagem-galeria
+          [empresaSlug]="empresaSlug"
+          context="produtos"
+          [imagens]="galeriaSelecionada"
+          (imagensChange)="onGaleriaSelecionada($event)"
+          (uploadingChange)="onUploadingGaleriaChange($event)">
+        </app-deposito-imagem-galeria>
+
+        <app-input-texto-restrito
+          [control]="whatsappLinkControl"
+          label="Link do WhatsApp"
+          placeholder="https://wa.me/...">
+        </app-input-texto-restrito>
+
+        <app-input-textarea
+          [control]="mensagemPadraoWhatsappControl"
+          label="Mensagem padrão do WhatsApp"
+          placeholder="Olá, quero orçamento deste produto."
+          [rows]="3">
+        </app-input-textarea>
+      </div>
+    </app-section-card>
+
+    <app-section-card titulo="Listas auxiliares" subtitulo="Monte filtros, usos indicados e associações do catálogo.">
+      <div class="cadastro-form-grid cadastro-form-grid--double">
+        <app-lista-dinamica-input
+          [control]="tagsControl"
+          label="Tags"
+          placeholder="Ex.: Acetinado"
+          buttonLabel="Adicionar tag"
+          helperText="Palavras-chave para busca e navegação.">
+        </app-lista-dinamica-input>
+
+        <app-lista-dinamica-input
+          [control]="indicadoParaControl"
+          label="Indicado para"
+          placeholder="Ex.: Banheiros"
+          buttonLabel="Adicionar uso"
+          helperText="Locais e aplicações recomendadas.">
+        </app-lista-dinamica-input>
+
+        <app-lista-dinamica-input
+          [control]="voceEncontraControl"
+          label="Você encontra"
+          placeholder="Ex.: Porcelanatos marmorizados"
+          buttonLabel="Adicionar sugestão"
+          helperText="Outras vitrines ou grupos relacionados.">
+        </app-lista-dinamica-input>
+      </div>
+    </app-section-card>
+
+    <app-section-card titulo="Controle" subtitulo="Defina comportamento comercial e visibilidade do item.">
+      <div class="cadastro-form-toggle-grid">
+        <div class="cadastro-form-toggle">
+          <mat-slide-toggle [formControl]="orcamentoIndividualControl">
+            Orçamento individual
+          </mat-slide-toggle>
+          <small>Use quando o atendimento precisar tratar esse item como orçamento dedicado.</small>
+        </div>
+
+        <div class="cadastro-form-toggle">
+          <mat-slide-toggle [formControl]="destaqueControl">
+            Item em destaque
+          </mat-slide-toggle>
+          <small>Prioriza o item em vitrines e resultados do catálogo.</small>
+        </div>
+
+        <div class="cadastro-form-toggle">
+          <mat-slide-toggle [formControl]="controlaEstoqueControl">
+            Controla estoque
+          </mat-slide-toggle>
+          <small>Desative se o item for apenas referência comercial sem saldo controlado.</small>
+        </div>
+
+        <div class="cadastro-form-toggle">
+          <mat-slide-toggle [formControl]="ativoControl">
+            Item ativo
+          </mat-slide-toggle>
+          <small>Itens inativos deixam de aparecer como opção para uso futuro.</small>
+        </div>
+      </div>
+    </app-section-card>
+
+    <div class="cadastro-form-actions" *ngIf="!isMobileView">
+      <button mat-stroked-button color="primary" type="button" (click)="voltar()">
+        Voltar
+      </button>
+
+      <button
+        mat-flat-button
+        color="primary"
+        type="submit"
+        [disabled]="!podeSalvar">
+        {{ textoAcaoPrincipal }}
+      </button>
+    </div>
+  </form>
+</app-page-card>
+
+<app-mobile-total-bar
+  *ngIf="isMobileView"
+  label="Depósito"
+  valueText="Item"
+  detailText="Dados, mídia e controle"
+  [expandable]="false"
+  secondaryActionText="Voltar"
+  [actionText]="textoAcaoPrincipal"
+  [actionDisabled]="!podeSalvar"
+  bottomOffset="58px"
+  [attachedToBottomNav]="true"
+  (secondaryAction)="voltar()"
+  (action)="onSubmit()">
+</app-mobile-total-bar>

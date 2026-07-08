@@ -4,9 +4,7 @@
 </div>
 } @if(!item.navCap && !item.external && !item.twoLines) {
 <a mat-list-item (click)="onItemSelected(item)" [ngClass]="{
-      'mat-toolbar mat-primary activeMenu': item.route
-        ? router.isActive(item.route, true)
-        : false,
+      'mat-toolbar mat-primary activeMenu': isItemActive(item),
       expanded: expanded,
       disabled: item.disabled
     }" class="menu-list-item {{ item.bgcolor }}">

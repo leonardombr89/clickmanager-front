@@ -1,0 +1,234 @@
+.onboarding-v2-entry {
+  min-height: 100vh;
+  padding: 28px 16px 40px;
+  background:
+    radial-gradient(circle at top left, rgba(37, 99, 235, 0.08), transparent 28%),
+    linear-gradient(180deg, #f3f7ff 0%, #f8fbff 100%);
+}
+
+.onboarding-v2-entry__shell {
+  width: min(1120px, 100%);
+  margin: 0 auto;
+  display: grid;
+  gap: 24px;
+}
+
+.onboarding-v2-entry__header {
+  max-width: 760px;
+  padding: 4px 2px;
+}
+
+.onboarding-v2-entry__eyebrow,
+.onboarding-v2-entry__microcopy,
+.onboarding-v2-entry__stage-step {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(37, 99, 235, 0.08);
+  color: #2563eb;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.onboarding-v2-entry__header h1 {
+  margin: 16px 0 10px;
+  font-size: clamp(2rem, 3.8vw, 3.4rem);
+  line-height: 1.02;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.onboarding-v2-entry__header p {
+  max-width: 620px;
+  margin: 0;
+  color: #64748b;
+  font-size: 1rem;
+  line-height: 1.65;
+}
+
+.onboarding-v2-entry__stage,
+.onboarding-v2-entry__card {
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 24px 50px rgba(15, 23, 42, 0.06);
+}
+
+.onboarding-v2-entry__stage {
+  padding: 24px;
+}
+
+.onboarding-v2-entry__stage-head {
+  margin-bottom: 20px;
+}
+
+.onboarding-v2-entry__stage-head h2 {
+  margin: 16px 0 8px;
+  font-size: clamp(1.55rem, 2.5vw, 2.2rem);
+  line-height: 1.1;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.onboarding-v2-entry__stage-head p {
+  max-width: 700px;
+  margin: 0;
+  color: #64748b;
+  font-size: 0.98rem;
+  line-height: 1.65;
+}
+
+.onboarding-v2-entry__card {
+  overflow: hidden;
+}
+
+.onboarding-v2-entry__card mat-card-content {
+  padding: 24px;
+}
+
+.onboarding-v2-entry__card-header h2 {
+  margin: 10px 0 4px;
+  font-size: 1.55rem;
+  line-height: 1.15;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.onboarding-v2-entry__card-header p {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.96rem;
+  line-height: 1.55;
+}
+
+.onboarding-v2-entry__card-body {
+  margin-top: 18px;
+}
+
+.onboarding-v2-entry__locked-state {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+  border: 1px dashed rgba(148, 163, 184, 0.36);
+  border-radius: 20px;
+  background: rgba(248, 250, 252, 0.92);
+  color: #64748b;
+  margin-bottom: 12px;
+}
+
+.onboarding-v2-entry__locked-state p {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+
+.onboarding-v2-entry__locked-icon {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  background: rgba(37, 99, 235, 0.08);
+  color: #2563eb;
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.onboarding-v2-entry__form {
+  display: grid;
+  gap: 14px;
+}
+
+.onboarding-v2-entry__form-fields {
+  display: grid;
+  gap: 6px;
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transform: translateY(-10px);
+  pointer-events: none;
+  transition:
+    max-height 320ms ease,
+    opacity 220ms ease,
+    transform 220ms ease;
+}
+
+.onboarding-v2-entry__form-fields.is-visible {
+  max-height: 920px;
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.onboarding-v2-entry__actions {
+  display: grid;
+  gap: 12px;
+}
+
+.onboarding-v2-entry__hint {
+  font-size: 0.88rem;
+  color: #64748b;
+}
+
+.onboarding-v2-entry__actions button[mat-flat-button] {
+  min-height: 54px;
+}
+
+.onboarding-v2-entry__actions .mat-mdc-progress-spinner {
+  display: inline-block;
+  margin-right: 8px;
+}
+
+@media (max-width: 768px) {
+  .onboarding-v2-entry {
+    padding: 16px 12px 28px;
+  }
+
+  .onboarding-v2-entry__shell {
+    gap: 16px;
+  }
+
+  .onboarding-v2-entry__header h1 {
+    margin-top: 14px;
+    font-size: 2.08rem;
+  }
+
+  .onboarding-v2-entry__header p,
+  .onboarding-v2-entry__stage-head p {
+    font-size: 0.94rem;
+    line-height: 1.55;
+  }
+
+  .onboarding-v2-entry__stage,
+  .onboarding-v2-entry__card {
+    border-radius: 22px;
+  }
+
+  .onboarding-v2-entry__stage,
+  .onboarding-v2-entry__card mat-card-content {
+    padding: 18px 16px;
+  }
+
+  .onboarding-v2-entry__stage-head {
+    margin-bottom: 16px;
+  }
+
+  .onboarding-v2-entry__stage-head h2 {
+    margin-top: 14px;
+    font-size: 1.55rem;
+  }
+
+  .onboarding-v2-entry__card-header h2 {
+    font-size: 1.35rem;
+  }
+
+  .onboarding-v2-entry__locked-state {
+    padding: 14px;
+    border-radius: 18px;
+  }
+}

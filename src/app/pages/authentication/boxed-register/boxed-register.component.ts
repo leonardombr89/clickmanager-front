@@ -9,6 +9,7 @@ import {
   ReactiveFormsModule,
 } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { MaterialModule } from '../../../material.module';
 import { BrandingComponent } from '../../../layouts/full/vertical/sidebar/branding.component';
 import { ToastrService } from 'ngx-toastr';
@@ -18,6 +19,7 @@ import { InputTelefoneComponent } from 'src/app/components/inputs/input-telefone
 import { InputEmailComponent } from 'src/app/components/inputs/input-email/input-custom.component';
 import { LandingEtapaFunil, LandingpagePublicService } from 'src/app/pages/theme-pages/landingpage/landingpage-public.service';
 import { AuthService } from 'src/app/services/auth.service';
+import { resolveTipoEmpresa, TipoEmpresa } from 'src/app/models/empresa/tipo-empresa.enum';
 
 @Component({
   selector: 'app-boxed-register',
@@ -42,6 +44,7 @@ export class AppBoxedRegisterComponent implements OnInit, AfterViewInit {
   private readonly landingStageStoragePrefix = 'clickmanager:landing:stage';
   private readonly pageTitle = 'Cadastro de Empresa';
   private sessionId = '';
+  private tipoEmpresa: TipoEmpresa = TipoEmpresa.GRAFICA;
   submitting = false;
   showPassword = false;
   showConfirmPassword = false;
@@ -52,6 +55,7 @@ export class AppBoxedRegisterComponent implements OnInit, AfterViewInit {
 
   constructor(
     private settings: CoreService,
+    private route: ActivatedRoute,
     private router: Router,
     private toastr: ToastrService,
     private onboardingService: OnboardingService,
@@ -74,6 +78,7 @@ export class AppBoxedRegisterComponent implements OnInit, AfterViewInit {
   });
 
   ngOnInit(): void {
+    this.tipoEmpresa = resolveTipoEmpresa(this.route.snapshot.queryParamMap.get('tipoEmpresa'));
     this.sessionId = this.ensureSessionId();
     this.registrarEtapaFunil('FORMULARIO_VISUALIZADO');
   }
@@ -231,6 +236,7 @@ export class AppBoxedRegisterComponent implements OnInit, AfterViewInit {
     const payload = {
       empresa: {
         nome: empresa.nome!,
+        tipoEmpresa: this.tipoEmpresa,
         ...(telefone ? { telefone } : {})
       },
       usuario: {

@@ -272,6 +272,19 @@
   </div>
 
   <div class="mobile-sheet__section">
+    @for(app of apps; track app.title) {
+    <a [routerLink]="[app.link]" class="mobile-action-link" (click)="closeMobileOverlays()">
+      <span class="d-flex align-items-center gap-12">
+        <img [src]="app.img" [alt]="app.title" width="20" height="20" />
+        <span class="d-flex flex-column">
+          <strong>{{ app.title }}</strong>
+          <small>{{ app.subtitle }}</small>
+        </span>
+      </span>
+      <i-tabler name="chevron-right" class="icon-18 d-flex"></i-tabler>
+    </a>
+    }
+
     <a [routerLink]="['/billing/minha-assinatura']" class="mobile-action-link" (click)="closeMobileOverlays()">
       <span>Minha assinatura</span>
       <i-tabler name="chevron-right" class="icon-18 d-flex"></i-tabler>

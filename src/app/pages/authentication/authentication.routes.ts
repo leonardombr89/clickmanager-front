@@ -2,12 +2,12 @@ import { Routes } from '@angular/router';
 
 import { AppBoxedForgotPasswordComponent } from './boxed-forgot-password/boxed-forgot-password.component';
 import { AppBoxedLoginComponent } from './boxed-login/boxed-login.component';
-import { AppBoxedRegisterComponent } from './boxed-register/boxed-register.component';
 import { AppBoxedTwoStepsComponent } from './boxed-two-steps/boxed-two-steps.component';
 import { AppErrorComponent } from './error/error.component';
 import { AppMaintenanceComponent } from './maintenance/maintenance.component';
 import { AppSideForgotPasswordComponent } from './side-forgot-password/side-forgot-password.component';
 import { AppSideLoginComponent } from './side-login/side-login.component';
+import { AppSideRegisterComponent } from './side-register/side-register.component';
 import { AppSideTwoStepsComponent } from './side-two-steps/side-two-steps.component';
 import { AppBoxedResetPasswordComponent } from './boxed-reset-password/boxed-reset-password.component';
 import { AppCadastroConcluidoComponent } from './cadastro-concluido/cadastro-concluido.component';
@@ -31,7 +31,8 @@ export const AuthenticationRoutes: Routes = [
       },
       {
         path: 'registro-gestor',
-        component: AppBoxedRegisterComponent,
+        redirectTo: '/onboarding-v2',
+        pathMatch: 'full',
       },
       {
         path: 'cadastro-concluido',
@@ -54,12 +55,12 @@ export const AuthenticationRoutes: Routes = [
         component: AppSideForgotPasswordComponent,
       },
       {
-        path: 'login',
+        path: 'side-login',
         component: AppSideLoginComponent,
       },
       {
         path: 'side-register',
-        component: AppBoxedRegisterComponent,
+        component: AppSideRegisterComponent,
       },
       {
         path: 'side-two-steps',

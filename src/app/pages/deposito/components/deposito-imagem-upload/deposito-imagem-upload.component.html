@@ -1,0 +1,63 @@
+<div class="deposito-upload">
+  <div class="deposito-upload__header">
+    <div class="deposito-upload__label">{{ label }}</div>
+    @if (carregando) {
+    <span class="deposito-upload__status">
+      <mat-spinner diameter="16"></mat-spinner>
+      Enviando...
+    </span>
+    }
+  </div>
+
+  <div class="deposito-upload__panel" [class.deposito-upload__panel--has-image]="possuiImagem">
+    @if (possuiImagem) {
+    <div class="deposito-upload__preview">
+      <img [src]="previewUrl" [alt]="altPreview" (error)="onPreviewError()" />
+    </div>
+    } @else {
+    <div class="deposito-upload__placeholder">
+      <mat-icon>image</mat-icon>
+      <span>Nenhuma imagem enviada ainda.</span>
+    </div>
+    }
+
+    <div class="deposito-upload__meta">
+      @if (arquivoNome) {
+      <strong>{{ arquivoNome }}</strong>
+      }
+      @if (arquivoTamanho) {
+      <small>{{ arquivoTamanho }}</small>
+      }
+      @if (!arquivoNome && !carregando) {
+      <small>PNG, JPG, WEBP, SVG ou GIF</small>
+      }
+    </div>
+
+    <div class="deposito-upload__actions">
+      <label class="deposito-upload__file-trigger">
+        <input type="file" accept="image/*" [disabled]="carregando" (change)="onFileSelected($event)" />
+        <span>{{ possuiImagem ? 'Trocar imagem' : 'Selecionar imagem' }}</span>
+      </label>
+
+      @if (uploadPendente) {
+      <button mat-flat-button type="button" color="primary" [disabled]="carregando" (click)="tentarNovamente()">
+        Tentar novamente
+      </button>
+      }
+
+      @if (possuiImagem) {
+      <button mat-stroked-button type="button" color="warn" [disabled]="carregando" (click)="limparSelecao()">
+        Remover
+      </button>
+      }
+    </div>
+  </div>
+
+  @if (erro) {
+  <div class="deposito-upload__error">{{ erro }}</div>
+  }
+
+  @if (avisoPreview) {
+  <div class="deposito-upload__warning">{{ avisoPreview }}</div>
+  }
+</div>

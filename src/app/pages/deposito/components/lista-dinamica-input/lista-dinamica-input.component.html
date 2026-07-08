@@ -1,0 +1,36 @@
+<div class="lista-dinamica">
+  <div class="lista-dinamica__header">
+    <mat-label class="f-s-14 f-w-600 d-block">{{ label }}</mat-label>
+    @if (helperText) {
+    <small>{{ helperText }}</small>
+    }
+  </div>
+
+  <div class="lista-dinamica__form">
+    <mat-form-field appearance="outline" class="w-100">
+      <input
+        matInput
+        [(ngModel)]="valorAtual"
+        [ngModelOptions]="{ standalone: true }"
+        [placeholder]="placeholder"
+        (keydown.enter)="onEnter($event)" />
+    </mat-form-field>
+
+    <button mat-stroked-button color="primary" type="button" (click)="adicionar()">
+      {{ buttonLabel }}
+    </button>
+  </div>
+
+  <mat-chip-set class="lista-dinamica__chips" *ngIf="itens.length; else semItens">
+    <mat-chip-row *ngFor="let item of itens" (removed)="remover(item)">
+      {{ item }}
+      <button matChipRemove type="button" aria-label="Remover item">
+        <mat-icon>close</mat-icon>
+      </button>
+    </mat-chip-row>
+  </mat-chip-set>
+
+  <ng-template #semItens>
+    <div class="lista-dinamica__empty">Nenhum item adicionado ainda.</div>
+  </ng-template>
+</div>

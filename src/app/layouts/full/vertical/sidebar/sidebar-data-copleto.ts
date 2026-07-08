@@ -140,7 +140,33 @@ export const navItems: NavItem[] = [
                 requiredPermission: ['SERVICOS_VER', 'SERVICOS_CADASTRAR', 'SERVICOS_EDITAR', 'SERVICOS_EXCLUIR']
             }
         ]
-    },    
+    },
+    {
+        displayName: 'Depósito',
+        iconName: 'archive',
+        bgcolor: 'primary',
+        route: '/page/deposito',
+        children: [
+            {
+                displayName: 'Categorias',
+                iconName: 'point',
+                bgcolor: 'transparent',
+                route: '/page/deposito/categorias'
+            },
+            {
+                displayName: 'Marcas',
+                iconName: 'point',
+                bgcolor: 'transparent',
+                route: '/page/deposito/marcas'
+            },
+            {
+                displayName: 'Itens',
+                iconName: 'point',
+                bgcolor: 'transparent',
+                route: '/page/deposito/itens'
+            }
+        ]
+    },
     {
         navCap: 'Pedidos',
         requiredPermission: ['PEDIDOS_VER', 'PEDIDOS_CADASTRAR', 'PEDIDOS_EDITAR', 'PEDIDOS_EXCLUIR']
