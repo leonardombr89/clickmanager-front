@@ -1,0 +1,104 @@
+<div class="onboarding-v2-entry">
+  <section class="onboarding-v2-entry__shell">
+    <header class="onboarding-v2-entry__header">
+      <span class="onboarding-v2-entry__eyebrow">Cadastro inicial</span>
+      <h1>Configure sua empresa em poucos passos</h1>
+      <p>
+        Crie sua conta e personalize o sistema para o seu tipo de operação.
+      </p>
+    </header>
+
+    <section class="onboarding-v2-entry__stage">
+      <div class="onboarding-v2-entry__stage-head">
+        <span class="onboarding-v2-entry__stage-step">Etapa 1</span>
+        <h2>Qual é o segmento da sua empresa?</h2>
+        <p>
+          Escolha o segmento para configurarmos o ClickManager da melhor forma para o seu negócio.
+        </p>
+      </div>
+
+      <app-segment-selector
+        [segments]="segmentosDisponiveis"
+        [selected]="selectedTipoEmpresa"
+        (segmentSelected)="onSegmentSelected($event)"
+      ></app-segment-selector>
+    </section>
+
+    <mat-card class="onboarding-v2-entry__card cardWithShadow">
+      <mat-card-content>
+        <div class="onboarding-v2-entry__card-header">
+          <div>
+            <span class="onboarding-v2-entry__microcopy">Comece agora</span>
+            <h2>Crie sua conta</h2>
+            <p>Depois disso, vamos preparar o ambiente da sua empresa.</p>
+          </div>
+        </div>
+
+        <div class="onboarding-v2-entry__card-body">
+          <div class="onboarding-v2-entry__locked-state" *ngIf="!hasSelectedSegment">
+            <div class="onboarding-v2-entry__locked-icon" aria-hidden="true">✦</div>
+            <p>Selecione um segmento acima para liberar o cadastro da sua empresa.</p>
+          </div>
+
+          <form [formGroup]="form" class="onboarding-v2-entry__form" (ngSubmit)="submit()">
+            <div class="onboarding-v2-entry__form-fields" [class.is-visible]="hasSelectedSegment">
+              <app-input-texto-restrito
+                [control]="empresaNomeControl"
+                label="Nome da empresa"
+                placeholder="Ex.: Minha Empresa"
+                [maxlength]="120"
+              ></app-input-texto-restrito>
+
+              <app-input-texto-restrito
+                [control]="responsavelNomeControl"
+                label="Seu nome"
+                placeholder="Quem vai operar o sistema?"
+                [maxlength]="120"
+              ></app-input-texto-restrito>
+
+              <app-input-email
+                [control]="emailControl"
+                label="E-mail de acesso"
+                placeholder="voce@suaempresa.com"
+              ></app-input-email>
+
+              <app-input-telefone
+                [control]="telefoneControl"
+                label="Telefone"
+                placeholder="(00) 00000-0000"
+              ></app-input-telefone>
+
+              <div class="row">
+                <div class="col-md-6">
+                  <mat-label class="f-s-14 f-w-600 m-b-8 d-block">Senha</mat-label>
+                  <mat-form-field appearance="outline" class="w-100">
+                    <input matInput type="password" formControlName="senha" placeholder="Mínimo 6 caracteres" />
+                    <mat-error *ngIf="senhaControl.invalid && senhaControl.touched">Senha inválida</mat-error>
+                  </mat-form-field>
+                </div>
+
+                <div class="col-md-6">
+                  <mat-label class="f-s-14 f-w-600 m-b-8 d-block">Confirmar senha</mat-label>
+                  <mat-form-field appearance="outline" class="w-100">
+                    <input matInput type="password" formControlName="confirmarSenha" placeholder="Repita a senha" />
+                    <mat-error *ngIf="confirmarSenhaControl.invalid && confirmarSenhaControl.touched">
+                      {{ senhaDivergente ? 'As senhas precisam coincidir' : 'Campo obrigatório' }}
+                    </mat-error>
+                  </mat-form-field>
+                </div>
+              </div>
+            </div>
+
+            <div class="onboarding-v2-entry__actions">
+              <span class="onboarding-v2-entry__hint">Leva menos de 2 minutos para concluir.</span>
+              <button mat-flat-button color="primary" type="submit" [disabled]="loading || !hasSelectedSegment">
+                <mat-spinner *ngIf="loading" diameter="18"></mat-spinner>
+                <span>{{ ctaLabel }}</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </section>
+</div>

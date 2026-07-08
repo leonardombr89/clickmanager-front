@@ -1,8 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
+import { finalize } from 'rxjs/operators';
 import { MaterialModule } from 'src/app/material.module';
 import { BrandingComponent } from 'src/app/layouts/full/vertical/sidebar/branding.component';
+import { OnboardingV2Service } from 'src/app/pages/onboarding-v2/services/onboarding-v2.service';
+import { isOnboardingV2Finished, resolveOnboardingV2RouteFromProgress } from 'src/app/pages/onboarding-v2/models/onboarding-v2.models';
 
 interface CadastroConcluidoViewModel {
   cadastroConcluido: boolean;
@@ -38,10 +41,15 @@ declare global {
 export class AppCadastroConcluidoComponent implements OnInit, OnDestroy {
   private readonly cadastroConcluidoStorageKey = 'clickmanager:onboarding:cadastro-concluido';
   private autoRedirectTimer: ReturnType<typeof setTimeout> | null = null;
+  private redirecting = false;
   cadastro!: CadastroConcluidoViewModel;
   private cameFromRealFlow = false;
+  nextRoute = '/onboarding';
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private onboardingV2Service: OnboardingV2Service
+  ) {}
 
   ngOnInit(): void {
     const cadastro = this.resolveCadastro();
@@ -52,7 +60,7 @@ export class AppCadastroConcluidoComponent implements OnInit, OnDestroy {
 
     this.cadastro = cadastro;
     this.trackConversionIfNeeded();
-    this.scheduleAutoRedirect();
+    this.resolveNextRoute();
   }
 
   ngOnDestroy(): void {
@@ -81,10 +89,36 @@ export class AppCadastroConcluidoComponent implements OnInit, OnDestroy {
     return `${this.diasDeTrial || 7} dias grátis`;
   }
 
+  get ctaLink(): string[] {
+    return [this.nextRoute];
+  }
+
   private scheduleAutoRedirect(): void {
     this.autoRedirectTimer = setTimeout(() => {
-      this.router.navigate(['/onboarding']);
+      this.router.navigateByUrl(this.nextRoute);
     }, 2500);
+  }
+
+  private resolveNextRoute(): void {
+    this.redirecting = true;
+
+    this.onboardingV2Service.fetchProgress().pipe(finalize(() => (this.redirecting = false))).subscribe({
+      next: (progress) => {
+        if (progress.onboardingVersion === 'v2') {
+          this.nextRoute = isOnboardingV2Finished(progress)
+            ? '/dashboards/dashboard1'
+            : resolveOnboardingV2RouteFromProgress(progress);
+        } else {
+          this.nextRoute = progress.onboardingConcluido ? '/dashboards/dashboard1' : '/onboarding';
+        }
+
+        this.scheduleAutoRedirect();
+      },
+      error: () => {
+        this.nextRoute = '/onboarding';
+        this.scheduleAutoRedirect();
+      }
+    });
   }
 
   private resolveCadastro(): CadastroConcluidoViewModel | null {

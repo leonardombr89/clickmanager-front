@@ -32,6 +32,7 @@ import { ImagemUtil } from 'src/app/utils/imagem-util';
 import { NotificacaoItem } from 'src/app/pages/notificacoes/models/notificacao.model';
 import { NotificacaoService } from 'src/app/pages/notificacoes/services/notificacao.service';
 import { NotificacaoEnviarDialogComponent } from 'src/app/pages/notificacoes/components/notificacao-enviar-dialog.component';
+import { resolveTipoEmpresa, TipoEmpresa } from 'src/app/models/empresa/tipo-empresa.enum';
 
 const MOBILE_VIEW = 'screen and (max-width: 768px)';
 const TABLET_VIEW = 'screen and (min-width: 769px) and (max-width: 1024px)';
@@ -120,47 +121,13 @@ export class FullComponent implements OnInit, OnDestroy {
   notificacoesNaoLidas = 0;
   carregandoNotificacoes = false;
   podeEnviarNotificacao = false;
+  tipoEmpresaAtual: TipoEmpresa = TipoEmpresa.GRAFICA;
   swipedNotificationId: number | null = null;
   private ultimaCargaResumoAt = 0;
   private readonly intervaloMinimoResumoMs = 5000;
   private readonly permissoesEnviarNotificacao = ['NOTIFICACAO_ENVIAR', 'NOTIFICACAO_ENVIAR_EMPRESA'];
   private notificationTouchStartX: number | null = null;
-  mobileBottomNavItems: MobileBottomNavItem[] = [
-    {
-      key: 'dashboard',
-      label: 'Dashboard',
-      icon: 'layout-dashboard',
-      route: '/dashboards/dashboard1',
-      startsWith: ['/dashboards/dashboard1'],
-    },
-    {
-      key: 'atalhos',
-      label: 'Atalhos',
-      icon: 'grid-dots',
-      action: 'apps',
-    },
-    {
-      key: 'smartcalc',
-      label: 'SmartCalc',
-      icon: 'calculator',
-      route: '/smartcalc',
-      startsWith: ['/smartcalc'],
-      special: true,
-    },
-    {
-      key: 'pedidos',
-      label: 'Pedidos',
-      icon: 'file-text',
-      route: '/page/pedido',
-      startsWith: ['/page/pedido'],
-    },
-    {
-      key: 'mais',
-      label: 'Mais',
-      icon: 'menu-2',
-      action: 'drawer',
-    }
-  ];
+  mobileBottomNavItems: MobileBottomNavItem[] = [];
 
   get isOver(): boolean {
     return this.isMobileScreen;
@@ -193,6 +160,7 @@ export class FullComponent implements OnInit, OnDestroy {
       url.startsWith('/page/cadastro-tecnico/formatos') ||
       url.startsWith('/page/cadastro-tecnico/materiais') ||
       url.startsWith('/page/cadastro-tecnico/produtos') ||
+      url.startsWith('/page/deposito') ||
       url.startsWith('/page/ajuda') ||
       url.startsWith('/page/cadastro-tecnico/servico') ||
       url.startsWith('/page/cadastro-tecnico/servicos') ||
@@ -221,15 +189,7 @@ export class FullComponent implements OnInit, OnDestroy {
   }
 
   // for mobile app sidebar
-  apps: apps[] = [
-    {
-      id: 1,
-      img: 'assets/images/svgs/icon-connect.svg',
-      title: 'SmartCalc',
-      subtitle: 'Calculadora Inteligente',
-      link: '/smartcalc',
-    },
-  ];
+  apps: apps[] = [];
 
   quicklinks: quicklinks[] = [
     {
@@ -289,20 +249,18 @@ export class FullComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.aplicarConfiguracaoPorTipoEmpresa(this.tipoEmpresaAtual);
     this.authService.usuario$
       .pipe(
-        filter((usuario): usuario is Usuario =>
-          !!usuario &&
-          !!usuario.perfil &&
-          Array.isArray(usuario.perfil.permissoes) &&
-          usuario.perfil.permissoes.length > 0
-        )
+        filter((usuario): usuario is Usuario => !!usuario)
       )
       .subscribe(usuario => {  
         this.usuarioLogado = usuario;
+        this.tipoEmpresaAtual = resolveTipoEmpresa(usuario.empresa?.tipoEmpresa);
+        this.aplicarConfiguracaoPorTipoEmpresa(this.tipoEmpresaAtual);
         this.atualizarPermissaoEnvioNotificacao();
-        const permissoes = usuario.perfil!.permissoes.map(p => p.chave);
-        this.navItemsFiltrados = this.filtrarMenusPorPermissao(navItems, permissoes);
+        const permissoes = (usuario.perfil?.permissoes || []).map(p => p.chave);
+        this.navItemsFiltrados = this.filtrarMenus(navItems, permissoes, this.tipoEmpresaAtual);
         this.mobileNavGroups = this.buildMobileNavGroups(this.navItemsFiltrados);
         this.currentPageTitle = this.resolveCurrentPageTitle(this.router.url);
         this.carregarStatusBilling();
@@ -325,21 +283,22 @@ export class FullComponent implements OnInit, OnDestroy {
     this.layoutChangesSubscription.unsubscribe();
   }
 
-  filtrarMenusPorPermissao(items: NavItem[], permissoesUsuario: string[]): NavItem[] {  
+  filtrarMenus(items: NavItem[], permissoesUsuario: string[], tipoEmpresa: TipoEmpresa): NavItem[] {  
     const possuiPermissao = (requeridas?: string[]) => {
-      const resultado = !requeridas || requeridas.some(p => permissoesUsuario.includes(p));
-      if (requeridas && !resultado) {
-      }
-      return resultado;
+      return !requeridas || requeridas.some(p => permissoesUsuario.includes(p));
     };
+
+    const aceitaTipoEmpresa = (tiposPermitidos?: TipoEmpresa[]) =>
+      !tiposPermitidos || tiposPermitidos.includes(tipoEmpresa);
   
     const filtrar = (menus: NavItem[]): NavItem[] =>
       menus
-        .filter(menu => possuiPermissao(menu.requiredPermission))
+        .filter(menu => aceitaTipoEmpresa(menu.allowedEmpresaTipos) && possuiPermissao(menu.requiredPermission))
         .map(menu => ({
           ...menu,
           children: menu.children ? filtrar(menu.children) : undefined
-        }));
+        }))
+        .filter(menu => !menu.children || menu.children.length > 0 || !!menu.route || !!menu.navCap);
   
     return filtrar(items);
   }
@@ -463,6 +422,10 @@ export class FullComponent implements OnInit, OnDestroy {
   }
 
   onMobileNavItemClick(item: NavItem): void {
+    if (item.disabled) {
+      return;
+    }
+
     if (item.children?.length) {
       this.toggleMobileItemExpanded(item);
       return;
@@ -474,6 +437,10 @@ export class FullComponent implements OnInit, OnDestroy {
   }
 
   onMobileChildItemClick(item: NavItem): void {
+    if (item.disabled) {
+      return;
+    }
+
     if (item.route) {
       this.router.navigate([item.route]);
     }
@@ -705,29 +672,43 @@ export class FullComponent implements OnInit, OnDestroy {
 
   private buildMobileNavGroups(items: NavItem[]): MobileNavGroup[] {
     const groups: MobileNavGroup[] = [];
-    const primaryRoutes = new Set(['/dashboards/dashboard1', '/page/pedido', '/smartcalc', '/page/cliente']);
+    const primaryRoutes = this.tipoEmpresaAtual === TipoEmpresa.DEPOSITO
+      ? new Set(['/page/empresa', '/page/usuarios/listar', '/page/deposito/itens'])
+      : new Set(['/dashboards/dashboard1', '/page/pedido', '/smartcalc', '/page/cliente']);
     const secondaryItems = items.filter((item) => !item.navCap && !primaryRoutes.has(item.route || ''));
 
-    const groupMap: Record<string, (item: NavItem) => boolean> = {
-      Administração: (item) =>
-        [
-          '/page/usuarios/listar',
-          '/page/perfil',
-          '/page/empresa',
-          '/config',
-          '/page/calculadora/config/criar'
-        ].some((route) => item.route?.startsWith(route)),
-      'Cadastros técnicos': (item) =>
-        [
-          '/cadastro-tecnico',
-          '/page/funcionarios'
-        ].some((route) => item.route?.startsWith(route)),
-      Ajuda: (item) =>
-        [
-          '/page/suporte',
-          '/page/ajuda'
-        ].some((route) => item.route?.startsWith(route)),
-    };
+    const groupMap: Record<string, (item: NavItem) => boolean> = this.tipoEmpresaAtual === TipoEmpresa.DEPOSITO
+      ? {
+          Dashboard: (item) =>
+            item.displayName === 'Dashboard',
+          Catálogo: (item) =>
+            item.displayName === 'Catálogo',
+          Comercial: (item) =>
+            item.displayName === 'Comercial',
+          Administração: (item) =>
+            item.displayName === 'Administração',
+        }
+      : {
+          Administração: (item) =>
+            [
+              '/page/usuarios/listar',
+              '/page/perfil',
+              '/page/empresa',
+              '/config',
+              '/page/calculadora/config/criar'
+            ].some((route) => item.route?.startsWith(route)),
+          'Cadastros técnicos': (item) =>
+            [
+              '/cadastro-tecnico',
+              '/page/funcionarios',
+              '/page/deposito'
+            ].some((route) => item.route?.startsWith(route)),
+          Ajuda: (item) =>
+            [
+              '/page/suporte',
+              '/page/ajuda'
+            ].some((route) => item.route?.startsWith(route)),
+        };
 
     Object.entries(groupMap).forEach(([title, matcher]) => {
       const groupItems = secondaryItems.filter((item) => matcher(item));
@@ -845,6 +826,130 @@ export class FullComponent implements OnInit, OnDestroy {
         this.carregandoNotificacoes = false;
       }
     });
+  }
+
+  private aplicarConfiguracaoPorTipoEmpresa(tipoEmpresa: TipoEmpresa): void {
+    this.mobileBottomNavItems = tipoEmpresa === TipoEmpresa.DEPOSITO
+      ? [
+          {
+            key: 'empresa',
+            label: 'Empresa',
+            icon: 'building',
+            route: '/page/empresa',
+            startsWith: ['/page/empresa'],
+          },
+          {
+            key: 'atalhos',
+            label: 'Atalhos',
+            icon: 'grid-dots',
+            action: 'apps',
+          },
+          {
+            key: 'itens',
+            label: 'Itens',
+            icon: 'package',
+            route: '/page/deposito/itens',
+            startsWith: ['/page/deposito/itens'],
+            special: true,
+          },
+          {
+            key: 'usuarios',
+            label: 'Usuários',
+            icon: 'users',
+            route: '/page/usuarios/listar',
+            startsWith: ['/page/usuarios'],
+          },
+          {
+            key: 'mais',
+            label: 'Mais',
+            icon: 'menu-2',
+            action: 'drawer',
+          }
+        ]
+      : [
+          {
+            key: 'dashboard',
+            label: 'Dashboard',
+            icon: 'layout-dashboard',
+            route: '/dashboards/dashboard1',
+            startsWith: ['/dashboards/dashboard1'],
+          },
+          {
+            key: 'atalhos',
+            label: 'Atalhos',
+            icon: 'grid-dots',
+            action: 'apps',
+          },
+          {
+            key: 'smartcalc',
+            label: 'SmartCalc',
+            icon: 'calculator',
+            route: '/smartcalc',
+            startsWith: ['/smartcalc'],
+            special: true,
+          },
+          {
+            key: 'pedidos',
+            label: 'Pedidos',
+            icon: 'file-text',
+            route: '/page/pedido',
+            startsWith: ['/page/pedido'],
+          },
+          {
+            key: 'mais',
+            label: 'Mais',
+            icon: 'menu-2',
+            action: 'drawer',
+          }
+        ];
+
+    this.apps = tipoEmpresa === TipoEmpresa.DEPOSITO
+      ? [
+          {
+            id: 1,
+            img: 'assets/images/svgs/icon-dd-invoice.svg',
+            title: 'Itens',
+            subtitle: 'Catálogo interno',
+            link: '/page/deposito/itens',
+          },
+          {
+            id: 2,
+            img: 'assets/images/svgs/icon-mailbox.svg',
+            title: 'Categorias',
+            subtitle: 'Organização do catálogo',
+            link: '/page/deposito/categorias',
+          },
+          {
+            id: 3,
+            img: 'assets/images/svgs/icon-dd-lifebuoy.svg',
+            title: 'Marcas',
+            subtitle: 'Fabricantes e linhas',
+            link: '/page/deposito/marcas',
+          },
+          {
+            id: 4,
+            img: 'assets/images/svgs/icon-user-male.svg',
+            title: 'Usuários',
+            subtitle: 'Equipe e acessos',
+            link: '/page/usuarios/listar',
+          },
+        ]
+      : [
+          {
+            id: 1,
+            img: 'assets/images/svgs/icon-connect.svg',
+            title: 'SmartCalc',
+            subtitle: 'Calculadora Inteligente',
+            link: '/smartcalc',
+          },
+          {
+            id: 2,
+            img: 'assets/images/svgs/icon-dd-invoice.svg',
+            title: 'Depósito',
+            subtitle: 'Catálogo interno',
+            link: '/page/deposito/itens',
+          },
+        ];
   }
 
   private atualizarPermissaoEnvioNotificacao(): void {

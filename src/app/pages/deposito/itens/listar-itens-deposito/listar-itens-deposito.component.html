@@ -1,0 +1,256 @@
+@if (!isMobileView) {
+<mat-card class="cardWithShadow">
+  <app-card-header
+    titulo="Itens de Depósito"
+    botaoTexto="Novo Item"
+    botaoIcone="add"
+    [botaoRota]="['/page/deposito/itens/novo']"
+    [mostrarDivisor]="true">
+  </app-card-header>
+
+  <mat-card-content>
+    <app-input-pesquisa placeholder="Ex: porcelanato, torneira, cuba" (valorAlterado)="onPesquisar($event)">
+    </app-input-pesquisa>
+
+    <div class="table-responsive">
+      <table mat-table [dataSource]="itens" class="mat-elevation-z1 no-wrap m-t-0 v-middle w-100">
+        <ng-container matColumnDef="codigo">
+          <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">Código</th>
+          <td mat-cell *matCellDef="let item" class="f-s-14">{{ item.codigo }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="nome">
+          <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">Nome</th>
+          <td mat-cell *matCellDef="let item" class="f-s-14">
+            <div class="table-item-media">
+              <div class="table-item-thumb">
+                <img [src]="getImagemSrc(item.imagemPrincipal)" [alt]="item.imagemPrincipal?.altText || item.nome" />
+              </div>
+
+              <div class="table-item-media__content">
+                <strong>{{ item.nome }}</strong>
+                <span>{{ item.descricaoCurta || 'Sem descrição curta' }}</span>
+              </div>
+            </div>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="categoria">
+          <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">Categoria</th>
+          <td mat-cell *matCellDef="let item" class="f-s-14">{{ item.categoriaNome || 'Sem categoria' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="marca">
+          <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">Marca</th>
+          <td mat-cell *matCellDef="let item" class="f-s-14">{{ item.marcaNome || 'Sem marca' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="preco">
+          <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">Preço</th>
+          <td mat-cell *matCellDef="let item" class="f-s-14">
+            @if (item.sobConsulta) {
+            <span class="status-pill status-pill--secondary">Sob consulta</span>
+            } @else if (item.exibirPreco === false) {
+            <span class="status-pill status-pill--inactive">Preço oculto</span>
+            } @else if (item.precoPromocional !== null && item.precoPromocional !== undefined) {
+            <div class="price-stack">
+              <strong class="price-stack__highlight">{{ formatarPreco(item.precoPromocional) }}</strong>
+              <span class="price-stack__original">{{ formatarPreco(item.precoVenda) }}</span>
+            </div>
+            } @else {
+            <span>{{ getPrecoExibicao(item) }}</span>
+            }
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="unidade">
+          <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">Unidade</th>
+          <td mat-cell *matCellDef="let item" class="f-s-14">{{ formatarUnidadeVenda(item.unidadeVenda) }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="site">
+          <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">Exibir no site</th>
+          <td mat-cell *matCellDef="let item" class="f-s-14">
+            <span class="status-pill" [class.status-pill--inactive]="item.exibirPreco === false">
+              {{ item.exibirPreco === false ? 'Não' : 'Sim' }}
+            </span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="consulta">
+          <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">Sob consulta</th>
+          <td mat-cell *matCellDef="let item" class="f-s-14">
+            <span class="status-pill" [class.status-pill--secondary]="item.sobConsulta" [class.status-pill--inactive]="!item.sobConsulta">
+              {{ item.sobConsulta ? 'Sim' : 'Não' }}
+            </span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="ativo">
+          <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">Status</th>
+          <td mat-cell *matCellDef="let item" class="f-s-14">
+            <span class="status-pill" [class.status-pill--inactive]="!item.ativo">
+              {{ statusAtivoLabel(item.ativo) }}
+            </span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="destaque">
+          <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">Destaque</th>
+          <td mat-cell *matCellDef="let item" class="f-s-14">
+            <span class="status-pill status-pill--secondary" *ngIf="item.destaque; else semDestaque">Destaque</span>
+            <ng-template #semDestaque>—</ng-template>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="estoque">
+          <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">Estoque</th>
+          <td mat-cell *matCellDef="let item" class="f-s-14">
+            <span class="status-pill" [class.status-pill--secondary]="!item.controlaEstoque">
+              {{ estoqueLabel(item.controlaEstoque) }}
+            </span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="acoes">
+          <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">Ações</th>
+          <td mat-cell *matCellDef="let item" class="action-link">
+            <a (click)="editar(item)" class="m-r-10 cursor-pointer">
+              <i-tabler name="edit" class="icon-18"></i-tabler>
+            </a>
+            <a (click)="excluir(item)" class="cursor-pointer">
+              <i-tabler name="trash" class="icon-18"></i-tabler>
+            </a>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="colunasExibidas"></tr>
+        <tr mat-row *matRowDef="let row; columns: colunasExibidas"></tr>
+      </table>
+
+      <mat-paginator
+        [length]="totalItens"
+        [pageIndex]="pagina"
+        [pageSize]="tamanhoPagina"
+        (page)="onPaginaAlterada($event)"
+        showFirstLastButtons>
+      </mat-paginator>
+    </div>
+  </mat-card-content>
+</mat-card>
+} @else {
+<section class="cadastro-mobile">
+  <div class="cadastro-mobile__sticky">
+    <div class="cadastro-mobile__search">
+      <mat-icon>search</mat-icon>
+      <input type="search" placeholder="Buscar item..." (input)="onPesquisar($any($event.target).value)" />
+    </div>
+  </div>
+
+  <div class="cadastro-mobile__list">
+    @if (carregando) {
+    <div class="cadastro-mobile__state">
+      <mat-spinner diameter="28"></mat-spinner>
+      <span>Carregando itens...</span>
+    </div>
+    } @else if (!itens.length) {
+    <div class="cadastro-mobile__state cadastro-mobile__state--empty">
+      <strong>Nenhum item encontrado</strong>
+      <span>Tente ajustar a busca ou crie um novo item.</span>
+    </div>
+    } @else {
+      @for (item of itens; track item.id) {
+      <article
+        class="cadastro-mobile-card"
+        matRipple
+        [matRippleColor]="'rgba(37, 99, 235, 0.08)'"
+        (click)="editar(item)">
+        <div class="cadastro-mobile-card__head">
+          <div class="cadastro-mobile-card__lead">
+            <div class="cadastro-mobile-card__cover">
+              <img [src]="getImagemSrc(item.imagemPrincipal)" [alt]="item.imagemPrincipal?.altText || item.nome" />
+            </div>
+
+            <div class="cadastro-mobile-card__identity">
+              <strong>{{ item.nome }}</strong>
+              <span>{{ item.codigo }} • {{ item.categoriaNome || 'Sem categoria' }}</span>
+            </div>
+          </div>
+
+          <button
+            mat-icon-button
+            type="button"
+            class="cadastro-mobile-card__menu"
+            [matMenuTriggerFor]="itemMenu"
+            (click)="selecionarItemMenu(item, $event)"
+            aria-label="Abrir ações do item">
+            <mat-icon>more_vert</mat-icon>
+          </button>
+        </div>
+
+        <div class="cadastro-mobile-card__meta">
+          <span>{{ item.marcaNome || 'Sem marca' }}</span>
+          <span>{{ item.descricaoCurta || item.slug }}</span>
+        </div>
+
+        <div class="cadastro-mobile-card__commercial">
+          <div class="cadastro-mobile-card__price">
+            @if (item.sobConsulta) {
+            <strong>Sob consulta</strong>
+            } @else if (item.exibirPreco === false) {
+            <strong>Preço oculto</strong>
+            } @else if (item.precoPromocional !== null && item.precoPromocional !== undefined) {
+            <strong>{{ formatarPreco(item.precoPromocional) }}</strong>
+            <span>{{ formatarPreco(item.precoVenda) }}</span>
+            } @else {
+            <strong>{{ getPrecoExibicao(item) }}</strong>
+            }
+          </div>
+
+          <div class="cadastro-mobile-card__badges">
+            <span class="status-pill status-pill--secondary">{{ formatarUnidadeVenda(item.unidadeVenda) }}</span>
+            <span class="status-pill" [class.status-pill--inactive]="item.exibirPreco === false">
+              {{ item.exibirPreco === false ? 'Preço oculto' : 'Preço visível' }}
+            </span>
+            @if (item.sobConsulta) {
+            <span class="status-pill status-pill--secondary">Sob consulta</span>
+            }
+          </div>
+        </div>
+
+        <div class="cadastro-mobile-card__footer">
+          @if (item.destaque) {
+          <span class="status-pill status-pill--secondary">Destaque</span>
+          }
+          <span class="status-pill" [class.status-pill--secondary]="!item.controlaEstoque">
+            {{ estoqueLabel(item.controlaEstoque) }}
+          </span>
+          <span class="status-pill" [class.status-pill--inactive]="!item.ativo">
+            {{ statusAtivoLabel(item.ativo) }}
+          </span>
+        </div>
+      </article>
+      }
+    }
+  </div>
+
+  <app-mobile-fab-action
+    label="Novo Item"
+    icon="add"
+    [compact]="mobileFabCompact"
+    ariaLabel="Criar novo item"
+    (action)="navegarCriacao()">
+  </app-mobile-fab-action>
+</section>
+
+<mat-menu #itemMenu="matMenu">
+  <button mat-menu-item type="button" (click)="editar(itemSelecionadoMenu!)" [disabled]="!itemSelecionadoMenu">
+    <mat-icon>edit</mat-icon>
+    <span>Editar</span>
+  </button>
+  <button mat-menu-item type="button" (click)="excluir(itemSelecionadoMenu!)" [disabled]="!itemSelecionadoMenu">
+    <mat-icon>delete</mat-icon>
+    <span>Inativar</span>
+  </button>
+</mat-menu>
+}

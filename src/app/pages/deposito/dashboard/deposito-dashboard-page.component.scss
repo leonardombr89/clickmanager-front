@@ -1,0 +1,163 @@
+.deposito-dashboard {
+  display: grid;
+  gap: 24px;
+}
+
+.deposito-dashboard__card {
+  border-radius: 24px;
+}
+
+.deposito-dashboard__hero {
+  padding: 0 28px 28px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: 24px;
+  background:
+    radial-gradient(circle at top right, rgba(59, 130, 246, 0.12), transparent 38%),
+    linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+  border: 1px solid rgba(59, 130, 246, 0.12);
+  border-radius: 0 0 24px 24px;
+
+  h1 {
+    margin: 8px 0 12px;
+    font-size: clamp(2rem, 3vw, 2.6rem);
+    line-height: 1.05;
+    color: #111827;
+  }
+
+  p {
+    max-width: 720px;
+    margin: 0;
+    font-size: 1rem;
+    line-height: 1.7;
+    color: #64748b;
+  }
+}
+
+.deposito-dashboard__hero-copy {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.deposito-dashboard__eyebrow {
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #2563eb;
+}
+
+.deposito-dashboard__hero-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-self: stretch;
+}
+
+.deposito-dashboard__metric {
+  border-radius: 22px;
+  padding: 20px;
+  background: #ffffff;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  display: grid;
+  gap: 10px;
+
+  strong {
+    font-size: clamp(1.8rem, 2vw, 2.3rem);
+    line-height: 1;
+    color: #111827;
+  }
+
+  small {
+    font-size: 0.92rem;
+    color: #64748b;
+  }
+}
+
+.deposito-dashboard__metric-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: #64748b;
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.deposito-dashboard__metric--primary {
+  background: linear-gradient(180deg, rgba(37, 99, 235, 0.08), #ffffff 100%);
+}
+
+.deposito-dashboard__metric--warning {
+  background: linear-gradient(180deg, rgba(245, 158, 11, 0.08), #ffffff 100%);
+}
+
+.deposito-dashboard__metric--success {
+  background: linear-gradient(180deg, rgba(34, 197, 94, 0.08), #ffffff 100%);
+}
+
+.deposito-dashboard__metric--neutral {
+  background: linear-gradient(180deg, rgba(100, 116, 139, 0.08), #ffffff 100%);
+}
+
+.deposito-dashboard__card {
+  display: grid;
+  gap: 16px;
+  min-height: 220px;
+  padding: 28px;
+
+  h2 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: #111827;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.98rem;
+    line-height: 1.7;
+    color: #64748b;
+  }
+}
+
+.deposito-dashboard__icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #2563eb;
+  background: rgba(37, 99, 235, 0.1);
+}
+
+@media (max-width: 1024px) {
+  .deposito-dashboard__hero {
+    grid-template-columns: 1fr;
+  }
+
+  .deposito-dashboard__hero-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .deposito-dashboard__card {
+    border-radius: 20px;
+    padding: 22px;
+  }
+
+  .deposito-dashboard__hero {
+    padding: 0 22px 22px;
+    border-radius: 0 0 20px 20px;
+  }
+
+  .deposito-dashboard__hero-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .deposito-dashboard {
+    gap: 18px;
+  }
+}

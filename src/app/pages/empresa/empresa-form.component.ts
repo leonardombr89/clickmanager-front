@@ -9,6 +9,7 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatCardModule } from '@angular/material/card';
 import { MatSelectModule } from '@angular/material/select';
 import { MatRadioModule } from '@angular/material/radio';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { TablerIconsModule } from 'angular-tabler-icons';
 import { NgxMaskDirective, provideNgxMask } from 'ngx-mask';
 import { ImagemUtil } from 'src/app/utils/imagem-util';
@@ -45,6 +46,7 @@ type EmpresaOnboardingSection = 'all' | 'empresa' | 'logo' | 'endereco';
     MatCardModule,
     MatSelectModule,
     MatRadioModule,
+    MatSlideToggleModule,
     TablerIconsModule,
     NgxMaskDirective,
     CardHeaderComponent,
@@ -140,6 +142,14 @@ export class EmpresaFormComponent implements OnInit {
       cnpj: ['', [Validators.required, ValidadorUtil.validarCNPJ]],
       inscricaoEstadual: [''],
       horario: [''],
+      instagramUrl: [''],
+      facebookUrl: [''],
+      siteUrl: [''],
+      youtubeUrl: [''],
+      slugPublico: [''],
+      dominioCustom: [''],
+      siteAtivo: [true],
+      ativa: [true],
       enderecoRequest: this.fb.group({
         cep: ['', Validators.required],
         logradouro: ['', Validators.required],
@@ -161,6 +171,14 @@ export class EmpresaFormComponent implements OnInit {
       cnpj: empresa.cnpj,
       inscricaoEstadual: empresa.inscricaoEstadual || '',
       horario: empresa.horario || '',
+      instagramUrl: empresa.instagramUrl || '',
+      facebookUrl: empresa.facebookUrl || '',
+      siteUrl: empresa.siteUrl || '',
+      youtubeUrl: empresa.youtubeUrl || '',
+      slugPublico: empresa.slugPublico || '',
+      dominioCustom: empresa.dominioCustom || '',
+      siteAtivo: empresa.siteAtivo ?? true,
+      ativa: empresa.ativa ?? true,
       enderecoRequest: {
         cep: empresa.endereco?.cep || '',
         logradouro: empresa.endereco?.logradouro || '',
@@ -319,6 +337,27 @@ export class EmpresaFormComponent implements OnInit {
   get horarioControl(): FormControl {
     return this.form.get('horario') as FormControl;
   }
+  get instagramUrlControl(): FormControl {
+    return this.form.get('instagramUrl') as FormControl;
+  }
+  get facebookUrlControl(): FormControl {
+    return this.form.get('facebookUrl') as FormControl;
+  }
+  get siteUrlControl(): FormControl {
+    return this.form.get('siteUrl') as FormControl;
+  }
+  get youtubeUrlControl(): FormControl {
+    return this.form.get('youtubeUrl') as FormControl;
+  }
+  get slugPublicoControl(): FormControl {
+    return this.form.get('slugPublico') as FormControl;
+  }
+  get dominioCustomControl(): FormControl {
+    return this.form.get('dominioCustom') as FormControl;
+  }
+  get siteAtivoControl(): FormControl {
+    return this.form.get('siteAtivo') as FormControl;
+  }
   get logoControl(): FormControl {
     return this.form.get('logo') as FormControl;
   }
@@ -343,5 +382,31 @@ export class EmpresaFormComponent implements OnInit {
   }
   get estadoControl(): FormControl {
     return this.form.get('enderecoRequest.estado') as FormControl;
+  }
+
+  get enderecoProvisorio(): string {
+    const slug = (this.slugPublicoControl.value || '').trim();
+    return slug ? `/loja/${slug}` : '/loja/seu-slug';
+  }
+
+  abrirSiteProvisorio(): void {
+    const slug = (this.slugPublicoControl.value || '').trim();
+    if (!slug) {
+      this.toastr.warning('Informe o slug público para abrir o site provisório.');
+      return;
+    }
+
+    window.open(`${window.location.origin}/loja/${slug}`, '_blank', 'noopener,noreferrer');
+  }
+
+  testarDominioCustom(): void {
+    const dominio = (this.dominioCustomControl.value || '').trim();
+    if (!dominio) {
+      this.toastr.warning('Informe o domínio próprio para testar.');
+      return;
+    }
+
+    const url = /^https?:\/\//i.test(dominio) ? dominio : `https://${dominio}`;
+    window.open(url, '_blank', 'noopener,noreferrer');
   }
 }

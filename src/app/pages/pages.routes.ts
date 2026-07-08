@@ -33,6 +33,14 @@ import { DetalheFolhaPagamentoComponent } from './pessoas/folha/detalhe-folha/de
 import { SuporteComponent } from './suporte/suporte.component';
 import { featureModuleGuard } from '../guards/feature-module.guard';
 import { permissionGuard } from '../guards/permission.guard';
+import { ListarCategoriasDepositoComponent } from './deposito/categorias/listar-categorias-deposito/listar-categorias-deposito.component';
+import { FormCategoriaDepositoComponent } from './deposito/categorias/form-categoria-deposito/form-categoria-deposito.component';
+import { ListarMarcasDepositoComponent } from './deposito/marcas/listar-marcas-deposito/listar-marcas-deposito.component';
+import { FormMarcaDepositoComponent } from './deposito/marcas/form-marca-deposito/form-marca-deposito.component';
+import { ListarItensDepositoComponent } from './deposito/itens/listar-itens-deposito/listar-itens-deposito.component';
+import { FormItemDepositoComponent } from './deposito/itens/form-item-deposito/form-item-deposito.component';
+import { DepositoDashboardPageComponent } from './deposito/dashboard/deposito-dashboard-page.component';
+import { DEPOSITO_ROUTE_DATA, GRAFICA_ROUTE_DATA, SHARED_ROUTE_DATA } from '../guards/empresa-tipo-route-data';
 
 export const PagesRoutes: Routes = [
   {
@@ -46,6 +54,7 @@ export const PagesRoutes: Routes = [
     path: 'empresa',
     component: EmpresaFormComponent,
     data: {
+      ...SHARED_ROUTE_DATA,
       title: 'Dados da Empresa',
       urls: [
         { title: 'Dashboard', url: '/dashboards/dashboard1' },
@@ -57,6 +66,7 @@ export const PagesRoutes: Routes = [
     path: 'perfil',
     component: GerenciarPerfilComponent,
     data: {
+      ...SHARED_ROUTE_DATA,
       title: 'Gerenciamento de perfil dos usuários',
       urls: [
         { title: 'Dashboard', url: '/dashboards/dashboard1' },
@@ -68,6 +78,7 @@ export const PagesRoutes: Routes = [
     path: 'ajuda',
     component: AjudaComponent,
     data: {
+      ...SHARED_ROUTE_DATA,
       title: 'Central de ajuda',
       urls: [
         { title: 'Dashboard', url: '/dashboards/dashboard1' },
@@ -80,6 +91,7 @@ export const PagesRoutes: Routes = [
     component: ListarFuncionariosComponent,
     canActivate: [featureModuleGuard],
     data: {
+      ...GRAFICA_ROUTE_DATA,
       featureKey: 'funcionarios',
       title: 'Gestão de Funcionários',
       urls: [
@@ -93,6 +105,7 @@ export const PagesRoutes: Routes = [
     component: FormFuncionarioComponent,
     canActivate: [featureModuleGuard],
     data: {
+      ...GRAFICA_ROUTE_DATA,
       featureKey: 'funcionarios',
       title: 'Novo Funcionário',
       urls: [
@@ -106,6 +119,7 @@ export const PagesRoutes: Routes = [
     component: FormFuncionarioComponent,
     canActivate: [featureModuleGuard],
     data: {
+      ...GRAFICA_ROUTE_DATA,
       featureKey: 'funcionarios',
       title: 'Editar Funcionário',
       urls: [
@@ -119,6 +133,7 @@ export const PagesRoutes: Routes = [
     component: DetalheFuncionarioComponent,
     canActivate: [featureModuleGuard],
     data: {
+      ...GRAFICA_ROUTE_DATA,
       featureKey: 'funcionarios',
       title: 'Detalhe do Funcionário',
       urls: [
@@ -131,6 +146,7 @@ export const PagesRoutes: Routes = [
     path: 'suporte',
     component: SuporteComponent,
     data: {
+      ...SHARED_ROUTE_DATA,
       title: 'Suporte',
       urls: [
         { title: 'Dashboard', url: '/dashboards/dashboard1' },
@@ -142,6 +158,7 @@ export const PagesRoutes: Routes = [
     path: 'suporte/:id',
     component: SuporteComponent,
     data: {
+      ...SHARED_ROUTE_DATA,
       title: 'Detalhe do chamado',
       urls: [
         { title: 'Dashboard', url: '/dashboards/dashboard1' },
@@ -155,6 +172,7 @@ export const PagesRoutes: Routes = [
     component: ListarFolhaPagamentoComponent,
     canActivate: [featureModuleGuard],
     data: {
+      ...GRAFICA_ROUTE_DATA,
       featureKey: 'folhaPagamento',
       title: 'Folha de Pagamento',
       urls: [
@@ -168,6 +186,7 @@ export const PagesRoutes: Routes = [
     component: DetalheFolhaPagamentoComponent,
     canActivate: [featureModuleGuard],
     data: {
+      ...GRAFICA_ROUTE_DATA,
       featureKey: 'folhaPagamento',
       title: 'Detalhe da Folha',
       urls: [
@@ -181,6 +200,7 @@ export const PagesRoutes: Routes = [
     component: FolhaConfigComponent,
     canActivate: [permissionGuard],
     data: {
+      ...GRAFICA_ROUTE_DATA,
       requiredPermission: ['FOLHA_CONFIGURAR'],
       title: 'Configuração da Folha',
       urls: [
@@ -193,6 +213,7 @@ export const PagesRoutes: Routes = [
     path: 'usuarios/novo',
     component: FormUsuarioComponent,
     data: {
+      ...SHARED_ROUTE_DATA,
       title: 'Cadastro de novo usuário',
       urls: [
         { title: 'Novo usuário', url: '/dashboards/dashboard1' },
@@ -204,6 +225,7 @@ export const PagesRoutes: Routes = [
     path: 'usuarios/editar/:id',
     component: FormUsuarioComponent,
     data: {
+      ...SHARED_ROUTE_DATA,
       title: 'Editar usuário',
       urls: [
         { title: 'Usuários', url: '/usuarios' },
@@ -215,6 +237,7 @@ export const PagesRoutes: Routes = [
     path: 'usuarios/listar',
     component: ListarUsuariosComponent,
     data: {
+      ...SHARED_ROUTE_DATA,
       title: 'Lista de usuários',
       urls: [
         { title: 'Lista de usuários', url: '/dashboards/dashboard1' },
@@ -226,6 +249,7 @@ export const PagesRoutes: Routes = [
     path: 'cadastro-tecnico/cores',
     component: ListarCoresComponent,
     data: {
+      ...GRAFICA_ROUTE_DATA,
       title: 'Lsita de Cores',
       urls: [
         { title: 'Lsita de Cores', url: '/cadastro-tecnico' },
@@ -237,6 +261,7 @@ export const PagesRoutes: Routes = [
     path: 'cadastro-tecnico/cores/nova',
     component: FormCoresComponent,
     data: {
+      ...GRAFICA_ROUTE_DATA,
       title: 'Nova Cor',
       urls: [
         { title: 'Cadastro Técnico', url: '/cadastro-tecnico' },
@@ -248,6 +273,7 @@ export const PagesRoutes: Routes = [
     path: 'cadastro-tecnico/cores/editar/:id',
     component: FormCoresComponent,
     data: {
+      ...GRAFICA_ROUTE_DATA,
       title: 'Editar Cor',
       urls: [
         { title: 'Cadastro Técnico', url: '/cadastro-tecnico' },
@@ -259,6 +285,7 @@ export const PagesRoutes: Routes = [
     path: 'cadastro-tecnico/materiais',
     component: ListarMaterialComponent,
     data: {
+      ...GRAFICA_ROUTE_DATA,
       title: 'Lista de Materiais',
       urls: [
         { title: 'Cadastro Técnico', url: '/cadastro-tecnico' },
@@ -270,6 +297,7 @@ export const PagesRoutes: Routes = [
     path: 'cadastro-tecnico/materiais/nova',
     component: FormMaterialComponent,
     data: {
+      ...GRAFICA_ROUTE_DATA,
       title: 'Novo Material',
       urls: [
         { title: 'Cadastro Técnico', url: '/cadastro-tecnico' },
@@ -281,6 +309,7 @@ export const PagesRoutes: Routes = [
     path: 'cadastro-tecnico/materiais/editar/:id',
     component: FormMaterialComponent,
     data: {
+      ...GRAFICA_ROUTE_DATA,
       title: 'Editar Material',
       urls: [
         { title: 'Cadastro Técnico', url: '/cadastro-tecnico' },
@@ -292,6 +321,7 @@ export const PagesRoutes: Routes = [
     path: 'cadastro-tecnico/acabamentos',
     component: ListarAcabamentoComponent,
     data: {
+      ...GRAFICA_ROUTE_DATA,
       title: 'Lista de Acabamentos',
       urls: [
         { title: 'Cadastro Técnico', url: '/cadastro-tecnico' },
@@ -303,6 +333,7 @@ export const PagesRoutes: Routes = [
     path: 'cadastro-tecnico/acabamentos/criar',
     component: FormAcabamentoComponent,
     data: {
+      ...GRAFICA_ROUTE_DATA,
       title: 'Novo Acabamento',
       urls: [
         { title: 'Cadastro Técnico', url: '/cadastro-tecnico' },
@@ -314,6 +345,7 @@ export const PagesRoutes: Routes = [
     path: 'cadastro-tecnico/acabamentos/editar/:id',
     component: FormAcabamentoComponent,
     data: {
+      ...GRAFICA_ROUTE_DATA,
       title: 'Editar Acabamento',
       urls: [
         { title: 'Cadastro Técnico', url: '/cadastro-tecnico' },
@@ -325,6 +357,7 @@ export const PagesRoutes: Routes = [
     path: 'cadastro-tecnico/formatos',
     component: ListarFormatoComponent,
     data: {
+      ...GRAFICA_ROUTE_DATA,
       title: 'Lista de Formatos',
       urls: [
         { title: 'Cadastro Técnico', url: '/cadastro-tecnico' },
@@ -336,6 +369,7 @@ export const PagesRoutes: Routes = [
     path: 'cadastro-tecnico/formatos/criar',
     component: FormFormatoComponent,
     data: {
+      ...GRAFICA_ROUTE_DATA,
       title: 'Novo Formato',
       urls: [
         { title: 'Cadastro Técnico', url: '/cadastro-tecnico' },
@@ -347,6 +381,7 @@ export const PagesRoutes: Routes = [
     path: 'cadastro-tecnico/formatos/editar/:id',
     component: FormFormatoComponent,
     data: {
+      ...GRAFICA_ROUTE_DATA,
       title: 'Editar Formato',
       urls: [
         { title: 'Cadastro Técnico', url: '/cadastro-tecnico' },
@@ -358,6 +393,7 @@ export const PagesRoutes: Routes = [
     path: 'cadastro-tecnico/produtos',
     component: ListarProdutosComponent,
     data: {
+      ...GRAFICA_ROUTE_DATA,
       title: 'Lista de Produtos',
       urls: [
         { title: 'Cadastro Técnico', url: '/cadastro-tecnico' },
@@ -369,6 +405,7 @@ export const PagesRoutes: Routes = [
     path: 'cadastro-tecnico/produtos/criar',
     component: FormProdutoComponent,
     data: {
+      ...GRAFICA_ROUTE_DATA,
       title: 'Criar Produto',
       urls: [
         { title: 'Lista de produtos', url: '/page/cadastro-tecnico/produtos' },
@@ -380,6 +417,7 @@ export const PagesRoutes: Routes = [
     path: 'cadastro-tecnico/produtos/editar/:id',
     component: FormProdutoComponent,
     data: {
+      ...GRAFICA_ROUTE_DATA,
       title: 'Editar Produto',
       urls: [
         { title: 'Lista de produtos', url: '/page/cadastro-tecnico/produtos' },
@@ -391,6 +429,7 @@ export const PagesRoutes: Routes = [
     path: 'cadastro-tecnico/servico',
     component: ListarServicoComponent,
     data: {
+      ...GRAFICA_ROUTE_DATA,
       title: 'Lista de Serviços',
       urls: [
         { title: 'Serviços', url: '/servico' },
@@ -402,6 +441,7 @@ export const PagesRoutes: Routes = [
     path: 'cadastro-tecnico/servico/criar',
     component: FormServicoComponent,
     data: {
+      ...GRAFICA_ROUTE_DATA,
       title: 'Criar Serviço',
       urls: [
         { title: 'Lista de Serviços', url: '/page/cadastro-tecnico/servico' },
@@ -413,6 +453,7 @@ export const PagesRoutes: Routes = [
     path: 'cadastro-tecnico/servico/editar/:id',
     component: FormServicoComponent,
     data: {
+      ...GRAFICA_ROUTE_DATA,
       title: 'Editar Serviço',
       urls: [
         { title: 'Lista de Serviços', url: '/page/cadastro-tecnico/servico' },
@@ -421,9 +462,129 @@ export const PagesRoutes: Routes = [
     }
   },
   {
+    path: 'deposito',
+    component: DepositoDashboardPageComponent,
+    data: {
+      ...DEPOSITO_ROUTE_DATA,
+      title: 'Dashboard do Depósito',
+      urls: [
+        { title: 'Dashboard' }
+      ]
+    }
+  },
+  {
+    path: 'deposito/categorias',
+    component: ListarCategoriasDepositoComponent,
+    data: {
+      ...DEPOSITO_ROUTE_DATA,
+      title: 'Categorias de Depósito',
+      urls: [
+        { title: 'Depósito', url: '/page/deposito/categorias' },
+        { title: 'Categorias' }
+      ]
+    }
+  },
+  {
+    path: 'deposito/categorias/nova',
+    component: FormCategoriaDepositoComponent,
+    data: {
+      ...DEPOSITO_ROUTE_DATA,
+      title: 'Nova Categoria de Depósito',
+      urls: [
+        { title: 'Categorias de Depósito', url: '/page/deposito/categorias' },
+        { title: 'Nova Categoria' }
+      ]
+    }
+  },
+  {
+    path: 'deposito/categorias/editar/:id',
+    component: FormCategoriaDepositoComponent,
+    data: {
+      ...DEPOSITO_ROUTE_DATA,
+      title: 'Editar Categoria de Depósito',
+      urls: [
+        { title: 'Categorias de Depósito', url: '/page/deposito/categorias' },
+        { title: 'Editar Categoria' }
+      ]
+    }
+  },
+  {
+    path: 'deposito/itens',
+    component: ListarItensDepositoComponent,
+    data: {
+      ...DEPOSITO_ROUTE_DATA,
+      title: 'Itens de Depósito',
+      urls: [
+        { title: 'Depósito', url: '/page/deposito/itens' },
+        { title: 'Itens' }
+      ]
+    }
+  },
+  {
+    path: 'deposito/itens/novo',
+    component: FormItemDepositoComponent,
+    data: {
+      ...DEPOSITO_ROUTE_DATA,
+      title: 'Novo Item de Depósito',
+      urls: [
+        { title: 'Itens de Depósito', url: '/page/deposito/itens' },
+        { title: 'Novo Item' }
+      ]
+    }
+  },
+  {
+    path: 'deposito/itens/editar/:id',
+    component: FormItemDepositoComponent,
+    data: {
+      ...DEPOSITO_ROUTE_DATA,
+      title: 'Editar Item de Depósito',
+      urls: [
+        { title: 'Itens de Depósito', url: '/page/deposito/itens' },
+        { title: 'Editar Item' }
+      ]
+    }
+  },
+  {
+    path: 'deposito/marcas',
+    component: ListarMarcasDepositoComponent,
+    data: {
+      ...DEPOSITO_ROUTE_DATA,
+      title: 'Marcas de Depósito',
+      urls: [
+        { title: 'Depósito', url: '/page/deposito/marcas' },
+        { title: 'Marcas' }
+      ]
+    }
+  },
+  {
+    path: 'deposito/marcas/nova',
+    component: FormMarcaDepositoComponent,
+    data: {
+      ...DEPOSITO_ROUTE_DATA,
+      title: 'Nova Marca de Depósito',
+      urls: [
+        { title: 'Marcas de Depósito', url: '/page/deposito/marcas' },
+        { title: 'Nova Marca' }
+      ]
+    }
+  },
+  {
+    path: 'deposito/marcas/editar/:id',
+    component: FormMarcaDepositoComponent,
+    data: {
+      ...DEPOSITO_ROUTE_DATA,
+      title: 'Editar Marca de Depósito',
+      urls: [
+        { title: 'Marcas de Depósito', url: '/page/deposito/marcas' },
+        { title: 'Editar Marca' }
+      ]
+    }
+  },
+  {
     path: 'pedido',
     component: ListarPedidoComponent,
     data: {
+      ...GRAFICA_ROUTE_DATA,
       title: 'Lista de Pedidos',
       urls: [
         { title: 'Pedidos', url: '/pedido' },
@@ -435,6 +596,7 @@ export const PagesRoutes: Routes = [
     path: 'pedido/criar',
     component: FormPedidoComponent,
     data: {
+      ...GRAFICA_ROUTE_DATA,
       title: 'Criar Pedido',
       urls: [
         { title: 'Lista de Pedidos', url: '/page/pedido' },
@@ -446,6 +608,7 @@ export const PagesRoutes: Routes = [
     path: 'pedido/detalhe/:id',
     component: DetalhesPedidoComponent,
     data: {
+      ...GRAFICA_ROUTE_DATA,
       title: 'Detalhes Pedido',
       urls: [
         { title: 'Detalhes de Pedidos', url: '/page/pedido' },
@@ -457,6 +620,7 @@ export const PagesRoutes: Routes = [
     path: 'cliente',
     component: ListarClienteComponent,
     data: {
+      ...GRAFICA_ROUTE_DATA,
       title: 'Lista de Clientes',
       urls: [
         { title: 'Clientes', url: '/cliente' },
@@ -468,6 +632,7 @@ export const PagesRoutes: Routes = [
     path: 'cliente/criar',
     component: FormClienteComponent,
     data: {
+      ...GRAFICA_ROUTE_DATA,
       title: 'Criar Cliente',
       urls: [
         { title: 'Lista de Clientes', url: '/page/cliente' },
@@ -479,6 +644,7 @@ export const PagesRoutes: Routes = [
     path: 'cliente/editar/:id',
     component: FormClienteComponent,
     data: {
+      ...GRAFICA_ROUTE_DATA,
       title: 'Editar Cliente',
       urls: [
         { title: 'Lista de Clientes', url: '/page/cliente' },
@@ -490,6 +656,7 @@ export const PagesRoutes: Routes = [
     path: 'calculadora/config/criar',
     component: CalculadoraConfigComponent,
     data: {
+      ...GRAFICA_ROUTE_DATA,
       title: 'Configuração SmartCalc',
       urls: [
         { title: 'Configuração SmartCalc', url: '/page/calculadora/config' },
@@ -501,6 +668,7 @@ export const PagesRoutes: Routes = [
     path: 'calculadora/config/editar/:id',
     component: CalculadoraConfigComponent,
     data: {
+      ...GRAFICA_ROUTE_DATA,
       title: 'Editar Configuração',
       urls: [
         { title: 'Lista de Configurações', url: '/page/calculadora/config' },
@@ -512,6 +680,7 @@ export const PagesRoutes: Routes = [
     path: 'config/email-servidor',
     component: EmailServidorComponent,
     data: {
+      ...GRAFICA_ROUTE_DATA,
       title: 'Servidor de E-mail',
       urls: [
         { title: 'Configurações', url: '/dashboards/dashboard1' },

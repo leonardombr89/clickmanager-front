@@ -27,13 +27,13 @@ export class RoleGuard implements CanActivate {
         map((tokens: any) => this.hasRequiredRole(String(tokens?.accessToken || ''), allowedRoles)),
         catchError(() => {
           this.authService.logout();
-          return of(this.router.createUrlTree(['/login']));
+          return of(this.router.createUrlTree(['/authentication/login']));
         })
       );
     }
 
     this.authService.logout();
-    return of(this.router.createUrlTree(['/login']));
+    return of(this.router.createUrlTree(['/authentication/login']));
   }
 
   private getUserRoles(token: string): string[] {

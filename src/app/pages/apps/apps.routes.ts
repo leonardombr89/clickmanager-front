@@ -22,6 +22,7 @@ import { AppEditInvoiceComponent } from './invoice/edit-invoice/edit-invoice.com
 import { AppContactListComponent } from './contact-list/contact-list.component';
 import { GerenciarPerfilComponent } from '../perfil/gerenciar-perfil/gerenciar-perfil.component';
 import { AppNotificacoesComponent } from '../notificacoes/notificacoes.component';
+import { GRAFICA_ROUTE_DATA, SHARED_ROUTE_DATA } from '../../guards/empresa-tipo-route-data';
 
 export const AppsRoutes: Routes = [
   {
@@ -32,6 +33,7 @@ export const AppsRoutes: Routes = [
         redirectTo: '/smartcalc',
         pathMatch: 'full',
         data: {
+          ...GRAFICA_ROUTE_DATA,
           title: 'SmartCalc – Calculadora Inteligente',
           urls: [
             { title: 'Dashboard', url: '/dashboards/dashboard1' },
@@ -43,6 +45,7 @@ export const AppsRoutes: Routes = [
         path: 'perfil',
         component: GerenciarPerfilComponent,
         data: {
+          ...SHARED_ROUTE_DATA,
           title: 'Gerenciamento de perfil dos usuários',
           urls: [
             { title: 'Dashboard', url: '/dashboards/dashboard1' },
@@ -54,6 +57,7 @@ export const AppsRoutes: Routes = [
         path: 'chat',
         component: AppChatComponent,
         data: {
+          ...GRAFICA_ROUTE_DATA,
           title: 'Chat',
           urls: [
             { title: 'Dashboard', url: '/dashboards/dashboard1' },
@@ -65,6 +69,7 @@ export const AppsRoutes: Routes = [
         path: 'calendar',
         component: AppFullcalendarComponent,
         data: {
+          ...GRAFICA_ROUTE_DATA,
           title: 'Calendar',
           urls: [
             { title: 'Dashboard', url: '/dashboards/dashboard1' },
@@ -76,6 +81,7 @@ export const AppsRoutes: Routes = [
         path: 'notes',
         component: AppNotesComponent,
         data: {
+          ...GRAFICA_ROUTE_DATA,
           title: 'Notes',
           urls: [
             { title: 'Dashboard', url: '/dashboards/dashboard1' },
@@ -87,6 +93,7 @@ export const AppsRoutes: Routes = [
         path: 'notificacoes',
         component: AppNotificacoesComponent,
         data: {
+          ...SHARED_ROUTE_DATA,
           title: 'Notificações',
           urls: [
             { title: 'Dashboard', url: '/dashboards/dashboard1' },
@@ -98,6 +105,7 @@ export const AppsRoutes: Routes = [
         path: 'notificacoes/:id',
         component: AppNotificacoesComponent,
         data: {
+          ...SHARED_ROUTE_DATA,
           title: 'Detalhe da Notificação',
           urls: [
             { title: 'Dashboard', url: '/dashboards/dashboard1' },
@@ -111,6 +119,7 @@ export const AppsRoutes: Routes = [
         path: 'email/:type',
         component: AppEmailComponent,
         data: {
+          ...GRAFICA_ROUTE_DATA,
           title: 'Email',
           urls: [
             { title: 'Dashboard', url: '/dashboards/dashboard1' },
@@ -122,6 +131,7 @@ export const AppsRoutes: Routes = [
             path: ':id',
             component: DetailComponent,
             data: {
+              ...GRAFICA_ROUTE_DATA,
               title: 'Email Detail',
               urls: [
                 { title: 'Dashboard', url: '/dashboards/dashboard1' },
@@ -135,6 +145,7 @@ export const AppsRoutes: Routes = [
         path: 'permission',
         component: AppPermissionComponent,
         data: {
+          ...GRAFICA_ROUTE_DATA,
           title: 'Roll Base Access',
           urls: [
             { title: 'Dashboard', url: '/dashboards/dashboard1' },
@@ -146,6 +157,7 @@ export const AppsRoutes: Routes = [
         path: 'todo',
         component: AppTodoComponent,
         data: {
+          ...GRAFICA_ROUTE_DATA,
           title: 'Todo App',
           urls: [
             { title: 'Dashboard', url: '/dashboards/dashboard1' },
@@ -157,6 +169,7 @@ export const AppsRoutes: Routes = [
         path: 'kanban',
         component: AppKanbanComponent,
         data: {
+          ...GRAFICA_ROUTE_DATA,
           title: 'Kanban',
           urls: [
             { title: 'Dashboard', url: '/dashboards/dashboard1' },
@@ -168,6 +181,7 @@ export const AppsRoutes: Routes = [
         path: 'tickets',
         component: AppTicketlistComponent,
         data: {
+          ...GRAFICA_ROUTE_DATA,
           title: 'Tickets',
           urls: [
             { title: 'Dashboard', url: '/dashboards/dashboard1' },
@@ -179,6 +193,7 @@ export const AppsRoutes: Routes = [
         path: 'contacts',
         component: AppContactComponent,
         data: {
+          ...GRAFICA_ROUTE_DATA,
           title: 'Contacts',
           urls: [
             { title: 'Dashboard', url: '/dashboards/dashboard1' },
@@ -190,6 +205,7 @@ export const AppsRoutes: Routes = [
         path: 'courses',
         component: AppCoursesComponent,
         data: {
+          ...GRAFICA_ROUTE_DATA,
           title: 'Courses',
           urls: [
             { title: 'Dashboard', url: '/dashboards/dashboard1' },
@@ -201,6 +217,7 @@ export const AppsRoutes: Routes = [
         path: 'contact-list',
         component: AppContactListComponent,
         data: {
+          ...GRAFICA_ROUTE_DATA,
           title: 'Contact List',
           urls: [
             { title: 'Dashboard', url: '/dashboards/dashboard1' },
@@ -212,6 +229,7 @@ export const AppsRoutes: Routes = [
         path: 'courses/coursesdetail/:id',
         component: AppCourseDetailComponent,
         data: {
+          ...GRAFICA_ROUTE_DATA,
           title: 'Course Detail',
           urls: [
             { title: 'Dashboard', url: '/dashboards/dashboard1' },
@@ -223,6 +241,7 @@ export const AppsRoutes: Routes = [
         path: 'blog/post',
         component: AppBlogsComponent,
         data: {
+          ...GRAFICA_ROUTE_DATA,
           title: 'Posts',
           urls: [
             { title: 'Dashboard', url: '/dashboards/dashboard1' },
@@ -234,6 +253,7 @@ export const AppsRoutes: Routes = [
         path: 'blog/detail/:id',
         component: AppBlogDetailsComponent,
         data: {
+          ...GRAFICA_ROUTE_DATA,
           title: 'Blog Detail',
           urls: [
             { title: 'Dashboard', url: '/dashboards/dashboard1' },
@@ -245,6 +265,7 @@ export const AppsRoutes: Routes = [
         path: 'employee',
         component: AppEmployeeComponent,
         data: {
+          ...GRAFICA_ROUTE_DATA,
           title: 'Employee',
           urls: [
             { title: 'Dashboard', url: '/dashboards/dashboard1' },
@@ -256,6 +277,7 @@ export const AppsRoutes: Routes = [
         path: 'invoice',
         component: AppInvoiceListComponent,
         data: {
+          ...GRAFICA_ROUTE_DATA,
           title: 'Invoice',
           urls: [
             { title: 'Dashboard', url: '/dashboards/dashboard1' },
@@ -267,6 +289,7 @@ export const AppsRoutes: Routes = [
         path: 'addInvoice',
         component: AppAddInvoiceComponent,
         data: {
+          ...GRAFICA_ROUTE_DATA,
           title: 'Add Invoice',
           urls: [
             { title: 'Dashboard', url: '/dashboards/dashboard1' },
@@ -278,6 +301,7 @@ export const AppsRoutes: Routes = [
         path: 'viewInvoice/:id',
         component: AppInvoiceViewComponent,
         data: {
+          ...GRAFICA_ROUTE_DATA,
           title: 'View Invoice',
           urls: [
             { title: 'Dashboard', url: '/dashboards/dashboard1' },
@@ -289,6 +313,7 @@ export const AppsRoutes: Routes = [
         path: 'editinvoice/:id',
         component: AppEditInvoiceComponent,
         data: {
+          ...GRAFICA_ROUTE_DATA,
           title: 'Edit Invoice',
           urls: [
             { title: 'Dashboard', url: '/dashboards/dashboard1' },

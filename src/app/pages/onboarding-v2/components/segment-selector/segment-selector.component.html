@@ -1,0 +1,22 @@
+<div class="segment-selector">
+  <button
+    *ngFor="let segment of segments; trackBy: trackBySegment"
+    type="button"
+    class="segment-selector__card"
+    [class.segment-selector__card--selected]="isSelected(segment)"
+    [attr.aria-pressed]="isSelected(segment)"
+    (click)="select(segment)"
+    (keydown)="handleKeydown($event, segment)"
+  >
+    <span class="segment-selector__check" aria-hidden="true">✓</span>
+
+    <div class="segment-selector__icon" aria-hidden="true">
+      {{ segment.icon }}
+    </div>
+
+    <div class="segment-selector__content">
+      <h3>{{ segment.title }}</h3>
+      <p>{{ segment.description }}</p>
+    </div>
+  </button>
+</div>

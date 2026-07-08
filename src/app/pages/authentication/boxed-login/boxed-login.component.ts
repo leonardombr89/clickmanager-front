@@ -49,8 +49,8 @@ export class AppBoxedLoginComponent {
     const { uname, password, lembrar } = this.form.value;
   
     this.authService.login(uname!, password!, lembrar!).subscribe({
-      next: () => {
-        this.router.navigate(['/dashboards/dashboard1']);
+      next: (usuario) => {
+        this.router.navigateByUrl(this.authService.getDefaultRouteForUsuario(usuario));
       },
       error: (error) => {
         if (error?.status === 402) {
@@ -60,6 +60,11 @@ export class AppBoxedLoginComponent {
         this.toastr.error('E-mail ou senha inválidos');
       }
     });
+  }
+
+  abrirCriacaoConta(): void {
+    this.authService.clearSession();
+    this.router.navigateByUrl('/onboarding-v2');
   }
   
 }

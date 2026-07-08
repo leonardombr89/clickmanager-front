@@ -1,0 +1,167 @@
+@if (!isMobileView) {
+<mat-card class="cardWithShadow">
+  <app-card-header
+    titulo="Categorias de Depósito"
+    botaoTexto="Nova Categoria"
+    botaoIcone="add"
+    [botaoRota]="['/page/deposito/categorias/nova']"
+    [mostrarDivisor]="true">
+  </app-card-header>
+
+  <mat-card-content>
+    <app-input-pesquisa placeholder="Ex: pisos, porcelanatos, revestimentos" (valorAlterado)="onPesquisar($event)">
+    </app-input-pesquisa>
+
+    <div class="table-responsive">
+      <table mat-table [dataSource]="categorias" class="mat-elevation-z1 no-wrap m-t-0 v-middle w-100">
+        <ng-container matColumnDef="codigo">
+          <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">Código</th>
+          <td mat-cell *matCellDef="let categoria" class="f-s-14">{{ categoria.codigo }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="nome">
+          <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">Nome</th>
+          <td mat-cell *matCellDef="let categoria" class="f-s-14">
+            <div class="table-item-media">
+              <div class="table-item-thumb">
+                <img [src]="getImagemSrc(categoria.imagem)" [alt]="categoria.imagem?.altText || categoria.nome" />
+              </div>
+
+              <div class="table-item-media__content">
+                <strong>{{ categoria.nome }}</strong>
+                <span>{{ categoria.descricaoCurta || 'Sem descrição curta' }}</span>
+              </div>
+            </div>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="slug">
+          <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">Slug</th>
+          <td mat-cell *matCellDef="let categoria" class="f-s-14">{{ categoria.slug }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="hierarquia">
+          <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">Hierarquia</th>
+          <td mat-cell *matCellDef="let categoria" class="f-s-14">
+            {{ categoria.categoriaPaiNome || 'Categoria raiz' }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="ativo">
+          <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">Status</th>
+          <td mat-cell *matCellDef="let categoria" class="f-s-14">
+            <span class="status-pill" [class.status-pill--inactive]="!categoria.ativo">
+              {{ statusAtivoLabel(categoria.ativo) }}
+            </span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="acoes">
+          <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">Ações</th>
+          <td mat-cell *matCellDef="let categoria" class="action-link">
+            <a (click)="editar(categoria)" class="m-r-10 cursor-pointer">
+              <i-tabler name="edit" class="icon-18"></i-tabler>
+            </a>
+            <a (click)="excluir(categoria)" class="cursor-pointer">
+              <i-tabler name="trash" class="icon-18"></i-tabler>
+            </a>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="colunasExibidas"></tr>
+        <tr mat-row *matRowDef="let row; columns: colunasExibidas"></tr>
+      </table>
+
+      <mat-paginator
+        [length]="totalCategorias"
+        [pageIndex]="pagina"
+        [pageSize]="tamanhoPagina"
+        (page)="onPaginaAlterada($event)"
+        showFirstLastButtons>
+      </mat-paginator>
+    </div>
+  </mat-card-content>
+</mat-card>
+} @else {
+<section class="cadastro-mobile">
+  <div class="cadastro-mobile__sticky">
+    <div class="cadastro-mobile__search">
+      <mat-icon>search</mat-icon>
+      <input type="search" placeholder="Buscar categoria..." (input)="onPesquisar($any($event.target).value)" />
+    </div>
+  </div>
+
+  <div class="cadastro-mobile__list">
+    @if (carregando) {
+    <div class="cadastro-mobile__state">
+      <mat-spinner diameter="28"></mat-spinner>
+      <span>Carregando categorias...</span>
+    </div>
+    } @else if (!categorias.length) {
+    <div class="cadastro-mobile__state cadastro-mobile__state--empty">
+      <strong>Nenhuma categoria encontrada</strong>
+      <span>Tente ajustar a busca ou crie uma nova categoria.</span>
+    </div>
+    } @else {
+      @for (categoria of categorias; track categoria.id) {
+      <article
+        class="cadastro-mobile-card"
+        matRipple
+        [matRippleColor]="'rgba(37, 99, 235, 0.08)'"
+        (click)="editar(categoria)">
+        <div class="cadastro-mobile-card__head">
+          <div class="cadastro-mobile-card__lead">
+            <div class="cadastro-mobile-card__cover">
+              <img [src]="getImagemSrc(categoria.imagem)" [alt]="categoria.imagem?.altText || categoria.nome" />
+            </div>
+
+            <div class="cadastro-mobile-card__identity">
+              <strong>{{ categoria.nome }}</strong>
+              <span>{{ categoria.codigo }} • {{ categoria.descricaoCurta || categoria.slug }}</span>
+            </div>
+          </div>
+
+          <button
+            mat-icon-button
+            type="button"
+            class="cadastro-mobile-card__menu"
+            [matMenuTriggerFor]="categoriaMenu"
+            (click)="selecionarCategoriaMenu(categoria, $event)"
+            aria-label="Abrir ações da categoria">
+            <mat-icon>more_vert</mat-icon>
+          </button>
+        </div>
+
+        <div class="cadastro-mobile-card__footer">
+          @if (categoria.destaque) {
+          <span class="status-pill status-pill--secondary">Destaque</span>
+          }
+          <span class="status-pill" [class.status-pill--inactive]="!categoria.ativo">
+            {{ statusAtivoLabel(categoria.ativo) }}
+          </span>
+        </div>
+      </article>
+      }
+    }
+  </div>
+
+  <app-mobile-fab-action
+    label="Nova Categoria"
+    icon="add"
+    [compact]="mobileFabCompact"
+    ariaLabel="Criar nova categoria"
+    (action)="navegarCriacao()">
+  </app-mobile-fab-action>
+</section>
+
+<mat-menu #categoriaMenu="matMenu">
+  <button mat-menu-item type="button" (click)="editar(categoriaSelecionadaMenu!)" [disabled]="!categoriaSelecionadaMenu">
+    <mat-icon>edit</mat-icon>
+    <span>Editar</span>
+  </button>
+  <button mat-menu-item type="button" (click)="excluir(categoriaSelecionadaMenu!)" [disabled]="!categoriaSelecionadaMenu">
+    <mat-icon>delete</mat-icon>
+    <span>Inativar</span>
+  </button>
+</mat-menu>
+}

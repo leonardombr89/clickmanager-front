@@ -49,6 +49,21 @@
   color: #64748b;
 }
 
+.empresa-site-publico__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.empresa-site-publico__actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
 @media (max-width: 768px) {
   .empresa-onboarding-form {
     gap: 18px;
@@ -77,5 +92,18 @@
   .empresa-onboarding-logo__actions button {
     flex: 1 1 100%;
     min-height: 46px;
+  }
+
+  .empresa-site-publico__header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .empresa-site-publico__actions {
+    flex-direction: column;
+  }
+
+  .empresa-site-publico__actions button {
+    width: 100%;
   }
 }

@@ -67,7 +67,7 @@
 
           <span class="d-block f-w-500 text-center m-t-24 f-s-14 login-register-copy">
             Ainda não tem conta?
-            <a [routerLink]="['/authentication/registro-gestor']"
+            <a (click)="abrirCriacaoConta()"
               class="text-decoration-none text-primary f-w-600 f-s-14">
               Criar conta grátis</a>
           </span>

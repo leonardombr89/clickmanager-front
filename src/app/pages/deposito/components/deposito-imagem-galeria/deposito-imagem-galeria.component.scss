@@ -1,0 +1,147 @@
+.deposito-galeria {
+  display: grid;
+  gap: 12px;
+}
+
+.deposito-galeria__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.deposito-galeria__label {
+  color: #0f172a;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.deposito-galeria__header small {
+  color: #64748b;
+  font-size: 0.82rem;
+}
+
+.deposito-galeria__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #2563eb;
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+.deposito-galeria__panel {
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+  border-radius: 22px;
+  border: 1px dashed rgba(148, 163, 184, 0.5);
+  background: rgba(248, 250, 252, 0.72);
+}
+
+.deposito-galeria__trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 42px;
+  width: fit-content;
+  padding: 0 18px;
+  border-radius: 999px;
+  background: #2563eb;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.deposito-galeria__trigger input {
+  display: none;
+}
+
+.deposito-galeria__empty {
+  min-height: 120px;
+  display: grid;
+  place-items: center;
+  gap: 8px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.92);
+  color: #64748b;
+  text-align: center;
+}
+
+.deposito-galeria__empty mat-icon {
+  width: 30px;
+  height: 30px;
+  font-size: 30px;
+}
+
+.deposito-galeria__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+}
+
+.deposito-galeria__card {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 18px;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  background: #fff;
+}
+
+.deposito-galeria__preview {
+  overflow: hidden;
+  border-radius: 14px;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  background: rgba(248, 250, 252, 0.8);
+}
+
+.deposito-galeria__preview img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+}
+
+.deposito-galeria__meta {
+  display: grid;
+  gap: 2px;
+}
+
+.deposito-galeria__meta strong {
+  color: #0f172a;
+  font-size: 0.9rem;
+}
+
+.deposito-galeria__meta small {
+  color: #64748b;
+  font-size: 0.8rem;
+}
+
+.deposito-galeria__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
+.deposito-galeria__error {
+  color: #dc2626;
+  font-size: 0.84rem;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .deposito-galeria__header {
+    display: grid;
+  }
+
+  .deposito-galeria__trigger {
+    width: 100%;
+    min-height: 48px;
+  }
+
+  .deposito-galeria__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

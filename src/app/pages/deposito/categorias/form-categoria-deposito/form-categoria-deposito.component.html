@@ -1,0 +1,151 @@
+<app-page-card
+  class="cadastro-form-page"
+  [titulo]="tituloPagina"
+  subtitulo="Organize grupos, hierarquia e canais de contato do catálogo."
+  botaoTexto="Voltar"
+  botaoIcone="arrow_back"
+  botaoCor="primary"
+  [botaoRota]="['/page/deposito/categorias']"
+  [mostrarDivisor]="true">
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <app-section-card titulo="Dados principais" subtitulo="Defina identificação, URL amigável e ordem de exibição.">
+      <div class="cadastro-form-grid">
+        <div class="cadastro-form-grid cadastro-form-grid--triple">
+          <app-input-texto-restrito
+            [control]="codigoControl"
+            label="Código"
+            placeholder="Ex.: PISOS">
+          </app-input-texto-restrito>
+
+          <app-input-texto-restrito
+            [control]="nomeControl"
+            label="Nome"
+            placeholder="Ex.: Pisos">
+          </app-input-texto-restrito>
+
+          <div class="w-100">
+            <mat-label class="f-s-14 f-w-600 m-b-8 d-block">Slug</mat-label>
+            <mat-form-field appearance="outline" class="w-100">
+              <input matInput [formControl]="slugControl" placeholder="Ex.: pisos" (input)="onSlugInput()" />
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="cadastro-form-grid cadastro-form-grid--double">
+          <div class="w-100">
+            <mat-label class="f-s-14 f-w-600 m-b-8 d-block">Categoria pai</mat-label>
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-select [formControl]="categoriaPaiIdControl" [disabled]="carregandoCategoriasPai">
+                <mat-option [value]="null">Sem categoria pai</mat-option>
+                <mat-option *ngFor="let categoria of categoriasPaiDisponiveis" [value]="categoria.id">
+                  {{ categoriaPaiLabel(categoria) }}
+                </mat-option>
+              </mat-select>
+              <mat-hint *ngIf="carregandoCategoriasPai">Carregando categorias...</mat-hint>
+            </mat-form-field>
+          </div>
+
+          <div class="w-100">
+            <mat-label class="f-s-14 f-w-600 m-b-8 d-block">Ordem</mat-label>
+            <mat-form-field appearance="outline" class="w-100">
+              <input matInput type="number" min="0" [formControl]="ordemControl" placeholder="Ex.: 1" />
+            </mat-form-field>
+          </div>
+        </div>
+      </div>
+    </app-section-card>
+
+    <app-section-card titulo="Conteúdo" subtitulo="Escreva a descrição curta e o detalhe completo da categoria.">
+      <div class="cadastro-form-grid">
+        <app-input-textarea
+          [control]="descricaoCurtaControl"
+          label="Descrição curta"
+          placeholder="Resumo rápido para listagens e cards"
+          [rows]="3"
+          [maxlength]="255">
+        </app-input-textarea>
+
+        <app-input-textarea
+          [control]="descricaoCompletaControl"
+          label="Descrição completa"
+          placeholder="Detalhes completos da categoria"
+          [rows]="5">
+        </app-input-textarea>
+      </div>
+    </app-section-card>
+
+    <app-section-card titulo="Mídia e contato" subtitulo="Envie a imagem da categoria e ajuste a mensagem padrão de atendimento.">
+      <div class="cadastro-form-grid">
+        <app-deposito-imagem-upload
+          [empresaSlug]="empresaSlug"
+          context="categorias"
+          label="Imagem da categoria"
+          [imagemAtual]="imagemSelecionada"
+          (imagemSelecionada)="onImagemSelecionada($event)"
+          (uploadingChange)="onUploadingImagemChange($event)">
+        </app-deposito-imagem-upload>
+
+        <app-input-texto-restrito
+          [control]="whatsappLinkPadraoControl"
+          label="Link padrão do WhatsApp"
+          placeholder="https://wa.me/...">
+        </app-input-texto-restrito>
+
+        <app-input-textarea
+          [control]="mensagemPadraoWhatsappControl"
+          label="Mensagem padrão do WhatsApp"
+          placeholder="Olá, quero saber mais sobre essa categoria."
+          [rows]="3">
+        </app-input-textarea>
+      </div>
+    </app-section-card>
+
+    <app-section-card titulo="Status" subtitulo="Controle destaque e disponibilidade dessa categoria.">
+      <div class="cadastro-form-toggle-grid">
+        <div class="cadastro-form-toggle">
+          <mat-slide-toggle [formControl]="destaqueControl">
+            Categoria em destaque
+          </mat-slide-toggle>
+          <small>Use para priorizar essa categoria nas vitrines e listagens.</small>
+        </div>
+
+        <div class="cadastro-form-toggle">
+          <mat-slide-toggle [formControl]="ativoControl">
+            Categoria ativa
+          </mat-slide-toggle>
+          <small>Ao inativar, a categoria deixa de ser usada nos cadastros futuros.</small>
+        </div>
+      </div>
+    </app-section-card>
+
+    <div class="cadastro-form-actions" *ngIf="!isMobileView">
+      <button mat-stroked-button color="primary" type="button" (click)="voltar()">
+        Voltar
+      </button>
+
+      <button
+        mat-flat-button
+        color="primary"
+        type="submit"
+        [disabled]="!podeSalvar">
+        {{ textoAcaoPrincipal }}
+      </button>
+    </div>
+  </form>
+</app-page-card>
+
+<app-mobile-total-bar
+  *ngIf="isMobileView"
+  label="Depósito"
+  valueText="Categoria"
+  detailText="Dados, mídia e status"
+  [expandable]="false"
+  secondaryActionText="Voltar"
+  [actionText]="textoAcaoPrincipal"
+  [actionDisabled]="!podeSalvar"
+  bottomOffset="58px"
+  [attachedToBottomNav]="true"
+  (secondaryAction)="voltar()"
+  (action)="onSubmit()">
+</app-mobile-total-bar>

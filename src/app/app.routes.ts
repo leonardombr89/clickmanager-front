@@ -12,18 +12,22 @@ import { BillingPagamentoComponent } from './pages/billing/billing-pagamento/bil
 import { BillingReturnComponent } from './pages/billing/billing-return/billing-return.component';
 import { OnboardingPageComponent } from './pages/onboarding/onboarding-page.component';
 import { OnboardingGuard } from './guards/onboarding.guard';
+import { EmpresaTipoGuard } from './guards/empresa-tipo.guard';
+import { GRAFICA_ROUTE_DATA, SHARED_ROUTE_DATA } from './guards/empresa-tipo-route-data';
+import { RootRedirectGuard } from './guards/root-redirect.guard';
 
 export const routes: Routes = [
   {
     path: '',
     pathMatch: 'full',
-    redirectTo: 'dashboards/dashboard1',
+    canActivate: [AuthGuard, RootRedirectGuard],
+    component: BlankComponent,
   },
   {
     path: '',
     component: FullComponent,
     canActivate: [AuthGuard],
-    canActivateChild: [OnboardingGuard],
+    canActivateChild: [OnboardingGuard, EmpresaTipoGuard],
     data: { perfil: 'GESTOR' },
     children: [
       {
@@ -33,6 +37,7 @@ export const routes: Routes = [
       },
       {
         path: 'page',
+        canActivateChild: [EmpresaTipoGuard],
         loadChildren: () =>
           import('./pages/pages.routes').then((m) => m.PagesRoutes),
       },
@@ -42,28 +47,29 @@ export const routes: Routes = [
           import('./pages/dashboards/dashboards.routes').then(
             (m) => m.DashboardsRoutes
           ),
-        canActivate: [AuthGuard],
-        data: { perfil: 'GESTOR' },
+        canActivate: [AuthGuard, EmpresaTipoGuard],
+        data: { perfil: 'GESTOR', ...GRAFICA_ROUTE_DATA },
       },
       {
         path: 'forms',
         loadChildren: () =>
           import('./pages/forms/forms.routes').then((m) => m.FormsRoutes),
         canActivate: [AuthGuard],
-        data: { perfil: 'GESTOR' },
+        data: { perfil: 'GESTOR', ...GRAFICA_ROUTE_DATA },
       },
       {
         path: 'charts',
         loadChildren: () =>
           import('./pages/charts/charts.routes').then((m) => m.ChartsRoutes),
         canActivate: [AuthGuard],
-        data: { perfil: 'GESTOR' },
+        data: { perfil: 'GESTOR', ...GRAFICA_ROUTE_DATA },
       },
       {
         path: 'apps',
         loadChildren: () =>
           import('./pages/apps/apps.routes').then((m) => m.AppsRoutes),
         canActivate: [AuthGuard],
+        canActivateChild: [EmpresaTipoGuard],
         data: { perfil: 'GESTOR' },
       },
       {
@@ -72,8 +78,9 @@ export const routes: Routes = [
           import('./pages/apps/smart-calc/smart-calc.component').then(
             (m) => m.SmartCalcComponent
           ),
-        canActivate: [AuthGuard],
+        canActivate: [AuthGuard, EmpresaTipoGuard],
         data: {
+          ...GRAFICA_ROUTE_DATA,
           perfil: 'GESTOR',
           title: 'SmartCalc – Calculadora Inteligente',
           urls: [
@@ -89,14 +96,14 @@ export const routes: Routes = [
             (m) => m.WidgetsRoutes
           ),
         canActivate: [AuthGuard],
-        data: { perfil: 'GESTOR' },
+        data: { perfil: 'GESTOR', ...GRAFICA_ROUTE_DATA },
       },
       {
         path: 'tables',
         loadChildren: () =>
           import('./pages/tables/tables.routes').then((m) => m.TablesRoutes),
         canActivate: [AuthGuard],
-        data: { perfil: 'GESTOR' },
+        data: { perfil: 'GESTOR', ...GRAFICA_ROUTE_DATA },
       },
       {
         path: 'datatable',
@@ -105,7 +112,7 @@ export const routes: Routes = [
             (m) => m.DatatablesRoutes
           ),
         canActivate: [AuthGuard],
-        data: { perfil: 'GESTOR' },
+        data: { perfil: 'GESTOR', ...GRAFICA_ROUTE_DATA },
       },
       {
         path: 'theme-pages',
@@ -114,6 +121,7 @@ export const routes: Routes = [
             (m) => m.ThemePagesRoutes
           ),
         canActivate: [AuthGuard],
+        canActivateChild: [EmpresaTipoGuard],
         data: { perfil: 'GESTOR' },
       },
       {
@@ -123,31 +131,31 @@ export const routes: Routes = [
             (m) => m.UiComponentsRoutes
           ),
         canActivate: [AuthGuard],
-        data: { perfil: 'GESTOR' },
+        data: { perfil: 'GESTOR', ...GRAFICA_ROUTE_DATA },
       },
       {
         path: 'billing/blocked',
         component: BillingBlockedComponent,
         canActivate: [AuthGuard],
-        data: { perfil: 'GESTOR' },
+        data: { perfil: 'GESTOR', ...SHARED_ROUTE_DATA },
       },
       {
         path: 'billing/pagamento',
         component: BillingPagamentoComponent,
         canActivate: [AuthGuard],
-        data: { perfil: 'GESTOR' },
+        data: { perfil: 'GESTOR', ...SHARED_ROUTE_DATA },
       },
       {
         path: 'billing/return',
         component: BillingReturnComponent,
         canActivate: [AuthGuard],
-        data: { perfil: 'GESTOR' },
+        data: { perfil: 'GESTOR', ...SHARED_ROUTE_DATA },
       },
       {
         path: 'billing/confirmacao',
         component: BillingConfirmationComponent,
         canActivate: [AuthGuard],
-        data: { perfil: 'GESTOR' },
+        data: { perfil: 'GESTOR', ...SHARED_ROUTE_DATA },
       },
       {
         path: 'billing/minha-assinatura',
@@ -156,7 +164,7 @@ export const routes: Routes = [
             (m) => m.MinhaAssinaturaComponent
           ),
         canActivate: [AuthGuard],
-        data: { perfil: 'GESTOR' },
+        data: { perfil: 'GESTOR', ...SHARED_ROUTE_DATA },
       },
     ],
   },
@@ -186,31 +194,45 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'onboarding-v2',
+        loadChildren: () =>
+          import('./pages/onboarding-v2/onboarding-v2.routes').then(
+            (m) => m.OnboardingV2Routes
+          ),
+      },
+      {
         path: 'onboarding',
         component: OnboardingPageComponent,
-        canActivate: [AuthGuard],
+        canActivate: [AuthGuard, EmpresaTipoGuard],
+        data: { ...GRAFICA_ROUTE_DATA },
       },
     ],
   },
   {
     path: '',
     component: PrintComponent,
+    canActivate: [AuthGuard],
+    canActivateChild: [EmpresaTipoGuard],
     children: [
       {
         path: 'pedido/imprimir/:id',
-        component: ImprimirPedidoPageComponent
+        component: ImprimirPedidoPageComponent,
+        data: { ...GRAFICA_ROUTE_DATA }
       },
       {
         path: 'pedido/imprimir-duas-vias/:id',
-        component: ImprimirPedidoPageComponent
+        component: ImprimirPedidoPageComponent,
+        data: { ...GRAFICA_ROUTE_DATA }
       },
       {
         path: 'pedido/imprimir-etiquetas/:id',
-        component: ImprimirEtiquetasPageComponent
+        component: ImprimirEtiquetasPageComponent,
+        data: { ...GRAFICA_ROUTE_DATA }
       },
       {
-        path: 'pedido/whatsapp/:id',      
-        component: ImprimirWhatsAppComponent
+        path: 'pedido/whatsapp/:id',
+        component: ImprimirWhatsAppComponent,
+        data: { ...GRAFICA_ROUTE_DATA }
       }
     ]
   },

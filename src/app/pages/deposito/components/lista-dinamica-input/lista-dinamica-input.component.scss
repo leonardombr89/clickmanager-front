@@ -1,0 +1,46 @@
+.lista-dinamica {
+  display: grid;
+  gap: 12px;
+}
+
+.lista-dinamica__header {
+  display: grid;
+  gap: 6px;
+}
+
+.lista-dinamica__header small {
+  color: #64748b;
+  font-size: 0.83rem;
+  line-height: 1.45;
+}
+
+.lista-dinamica__form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: start;
+}
+
+.lista-dinamica__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.lista-dinamica__empty {
+  padding: 14px 16px;
+  border-radius: 18px;
+  border: 1px dashed rgba(203, 213, 225, 0.9);
+  color: #64748b;
+  font-size: 0.86rem;
+}
+
+@media (max-width: 768px) {
+  .lista-dinamica__form {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .lista-dinamica__form button {
+    min-height: 48px;
+  }
+}

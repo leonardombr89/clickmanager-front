@@ -290,8 +290,14 @@ export class AppAccountSettingComponent implements OnInit, OnDestroy {
   }
 
   abrirOnboarding(): void {
-    this.router.navigate(['/onboarding'], {
-      queryParams: { reabrir: '1' },
-    });
+    const rota = this.authService.getOnboardingRouteForUsuario(false, this.usuarioAtual);
+    if (rota === '/onboarding') {
+      this.router.navigate(['/onboarding'], {
+        queryParams: { reabrir: '1' },
+      });
+      return;
+    }
+
+    this.router.navigateByUrl(rota);
   }
 }
