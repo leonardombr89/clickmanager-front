@@ -40,7 +40,14 @@ import { FormMarcaDepositoComponent } from './deposito/marcas/form-marca-deposit
 import { ListarItensDepositoComponent } from './deposito/itens/listar-itens-deposito/listar-itens-deposito.component';
 import { FormItemDepositoComponent } from './deposito/itens/form-item-deposito/form-item-deposito.component';
 import { DepositoDashboardPageComponent } from './deposito/dashboard/deposito-dashboard-page.component';
+import { ListarOrcamentosDepositoComponent } from './deposito/orcamentos/listar-orcamentos-deposito/listar-orcamentos-deposito.component';
+import { DetalheOrcamentoDepositoComponent } from './deposito/orcamentos/detalhe-orcamento-deposito/detalhe-orcamento-deposito.component';
 import { DEPOSITO_ROUTE_DATA, GRAFICA_ROUTE_DATA, SHARED_ROUTE_DATA } from '../guards/empresa-tipo-route-data';
+import { ListarBannersComponent } from './site/banners/listar-banners/listar-banners.component';
+import { FormBannerComponent } from './site/banners/form-banner/form-banner.component';
+import { ListarPaginasComponent } from './site/paginas/listar-paginas/listar-paginas.component';
+import { FormPaginaComponent } from './site/paginas/form-pagina/form-pagina.component';
+import { SiteConfiguracoesComponent } from './site/configuracoes/site-configuracoes.component';
 
 export const PagesRoutes: Routes = [
   {
@@ -53,8 +60,10 @@ export const PagesRoutes: Routes = [
   {
     path: 'empresa',
     component: EmpresaFormComponent,
+    canActivate: [permissionGuard],
     data: {
       ...SHARED_ROUTE_DATA,
+      requiredPermission: ['DADOS_EMPRESA'],
       title: 'Dados da Empresa',
       urls: [
         { title: 'Dashboard', url: '/dashboards/dashboard1' },
@@ -65,8 +74,10 @@ export const PagesRoutes: Routes = [
   {
     path: 'perfil',
     component: GerenciarPerfilComponent,
+    canActivate: [permissionGuard],
     data: {
       ...SHARED_ROUTE_DATA,
+      requiredPermission: ['PERFIS_PERMISSOES_VER'],
       title: 'Gerenciamento de perfil dos usuários',
       urls: [
         { title: 'Dashboard', url: '/dashboards/dashboard1' },
@@ -89,10 +100,11 @@ export const PagesRoutes: Routes = [
   {
     path: 'funcionarios',
     component: ListarFuncionariosComponent,
-    canActivate: [featureModuleGuard],
+    canActivate: [featureModuleGuard, permissionGuard],
     data: {
       ...GRAFICA_ROUTE_DATA,
       featureKey: 'funcionarios',
+      requiredPermission: ['FUNCIONARIO_VER'],
       title: 'Gestão de Funcionários',
       urls: [
         { title: 'Dashboard', url: '/dashboards/dashboard1' },
@@ -103,10 +115,11 @@ export const PagesRoutes: Routes = [
   {
     path: 'funcionarios/novo',
     component: FormFuncionarioComponent,
-    canActivate: [featureModuleGuard],
+    canActivate: [featureModuleGuard, permissionGuard],
     data: {
       ...GRAFICA_ROUTE_DATA,
       featureKey: 'funcionarios',
+      requiredPermission: ['FUNCIONARIO_CRIAR'],
       title: 'Novo Funcionário',
       urls: [
         { title: 'Funcionários', url: '/page/funcionarios' },
@@ -117,10 +130,11 @@ export const PagesRoutes: Routes = [
   {
     path: 'funcionarios/editar/:id',
     component: FormFuncionarioComponent,
-    canActivate: [featureModuleGuard],
+    canActivate: [featureModuleGuard, permissionGuard],
     data: {
       ...GRAFICA_ROUTE_DATA,
       featureKey: 'funcionarios',
+      requiredPermission: ['FUNCIONARIO_EDITAR'],
       title: 'Editar Funcionário',
       urls: [
         { title: 'Funcionários', url: '/page/funcionarios' },
@@ -131,10 +145,11 @@ export const PagesRoutes: Routes = [
   {
     path: 'funcionarios/detalhe/:id',
     component: DetalheFuncionarioComponent,
-    canActivate: [featureModuleGuard],
+    canActivate: [featureModuleGuard, permissionGuard],
     data: {
       ...GRAFICA_ROUTE_DATA,
       featureKey: 'funcionarios',
+      requiredPermission: ['FUNCIONARIO_VER'],
       title: 'Detalhe do Funcionário',
       urls: [
         { title: 'Funcionários', url: '/page/funcionarios' },
@@ -168,12 +183,116 @@ export const PagesRoutes: Routes = [
     }
   },
   {
+    path: 'site',
+    redirectTo: 'site/banners',
+    pathMatch: 'full',
+  },
+  {
+    path: 'site/banners',
+    component: ListarBannersComponent,
+    canActivate: [permissionGuard],
+    data: {
+      ...SHARED_ROUTE_DATA,
+      requiredPermission: ['SITE_BANNERS_VER'],
+      title: 'Banners do site',
+      urls: [
+        { title: 'Meu Site', url: '/page/site/banners' },
+        { title: 'Banners' }
+      ]
+    }
+  },
+  {
+    path: 'site/banners/novo',
+    component: FormBannerComponent,
+    canActivate: [permissionGuard],
+    data: {
+      ...SHARED_ROUTE_DATA,
+      requiredPermission: ['SITE_BANNERS_CADASTRAR'],
+      title: 'Novo banner',
+      urls: [
+        { title: 'Banners do site', url: '/page/site/banners' },
+        { title: 'Novo banner' }
+      ]
+    }
+  },
+  {
+    path: 'site/banners/editar/:id',
+    component: FormBannerComponent,
+    canActivate: [permissionGuard],
+    data: {
+      ...SHARED_ROUTE_DATA,
+      requiredPermission: ['SITE_BANNERS_EDITAR'],
+      title: 'Editar banner',
+      urls: [
+        { title: 'Banners do site', url: '/page/site/banners' },
+        { title: 'Editar banner' }
+      ]
+    }
+  },
+  {
+    path: 'site/paginas',
+    component: ListarPaginasComponent,
+    canActivate: [permissionGuard],
+    data: {
+      ...SHARED_ROUTE_DATA,
+      requiredPermission: ['SITE_PAGINAS_VER'],
+      title: 'Páginas do site',
+      urls: [
+        { title: 'Meu Site', url: '/page/site/paginas' },
+        { title: 'Páginas' }
+      ]
+    }
+  },
+  {
+    path: 'site/paginas/nova',
+    component: FormPaginaComponent,
+    canActivate: [permissionGuard],
+    data: {
+      ...SHARED_ROUTE_DATA,
+      requiredPermission: ['SITE_PAGINAS_CADASTRAR'],
+      title: 'Nova página',
+      urls: [
+        { title: 'Páginas do site', url: '/page/site/paginas' },
+        { title: 'Nova página' }
+      ]
+    }
+  },
+  {
+    path: 'site/paginas/editar/:id',
+    component: FormPaginaComponent,
+    canActivate: [permissionGuard],
+    data: {
+      ...SHARED_ROUTE_DATA,
+      requiredPermission: ['SITE_PAGINAS_EDITAR'],
+      title: 'Editar página',
+      urls: [
+        { title: 'Páginas do site', url: '/page/site/paginas' },
+        { title: 'Editar página' }
+      ]
+    }
+  },
+  {
+    path: 'site/configuracoes',
+    component: SiteConfiguracoesComponent,
+    canActivate: [permissionGuard],
+    data: {
+      ...SHARED_ROUTE_DATA,
+      requiredPermission: ['SITE_CONFIG_VER'],
+      title: 'Configurações do site',
+      urls: [
+        { title: 'Meu Site', url: '/page/site/configuracoes' },
+        { title: 'Configurações' }
+      ]
+    }
+  },
+  {
     path: 'folha-pagamento',
     component: ListarFolhaPagamentoComponent,
-    canActivate: [featureModuleGuard],
+    canActivate: [featureModuleGuard, permissionGuard],
     data: {
       ...GRAFICA_ROUTE_DATA,
       featureKey: 'folhaPagamento',
+      requiredPermission: ['FOLHA_VER'],
       title: 'Folha de Pagamento',
       urls: [
         { title: 'Gestão de Pessoas', url: '/page/funcionarios' },
@@ -184,10 +303,11 @@ export const PagesRoutes: Routes = [
   {
     path: 'folha-pagamento/detalhe/:competencia/:funcionarioId',
     component: DetalheFolhaPagamentoComponent,
-    canActivate: [featureModuleGuard],
+    canActivate: [featureModuleGuard, permissionGuard],
     data: {
       ...GRAFICA_ROUTE_DATA,
       featureKey: 'folhaPagamento',
+      requiredPermission: ['FOLHA_VER', 'FOLHA_EDITAR'],
       title: 'Detalhe da Folha',
       urls: [
         { title: 'Folha de Pagamento', url: '/page/folha-pagamento' },
@@ -212,8 +332,10 @@ export const PagesRoutes: Routes = [
   {
     path: 'usuarios/novo',
     component: FormUsuarioComponent,
+    canActivate: [permissionGuard],
     data: {
       ...SHARED_ROUTE_DATA,
+      requiredPermission: ['USUARIO_CADASTRAR'],
       title: 'Cadastro de novo usuário',
       urls: [
         { title: 'Novo usuário', url: '/dashboards/dashboard1' },
@@ -224,8 +346,10 @@ export const PagesRoutes: Routes = [
   {
     path: 'usuarios/editar/:id',
     component: FormUsuarioComponent,
+    canActivate: [permissionGuard],
     data: {
       ...SHARED_ROUTE_DATA,
+      requiredPermission: ['USUARIO_EDITAR'],
       title: 'Editar usuário',
       urls: [
         { title: 'Usuários', url: '/usuarios' },
@@ -236,8 +360,10 @@ export const PagesRoutes: Routes = [
   {
     path: 'usuarios/listar',
     component: ListarUsuariosComponent,
+    canActivate: [permissionGuard],
     data: {
       ...SHARED_ROUTE_DATA,
+      requiredPermission: ['USUARIOS_VER'],
       title: 'Lista de usuários',
       urls: [
         { title: 'Lista de usuários', url: '/dashboards/dashboard1' },
@@ -248,8 +374,10 @@ export const PagesRoutes: Routes = [
   {
     path: 'cadastro-tecnico/cores',
     component: ListarCoresComponent,
+    canActivate: [permissionGuard],
     data: {
       ...GRAFICA_ROUTE_DATA,
+      requiredPermission: ['PRODUTOS_VER'],
       title: 'Lsita de Cores',
       urls: [
         { title: 'Lsita de Cores', url: '/cadastro-tecnico' },
@@ -260,8 +388,10 @@ export const PagesRoutes: Routes = [
   {
     path: 'cadastro-tecnico/cores/nova',
     component: FormCoresComponent,
+    canActivate: [permissionGuard],
     data: {
       ...GRAFICA_ROUTE_DATA,
+      requiredPermission: ['PRODUTOS_CADASTRAR'],
       title: 'Nova Cor',
       urls: [
         { title: 'Cadastro Técnico', url: '/cadastro-tecnico' },
@@ -272,8 +402,10 @@ export const PagesRoutes: Routes = [
   {
     path: 'cadastro-tecnico/cores/editar/:id',
     component: FormCoresComponent,
+    canActivate: [permissionGuard],
     data: {
       ...GRAFICA_ROUTE_DATA,
+      requiredPermission: ['PRODUTOS_EDITAR'],
       title: 'Editar Cor',
       urls: [
         { title: 'Cadastro Técnico', url: '/cadastro-tecnico' },
@@ -284,8 +416,10 @@ export const PagesRoutes: Routes = [
   {
     path: 'cadastro-tecnico/materiais',
     component: ListarMaterialComponent,
+    canActivate: [permissionGuard],
     data: {
       ...GRAFICA_ROUTE_DATA,
+      requiredPermission: ['PRODUTOS_VER'],
       title: 'Lista de Materiais',
       urls: [
         { title: 'Cadastro Técnico', url: '/cadastro-tecnico' },
@@ -296,8 +430,10 @@ export const PagesRoutes: Routes = [
   {
     path: 'cadastro-tecnico/materiais/nova',
     component: FormMaterialComponent,
+    canActivate: [permissionGuard],
     data: {
       ...GRAFICA_ROUTE_DATA,
+      requiredPermission: ['PRODUTOS_CADASTRAR'],
       title: 'Novo Material',
       urls: [
         { title: 'Cadastro Técnico', url: '/cadastro-tecnico' },
@@ -308,8 +444,10 @@ export const PagesRoutes: Routes = [
   {
     path: 'cadastro-tecnico/materiais/editar/:id',
     component: FormMaterialComponent,
+    canActivate: [permissionGuard],
     data: {
       ...GRAFICA_ROUTE_DATA,
+      requiredPermission: ['PRODUTOS_EDITAR'],
       title: 'Editar Material',
       urls: [
         { title: 'Cadastro Técnico', url: '/cadastro-tecnico' },
@@ -320,8 +458,10 @@ export const PagesRoutes: Routes = [
   {
     path: 'cadastro-tecnico/acabamentos',
     component: ListarAcabamentoComponent,
+    canActivate: [permissionGuard],
     data: {
       ...GRAFICA_ROUTE_DATA,
+      requiredPermission: ['PRODUTOS_VER'],
       title: 'Lista de Acabamentos',
       urls: [
         { title: 'Cadastro Técnico', url: '/cadastro-tecnico' },
@@ -332,8 +472,10 @@ export const PagesRoutes: Routes = [
   {
     path: 'cadastro-tecnico/acabamentos/criar',
     component: FormAcabamentoComponent,
+    canActivate: [permissionGuard],
     data: {
       ...GRAFICA_ROUTE_DATA,
+      requiredPermission: ['PRODUTOS_CADASTRAR'],
       title: 'Novo Acabamento',
       urls: [
         { title: 'Cadastro Técnico', url: '/cadastro-tecnico' },
@@ -344,8 +486,10 @@ export const PagesRoutes: Routes = [
   {
     path: 'cadastro-tecnico/acabamentos/editar/:id',
     component: FormAcabamentoComponent,
+    canActivate: [permissionGuard],
     data: {
       ...GRAFICA_ROUTE_DATA,
+      requiredPermission: ['PRODUTOS_EDITAR'],
       title: 'Editar Acabamento',
       urls: [
         { title: 'Cadastro Técnico', url: '/cadastro-tecnico' },
@@ -356,8 +500,10 @@ export const PagesRoutes: Routes = [
   {
     path: 'cadastro-tecnico/formatos',
     component: ListarFormatoComponent,
+    canActivate: [permissionGuard],
     data: {
       ...GRAFICA_ROUTE_DATA,
+      requiredPermission: ['PRODUTOS_VER'],
       title: 'Lista de Formatos',
       urls: [
         { title: 'Cadastro Técnico', url: '/cadastro-tecnico' },
@@ -368,8 +514,10 @@ export const PagesRoutes: Routes = [
   {
     path: 'cadastro-tecnico/formatos/criar',
     component: FormFormatoComponent,
+    canActivate: [permissionGuard],
     data: {
       ...GRAFICA_ROUTE_DATA,
+      requiredPermission: ['PRODUTOS_CADASTRAR'],
       title: 'Novo Formato',
       urls: [
         { title: 'Cadastro Técnico', url: '/cadastro-tecnico' },
@@ -380,8 +528,10 @@ export const PagesRoutes: Routes = [
   {
     path: 'cadastro-tecnico/formatos/editar/:id',
     component: FormFormatoComponent,
+    canActivate: [permissionGuard],
     data: {
       ...GRAFICA_ROUTE_DATA,
+      requiredPermission: ['PRODUTOS_EDITAR'],
       title: 'Editar Formato',
       urls: [
         { title: 'Cadastro Técnico', url: '/cadastro-tecnico' },
@@ -392,8 +542,10 @@ export const PagesRoutes: Routes = [
   {
     path: 'cadastro-tecnico/produtos',
     component: ListarProdutosComponent,
+    canActivate: [permissionGuard],
     data: {
       ...GRAFICA_ROUTE_DATA,
+      requiredPermission: ['PRODUTOS_VER'],
       title: 'Lista de Produtos',
       urls: [
         { title: 'Cadastro Técnico', url: '/cadastro-tecnico' },
@@ -404,8 +556,10 @@ export const PagesRoutes: Routes = [
   {
     path: 'cadastro-tecnico/produtos/criar',
     component: FormProdutoComponent,
+    canActivate: [permissionGuard],
     data: {
       ...GRAFICA_ROUTE_DATA,
+      requiredPermission: ['PRODUTOS_CADASTRAR'],
       title: 'Criar Produto',
       urls: [
         { title: 'Lista de produtos', url: '/page/cadastro-tecnico/produtos' },
@@ -416,8 +570,10 @@ export const PagesRoutes: Routes = [
   {
     path: 'cadastro-tecnico/produtos/editar/:id',
     component: FormProdutoComponent,
+    canActivate: [permissionGuard],
     data: {
       ...GRAFICA_ROUTE_DATA,
+      requiredPermission: ['PRODUTOS_EDITAR'],
       title: 'Editar Produto',
       urls: [
         { title: 'Lista de produtos', url: '/page/cadastro-tecnico/produtos' },
@@ -428,8 +584,10 @@ export const PagesRoutes: Routes = [
   {
     path: 'cadastro-tecnico/servico',
     component: ListarServicoComponent,
+    canActivate: [permissionGuard],
     data: {
       ...GRAFICA_ROUTE_DATA,
+      requiredPermission: ['SERVICOS_VER'],
       title: 'Lista de Serviços',
       urls: [
         { title: 'Serviços', url: '/servico' },
@@ -440,8 +598,10 @@ export const PagesRoutes: Routes = [
   {
     path: 'cadastro-tecnico/servico/criar',
     component: FormServicoComponent,
+    canActivate: [permissionGuard],
     data: {
       ...GRAFICA_ROUTE_DATA,
+      requiredPermission: ['SERVICOS_CADASTRAR'],
       title: 'Criar Serviço',
       urls: [
         { title: 'Lista de Serviços', url: '/page/cadastro-tecnico/servico' },
@@ -452,8 +612,10 @@ export const PagesRoutes: Routes = [
   {
     path: 'cadastro-tecnico/servico/editar/:id',
     component: FormServicoComponent,
+    canActivate: [permissionGuard],
     data: {
       ...GRAFICA_ROUTE_DATA,
+      requiredPermission: ['SERVICOS_EDITAR'],
       title: 'Editar Serviço',
       urls: [
         { title: 'Lista de Serviços', url: '/page/cadastro-tecnico/servico' },
@@ -464,8 +626,10 @@ export const PagesRoutes: Routes = [
   {
     path: 'deposito',
     component: DepositoDashboardPageComponent,
+    canActivate: [permissionGuard],
     data: {
       ...DEPOSITO_ROUTE_DATA,
+      requiredPermission: ['DEPOSITO_DASHBOARD_VER'],
       title: 'Dashboard do Depósito',
       urls: [
         { title: 'Dashboard' }
@@ -475,8 +639,10 @@ export const PagesRoutes: Routes = [
   {
     path: 'deposito/categorias',
     component: ListarCategoriasDepositoComponent,
+    canActivate: [permissionGuard],
     data: {
       ...DEPOSITO_ROUTE_DATA,
+      requiredPermission: ['DEPOSITO_CATEGORIAS_VER'],
       title: 'Categorias de Depósito',
       urls: [
         { title: 'Depósito', url: '/page/deposito/categorias' },
@@ -487,8 +653,10 @@ export const PagesRoutes: Routes = [
   {
     path: 'deposito/categorias/nova',
     component: FormCategoriaDepositoComponent,
+    canActivate: [permissionGuard],
     data: {
       ...DEPOSITO_ROUTE_DATA,
+      requiredPermission: ['DEPOSITO_CATEGORIAS_CADASTRAR'],
       title: 'Nova Categoria de Depósito',
       urls: [
         { title: 'Categorias de Depósito', url: '/page/deposito/categorias' },
@@ -499,8 +667,10 @@ export const PagesRoutes: Routes = [
   {
     path: 'deposito/categorias/editar/:id',
     component: FormCategoriaDepositoComponent,
+    canActivate: [permissionGuard],
     data: {
       ...DEPOSITO_ROUTE_DATA,
+      requiredPermission: ['DEPOSITO_CATEGORIAS_EDITAR'],
       title: 'Editar Categoria de Depósito',
       urls: [
         { title: 'Categorias de Depósito', url: '/page/deposito/categorias' },
@@ -511,8 +681,10 @@ export const PagesRoutes: Routes = [
   {
     path: 'deposito/itens',
     component: ListarItensDepositoComponent,
+    canActivate: [permissionGuard],
     data: {
       ...DEPOSITO_ROUTE_DATA,
+      requiredPermission: ['DEPOSITO_ITENS_VER'],
       title: 'Itens de Depósito',
       urls: [
         { title: 'Depósito', url: '/page/deposito/itens' },
@@ -523,8 +695,10 @@ export const PagesRoutes: Routes = [
   {
     path: 'deposito/itens/novo',
     component: FormItemDepositoComponent,
+    canActivate: [permissionGuard],
     data: {
       ...DEPOSITO_ROUTE_DATA,
+      requiredPermission: ['DEPOSITO_ITENS_CADASTRAR'],
       title: 'Novo Item de Depósito',
       urls: [
         { title: 'Itens de Depósito', url: '/page/deposito/itens' },
@@ -535,8 +709,10 @@ export const PagesRoutes: Routes = [
   {
     path: 'deposito/itens/editar/:id',
     component: FormItemDepositoComponent,
+    canActivate: [permissionGuard],
     data: {
       ...DEPOSITO_ROUTE_DATA,
+      requiredPermission: ['DEPOSITO_ITENS_EDITAR'],
       title: 'Editar Item de Depósito',
       urls: [
         { title: 'Itens de Depósito', url: '/page/deposito/itens' },
@@ -547,8 +723,10 @@ export const PagesRoutes: Routes = [
   {
     path: 'deposito/marcas',
     component: ListarMarcasDepositoComponent,
+    canActivate: [permissionGuard],
     data: {
       ...DEPOSITO_ROUTE_DATA,
+      requiredPermission: ['DEPOSITO_MARCAS_VER'],
       title: 'Marcas de Depósito',
       urls: [
         { title: 'Depósito', url: '/page/deposito/marcas' },
@@ -559,8 +737,10 @@ export const PagesRoutes: Routes = [
   {
     path: 'deposito/marcas/nova',
     component: FormMarcaDepositoComponent,
+    canActivate: [permissionGuard],
     data: {
       ...DEPOSITO_ROUTE_DATA,
+      requiredPermission: ['DEPOSITO_MARCAS_CADASTRAR'],
       title: 'Nova Marca de Depósito',
       urls: [
         { title: 'Marcas de Depósito', url: '/page/deposito/marcas' },
@@ -571,8 +751,10 @@ export const PagesRoutes: Routes = [
   {
     path: 'deposito/marcas/editar/:id',
     component: FormMarcaDepositoComponent,
+    canActivate: [permissionGuard],
     data: {
       ...DEPOSITO_ROUTE_DATA,
+      requiredPermission: ['DEPOSITO_MARCAS_EDITAR'],
       title: 'Editar Marca de Depósito',
       urls: [
         { title: 'Marcas de Depósito', url: '/page/deposito/marcas' },
@@ -581,10 +763,40 @@ export const PagesRoutes: Routes = [
     }
   },
   {
+    path: 'deposito/orcamentos',
+    component: ListarOrcamentosDepositoComponent,
+    canActivate: [permissionGuard],
+    data: {
+      ...DEPOSITO_ROUTE_DATA,
+      requiredPermission: ['DEPOSITO_ORCAMENTOS_VER'],
+      title: 'Orçamentos do Depósito',
+      urls: [
+        { title: 'Depósito', url: '/page/deposito' },
+        { title: 'Orçamentos' }
+      ]
+    }
+  },
+  {
+    path: 'deposito/orcamentos/:id',
+    component: DetalheOrcamentoDepositoComponent,
+    canActivate: [permissionGuard],
+    data: {
+      ...DEPOSITO_ROUTE_DATA,
+      requiredPermission: ['DEPOSITO_ORCAMENTOS_VER'],
+      title: 'Detalhes do Orçamento',
+      urls: [
+        { title: 'Orçamentos', url: '/page/deposito/orcamentos' },
+        { title: 'Detalhes' }
+      ]
+    }
+  },
+  {
     path: 'pedido',
     component: ListarPedidoComponent,
+    canActivate: [permissionGuard],
     data: {
       ...GRAFICA_ROUTE_DATA,
+      requiredPermission: ['PEDIDOS_VER'],
       title: 'Lista de Pedidos',
       urls: [
         { title: 'Pedidos', url: '/pedido' },
@@ -595,8 +807,10 @@ export const PagesRoutes: Routes = [
   {
     path: 'pedido/criar',
     component: FormPedidoComponent,
+    canActivate: [permissionGuard],
     data: {
       ...GRAFICA_ROUTE_DATA,
+      requiredPermission: ['PEDIDOS_CADASTRAR'],
       title: 'Criar Pedido',
       urls: [
         { title: 'Lista de Pedidos', url: '/page/pedido' },
@@ -607,8 +821,10 @@ export const PagesRoutes: Routes = [
   {
     path: 'pedido/detalhe/:id',
     component: DetalhesPedidoComponent,
+    canActivate: [permissionGuard],
     data: {
       ...GRAFICA_ROUTE_DATA,
+      requiredPermission: ['PEDIDOS_VER', 'PEDIDOS_EDITAR'],
       title: 'Detalhes Pedido',
       urls: [
         { title: 'Detalhes de Pedidos', url: '/page/pedido' },
@@ -619,8 +835,10 @@ export const PagesRoutes: Routes = [
   {
     path: 'cliente',
     component: ListarClienteComponent,
+    canActivate: [permissionGuard],
     data: {
       ...GRAFICA_ROUTE_DATA,
+      requiredPermission: ['CLIENTE_VER'],
       title: 'Lista de Clientes',
       urls: [
         { title: 'Clientes', url: '/cliente' },
@@ -631,8 +849,10 @@ export const PagesRoutes: Routes = [
   {
     path: 'cliente/criar',
     component: FormClienteComponent,
+    canActivate: [permissionGuard],
     data: {
       ...GRAFICA_ROUTE_DATA,
+      requiredPermission: ['CLIENTE_CADASTRAR'],
       title: 'Criar Cliente',
       urls: [
         { title: 'Lista de Clientes', url: '/page/cliente' },
@@ -643,8 +863,10 @@ export const PagesRoutes: Routes = [
   {
     path: 'cliente/editar/:id',
     component: FormClienteComponent,
+    canActivate: [permissionGuard],
     data: {
       ...GRAFICA_ROUTE_DATA,
+      requiredPermission: ['CLIENTE_EDITAR'],
       title: 'Editar Cliente',
       urls: [
         { title: 'Lista de Clientes', url: '/page/cliente' },
@@ -655,8 +877,10 @@ export const PagesRoutes: Routes = [
   {
     path: 'calculadora/config/criar',
     component: CalculadoraConfigComponent,
+    canActivate: [permissionGuard],
     data: {
       ...GRAFICA_ROUTE_DATA,
+      requiredPermission: ['CONFIG_CALCULADORAS'],
       title: 'Configuração SmartCalc',
       urls: [
         { title: 'Configuração SmartCalc', url: '/page/calculadora/config' },
@@ -667,8 +891,10 @@ export const PagesRoutes: Routes = [
   {
     path: 'calculadora/config/editar/:id',
     component: CalculadoraConfigComponent,
+    canActivate: [permissionGuard],
     data: {
       ...GRAFICA_ROUTE_DATA,
+      requiredPermission: ['CONFIG_CALCULADORAS'],
       title: 'Editar Configuração',
       urls: [
         { title: 'Lista de Configurações', url: '/page/calculadora/config' },
@@ -679,8 +905,10 @@ export const PagesRoutes: Routes = [
   {
     path: 'config/email-servidor',
     component: EmailServidorComponent,
+    canActivate: [permissionGuard],
     data: {
       ...GRAFICA_ROUTE_DATA,
+      requiredPermission: ['CONFIG_EMAIL'],
       title: 'Servidor de E-mail',
       urls: [
         { title: 'Configurações', url: '/dashboards/dashboard1' },

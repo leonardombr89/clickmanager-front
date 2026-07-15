@@ -1,0 +1,123 @@
+.site-banner-form-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(360px, 0.85fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.site-banner-form-layout__main,
+.site-banner-form-layout__preview {
+  display: grid;
+  gap: 18px;
+}
+
+.site-banner-form-layout__preview {
+  position: sticky;
+  top: 86px;
+}
+
+.cadastro-form-grid {
+  display: grid;
+  gap: 18px;
+}
+
+.cadastro-form-grid--double {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.cadastro-form-grid--triple {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.cadastro-form-grid--centered {
+  align-items: center;
+}
+
+.cadastro-form-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.cadastro-form-toggle-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.cadastro-form-toggle {
+  display: grid;
+  gap: 8px;
+}
+
+.cadastro-form-toggle small {
+  color: #64748b;
+  font-size: 0.85rem;
+}
+
+.cadastro-form-field {
+  min-width: 0;
+}
+
+.cadastro-form-toggle-buttons {
+  width: 100%;
+}
+
+.cadastro-form-toggle-buttons .mat-button-toggle {
+  flex: 1 1 0;
+}
+
+.cadastro-form-slider {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.cadastro-form-slider--disabled {
+  opacity: 0.64;
+}
+
+.cadastro-form-slider__label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.cadastro-form-slider__label strong {
+  color: #0f172a;
+  font-size: 0.9rem;
+}
+
+.site-banner-form-state {
+  min-height: 240px;
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 10px;
+  color: #64748b;
+  text-align: center;
+}
+
+@media (max-width: 1180px) {
+  .site-banner-form-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .site-banner-form-layout__preview {
+    position: static;
+  }
+}
+
+@media (max-width: 768px) {
+  .cadastro-form-grid--double,
+  .cadastro-form-grid--triple,
+  .cadastro-form-toggle-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  :host ::ng-deep .site-banner-form-page .mat-mdc-card-content {
+    padding-bottom: 220px;
+  }
+}

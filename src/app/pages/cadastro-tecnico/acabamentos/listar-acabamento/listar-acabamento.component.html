@@ -9,7 +9,7 @@
     helpFragment="produtos"
     helpTexto=""
     helpIcone="help_outline"
-    permissao="GERENCIAR_PRODUTOS"
+    permissao="PRODUTOS_CADASTRAR"
     [mostrarDivisor]="true">
   </app-card-header>
 
@@ -51,7 +51,7 @@
               <i-tabler name="edit" class="icon-18"></i-tabler>
             </a>
 
-            <a (click)="excluir(a)" class="cursor-pointer" *temPermissao="'GERENCIAR_PRODUTOS'">
+            <a (click)="excluir(a)" class="cursor-pointer" *temPermissao="'PRODUTOS_EXCLUIR'">
               <i-tabler name="trash" class="icon-18"></i-tabler>
             </a>
           </td>
@@ -131,7 +131,7 @@
   </div>
 
   <app-mobile-fab-action
-    *temPermissao="'GERENCIAR_PRODUTOS'"
+    *temPermissao="'PRODUTOS_CADASTRAR'"
     label="Novo Acabamento"
     icon="add"
     [compact]="mobileFabCompact"
@@ -146,7 +146,7 @@
     <span>Editar</span>
   </button>
   <button
-    *temPermissao="'GERENCIAR_PRODUTOS'"
+    *temPermissao="'PRODUTOS_EXCLUIR'"
     mat-menu-item
     type="button"
     (click)="excluir(acabamentoSelecionadoMenu!)"

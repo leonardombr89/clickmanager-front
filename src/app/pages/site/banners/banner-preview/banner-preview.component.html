@@ -1,0 +1,29 @@
+<div class="banner-preview">
+  <div class="banner-preview__label">Preview</div>
+
+  <div class="banner-preview__frame" [class.banner-preview__frame--empty]="!imagemUrl">
+    @if (imagemUrl) {
+    <img [src]="imagemUrl" [alt]="altText || titulo || 'Banner do site'" />
+    } @else {
+    <div class="banner-preview__empty">Selecione uma imagem para visualizar o banner.</div>
+    }
+
+    <div class="banner-preview__backdrop" [style.background]="overlayBackground"></div>
+
+    <div class="banner-preview__content" [ngClass]="[posicaoClass, corClass]">
+      @if (subtitulo) {
+      <span class="banner-preview__eyebrow">{{ subtitulo }}</span>
+      }
+
+      <strong>{{ titulo || 'Título do banner' }}</strong>
+
+      @if (descricao) {
+      <p>{{ descricao }}</p>
+      }
+
+      @if (ctaTexto) {
+      <span class="banner-preview__button">{{ ctaTexto }}</span>
+      }
+    </div>
+  </div>
+</div>

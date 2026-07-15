@@ -357,56 +357,6 @@
           <div class="m-t-24">
             <mat-card class="cardWithShadow">
               <mat-card-content class="p-y-24">
-                <div class="empresa-site-publico__header">
-                  <div>
-                    <mat-card-title>Site público</mat-card-title>
-                    <mat-card-subtitle class="f-s-14">
-                      Use o endereço provisório para divulgar seu site imediatamente. Se você já possui um domínio próprio, informe abaixo para conectar ao ClickManager.
-                    </mat-card-subtitle>
-                  </div>
-
-                  <mat-slide-toggle color="primary" [formControl]="siteAtivoControl">
-                    Site ativo
-                  </mat-slide-toggle>
-                </div>
-
-                <div class="row m-t-16">
-                  <div class="col-lg-6">
-                    <mat-form-field appearance="outline" class="w-100">
-                      <mat-label>Endereço provisório</mat-label>
-                      <input matInput [value]="enderecoProvisorio" readonly>
-                    </mat-form-field>
-                  </div>
-
-                  <div class="col-lg-6">
-                    <app-input-texto-restrito [control]="slugPublicoControl"
-                      label="Slug público" placeholder="santa-luzia-acabamentos"
-                      [maxlength]="120"></app-input-texto-restrito>
-                  </div>
-
-                  <div class="col-12">
-                    <app-input-texto-restrito [control]="dominioCustomControl"
-                      label="Domínio próprio" placeholder="santaluziaacabamentos.com.br"
-                      [maxlength]="255"></app-input-texto-restrito>
-                  </div>
-                </div>
-
-                <div class="empresa-site-publico__actions">
-                  <button mat-stroked-button color="primary" type="button" (click)="abrirSiteProvisorio()">
-                    Abrir site provisório
-                  </button>
-
-                  <button mat-flat-button color="primary" type="button" (click)="testarDominioCustom()">
-                    Testar domínio próprio
-                  </button>
-                </div>
-              </mat-card-content>
-            </mat-card>
-          </div>
-
-          <div class="m-t-24">
-            <mat-card class="cardWithShadow">
-              <mat-card-content class="p-y-24">
                 <mat-card-title>Redes Sociais</mat-card-title>
                 <mat-card-subtitle class="f-s-14">
                   Ajuste os links públicos usados no site e nos materiais da empresa.

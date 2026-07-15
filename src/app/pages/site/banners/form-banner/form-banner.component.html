@@ -1,0 +1,210 @@
+<app-page-card
+  class="site-banner-form-page"
+  [titulo]="tituloPagina"
+  subtitulo="Configure imagem, texto e chamada do banner exibido no site público."
+  botaoTexto="Voltar"
+  botaoIcone="arrow_back"
+  botaoCor="primary"
+  [botaoRota]="['/page/site/banners']"
+  [mostrarDivisor]="true">
+
+  @if (carregando) {
+  <div class="site-banner-form-state">
+    <mat-spinner diameter="32"></mat-spinner>
+    <span>Carregando banner...</span>
+  </div>
+  } @else {
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <div class="site-banner-form-layout">
+      <div class="site-banner-form-layout__main">
+        <app-section-card titulo="Imagem" subtitulo="Selecione a imagem principal do banner.">
+          <app-site-banner-image-upload
+            [imagemAtual]="imagemAtualUrl"
+            [altText]="altTextControl.value || tituloControl.value || 'Banner do site'"
+            [required]="!isEditMode"
+            (fileChange)="onImagemSelecionada($event)"
+            (previewChange)="onPreviewChange($event)">
+          </app-site-banner-image-upload>
+        </app-section-card>
+
+        <app-section-card titulo="Conteúdo" subtitulo="Defina textos, botão e acessibilidade.">
+          <div class="cadastro-form-grid">
+            <app-input-texto-restrito
+              [control]="tituloControl"
+              label="Título"
+              placeholder="Ex.: Promoção de inauguração">
+            </app-input-texto-restrito>
+
+            <app-input-texto-restrito
+              [control]="subtituloControl"
+              label="Subtítulo"
+              placeholder="Ex.: Confira as novidades">
+            </app-input-texto-restrito>
+
+            <app-input-textarea
+              [control]="descricaoControl"
+              label="Descrição"
+              placeholder="Texto de apoio exibido no banner"
+              [rows]="4">
+            </app-input-textarea>
+
+            <div class="cadastro-form-grid cadastro-form-grid--double">
+              <app-input-texto-restrito
+                [control]="ctaTextoControl"
+                label="Texto do botão"
+                placeholder="Ex.: Ver ofertas">
+              </app-input-texto-restrito>
+
+              <app-input-texto-restrito
+                [control]="ctaUrlControl"
+                label="Link do botão"
+                placeholder="https://...">
+              </app-input-texto-restrito>
+            </div>
+
+            <app-input-texto-restrito
+              [control]="altTextControl"
+              label="Alt da imagem"
+              placeholder="Descrição curta da imagem para acessibilidade">
+            </app-input-texto-restrito>
+          </div>
+        </app-section-card>
+
+        <app-section-card titulo="Aparência" subtitulo="Ajuste contraste, alinhamento e camada visual do texto.">
+          <div class="cadastro-form-grid">
+            <div class="cadastro-form-grid cadastro-form-grid--double">
+              <div class="cadastro-form-field">
+                <mat-label class="f-s-14 f-w-600 m-b-8 d-block">Posição do texto</mat-label>
+                <mat-button-toggle-group
+                  class="cadastro-form-toggle-buttons"
+                  [formControl]="posicaoTextoControl"
+                  aria-label="Posição do texto">
+                  @for (posicao of posicoesTexto; track posicao.value) {
+                  <mat-button-toggle [value]="posicao.value">{{ posicao.label }}</mat-button-toggle>
+                  }
+                </mat-button-toggle-group>
+              </div>
+
+              <div class="cadastro-form-field">
+                <mat-label class="f-s-14 f-w-600 m-b-8 d-block">Cor do texto</mat-label>
+                <mat-button-toggle-group
+                  class="cadastro-form-toggle-buttons"
+                  [formControl]="corTextoControl"
+                  aria-label="Cor do texto">
+                  @for (cor of coresTexto; track cor.value) {
+                  <mat-button-toggle [value]="cor.value">{{ cor.label }}</mat-button-toggle>
+                  }
+                </mat-button-toggle-group>
+              </div>
+            </div>
+
+            <div class="cadastro-form-grid cadastro-form-grid--double cadastro-form-grid--centered">
+              <div class="cadastro-form-toggle">
+                <mat-slide-toggle [formControl]="overlayAtivoControl">
+                  Overlay ativo
+                </mat-slide-toggle>
+                <small>Adiciona uma camada escura sobre a imagem para melhorar leitura.</small>
+              </div>
+
+              <div class="cadastro-form-slider" [class.cadastro-form-slider--disabled]="!overlayAtivoControl.value">
+                <div class="cadastro-form-slider__label">
+                  <mat-label class="f-s-14 f-w-600 d-block">Opacidade do overlay</mat-label>
+                  <strong>{{ overlayOpacidadeControl.value || 0 }}%</strong>
+                </div>
+                <mat-slider min="0" max="100" step="1" discrete [disabled]="!overlayAtivoControl.value" class="w-100">
+                  <input matSliderThumb [formControl]="overlayOpacidadeControl" />
+                </mat-slider>
+              </div>
+            </div>
+          </div>
+        </app-section-card>
+
+        <app-section-card titulo="Publicação" subtitulo="Controle status, ordem e período de exibição.">
+          <div class="cadastro-form-grid">
+            <div class="cadastro-form-grid cadastro-form-grid--triple">
+              <div class="w-100">
+                <mat-label class="f-s-14 f-w-600 m-b-8 d-block">Ordem</mat-label>
+                <mat-form-field appearance="outline" class="w-100">
+                  <input matInput type="number" min="1" [formControl]="ordemControl" placeholder="Ex.: 1" />
+                </mat-form-field>
+              </div>
+
+              <div class="w-100">
+                <mat-label class="f-s-14 f-w-600 m-b-8 d-block">Data início</mat-label>
+                <mat-form-field appearance="outline" class="w-100">
+                  <input matInput type="date" [formControl]="dataInicioControl" />
+                </mat-form-field>
+              </div>
+
+              <div class="w-100">
+                <mat-label class="f-s-14 f-w-600 m-b-8 d-block">Data fim</mat-label>
+                <mat-form-field appearance="outline" class="w-100">
+                  <input matInput type="date" [formControl]="dataFimControl" />
+                </mat-form-field>
+              </div>
+            </div>
+
+            <div class="cadastro-form-toggle-grid">
+              <div class="cadastro-form-toggle">
+                <mat-slide-toggle [formControl]="ativoControl">
+                  Banner ativo
+                </mat-slide-toggle>
+                <small>Desative para manter o banner salvo sem aparecer no site.</small>
+              </div>
+
+              <div class="cadastro-form-toggle">
+                <mat-slide-toggle [formControl]="abrirEmNovaAbaControl">
+                  Abrir link em nova aba
+                </mat-slide-toggle>
+                <small>Use para links externos ou páginas fora do fluxo principal.</small>
+              </div>
+            </div>
+          </div>
+        </app-section-card>
+      </div>
+
+      <div class="site-banner-form-layout__preview">
+        <app-section-card titulo="Visualização" subtitulo="Prévia aproximada da chamada na página inicial.">
+          <app-banner-preview
+            [imagemUrl]="previewImagem"
+            [titulo]="tituloControl.value"
+            [subtitulo]="subtituloControl.value"
+            [descricao]="descricaoControl.value"
+            [ctaTexto]="ctaTextoControl.value"
+            [altText]="altTextControl.value"
+            [posicaoTexto]="posicaoTextoControl.value"
+            [corTexto]="corTextoControl.value"
+            [overlayAtivo]="overlayAtivoControl.value"
+            [overlayOpacidade]="overlayOpacidadeControl.value">
+          </app-banner-preview>
+        </app-section-card>
+      </div>
+    </div>
+
+    <div class="cadastro-form-actions" *ngIf="!isMobileView">
+      <button mat-stroked-button color="primary" type="button" (click)="voltar()">
+        Voltar
+      </button>
+
+      <button mat-flat-button color="primary" type="submit" [disabled]="!podeSalvar">
+        {{ textoAcaoPrincipal }}
+      </button>
+    </div>
+  </form>
+  }
+</app-page-card>
+
+<app-mobile-total-bar
+  *ngIf="isMobileView"
+  label="Meu Site"
+  valueText="Banner"
+  detailText="Imagem, texto e publicação"
+  [expandable]="false"
+  secondaryActionText="Voltar"
+  [actionText]="textoAcaoPrincipal"
+  [actionDisabled]="!podeSalvar"
+  bottomOffset="58px"
+  [attachedToBottomNav]="true"
+  (secondaryAction)="voltar()"
+  (action)="onSubmit()">
+</app-mobile-total-bar>

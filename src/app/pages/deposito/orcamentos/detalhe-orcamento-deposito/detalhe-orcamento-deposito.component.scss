@@ -1,0 +1,126 @@
+.orcamento-detail-state {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  padding: 28px 16px;
+  color: #64748b;
+  text-align: center;
+}
+
+.orcamento-detail-state--empty {
+  border: 1px dashed rgba(191, 219, 254, 0.9);
+  border-radius: 12px;
+}
+
+.detail-actions,
+.detail-inline-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.detail-inline-actions--between {
+  justify-content: space-between;
+}
+
+.detail-inline-actions span {
+  color: #64748b;
+  font-size: 0.85rem;
+}
+
+.detail-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.detail-summary-grid > div {
+  display: grid;
+  gap: 4px;
+}
+
+.detail-summary-grid span,
+.detail-list dt,
+.detail-timeline span {
+  color: #64748b;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.detail-summary-grid strong,
+.detail-list dd,
+.detail-timeline strong {
+  color: #0f172a;
+  font-size: 0.95rem;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 16px;
+}
+
+.detail-list {
+  display: grid;
+  gap: 10px;
+  margin: 0 0 16px;
+}
+
+.detail-list div {
+  display: grid;
+  grid-template-columns: 150px minmax(0, 1fr);
+  gap: 12px;
+}
+
+.detail-list dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.detail-message {
+  color: #475569;
+  line-height: 1.55;
+  margin: 0;
+  white-space: pre-line;
+}
+
+.detail-total {
+  color: #0f172a;
+  font-weight: 800;
+}
+
+.detail-timeline {
+  display: grid;
+  gap: 14px;
+}
+
+.detail-timeline div {
+  display: grid;
+  gap: 2px;
+}
+
+@media (max-width: 1180px) {
+  .detail-summary-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .detail-summary-grid,
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .detail-list div {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+
+  .detail-actions,
+  .detail-inline-actions,
+  .detail-inline-actions--between {
+    justify-content: flex-start;
+  }
+}

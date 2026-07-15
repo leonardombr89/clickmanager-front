@@ -1,0 +1,194 @@
+<app-page-card
+  class="site-pagina-form-page"
+  [titulo]="tituloPagina"
+  subtitulo="Configure conteúdo, exibição no menu, resumo da Home e SEO da página."
+  botaoTexto="Voltar"
+  botaoIcone="arrow_back"
+  botaoCor="primary"
+  [botaoRota]="['/page/site/paginas']"
+  [mostrarDivisor]="true">
+
+  @if (carregando) {
+  <div class="site-pagina-form-state">
+    <mat-spinner diameter="32"></mat-spinner>
+    <span>Carregando página...</span>
+  </div>
+  } @else {
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <div class="site-pagina-form-layout">
+      <app-section-card titulo="Dados da página" subtitulo="Defina identificação, rota e status principal.">
+        <div class="cadastro-form-grid">
+          @if (isEditMode) {
+          <div class="pagina-meta">
+            <span>Tipo: <strong>{{ tipoLabel }}</strong></span>
+            <span>Código: <strong>{{ codigoLabel }}</strong></span>
+          </div>
+          }
+
+          <div class="cadastro-form-grid cadastro-form-grid--double">
+            <app-input-texto-restrito
+              [control]="tituloControl"
+              label="Título"
+              placeholder="Ex.: Quem somos">
+            </app-input-texto-restrito>
+
+            <app-input-texto-restrito
+              [control]="slugControl"
+              label="Slug"
+              placeholder="Ex.: quem-somos">
+            </app-input-texto-restrito>
+          </div>
+
+          <app-input-textarea
+            [control]="resumoControl"
+            label="Resumo"
+            placeholder="Resumo curto da página"
+            [rows]="4">
+          </app-input-textarea>
+
+          <div class="cadastro-form-toggle">
+            <mat-slide-toggle [formControl]="ativaControl">
+              Página ativa
+            </mat-slide-toggle>
+            <small>{{ isHome ? 'A página HOME deve permanecer ativa.' : 'Páginas inativas não têm efeito no menu nem na Home.' }}</small>
+          </div>
+        </div>
+      </app-section-card>
+
+      <app-section-card titulo="Exibição" subtitulo="Controle presença e ordem no menu e na Home.">
+        <div class="cadastro-form-grid">
+          <div class="cadastro-form-toggle-grid">
+            <div class="cadastro-form-toggle">
+              <mat-slide-toggle [formControl]="exibirNoMenuControl">
+                Exibir no menu
+              </mat-slide-toggle>
+              <small>Sem efeito quando a página está inativa.</small>
+            </div>
+
+            <div class="cadastro-form-toggle">
+              <mat-slide-toggle [formControl]="exibirNaHomeControl">
+                Exibir na Home
+              </mat-slide-toggle>
+              <small>Ativa o resumo da página na página inicial.</small>
+            </div>
+          </div>
+
+          <div class="cadastro-form-grid cadastro-form-grid--double">
+            <div class="w-100">
+              <mat-label class="f-s-14 f-w-600 m-b-8 d-block">Ordem no menu</mat-label>
+              <mat-form-field appearance="outline" class="w-100">
+                <input matInput type="number" min="1" [formControl]="ordemMenuControl" placeholder="Ex.: 1" />
+              </mat-form-field>
+            </div>
+
+            <div class="w-100" [class.home-field-highlight]="exibirNaHomeControl.value">
+              <mat-label class="f-s-14 f-w-600 m-b-8 d-block">Ordem na Home</mat-label>
+              <mat-form-field appearance="outline" class="w-100">
+                <input matInput type="number" min="1" [formControl]="ordemHomeControl" placeholder="Ex.: 1" />
+              </mat-form-field>
+            </div>
+          </div>
+        </div>
+      </app-section-card>
+
+      <app-section-card
+        titulo="Resumo da Home"
+        subtitulo="Configure o bloco exibido na página inicial."
+        [class.home-section-disabled]="!exibirNaHomeControl.value"
+        [class.home-section-highlight]="exibirNaHomeControl.value">
+        <div class="cadastro-form-grid">
+          <div class="cadastro-form-grid cadastro-form-grid--double">
+            <app-input-texto-restrito
+              [control]="tituloHomeControl"
+              label="Título na Home"
+              placeholder="Ex.: Produtos em destaque">
+            </app-input-texto-restrito>
+
+            <app-input-texto-restrito
+              [control]="textoBotaoHomeControl"
+              label="Texto do botão"
+              placeholder="Ex.: Ver mais">
+            </app-input-texto-restrito>
+          </div>
+
+          <app-input-textarea
+            [control]="subtituloHomeControl"
+            label="Subtítulo na Home"
+            placeholder="Texto de apoio do bloco"
+            [rows]="3">
+          </app-input-textarea>
+
+          <div class="cadastro-form-grid cadastro-form-grid--double">
+            <div class="w-100 home-field-highlight" [class.home-field-highlight--active]="exibirNaHomeControl.value">
+              <mat-label class="f-s-14 f-w-600 m-b-8 d-block">Limite de itens</mat-label>
+              <mat-form-field appearance="outline" class="w-100">
+                <input matInput type="number" min="1" [formControl]="limiteItensHomeControl" placeholder="Ex.: 6" />
+              </mat-form-field>
+            </div>
+
+            <div class="w-100 home-field-highlight" [class.home-field-highlight--active]="exibirNaHomeControl.value">
+              <mat-label class="f-s-14 f-w-600 m-b-8 d-block">Layout</mat-label>
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-select [formControl]="layoutHomeControl">
+                  @for (layout of layouts; track layout.value) {
+                  <mat-option [value]="layout.value">{{ layout.label }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+            </div>
+          </div>
+        </div>
+      </app-section-card>
+
+      <app-section-card titulo="SEO" subtitulo="Defina título e descrição para buscadores.">
+        <div class="cadastro-form-grid">
+          <app-input-texto-restrito
+            [control]="seoTituloControl"
+            label="Título SEO"
+            placeholder="Título exibido em buscadores">
+          </app-input-texto-restrito>
+
+          <app-input-textarea
+            [control]="seoDescricaoControl"
+            label="Descrição SEO"
+            placeholder="Descrição curta para buscadores"
+            [rows]="4">
+          </app-input-textarea>
+        </div>
+      </app-section-card>
+
+      @if (podeGerenciarBlocos) {
+      <app-listar-blocos
+        *temPermissao="'SITE_PAGINA_BLOCOS_VER'"
+        [paginaId]="paginaId">
+      </app-listar-blocos>
+      }
+    </div>
+
+    <div class="cadastro-form-actions" *ngIf="!isMobileView">
+      <button mat-stroked-button color="primary" type="button" (click)="voltar()">
+        Voltar
+      </button>
+
+      <button mat-flat-button color="primary" type="submit" [disabled]="!podeSalvar">
+        {{ textoAcaoPrincipal }}
+      </button>
+    </div>
+  </form>
+  }
+</app-page-card>
+
+<app-mobile-total-bar
+  *ngIf="isMobileView"
+  label="Meu Site"
+  valueText="Página"
+  detailText="Menu, Home e SEO"
+  [expandable]="false"
+  secondaryActionText="Voltar"
+  [actionText]="textoAcaoPrincipal"
+  [actionDisabled]="!podeSalvar"
+  bottomOffset="58px"
+  [attachedToBottomNav]="true"
+  (secondaryAction)="voltar()"
+  (action)="onSubmit()">
+</app-mobile-total-bar>

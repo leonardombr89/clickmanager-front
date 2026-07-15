@@ -38,7 +38,7 @@ export class AppNotificacoesComponent implements OnInit, OnChanges {
   selecionada = signal<NotificacaoItem | null>(null);
   busca = '';
   podeEnviarNotificacao = false;
-  private readonly permissoesEnviarNotificacao = ['NOTIFICACAO_ENVIAR', 'NOTIFICACAO_ENVIAR_EMPRESA'];
+  private readonly permissoesEnviarNotificacao = ['NOTIFICACAO_ENVIAR', 'NOTIFICACAO_ENVIAR_GLOBAL'];
 
   constructor(
     private readonly service: NotificacaoService,

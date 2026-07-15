@@ -3,8 +3,8 @@
     <div class="via">
       <header class="empresa-box" *ngIf="empresa">
         <div class="empresa-header">
-          <div class="empresa-logo" *ngIf="empresa?.logoPath">
-            <img [src]="empresa?.logoPath" alt="Logo {{ empresa?.nome }}" />
+          <div class="empresa-logo" *ngIf="empresa?.logoUrl">
+            <img [src]="empresa?.logoUrl" alt="Logo {{ empresa?.nome }}" />
           </div>
           <div class="empresa-info">
             <div class="empresa-nome">{{ empresa?.nome }}</div>

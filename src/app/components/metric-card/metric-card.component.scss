@@ -1,0 +1,122 @@
+.metric-card {
+  min-height: 138px;
+  border-radius: 10px;
+  padding: 20px;
+  border: 1px solid #dbe7ff;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  background: #ffffff;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.metric-card__content {
+  min-width: 0;
+  display: grid;
+  align-content: start;
+}
+
+.metric-card__content > span {
+  color: #172554;
+  font-size: 0.85rem;
+  font-weight: 800;
+  line-height: 1.25;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.metric-card strong {
+  display: block;
+  margin: 8px 0 4px;
+  color: #101a33;
+  font-size: 2rem;
+  line-height: 1;
+  font-weight: 800;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.metric-card small {
+  display: -webkit-box;
+  color: #101a33;
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1.25;
+  min-height: 2.25em;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.metric-card em {
+  display: block;
+  margin-top: 14px;
+  color: #64748b;
+  font-size: 0.82rem;
+  font-style: normal;
+  line-height: 1.35;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.metric-card__icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+
+.metric-card--primary {
+  background: #fbfdff;
+}
+
+.metric-card--primary .metric-card__icon {
+  background: #e8f1ff;
+  color: #0b63ce;
+}
+
+.metric-card--warning {
+  background: #fbfffd;
+  border-color: #d8eee7;
+}
+
+.metric-card--warning .metric-card__icon {
+  background: #dff7ec;
+  color: #0f9f6e;
+}
+
+.metric-card--success {
+  background: #fefdff;
+  border-color: #e4dcff;
+}
+
+.metric-card--success .metric-card__icon {
+  background: #efe9ff;
+  color: #7c3aed;
+}
+
+.metric-card--neutral {
+  background: #fffdf9;
+  border-color: #fedfc2;
+}
+
+.metric-card--neutral .metric-card__content > span {
+  color: #f97316;
+}
+
+.metric-card--neutral .metric-card__icon {
+  background: #ffedd5;
+  color: #f97316;
+}
+
+.metric-card.is-disabled strong {
+  font-size: 1.1rem;
+  line-height: 1.25;
+}

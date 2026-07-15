@@ -22,6 +22,9 @@ import { CardHeaderComponent } from "src/app/components/card-header/card-header.
 import { Perfil } from 'src/app/models/perfil.model';
 import { PerfilService } from '../../usuarios/services/perfil.service';
 import { PerfilRequest } from 'src/app/models/perfil/perfil-request.model';
+import { PermissaoCatalogo } from 'src/app/models/permissao.model';
+import { forkJoin } from 'rxjs';
+import { AuthService } from 'src/app/services/auth.service';
 
 @Component({
   selector: 'app-gerenciar-perfil',
@@ -54,9 +57,14 @@ export class GerenciarPerfilComponent implements OnInit {
   displayedColumns1: string[] = ['usuario', 'perfil', 'acoes'];
   dataSource = new MatTableDataSource<Usuario>([]);
   imagemUtil = ImagemUtil;
-  private permissoesMap: Record<string, number> = {};
 
-  constructor(private fb: FormBuilder, private perfilService: PerfilService, private dialog: MatDialog, private toastrService: ToastrService) {}
+  constructor(
+    private fb: FormBuilder,
+    private perfilService: PerfilService,
+    private dialog: MatDialog,
+    private toastrService: ToastrService,
+    private authService: AuthService
+  ) {}
 
   ngOnInit(): void {
     this.form = this.fb.group({
@@ -70,23 +78,6 @@ export class GerenciarPerfilComponent implements OnInit {
   carregarPerfis(): void {
     this.perfilService.listar().subscribe(perfis => {
       this.perfis = perfis;
-    });
-  }
-
-  private carregarPermissoes(onLoaded: () => void): void {
-    if (Object.keys(this.permissoesMap).length) {
-      onLoaded();
-      return;
-    }
-
-    this.perfilService.listarPermissoes().subscribe(permissoes => {
-      this.permissoesMap = permissoes.reduce((acc: Record<string, number>, perm) => {
-        if (perm.chave && typeof perm.id === 'number' && acc[perm.chave] === undefined) {
-          acc[perm.chave] = perm.id;
-        }
-        return acc;
-      }, {});
-      onLoaded();
     });
   }
 
@@ -148,24 +139,30 @@ export class GerenciarPerfilComponent implements OnInit {
   
 
   openDialogPerfil(action: 'Add' | 'Edit', perfil: any = {}): void {
-    const prepararAbertura = (perfilDados: any) => {
-      this.carregarPermissoes(() => this.abrirDialog(action, perfilDados));
-    };
-
     if (action === 'Edit' && perfil?.id) {
-      this.perfilService.obter(perfil.id).subscribe(perfilCompleto => {
-        prepararAbertura(perfilCompleto);
+      forkJoin({
+        perfil: this.perfilService.obter(perfil.id),
+        permissoes: this.perfilService.listarPermissoesPorPerfil(perfil.id),
+        usuarios: this.perfilService.listarUsuariosDoPerfil(perfil.id)
+      }).subscribe({
+        next: ({ perfil: perfilCompleto, permissoes, usuarios }) => {
+          this.abrirDialog(action, perfilCompleto, permissoes, usuarios.some(usuario => !!usuario.proprietario));
+        },
+        error: (err) => this.exibirErro(err, 'Erro ao carregar permissões do perfil.')
       });
     } else {
-      prepararAbertura(perfil);
+      this.perfilService.listarPermissoesDisponiveis().subscribe({
+        next: (permissoes) => this.abrirDialog(action, perfil, permissoes, false),
+        error: (err) => this.exibirErro(err, 'Erro ao carregar catálogo de permissões.')
+      });
     }
   }
 
-  private abrirDialog(action: 'Add' | 'Edit', perfil: any): void {
+  private abrirDialog(action: 'Add' | 'Edit', perfil: any, permissoesCatalogo: PermissaoCatalogo[], perfilProprietario: boolean): void {
     const dialogRef = this.dialog.open(PerfilDialogComponent, {
-      data: { action, perfil },
+      data: { action, perfil, permissoesCatalogo, perfilProprietario },
       autoFocus: false,
-      width: '600px'
+      width: '860px'
     });
   
     dialogRef.afterClosed().subscribe((result) => {
@@ -212,6 +209,7 @@ export class GerenciarPerfilComponent implements OnInit {
   salvarPerfil(dados: PerfilRequest): void {
     this.perfilService.salvar(dados).subscribe({
       next: () => {
+        this.toastrService.success('Perfil salvo com sucesso');
         this.carregarPerfis();
       },
       error: (err) => this.exibirErro(err, 'Erro ao salvar perfil')
@@ -223,6 +221,7 @@ export class GerenciarPerfilComponent implements OnInit {
       next: () => {
         this.toastrService.success('Perfil atualizado com sucesso');
         this.carregarPerfis();
+        this.recarregarUsuarioSePerfilAtual(id);
       },
       error: (err) => this.exibirErro(err, 'Erro ao atualizar perfil')
     });
@@ -246,16 +245,33 @@ export class GerenciarPerfilComponent implements OnInit {
 
   private montarPayloadPerfil(data: any): PerfilRequest {
     const permissoes = Object.entries(data.permissoes || {})
-      .map(([chave, selecionada]) => ({
-        id: this.permissoesMap[chave],
+      .map(([id, selecionada]) => ({
+        id: Number(id),
         selecionada: !!selecionada
       }))
-      .filter((p): p is { id: number; selecionada: boolean } => typeof p.id === 'number');
+      .filter((p): p is { id: number; selecionada: boolean } => Number.isFinite(p.id));
 
     return {
       nome: data.nome,
       descricao: data.descricao,
       permissoes
     };
+  }
+
+  private recarregarUsuarioSePerfilAtual(perfilId: number): void {
+    let usuarioAtual: Usuario | null = null;
+    try {
+      usuarioAtual = this.authService.getUsuario();
+    } catch {
+      return;
+    }
+
+    if (usuarioAtual?.perfil?.id !== perfilId) {
+      return;
+    }
+
+    this.authService.carregarUsuarioCompleto().subscribe({
+      error: (err) => this.exibirErro(err, 'Perfil atualizado, mas não foi possível recarregar suas permissões atuais.')
+    });
   }
 }

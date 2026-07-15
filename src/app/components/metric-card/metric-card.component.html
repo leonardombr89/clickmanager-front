@@ -1,0 +1,12 @@
+<article class="metric-card metric-card--{{ accent }}" [class.is-disabled]="disabled">
+  <div class="metric-card__content">
+    <span [title]="label">{{ label }}</span>
+    <strong [title]="value">{{ value }}</strong>
+    <small [title]="detail">{{ detail }}</small>
+    <em *ngIf="info" [title]="info">{{ info }}</em>
+  </div>
+
+  <div class="metric-card__icon">
+    <i-tabler [name]="icon" class="icon-28 d-flex"></i-tabler>
+  </div>
+</article>

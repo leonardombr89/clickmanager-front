@@ -2,7 +2,7 @@
 <mat-card class="cardWithShadow">
 
   <app-card-header titulo="Produtos" botaoTexto="Novo Produto" botaoIcone="add"
-    [botaoRota]="['/page/cadastro-tecnico/produtos/criar']" *temPermissao="'GERENCIAR_PRODUTOS'"
+    [botaoRota]="['/page/cadastro-tecnico/produtos/criar']" *temPermissao="'PRODUTOS_CADASTRAR'"
     [helpRota]="['/page/ajuda']"
     helpFragment="produtos"
     helpTexto=""
@@ -44,7 +44,7 @@
             <a (click)="editar(p)" class="m-r-10 cursor-pointer">
               <i-tabler name="edit" class="icon-18"></i-tabler>
             </a>
-            <a *temPermissao="'GERENCIAR_PRODUTOS'" (click)="excluir(p)" class="cursor-pointer">
+            <a *temPermissao="'PRODUTOS_EXCLUIR'" (click)="excluir(p)" class="cursor-pointer">
               <i-tabler name="trash" class="icon-18"></i-tabler>
             </a>
           </td>
@@ -125,7 +125,7 @@
   </div>
 
   <app-mobile-fab-action
-    *temPermissao="'GERENCIAR_PRODUTOS'"
+    *temPermissao="'PRODUTOS_CADASTRAR'"
     label="Novo Produto"
     icon="add"
     [compact]="mobileFabCompact"
@@ -140,7 +140,7 @@
     <span>Editar</span>
   </button>
   <button
-    *temPermissao="'GERENCIAR_PRODUTOS'"
+    *temPermissao="'PRODUTOS_EXCLUIR'"
     mat-menu-item
     type="button"
     (click)="excluir(produtoSelecionadoMenu!)"

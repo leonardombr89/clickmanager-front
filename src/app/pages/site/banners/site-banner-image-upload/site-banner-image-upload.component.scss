@@ -1,0 +1,128 @@
+.site-banner-upload {
+  display: grid;
+  gap: 12px;
+}
+
+.site-banner-upload__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.site-banner-upload__label {
+  color: #0f172a;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.site-banner-upload__label span {
+  color: #dc2626;
+}
+
+.site-banner-upload__panel {
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+  border-radius: 22px;
+  border: 1px dashed rgba(148, 163, 184, 0.5);
+  background: rgba(248, 250, 252, 0.72);
+}
+
+.site-banner-upload__panel--has-image {
+  border-style: solid;
+  background: #fff;
+}
+
+.site-banner-upload__preview {
+  width: 100%;
+  overflow: hidden;
+  border-radius: 18px;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  background: #fff;
+  aspect-ratio: 16 / 6;
+}
+
+.site-banner-upload__preview img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.site-banner-upload__placeholder {
+  min-height: 180px;
+  display: grid;
+  place-items: center;
+  gap: 8px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.9);
+  color: #64748b;
+  text-align: center;
+}
+
+.site-banner-upload__placeholder mat-icon {
+  width: 32px;
+  height: 32px;
+  font-size: 32px;
+}
+
+.site-banner-upload__meta {
+  display: grid;
+  gap: 4px;
+}
+
+.site-banner-upload__meta strong {
+  color: #0f172a;
+  font-size: 0.92rem;
+}
+
+.site-banner-upload__meta small {
+  color: #64748b;
+  font-size: 0.82rem;
+}
+
+.site-banner-upload__actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.site-banner-upload__file-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 0 18px;
+  border-radius: 999px;
+  background: #2563eb;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.site-banner-upload__file-trigger input {
+  display: none;
+}
+
+.site-banner-upload__error {
+  color: #dc2626;
+  font-size: 0.84rem;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .site-banner-upload__preview {
+    aspect-ratio: 16 / 9;
+  }
+
+  .site-banner-upload__actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .site-banner-upload__file-trigger {
+    width: 100%;
+    min-height: 48px;
+  }
+}

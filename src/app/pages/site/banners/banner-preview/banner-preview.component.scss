@@ -1,0 +1,128 @@
+.banner-preview {
+  display: grid;
+  gap: 12px;
+}
+
+.banner-preview__label {
+  color: #0f172a;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.banner-preview__frame {
+  position: relative;
+  min-height: 260px;
+  overflow: hidden;
+  border-radius: 22px;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  background: #0f172a;
+}
+
+.banner-preview__frame img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 260px;
+  object-fit: cover;
+}
+
+.banner-preview__backdrop {
+  position: absolute;
+  inset: 0;
+}
+
+.banner-preview__frame--empty {
+  background: rgba(248, 250, 252, 0.96);
+}
+
+.banner-preview__frame--empty .banner-preview__backdrop {
+  display: none;
+}
+
+.banner-preview__frame--empty .banner-preview__content {
+  color: #0f172a;
+}
+
+.banner-preview__empty {
+  min-height: 260px;
+  display: grid;
+  place-items: center;
+  color: #64748b;
+  text-align: center;
+  padding: 24px;
+}
+
+.banner-preview__content {
+  position: absolute;
+  z-index: 1;
+  left: 28px;
+  right: 28px;
+  bottom: 28px;
+  max-width: 560px;
+  display: grid;
+  gap: 10px;
+  color: #fff;
+}
+
+.banner-preview__content--centro {
+  margin: 0 auto;
+  justify-items: center;
+  text-align: center;
+}
+
+.banner-preview__content--direita {
+  margin-left: auto;
+  justify-items: end;
+  text-align: right;
+}
+
+.banner-preview__content--escuro {
+  color: #111827;
+}
+
+.banner-preview__eyebrow {
+  font-size: 0.82rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.banner-preview__content strong {
+  font-size: 1.65rem;
+  line-height: 1.15;
+}
+
+.banner-preview__content p {
+  margin: 0;
+  font-size: 0.96rem;
+  line-height: 1.5;
+}
+
+.banner-preview__button {
+  width: fit-content;
+  display: inline-flex;
+  align-items: center;
+  min-height: 38px;
+  padding: 0 16px;
+  border-radius: 999px;
+  background: #2563eb;
+  color: #fff;
+  font-weight: 800;
+}
+
+@media (max-width: 768px) {
+  .banner-preview__frame,
+  .banner-preview__frame img,
+  .banner-preview__empty {
+    min-height: 220px;
+  }
+
+  .banner-preview__content {
+    left: 18px;
+    right: 18px;
+    bottom: 18px;
+  }
+
+  .banner-preview__content strong {
+    font-size: 1.25rem;
+  }
+}

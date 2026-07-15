@@ -1,0 +1,35 @@
+.list-filter-bar {
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) repeat(3, minmax(150px, 190px)) auto;
+  gap: 12px;
+  align-items: center;
+}
+
+.list-filter-bar__search {
+  min-width: 0;
+}
+
+.list-filter-bar button {
+  min-height: 44px;
+  white-space: nowrap;
+}
+
+:host ::ng-deep .list-filter-bar .mat-mdc-form-field-subscript-wrapper {
+  display: none;
+}
+
+@media (max-width: 1180px) {
+  .list-filter-bar {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .list-filter-bar {
+    grid-template-columns: 1fr;
+  }
+
+  .list-filter-bar button {
+    margin-top: 0;
+  }
+}

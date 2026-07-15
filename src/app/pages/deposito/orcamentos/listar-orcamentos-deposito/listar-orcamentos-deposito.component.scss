@@ -1,0 +1,123 @@
+.mat-mdc-table .mat-mdc-row .mat-mdc-cell {
+  white-space: normal;
+}
+
+.orcamento-metric-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.orcamento-filter-grid--dates {
+  display: grid;
+  gap: 12px;
+  align-items: start;
+  margin-top: 12px;
+  grid-template-columns: repeat(2, minmax(180px, 220px));
+}
+
+.orcamento-table-panel {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #ffffff;
+  overflow: hidden;
+}
+
+.orcamento-table-panel__header {
+  padding: 14px 16px;
+  border-bottom: 1px solid #e2e8f0;
+  background: #fbfdff;
+}
+
+.orcamento-table-panel .table-responsive {
+  border-radius: 0;
+}
+
+.orcamento-table-panel table {
+  box-shadow: none;
+}
+
+.orcamento-main-cell {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.orcamento-main-cell strong {
+  color: #0f172a;
+  font-size: 0.92rem;
+  line-height: 1.25;
+}
+
+.orcamento-main-cell span {
+  color: #64748b;
+  font-size: 0.8rem;
+  line-height: 1.35;
+}
+
+.text-link {
+  border: 0;
+  background: transparent;
+  color: #0b63ce;
+  font: inherit;
+  font-weight: 700;
+  padding: 0;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.orcamento-state {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  padding: 28px 16px;
+  color: #64748b;
+  text-align: center;
+}
+
+.orcamento-state--empty {
+  margin: 18px;
+  border-radius: 12px;
+  border: 1px dashed rgba(191, 219, 254, 0.9);
+  background: rgba(248, 250, 252, 0.8);
+}
+
+.orcamento-state strong {
+  color: #0f172a;
+  font-size: 1rem;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(34, 197, 94, 0.12);
+  color: #166534;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.status-pill--secondary {
+  background: rgba(37, 99, 235, 0.12);
+  color: #1d4ed8;
+}
+
+.orcamento-mobile-contact {
+  color: #64748b;
+  font-size: 0.85rem;
+}
+
+@media (max-width: 1180px) {
+  .orcamento-metric-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .orcamento-metric-grid,
+  .orcamento-filter-grid--dates {
+    grid-template-columns: 1fr;
+  }
+}

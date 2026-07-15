@@ -27,23 +27,54 @@
           <i-tabler name="shield" class="icon-18 text-primary"></i-tabler>
           <h3 class="f-s-14 f-w-600 m-0">Permissões</h3>
         </div>
-        <mat-slide-toggle color="primary" [checked]="todasSelecionadas" (change)="selecionarTodos($event.checked)">
+        <mat-checkbox color="primary" [checked]="todasSelecionadas" [indeterminate]="algumasSelecionadas" (change)="selecionarTodos($event.checked)">
           Selecionar todos
-        </mat-slide-toggle>
+        </mat-checkbox>
       </div>
 
-      <div formGroupName="permissoes" class="permissoes-grid">
-        <div *ngFor="let grupo of grupos | keyvalue" class="permissao-card">
-          <div class="permissao-title">
-            <span class="f-w-600">{{ grupo.key }}</span>
+      <div *ngIf="avisoProprietario" class="owner-alert">
+        O proprietário da empresa possui acesso total aos módulos ativos, independentemente das permissões deste perfil.
+      </div>
+
+      <div formGroupName="permissoes" class="permissoes-modulos">
+        <div *ngFor="let modulo of modulos" class="modulo-card">
+          <div class="modulo-header">
+            <div>
+              <div class="modulo-title">{{ modulo.titulo }}</div>
+              <div class="modulo-subtitle">{{ modulo.recursos.length }} recurso(s)</div>
+            </div>
+            <mat-checkbox
+              color="primary"
+              [checked]="moduloSelecionado(modulo)"
+              [indeterminate]="moduloParcial(modulo)"
+              (change)="selecionarModulo(modulo, $event.checked)">
+              Selecionar módulo
+            </mat-checkbox>
           </div>
-          <div class="permissao-list">
-            <mat-slide-toggle
-              *ngFor="let permissao of grupo.value"
-              [formControlName]="permissao.chave"
-              color="primary">
-              {{ permissao.titulo }}
-            </mat-slide-toggle>
+
+          <div class="recursos-list">
+            <div *ngFor="let recurso of modulo.recursos" class="recurso-card">
+              <div class="recurso-header">
+                <div class="recurso-title">{{ recurso.titulo }}</div>
+                <mat-checkbox
+                  color="primary"
+                  [checked]="recursoSelecionado(recurso)"
+                  [indeterminate]="recursoParcial(recurso)"
+                  (change)="selecionarRecurso(recurso, $event.checked)">
+                  Selecionar recurso
+                </mat-checkbox>
+              </div>
+
+              <div class="acoes-list">
+                <mat-slide-toggle
+                  *ngFor="let permissao of recurso.permissoes"
+                  [formControlName]="controlName(permissao)"
+                  color="primary"
+                  [title]="descricaoAcao(permissao) || ''">
+                  {{ labelAcao(permissao) }}
+                </mat-slide-toggle>
+              </div>
+            </div>
           </div>
         </div>
       </div>
