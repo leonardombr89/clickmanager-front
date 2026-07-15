@@ -1,6 +1,7 @@
 import { HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { catchError, throwError } from 'rxjs';
 import { ApiService } from 'src/app/services/api.service';
 import {
   DepositoCategoria,
@@ -10,6 +11,9 @@ import {
   DepositoListParams,
   DepositoMarca,
   DepositoMarcaRequest,
+  DepositoOrcamento,
+  DepositoOrcamentoListParams,
+  DepositoOrcamentoStatus,
   DepositoPaginaResponse,
 } from '../models/deposito.models';
 
@@ -18,6 +22,7 @@ export class DepositoService {
   private readonly categoriasEndpoint = 'api/deposito/categorias';
   private readonly marcasEndpoint = 'api/deposito/marcas';
   private readonly itensEndpoint = 'api/deposito/itens';
+  private readonly orcamentosEndpoint = 'api/deposito/orcamentos';
 
   constructor(private readonly api: ApiService) {}
 
@@ -81,10 +86,40 @@ export class DepositoService {
     return this.api.delete<void>(`${this.itensEndpoint}/${id}`);
   }
 
-  private buildParams(params: DepositoListParams): HttpParams {
+  listarOrcamentos(params: DepositoOrcamentoListParams = {}): Observable<DepositoPaginaResponse<DepositoOrcamento>> {
+    return this.api
+      .get<DepositoPaginaResponse<DepositoOrcamento>>(this.orcamentosEndpoint, this.buildParams(params, false))
+      .pipe(catchError((error) => this.handleOrcamentoError(error)));
+  }
+
+  detalharOrcamento(id: number): Observable<DepositoOrcamento> {
+    return this.api
+      .get<DepositoOrcamento>(`${this.orcamentosEndpoint}/${id}`)
+      .pipe(catchError((error) => this.handleOrcamentoError(error)));
+  }
+
+  alterarStatusOrcamento(id: number, status: DepositoOrcamentoStatus): Observable<DepositoOrcamento> {
+    return this.api
+      .patch<DepositoOrcamento>(`${this.orcamentosEndpoint}/${id}/status`, { status })
+      .pipe(catchError((error) => this.handleOrcamentoError(error)));
+  }
+
+  atualizarObservacaoInternaOrcamento(id: number, observacaoInterna: string | null): Observable<DepositoOrcamento> {
+    return this.api
+      .patch<DepositoOrcamento>(`${this.orcamentosEndpoint}/${id}/observacao-interna`, { observacaoInterna })
+      .pipe(catchError((error) => this.handleOrcamentoError(error)));
+  }
+
+  excluirOrcamento(id: number): Observable<void> {
+    return this.api
+      .delete<void>(`${this.orcamentosEndpoint}/${id}`)
+      .pipe(catchError((error) => this.handleOrcamentoError(error)));
+  }
+
+  private buildParams(params: DepositoListParams, incluirTextoPesquisa = true): HttpParams {
     let httpParams = new HttpParams();
 
-    if (params.textoPesquisa?.trim()) {
+    if (incluirTextoPesquisa && params.textoPesquisa?.trim()) {
       httpParams = httpParams.set('textoPesquisa', params.textoPesquisa.trim());
     }
 
@@ -100,6 +135,27 @@ export class DepositoService {
       httpParams = httpParams.set('sort', params.sort.trim());
     }
 
+    const orcamentoParams = params as DepositoOrcamentoListParams;
+    if (orcamentoParams.status) {
+      httpParams = httpParams.set('status', orcamentoParams.status);
+    }
+
+    if (orcamentoParams.origem) {
+      httpParams = httpParams.set('origem', orcamentoParams.origem);
+    }
+
+    if (orcamentoParams.dataInicio) {
+      httpParams = httpParams.set('dataInicio', orcamentoParams.dataInicio);
+    }
+
+    if (orcamentoParams.dataFim) {
+      httpParams = httpParams.set('dataFim', orcamentoParams.dataFim);
+    }
+
     return httpParams;
+  }
+
+  private handleOrcamentoError(error: unknown): Observable<never> {
+    return throwError(() => error);
   }
 }

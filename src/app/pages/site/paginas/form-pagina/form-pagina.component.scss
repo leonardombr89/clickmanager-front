@@ -1,0 +1,89 @@
+.site-pagina-form-layout {
+  display: grid;
+  gap: 18px;
+}
+
+.cadastro-form-grid {
+  display: grid;
+  gap: 18px;
+}
+
+.cadastro-form-grid--double {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.cadastro-form-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.cadastro-form-toggle-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.cadastro-form-toggle {
+  display: grid;
+  gap: 8px;
+}
+
+.cadastro-form-toggle small {
+  color: #64748b;
+  font-size: 0.85rem;
+}
+
+.pagina-meta {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.pagina-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(37, 99, 235, 0.1);
+  color: #1d4ed8;
+  font-size: 0.82rem;
+}
+
+.home-section-disabled {
+  opacity: 0.68;
+}
+
+.home-section-highlight {
+  outline: 2px solid rgba(37, 99, 235, 0.18);
+  outline-offset: 2px;
+}
+
+.home-field-highlight--active {
+  padding: 12px;
+  border-radius: 14px;
+  background: rgba(37, 99, 235, 0.06);
+}
+
+.site-pagina-form-state {
+  min-height: 240px;
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 10px;
+  color: #64748b;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .cadastro-form-grid--double,
+  .cadastro-form-toggle-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  :host ::ng-deep .site-pagina-form-page .mat-mdc-card-content {
+    padding-bottom: 220px;
+  }
+}

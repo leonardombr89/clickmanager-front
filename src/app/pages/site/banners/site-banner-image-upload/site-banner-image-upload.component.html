@@ -1,0 +1,50 @@
+<div class="site-banner-upload">
+  <div class="site-banner-upload__header">
+    <div class="site-banner-upload__label">
+      Imagem do banner
+      <span *ngIf="required">*</span>
+    </div>
+  </div>
+
+  <div class="site-banner-upload__panel" [class.site-banner-upload__panel--has-image]="possuiImagem">
+    @if (possuiImagem) {
+    <div class="site-banner-upload__preview">
+      <img [src]="previewUrl" [alt]="altText || 'Banner do site'" />
+    </div>
+    } @else {
+    <div class="site-banner-upload__placeholder">
+      <mat-icon>image</mat-icon>
+      <span>Nenhuma imagem selecionada.</span>
+    </div>
+    }
+
+    <div class="site-banner-upload__meta">
+      @if (arquivoNome) {
+      <strong>{{ arquivoNome }}</strong>
+      }
+      @if (arquivoTamanho) {
+      <small>{{ arquivoTamanho }}</small>
+      }
+      @if (!arquivoNome) {
+      <small>JPG, PNG ou WEBP</small>
+      }
+    </div>
+
+    <div class="site-banner-upload__actions">
+      <label class="site-banner-upload__file-trigger">
+        <input type="file" accept="image/jpeg,image/png,image/webp" (change)="onFileSelected($event)" />
+        <span>{{ textoAcao }}</span>
+      </label>
+
+      @if (podeRemover) {
+      <button mat-stroked-button color="warn" type="button" (click)="remover()">
+        Remover seleção
+      </button>
+      }
+    </div>
+  </div>
+
+  @if (erro) {
+  <div class="site-banner-upload__error">{{ erro }}</div>
+  }
+</div>

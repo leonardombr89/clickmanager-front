@@ -1,0 +1,157 @@
+<mat-card class="cardWithShadow site-config-card">
+  <app-card-header
+    titulo="Configurações do site"
+    subtitulo="Gerencie publicação, endereço, orçamento e botão geral de WhatsApp."
+    [mostrarDivisor]="true">
+  </app-card-header>
+
+  <mat-card-content>
+    @if (carregando) {
+    <div class="site-config-state">
+      <mat-spinner diameter="32"></mat-spinner>
+      <span>Carregando configurações...</span>
+    </div>
+    } @else {
+    <form [formGroup]="form" (ngSubmit)="salvar()" class="site-config-form">
+      @if (!podeEditar) {
+      <div class="site-config-alert">
+        <mat-icon>lock</mat-icon>
+        <span>Você pode visualizar estas configurações, mas não possui permissão para editar.</span>
+      </div>
+      }
+
+      <section class="site-config-section">
+        <div class="site-config-section__header">
+          <div>
+            <h3>Publicação</h3>
+            <p>Controle se o site público fica disponível para clientes.</p>
+          </div>
+
+          <mat-slide-toggle color="primary" [formControl]="siteAtivoControl">
+            Site ativo
+          </mat-slide-toggle>
+        </div>
+
+        <div class="site-config-grid site-config-grid--two">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Endereço provisório</mat-label>
+            <input matInput [value]="enderecoProvisorio" readonly>
+          </mat-form-field>
+
+          <app-input-texto-restrito
+            [control]="slugPublicoControl"
+            label="Slug público"
+            placeholder="santa-luzia-acabamentos"
+            [maxlength]="120">
+          </app-input-texto-restrito>
+        </div>
+
+        <div class="site-config-actions">
+          <button mat-stroked-button color="primary" type="button" (click)="abrirSiteProvisorio()">
+            Abrir site provisório
+          </button>
+        </div>
+      </section>
+
+      <section class="site-config-section">
+        <div class="site-config-section__header">
+          <div>
+            <h3>Domínio próprio</h3>
+            <p>Informe o domínio que será usado para acessar o site publicado.</p>
+          </div>
+        </div>
+
+        <app-input-texto-restrito
+          [control]="dominioCustomControl"
+          label="Domínio próprio"
+          placeholder="santaluziaacabamentos.com.br"
+          [maxlength]="255">
+        </app-input-texto-restrito>
+
+        <div class="site-config-actions">
+          <button mat-stroked-button color="primary" type="button" (click)="testarDominioCustom()">
+            Testar domínio próprio
+          </button>
+        </div>
+      </section>
+
+      <section class="site-config-section">
+        <div class="site-config-section__header">
+          <div>
+            <h3>Orçamento</h3>
+            <p>Controle a exibição da funcionalidade de solicitação de orçamento.</p>
+          </div>
+
+          <mat-slide-toggle color="primary" [formControl]="orcamentoAtivoControl">
+            Orçamento ativo
+          </mat-slide-toggle>
+        </div>
+      </section>
+
+      <section class="site-config-section">
+        <div class="site-config-section__header">
+          <div>
+            <h3>WhatsApp</h3>
+            <p>Configure o botão geral exibido no site público.</p>
+          </div>
+
+          <mat-slide-toggle color="primary" [formControl]="whatsappAtivoControl">
+            WhatsApp ativo
+          </mat-slide-toggle>
+        </div>
+
+        <div class="site-config-grid site-config-grid--two">
+          <div class="w-100">
+            <mat-label class="f-s-14 f-w-600 m-b-8 d-block">Telefone do WhatsApp</mat-label>
+            <mat-form-field appearance="outline" class="w-100">
+              <input
+                matInput
+                type="tel"
+                inputmode="numeric"
+                [formControl]="whatsappTelefoneControl"
+                placeholder="5531999999999"
+                maxlength="13">
+              @if (whatsappTelefoneControl.invalid && whatsappTelefoneControl.touched) {
+              <mat-error>Informe apenas números, com DDD ou DDI.</mat-error>
+              }
+            </mat-form-field>
+          </div>
+
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Exibição do botão</mat-label>
+            <mat-select [formControl]="whatsappExibicaoControl">
+              @for (exibicao of exibicoesWhatsapp; track exibicao.value) {
+              <mat-option [value]="exibicao.value">{{ exibicao.label }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <app-input-texto-restrito
+          [control]="whatsappTextoControl"
+          label="Texto do botão"
+          placeholder="Fale conosco"
+          [maxlength]="80">
+        </app-input-texto-restrito>
+
+        <app-input-textarea
+          [control]="whatsappMensagemInicialControl"
+          label="Mensagem inicial"
+          placeholder="Olá! Acessei o site e gostaria de mais informações."
+          [rows]="4">
+        </app-input-textarea>
+      </section>
+
+      <div class="site-config-footer" *temPermissao="'SITE_CONFIG_EDITAR'">
+        <button mat-stroked-button color="primary" type="button" (click)="carregarConfiguracao()" [disabled]="salvando">
+          Cancelar
+        </button>
+
+        <button mat-flat-button color="primary" type="submit" [disabled]="!podeSalvar">
+          {{ salvando ? 'Salvando...' : 'Salvar configurações' }}
+        </button>
+      </div>
+    </form>
+    }
+  </mat-card-content>
+</mat-card>

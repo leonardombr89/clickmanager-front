@@ -52,7 +52,7 @@ export class OnboardingV2SummaryPageComponent implements OnInit {
     });
   }
 
-  private loadStep(): void {
+  loadStep(): void {
     this.carregando = true;
     this.onboardingV2State
       .loadResumo()

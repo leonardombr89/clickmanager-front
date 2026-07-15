@@ -1,0 +1,254 @@
+@if (!isMobileView) {
+<mat-card class="cardWithShadow">
+  <app-card-header
+    titulo="Gestão de orçamentos"
+    subtitulo="Acompanhe as solicitações recebidas e organize os atendimentos."
+    [mostrarDivisor]="true">
+  </app-card-header>
+
+  <mat-card-content>
+    <div class="orcamento-metric-grid" *ngIf="indicadores.length">
+      <app-metric-card
+        *ngFor="let indicador of indicadores"
+        [label]="indicador.titulo"
+        [value]="indicador.valor"
+        [detail]="indicador.auxiliar"
+        [icon]="indicador.icon"
+        [accent]="indicador.accent">
+      </app-metric-card>
+    </div>
+
+    <div class="orcamento-table-panel">
+      <div class="orcamento-table-panel__header">
+        <app-list-filter-bar
+          placeholder="Buscar por cliente, telefone ou protocolo"
+          [searchValue]="termoPesquisa"
+          [filters]="filtrosOrcamento"
+          [showClear]="possuiFiltros"
+          (searchChange)="onPesquisar($event)"
+          (filterChange)="onFiltroChange($event)"
+          (clear)="limparFiltros()">
+        </app-list-filter-bar>
+
+        <div class="orcamento-filter-grid orcamento-filter-grid--dates" *ngIf="periodoSelecionado === 'PERSONALIZADO'">
+          <mat-form-field appearance="outline">
+            <mat-label>Data inicial</mat-label>
+            <input matInput type="date" [(ngModel)]="dataInicioPersonalizada" (change)="aplicarFiltros()" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Data final</mat-label>
+            <input matInput type="date" [(ngModel)]="dataFimPersonalizada" (change)="aplicarFiltros()" />
+          </mat-form-field>
+        </div>
+      </div>
+
+      @if (erro && !carregando) {
+      <div class="orcamento-state orcamento-state--empty">
+        <strong>Não foi possível carregar os orçamentos.</strong>
+        <button mat-flat-button color="primary" type="button" (click)="carregarOrcamentos()">Tentar novamente</button>
+      </div>
+      } @else if (carregando) {
+      <div class="orcamento-state">
+        <mat-spinner diameter="30"></mat-spinner>
+        <span>Carregando orçamentos...</span>
+      </div>
+      } @else if (!orcamentosFiltrados.length) {
+      <div class="orcamento-state orcamento-state--empty">
+        <strong>Nenhum orçamento encontrado</strong>
+        <span>{{ possuiFiltros ? 'Nenhum orçamento corresponde aos filtros selecionados.' : 'As solicitações enviadas pelo site aparecerão aqui.' }}</span>
+        <button mat-stroked-button type="button" (click)="limparFiltros()" *ngIf="possuiFiltros">Limpar filtros</button>
+      </div>
+      } @else {
+      <div class="table-responsive">
+        <table mat-table [dataSource]="orcamentosFiltrados" class="mat-elevation-z1 no-wrap m-t-0 v-middle w-100">
+        <ng-container matColumnDef="protocolo">
+          <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">Protocolo</th>
+          <td mat-cell *matCellDef="let orcamento" class="f-s-14">
+            <button class="text-link" type="button" (click)="copiarProtocolo(orcamento)">
+              {{ protocoloLabel(orcamento) }}
+            </button>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="cliente">
+          <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">Cliente</th>
+          <td mat-cell *matCellDef="let orcamento" class="f-s-14">
+            <div class="orcamento-main-cell">
+              <strong>{{ clienteLabel(orcamento) }}</strong>
+              <span>{{ itensLabel(orcamento) }}</span>
+            </div>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="contato">
+          <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">Contato</th>
+          <td mat-cell *matCellDef="let orcamento" class="f-s-14">
+            <div class="orcamento-main-cell">
+              <strong>{{ telefoneOrcamento(orcamento) ? (telefoneOrcamento(orcamento) | telefone) : 'Não informado' }}</strong>
+              <span *ngIf="emailOrcamento(orcamento)">{{ emailOrcamento(orcamento) }}</span>
+            </div>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="total">
+          <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">Valor</th>
+          <td mat-cell *matCellDef="let orcamento" class="f-s-14">
+            {{ totalLabel(orcamento) !== null ? (totalLabel(orcamento) | currency:'BRL':'symbol':'1.2-2') : 'Sob consulta' }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="recebidoEm">
+          <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">Recebido em</th>
+          <td mat-cell *matCellDef="let orcamento" class="f-s-14">{{ dataCriacao(orcamento) | date:'dd/MM/yyyy HH:mm' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">Status</th>
+          <td mat-cell *matCellDef="let orcamento" class="f-s-14">
+            <app-status-badge [status]="orcamento.status"></app-status-badge>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="acao">
+          <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">Ações</th>
+          <td mat-cell *matCellDef="let orcamento" class="action-link">
+            <a [routerLink]="['/page/deposito/orcamentos', orcamento.id]" class="m-r-10 cursor-pointer">
+              <i-tabler name="eye" class="icon-18"></i-tabler>
+            </a>
+            <button mat-icon-button type="button" [matMenuTriggerFor]="acoesMenu" aria-label="Abrir ações do orçamento">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #acoesMenu="matMenu">
+              <a mat-menu-item [routerLink]="['/page/deposito/orcamentos', orcamento.id]">
+                <mat-icon>visibility</mat-icon>
+                <span>Ver detalhes</span>
+              </a>
+              <button mat-menu-item type="button" (click)="marcarStatus(orcamento, 'EM_ATENDIMENTO')" *ngIf="deveMostrarAcaoStatus(orcamento, 'EM_ATENDIMENTO')">
+                <mat-icon>support_agent</mat-icon>
+                <span>Marcar em atendimento</span>
+              </button>
+              <button mat-menu-item type="button" (click)="marcarStatus(orcamento, 'AGUARDANDO_CLIENTE')" *ngIf="deveMostrarAcaoStatus(orcamento, 'AGUARDANDO_CLIENTE')">
+                <mat-icon>schedule</mat-icon>
+                <span>Aguardar cliente</span>
+              </button>
+              <button mat-menu-item type="button" (click)="marcarStatus(orcamento, 'CONVERTIDO')" *ngIf="deveMostrarAcaoStatus(orcamento, 'CONVERTIDO')">
+                <mat-icon>check_circle</mat-icon>
+                <span>Marcar como convertido</span>
+              </button>
+              <button mat-menu-item type="button" (click)="marcarStatus(orcamento, 'PERDIDO')" *ngIf="deveMostrarAcaoStatus(orcamento, 'PERDIDO')">
+                <mat-icon>cancel</mat-icon>
+                <span>Marcar como não convertido</span>
+              </button>
+              <button mat-menu-item type="button" (click)="copiarContato(orcamento)">
+                <mat-icon>content_copy</mat-icon>
+                <span>Copiar contato</span>
+              </button>
+              <button mat-menu-item type="button" (click)="abrirWhatsApp(orcamento)" *ngIf="possuiTelefone(orcamento)">
+                <mat-icon>chat</mat-icon>
+                <span>Conversar pelo WhatsApp</span>
+              </button>
+              <button mat-menu-item type="button" (click)="excluir(orcamento)" *ngIf="podeExcluir">
+                <mat-icon>delete</mat-icon>
+                <span>Excluir</span>
+              </button>
+            </mat-menu>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="colunasExibidas"></tr>
+        <tr mat-row *matRowDef="let row; columns: colunasExibidas"></tr>
+        </table>
+
+        <mat-paginator
+          [length]="totalOrcamentos"
+          [pageIndex]="pagina"
+          [pageSize]="tamanhoPagina"
+          (page)="onPaginaAlterada($event)"
+          showFirstLastButtons>
+        </mat-paginator>
+      </div>
+      }
+    </div>
+  </mat-card-content>
+</mat-card>
+} @else {
+<section class="cadastro-mobile">
+  <div class="cadastro-mobile__sticky">
+    <div class="cadastro-mobile__search">
+      <mat-icon>search</mat-icon>
+      <input type="search" placeholder="Buscar orçamento..." (input)="onPesquisar($any($event.target).value)" />
+    </div>
+  </div>
+
+  <div class="cadastro-mobile__list">
+    @if (carregando) {
+    <div class="cadastro-mobile__state">
+      <mat-spinner diameter="28"></mat-spinner>
+      <span>Carregando orçamentos...</span>
+    </div>
+    } @else if (!orcamentosFiltrados.length) {
+    <div class="cadastro-mobile__state cadastro-mobile__state--empty">
+      <strong>Nenhum orçamento encontrado</strong>
+      <span>As solicitações enviadas pelo site aparecerão aqui.</span>
+    </div>
+    } @else {
+      @for (orcamento of orcamentosFiltrados; track orcamento.id) {
+      <article class="cadastro-mobile-card">
+        <div class="cadastro-mobile-card__head">
+          <div class="cadastro-mobile-card__identity">
+            <strong>{{ clienteLabel(orcamento) }}</strong>
+            <span>{{ protocoloLabel(orcamento) }} • {{ dataCriacao(orcamento) | date:'dd/MM/yyyy HH:mm' }}</span>
+          </div>
+
+          <button
+            mat-icon-button
+            type="button"
+            class="cadastro-mobile-card__menu"
+            [matMenuTriggerFor]="mobileMenu"
+            aria-label="Abrir ações do orçamento">
+            <mat-icon>more_vert</mat-icon>
+          </button>
+        </div>
+
+        <div class="cadastro-mobile-card__footer">
+          <app-status-badge [status]="orcamento.status"></app-status-badge>
+          <span class="status-pill status-pill--secondary">{{ totalLabel(orcamento) !== null ? (totalLabel(orcamento) | currency:'BRL':'symbol':'1.2-2') : 'Sob consulta' }}</span>
+          <span class="status-pill">{{ itensLabel(orcamento) }}</span>
+        </div>
+
+        <div class="orcamento-mobile-contact">
+          {{ telefoneOrcamento(orcamento) ? (telefoneOrcamento(orcamento) | telefone) : 'Não informado' }}
+        </div>
+
+        <mat-menu #mobileMenu="matMenu">
+          <a mat-menu-item [routerLink]="['/page/deposito/orcamentos', orcamento.id]">
+            <mat-icon>visibility</mat-icon>
+            <span>Ver detalhes</span>
+          </a>
+          <button mat-menu-item type="button" (click)="marcarStatus(orcamento, 'EM_ATENDIMENTO')" *ngIf="deveMostrarAcaoStatus(orcamento, 'EM_ATENDIMENTO')">
+            <mat-icon>support_agent</mat-icon>
+            <span>Marcar em atendimento</span>
+          </button>
+          <button mat-menu-item type="button" (click)="marcarStatus(orcamento, 'AGUARDANDO_CLIENTE')" *ngIf="deveMostrarAcaoStatus(orcamento, 'AGUARDANDO_CLIENTE')">
+            <mat-icon>schedule</mat-icon>
+            <span>Aguardar cliente</span>
+          </button>
+          <button mat-menu-item type="button" (click)="marcarStatus(orcamento, 'CONVERTIDO')" *ngIf="deveMostrarAcaoStatus(orcamento, 'CONVERTIDO')">
+            <mat-icon>check_circle</mat-icon>
+            <span>Marcar como convertido</span>
+          </button>
+          <button mat-menu-item type="button" (click)="marcarStatus(orcamento, 'PERDIDO')" *ngIf="deveMostrarAcaoStatus(orcamento, 'PERDIDO')">
+            <mat-icon>cancel</mat-icon>
+            <span>Marcar como não convertido</span>
+          </button>
+          <button mat-menu-item type="button" (click)="abrirWhatsApp(orcamento)" *ngIf="possuiTelefone(orcamento)">
+            <mat-icon>chat</mat-icon>
+            <span>Conversar pelo WhatsApp</span>
+          </button>
+        </mat-menu>
+      </article>
+      }
+    }
+  </div>
+</section>
+}

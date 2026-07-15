@@ -83,7 +83,8 @@ export const navItems: NavItem[] = [
         bgcolor: 'primary',
         route: '/cadastro-tecnico',
         requiredPermission: [
-            'GERENCIAR_PRODUTOS', 'SERVICOS_VER', 'SERVICOS_CADASTRAR', 'SERVICOS_EDITAR', 'SERVICOS_EXCLUIR'
+            'PRODUTOS_VER', 'PRODUTOS_CADASTRAR', 'PRODUTOS_EDITAR', 'PRODUTOS_EXCLUIR',
+            'SERVICOS_VER', 'SERVICOS_CADASTRAR', 'SERVICOS_EDITAR', 'SERVICOS_EXCLUIR'
         ],
         allowedEmpresaTipos: [TipoEmpresa.GRAFICA],
         children: [
@@ -92,7 +93,7 @@ export const navItems: NavItem[] = [
                 iconName: 'point',
                 bgcolor: 'transparent',
                 route: '/page/cadastro-tecnico/acabamentos',
-                requiredPermission: ['GERENCIAR_PRODUTOS'],
+                requiredPermission: ['PRODUTOS_VER', 'PRODUTOS_CADASTRAR', 'PRODUTOS_EDITAR', 'PRODUTOS_EXCLUIR'],
                 allowedEmpresaTipos: [TipoEmpresa.GRAFICA],
             },
             {
@@ -100,7 +101,7 @@ export const navItems: NavItem[] = [
                 iconName: 'point',
                 bgcolor: 'transparent',
                 route: '/page/cadastro-tecnico/cores',
-                requiredPermission: ['GERENCIAR_PRODUTOS'],
+                requiredPermission: ['PRODUTOS_VER', 'PRODUTOS_CADASTRAR', 'PRODUTOS_EDITAR', 'PRODUTOS_EXCLUIR'],
                 allowedEmpresaTipos: [TipoEmpresa.GRAFICA],
             },
             {
@@ -108,7 +109,7 @@ export const navItems: NavItem[] = [
                 iconName: 'point',
                 bgcolor: 'transparent',
                 route: '/page/cadastro-tecnico/formatos',
-                requiredPermission: ['GERENCIAR_PRODUTOS'],
+                requiredPermission: ['PRODUTOS_VER', 'PRODUTOS_CADASTRAR', 'PRODUTOS_EDITAR', 'PRODUTOS_EXCLUIR'],
                 allowedEmpresaTipos: [TipoEmpresa.GRAFICA],
             },
             {
@@ -116,7 +117,7 @@ export const navItems: NavItem[] = [
                 iconName: 'point',
                 bgcolor: 'transparent',
                 route: '/page/cadastro-tecnico/materiais',
-                requiredPermission: ['GERENCIAR_PRODUTOS'],
+                requiredPermission: ['PRODUTOS_VER', 'PRODUTOS_CADASTRAR', 'PRODUTOS_EDITAR', 'PRODUTOS_EXCLUIR'],
                 allowedEmpresaTipos: [TipoEmpresa.GRAFICA],
             },
             {
@@ -132,7 +133,7 @@ export const navItems: NavItem[] = [
                 iconName: 'point',
                 bgcolor: 'transparent',
                 route: '/page/cadastro-tecnico/produtos',
-                requiredPermission: ['GERENCIAR_PRODUTOS'],
+                requiredPermission: ['PRODUTOS_VER', 'PRODUTOS_CADASTRAR', 'PRODUTOS_EDITAR', 'PRODUTOS_EXCLUIR'],
                 allowedEmpresaTipos: [TipoEmpresa.GRAFICA],
             }
         ]
@@ -142,13 +143,7 @@ export const navItems: NavItem[] = [
         iconName: 'layout-dashboard',
         bgcolor: 'primary',
         route: '/page/deposito',
-        requiredPermission: [
-            'DEPOSITO_CATEGORIAS_VER',
-            'DEPOSITO_MARCAS_VER',
-            'DEPOSITO_ITENS_VER',
-            'DEPOSITO_IMAGENS_VER',
-            'DEPOSITO_ORCAMENTOS_VER'
-        ],
+        requiredPermission: ['DEPOSITO_DASHBOARD_VER'],
         allowedEmpresaTipos: [TipoEmpresa.DEPOSITO],
     },
     {
@@ -199,9 +194,9 @@ export const navItems: NavItem[] = [
                 displayName: 'Orçamentos',
                 iconName: 'file-text',
                 bgcolor: 'transparent',
+                route: '/page/deposito/orcamentos',
                 requiredPermission: ['DEPOSITO_ORCAMENTOS_VER'],
                 allowedEmpresaTipos: [TipoEmpresa.DEPOSITO],
-                disabled: true,
             },
         ]
     },
@@ -212,6 +207,39 @@ export const navItems: NavItem[] = [
         route: '/page/cliente',
         requiredPermission: ['CLIENTE_VER', 'CLIENTE_CADASTRAR', 'CLIENTE_EDITAR', 'CLIENTE_EXCLUIR'],
         allowedEmpresaTipos: [TipoEmpresa.GRAFICA],
+    },
+    {
+        displayName: 'Meu Site',
+        iconName: 'world',
+        bgcolor: 'primary',
+        requiredPermission: ['SITE_BANNERS_VER', 'SITE_PAGINAS_VER', 'SITE_CONFIG_VER'],
+        allowedEmpresaTipos: [TipoEmpresa.GRAFICA, TipoEmpresa.DEPOSITO],
+        children: [
+            {
+                displayName: 'Banners',
+                iconName: 'point',
+                bgcolor: 'transparent',
+                route: '/page/site/banners',
+                requiredPermission: ['SITE_BANNERS_VER'],
+                allowedEmpresaTipos: [TipoEmpresa.GRAFICA, TipoEmpresa.DEPOSITO],
+            },
+            {
+                displayName: 'Páginas',
+                iconName: 'point',
+                bgcolor: 'transparent',
+                route: '/page/site/paginas',
+                requiredPermission: ['SITE_PAGINAS_VER'],
+                allowedEmpresaTipos: [TipoEmpresa.GRAFICA, TipoEmpresa.DEPOSITO],
+            },
+            {
+                displayName: 'Configurações',
+                iconName: 'point',
+                bgcolor: 'transparent',
+                route: '/page/site/configuracoes',
+                requiredPermission: ['SITE_CONFIG_VER'],
+                allowedEmpresaTipos: [TipoEmpresa.GRAFICA, TipoEmpresa.DEPOSITO],
+            }
+        ]
     },
     {
         displayName: 'Dados da empresa',

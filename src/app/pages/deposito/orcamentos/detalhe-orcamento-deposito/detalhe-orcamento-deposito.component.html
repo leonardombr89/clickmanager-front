@@ -1,0 +1,205 @@
+<mat-card class="cardWithShadow">
+  <app-card-header
+    titulo="Detalhes do orçamento"
+    subtitulo="Consulte os dados da solicitação e acompanhe o atendimento."
+    [mostrarDivisor]="true">
+  </app-card-header>
+
+  <mat-card-content>
+    @if (carregando) {
+    <div class="orcamento-detail-state">
+      <mat-spinner diameter="30"></mat-spinner>
+      <span>Carregando orçamento...</span>
+    </div>
+    } @else if (orcamento) {
+    <app-section-card titulo="Resumo do orçamento" [divider]="true">
+      <div actions class="detail-actions">
+        <button mat-stroked-button type="button" [matMenuTriggerFor]="statusMenu" *ngIf="podeEditar">
+          <mat-icon>sync_alt</mat-icon>
+          Alterar status
+        </button>
+        <button mat-stroked-button type="button" (click)="abrirWhatsApp()" *ngIf="telefone">
+          <mat-icon>chat</mat-icon>
+          WhatsApp
+        </button>
+        <button mat-stroked-button type="button" (click)="voltar()">
+          <mat-icon>arrow_back</mat-icon>
+          Voltar
+        </button>
+      </div>
+
+      <mat-menu #statusMenu="matMenu">
+        <button mat-menu-item type="button" (click)="marcarStatus('EM_ATENDIMENTO')" *ngIf="deveMostrarAcaoStatus('EM_ATENDIMENTO')">
+          <mat-icon>support_agent</mat-icon>
+          <span>Marcar em atendimento</span>
+        </button>
+        <button mat-menu-item type="button" (click)="marcarStatus('AGUARDANDO_CLIENTE')" *ngIf="deveMostrarAcaoStatus('AGUARDANDO_CLIENTE')">
+          <mat-icon>schedule</mat-icon>
+          <span>Aguardar cliente</span>
+        </button>
+        <button mat-menu-item type="button" (click)="marcarStatus('CONVERTIDO')" *ngIf="deveMostrarAcaoStatus('CONVERTIDO')">
+          <mat-icon>check_circle</mat-icon>
+          <span>Marcar como convertido</span>
+        </button>
+        <button mat-menu-item type="button" (click)="marcarStatus('PERDIDO')" *ngIf="deveMostrarAcaoStatus('PERDIDO')">
+          <mat-icon>cancel</mat-icon>
+          <span>Marcar como não convertido</span>
+        </button>
+      </mat-menu>
+
+      <div class="detail-summary-grid">
+        <div>
+          <span>Protocolo</span>
+          <strong>{{ orcamento.protocolo || ('#' + orcamento.id) }}</strong>
+        </div>
+        <div>
+          <span>Status</span>
+          <app-status-badge [status]="orcamento.status"></app-status-badge>
+        </div>
+        <div>
+          <span>Recebido em</span>
+          <strong>{{ dataCriacao() | date:'dd/MM/yyyy HH:mm' }}</strong>
+        </div>
+        <div>
+          <span>Atualizado em</span>
+          <strong>{{ dataAtualizacao() ? (dataAtualizacao() | date:'dd/MM/yyyy HH:mm') : '-' }}</strong>
+        </div>
+        <div>
+          <span>Itens</span>
+          <strong>{{ itensLabel() }}</strong>
+        </div>
+        <div>
+          <span>Total estimado</span>
+          <strong>{{ totalEstimado() !== null ? (totalEstimado() | currency:'BRL':'symbol':'1.2-2') : 'Sob consulta' }}</strong>
+        </div>
+      </div>
+    </app-section-card>
+
+    <div class="detail-grid m-t-20">
+      <app-section-card titulo="Dados do cliente" [divider]="true">
+        <dl class="detail-list">
+          <div>
+            <dt>Nome</dt>
+            <dd>{{ nomeCliente }}</dd>
+          </div>
+          <div>
+            <dt>Telefone</dt>
+            <dd>{{ telefone ? (telefone | telefone) : 'Não informado' }}</dd>
+          </div>
+          <div>
+            <dt>E-mail</dt>
+            <dd>{{ email || 'Não informado' }}</dd>
+          </div>
+          <div>
+            <dt>Origem da solicitação</dt>
+            <dd>{{ origemLabel(orcamento.origem) }}</dd>
+          </div>
+        </dl>
+
+        <div class="detail-inline-actions">
+          <button mat-stroked-button type="button" (click)="copiarTexto(telefone, 'Telefone')" *ngIf="telefone">
+            <mat-icon>content_copy</mat-icon>
+            Copiar telefone
+          </button>
+          <button mat-stroked-button type="button" (click)="copiarTexto(email, 'E-mail')" *ngIf="email">
+            <mat-icon>content_copy</mat-icon>
+            Copiar e-mail
+          </button>
+          <button mat-stroked-button type="button" (click)="abrirWhatsApp()" *ngIf="telefone">
+            <mat-icon>chat</mat-icon>
+            WhatsApp
+          </button>
+        </div>
+      </app-section-card>
+
+      <app-section-card titulo="Mensagem do cliente" [divider]="true">
+        <p class="detail-message">{{ orcamento.mensagem || 'O cliente não adicionou uma mensagem.' }}</p>
+      </app-section-card>
+    </div>
+
+    <app-section-card titulo="Itens solicitados" subtitulo="Os valores são estimativos e podem ser revisados durante o atendimento." class="d-block m-t-20" [divider]="true">
+      <div actions class="detail-total">
+        {{ totalEstimado() !== null ? (totalEstimado() | currency:'BRL':'symbol':'1.2-2') : 'Sob consulta' }}
+      </div>
+
+      @if (!orcamento.itens?.length) {
+      <div class="orcamento-detail-state orcamento-detail-state--empty">Nenhum item vinculado a esta solicitação.</div>
+      } @else {
+      <div class="table-responsive">
+        <table mat-table [dataSource]="orcamento.itens || []" class="mat-elevation-z1 no-wrap m-t-0 v-middle w-100">
+          <ng-container matColumnDef="produto">
+            <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">Produto</th>
+            <td mat-cell *matCellDef="let item" class="f-s-14">{{ item.produtoNome || 'Produto não informado' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="quantidade">
+            <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">Quantidade</th>
+            <td mat-cell *matCellDef="let item" class="f-s-14">{{ quantidadeLabel(item) }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="precoUnitario">
+            <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">Valor unitário</th>
+            <td mat-cell *matCellDef="let item" class="f-s-14">
+              {{ item.sobConsulta ? 'Sob consulta' : (valorUnitario(item) !== null ? (valorUnitario(item) | currency:'BRL':'symbol':'1.2-2') : '-') }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="subtotal">
+            <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">Subtotal</th>
+            <td mat-cell *matCellDef="let item" class="f-s-14">
+              {{ item.subtotalEstimado !== null && item.subtotalEstimado !== undefined ? (item.subtotalEstimado | currency:'BRL':'symbol':'1.2-2') : '-' }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="observacao">
+            <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">Observação</th>
+            <td mat-cell *matCellDef="let item" class="f-s-14">{{ item.observacao || 'Nenhuma observação' }}</td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="colunasItens"></tr>
+          <tr mat-row *matRowDef="let row; columns: colunasItens"></tr>
+        </table>
+      </div>
+      }
+    </app-section-card>
+
+    <div class="detail-grid m-t-20">
+      <app-section-card titulo="Anotações da equipe" subtitulo="Esta anotação é visível apenas para os usuários da empresa." [divider]="true">
+        <mat-form-field appearance="outline" class="w-100">
+          <textarea
+            matInput
+            rows="6"
+            placeholder="Registre informações importantes sobre o atendimento."
+            [(ngModel)]="observacaoInterna"
+            [readonly]="!podeEditar">
+          </textarea>
+        </mat-form-field>
+
+        <div class="detail-inline-actions detail-inline-actions--between">
+          <span>{{ dataAtualizacao() ? 'Atualizado recentemente' : 'Sem atualização registrada' }}</span>
+          <button mat-flat-button color="primary" type="button" (click)="salvarObservacaoInterna()" [disabled]="salvandoObservacao" *ngIf="podeEditar">
+            Salvar anotação
+          </button>
+        </div>
+      </app-section-card>
+
+      <app-section-card titulo="Acompanhamento" [divider]="true">
+        <div class="detail-timeline">
+          <div>
+            <strong>Solicitação recebida</strong>
+            <span>{{ dataCriacao() | date:'dd/MM/yyyy HH:mm' }}</span>
+          </div>
+          <div *ngIf="dataAtualizacao()">
+            <strong>Última atualização</strong>
+            <span>{{ dataAtualizacao() | date:'dd/MM/yyyy HH:mm' }}</span>
+          </div>
+          <div>
+            <strong>Status atual</strong>
+            <span>{{ statusLabel(orcamento.status) }}</span>
+          </div>
+        </div>
+      </app-section-card>
+    </div>
+    }
+  </mat-card-content>
+</mat-card>

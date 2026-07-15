@@ -170,7 +170,7 @@ export class AuthService {
 
   getDefaultRouteForUsuario(usuario?: Usuario | null): string {
     return this.getTipoEmpresa(usuario) === TipoEmpresa.DEPOSITO
-      ? '/page/deposito/itens'
+      ? '/page/deposito'
       : '/dashboards/dashboard1';
   }
 

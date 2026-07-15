@@ -1,0 +1,15 @@
+<div class="bloco-preview">
+  <div class="bloco-preview__image">
+    @if (bloco?.imagemUrl) {
+    <img [src]="bloco?.imagemUrl" [alt]="bloco?.altText || bloco?.titulo || tipoLabel" />
+    } @else {
+    <mat-icon>widgets</mat-icon>
+    }
+  </div>
+
+  <div class="bloco-preview__content">
+    <span>{{ tipoLabel }}</span>
+    <strong>{{ bloco?.titulo || 'Sem título' }}</strong>
+    <small>{{ resumo }}</small>
+  </div>
+</div>

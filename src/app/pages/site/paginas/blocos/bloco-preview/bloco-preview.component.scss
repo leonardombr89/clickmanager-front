@@ -1,0 +1,52 @@
+.bloco-preview {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+}
+
+.bloco-preview__image {
+  width: 72px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 8px;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  background: rgba(248, 250, 252, 0.92);
+  color: #94a3b8;
+}
+
+.bloco-preview__image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.bloco-preview__content {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.bloco-preview__content span {
+  color: #1d4ed8;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.bloco-preview__content strong {
+  color: #0f172a;
+  font-size: 0.92rem;
+  line-height: 1.25;
+}
+
+.bloco-preview__content small {
+  overflow: hidden;
+  color: #64748b;
+  font-size: 0.8rem;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

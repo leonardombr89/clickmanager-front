@@ -1,0 +1,48 @@
+<div class="bloco-upload">
+  <div class="bloco-upload__label">
+    Imagem
+    <span *ngIf="required">*</span>
+  </div>
+
+  <div class="bloco-upload__panel" [class.bloco-upload__panel--has-image]="possuiImagem">
+    @if (possuiImagem) {
+    <div class="bloco-upload__preview">
+      <img [src]="previewUrl" [alt]="altText || 'Imagem do bloco'" />
+    </div>
+    } @else {
+    <div class="bloco-upload__placeholder">
+      <mat-icon>image</mat-icon>
+      <span>Nenhuma imagem selecionada.</span>
+    </div>
+    }
+
+    <div class="bloco-upload__meta">
+      @if (arquivoNome) {
+      <strong>{{ arquivoNome }}</strong>
+      }
+      @if (arquivoTamanho) {
+      <small>{{ arquivoTamanho }}</small>
+      }
+      @if (!arquivoNome) {
+      <small>JPG, PNG ou WEBP</small>
+      }
+    </div>
+
+    <div class="bloco-upload__actions">
+      <label class="bloco-upload__file-trigger">
+        <input type="file" accept="image/jpeg,image/png,image/webp" (change)="onFileSelected($event)" />
+        <span>{{ textoAcao }}</span>
+      </label>
+
+      @if (podeRemover) {
+      <button mat-stroked-button color="warn" type="button" (click)="remover()">
+        Remover seleção
+      </button>
+      }
+    </div>
+  </div>
+
+  @if (erro) {
+  <div class="bloco-upload__error">{{ erro }}</div>
+  }
+</div>

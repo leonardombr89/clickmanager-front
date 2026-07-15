@@ -1,0 +1,24 @@
+<div class="list-filter-bar">
+  <div class="list-filter-bar__search">
+    <app-input-pesquisa
+      [placeholder]="placeholder"
+      [value]="searchValue"
+      [showLabel]="showSearchLabel"
+      (valorAlterado)="onSearchChange($event)">
+    </app-input-pesquisa>
+  </div>
+
+  <mat-form-field appearance="outline" *ngFor="let filter of filters; trackBy: trackByFilter">
+    <mat-label>{{ filter.label }}</mat-label>
+    <mat-select [value]="filter.value" (selectionChange)="onFilterChange(filter.key, $event.value)">
+      <mat-option *ngFor="let option of filter.options; trackBy: trackByOption" [value]="option.value">
+        {{ option.label }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <button mat-stroked-button type="button" (click)="clear.emit()" *ngIf="showClear">
+    <mat-icon>filter_alt_off</mat-icon>
+    Limpar
+  </button>
+</div>

@@ -3,7 +3,7 @@ import { CanActivateFn, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { AuthService } from '../services/auth.service';
 
-export const permissionGuard: CanActivateFn = (route) => {
+export const permissionGuard: CanActivateFn = (route, state) => {
   const auth = inject(AuthService);
   const router = inject(Router);
   const toastr = inject(ToastrService);
@@ -17,6 +17,19 @@ export const permissionGuard: CanActivateFn = (route) => {
   if (hasPermission) return true;
 
   toastr.warning('Você não possui permissão para acessar esta configuração.');
+  const fallback = auth.getDefaultRouteForUsuario();
+
+  if (state.url !== fallback) {
+    return router.createUrlTree([fallback]);
+  }
+
+  if (auth.temPermissao('DEPOSITO_ITENS_VER')) {
+    return router.createUrlTree(['/page/deposito/itens']);
+  }
+
+  if (auth.temPermissao('DADOS_EMPRESA')) {
+    return router.createUrlTree(['/page/empresa']);
+  }
+
   return router.createUrlTree(['/dashboards/dashboard1']);
 };
-

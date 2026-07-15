@@ -85,7 +85,7 @@ export const navItems: NavItem[] = [
     {
         navCap: 'Cadastro Técnico',
         requiredPermission: [
-            'GERENCIAR_PRODUTOS'
+            'PRODUTOS_VER', 'PRODUTOS_CADASTRAR', 'PRODUTOS_EDITAR', 'PRODUTOS_EXCLUIR'
         ]
     },
     {
@@ -94,7 +94,8 @@ export const navItems: NavItem[] = [
         bgcolor: 'primary',
         route: '/cadastro-tecnico',
         requiredPermission: [
-            'GERENCIAR_PRODUTOS', 'SERVICOS_VER', 'SERVICOS_CADASTRAR', 'SERVICOS_EDITAR', 'SERVICOS_EXCLUIR'   
+            'PRODUTOS_VER', 'PRODUTOS_CADASTRAR', 'PRODUTOS_EDITAR', 'PRODUTOS_EXCLUIR',
+            'SERVICOS_VER', 'SERVICOS_CADASTRAR', 'SERVICOS_EDITAR', 'SERVICOS_EXCLUIR'   
         ],
         children: [
             {
@@ -102,35 +103,35 @@ export const navItems: NavItem[] = [
                 iconName: 'point',
                 bgcolor: 'transparent',
                 route: '/page/cadastro-tecnico/acabamentos',
-                requiredPermission: ['GERENCIAR_PRODUTOS']
+                requiredPermission: ['PRODUTOS_VER', 'PRODUTOS_CADASTRAR', 'PRODUTOS_EDITAR', 'PRODUTOS_EXCLUIR']
             },
             {
                 displayName: 'Cores',
                 iconName: 'point',
                 bgcolor: 'transparent',
                 route: '/page/cadastro-tecnico/cores',
-                requiredPermission: ['GERENCIAR_PRODUTOS']
+                requiredPermission: ['PRODUTOS_VER', 'PRODUTOS_CADASTRAR', 'PRODUTOS_EDITAR', 'PRODUTOS_EXCLUIR']
             },
             {
                 displayName: 'Formatos',
                 iconName: 'point',
                 bgcolor: 'transparent',
                 route: '/page/cadastro-tecnico/formatos',
-                requiredPermission: ['GERENCIAR_PRODUTOS']
+                requiredPermission: ['PRODUTOS_VER', 'PRODUTOS_CADASTRAR', 'PRODUTOS_EDITAR', 'PRODUTOS_EXCLUIR']
             },
             {
                 displayName: 'Materiais',
                 iconName: 'point',
                 bgcolor: 'transparent',
                 route: '/page/cadastro-tecnico/materiais',
-                requiredPermission: ['GERENCIAR_PRODUTOS']
+                requiredPermission: ['PRODUTOS_VER', 'PRODUTOS_CADASTRAR', 'PRODUTOS_EDITAR', 'PRODUTOS_EXCLUIR']
             },
             {
                 displayName: 'Produtos',
                 iconName: 'point',
                 bgcolor: 'transparent',
                 route: '/page/cadastro-tecnico/produtos',
-                requiredPermission: ['GERENCIAR_PRODUTOS']
+                requiredPermission: ['PRODUTOS_VER', 'PRODUTOS_CADASTRAR', 'PRODUTOS_EDITAR', 'PRODUTOS_EXCLUIR']
             },
             {
                 displayName: 'Serviços',

@@ -125,7 +125,7 @@ export class FullComponent implements OnInit, OnDestroy {
   swipedNotificationId: number | null = null;
   private ultimaCargaResumoAt = 0;
   private readonly intervaloMinimoResumoMs = 5000;
-  private readonly permissoesEnviarNotificacao = ['NOTIFICACAO_ENVIAR', 'NOTIFICACAO_ENVIAR_EMPRESA'];
+  private readonly permissoesEnviarNotificacao = ['NOTIFICACAO_ENVIAR', 'NOTIFICACAO_ENVIAR_GLOBAL'];
   private notificationTouchStartX: number | null = null;
   mobileBottomNavItems: MobileBottomNavItem[] = [];
 
@@ -673,7 +673,7 @@ export class FullComponent implements OnInit, OnDestroy {
   private buildMobileNavGroups(items: NavItem[]): MobileNavGroup[] {
     const groups: MobileNavGroup[] = [];
     const primaryRoutes = this.tipoEmpresaAtual === TipoEmpresa.DEPOSITO
-      ? new Set(['/page/empresa', '/page/usuarios/listar', '/page/deposito/itens'])
+      ? new Set(['/page/empresa', '/page/usuarios/listar', '/page/deposito'])
       : new Set(['/dashboards/dashboard1', '/page/pedido', '/smartcalc', '/page/cliente']);
     const secondaryItems = items.filter((item) => !item.navCap && !primaryRoutes.has(item.route || ''));
 
@@ -845,11 +845,11 @@ export class FullComponent implements OnInit, OnDestroy {
             action: 'apps',
           },
           {
-            key: 'itens',
-            label: 'Itens',
-            icon: 'package',
-            route: '/page/deposito/itens',
-            startsWith: ['/page/deposito/itens'],
+            key: 'dashboard',
+            label: 'Dashboard',
+            icon: 'layout-dashboard',
+            route: '/page/deposito',
+            startsWith: ['/page/deposito'],
             special: true,
           },
           {

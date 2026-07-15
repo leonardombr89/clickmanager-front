@@ -6,7 +6,7 @@
         helpFragment="produtos"
         helpTexto=""
         helpIcone="help_outline"
-        permissao="GERENCIAR_PRODUTOS" [mostrarDivisor]="true">
+        permissao="SERVICOS_CADASTRAR" [mostrarDivisor]="true">
     </app-card-header>
 
     <mat-card-content>
@@ -103,7 +103,7 @@
     </div>
 
     <app-mobile-fab-action
-        *temPermissao="'GERENCIAR_PRODUTOS'"
+        *temPermissao="'SERVICOS_CADASTRAR'"
         label="Novo Serviço"
         icon="add"
         [compact]="mobileFabCompact"

@@ -1,0 +1,173 @@
+<h2 mat-dialog-title>{{ tituloDialog }}</h2>
+
+<mat-dialog-content class="form-bloco-dialog">
+  @if (avisoJsonInvalido) {
+  <div class="form-bloco-alert">
+    O conteúdo salvo deste bloco está inválido. Os campos foram abertos em branco para evitar quebra da tela.
+  </div>
+  }
+
+  <form [formGroup]="form" class="form-bloco-grid">
+    <div class="form-bloco-grid form-bloco-grid--double">
+      <div class="w-100">
+        <mat-label class="f-s-14 f-w-600 m-b-8 d-block">Tipo</mat-label>
+        <mat-form-field appearance="outline" class="w-100">
+          <mat-select formControlName="tipo">
+            @for (tipo of tipos; track tipo.value) {
+            <mat-option [value]="tipo.value">{{ tipo.label }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <div class="w-100">
+        <mat-label class="f-s-14 f-w-600 m-b-8 d-block">Ordem</mat-label>
+        <mat-form-field appearance="outline" class="w-100">
+          <input matInput type="number" min="1" formControlName="ordem" />
+        </mat-form-field>
+      </div>
+    </div>
+
+    <div class="form-bloco-grid form-bloco-grid--double">
+      <app-input-texto-restrito [control]="tituloControl" label="Título" placeholder="Título do bloco">
+      </app-input-texto-restrito>
+
+      <app-input-texto-restrito [control]="subtituloControl" label="Subtítulo" placeholder="Texto complementar">
+      </app-input-texto-restrito>
+    </div>
+
+    <div class="form-bloco-toggle">
+      <mat-slide-toggle formControlName="ativo">Bloco ativo</mat-slide-toggle>
+    </div>
+
+    @if (mostraImagem) {
+    <app-bloco-image-upload
+      [imagemAtual]="imagemAtualUrl"
+      [altText]="altTextControl.value || tituloControl.value || 'Imagem do bloco'"
+      [required]="exigeImagem && !isEditMode"
+      (fileChange)="onImagemSelecionada($event)">
+    </app-bloco-image-upload>
+
+    <app-input-texto-restrito [control]="altTextControl" label="Alt da imagem" placeholder="Descrição acessível da imagem">
+    </app-input-texto-restrito>
+    }
+
+    @switch (tipoSelecionado) {
+      @case ('TEXTO') {
+      <app-input-textarea [control]="htmlControl" label="Conteúdo" placeholder="Texto do bloco" [rows]="7">
+      </app-input-textarea>
+      }
+
+      @case ('TEXTO_IMAGEM') {
+      <app-input-textarea [control]="htmlControl" label="Texto" placeholder="Texto ao lado da imagem" [rows]="6">
+      </app-input-textarea>
+
+      <div class="w-100">
+        <mat-label class="f-s-14 f-w-600 m-b-8 d-block">Posição da imagem</mat-label>
+        <mat-form-field appearance="outline" class="w-100">
+          <mat-select formControlName="posicaoImagem">
+            @for (posicao of posicoesImagem; track posicao.value) {
+            <mat-option [value]="posicao.value">{{ posicao.label }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+      }
+
+      @case ('FAQ') {
+      <div class="faq-editor">
+        <div class="faq-editor__header">
+          <strong>Perguntas e respostas</strong>
+          <button mat-stroked-button color="primary" type="button" (click)="adicionarFaqItem()">
+            Adicionar item
+          </button>
+        </div>
+
+        <div formArrayName="faqItens" class="faq-editor__items">
+          @for (item of faqItens.controls; track $index) {
+          <div [formGroupName]="$index" class="faq-editor__item">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Pergunta</mat-label>
+              <input matInput formControlName="pergunta" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Resposta</mat-label>
+              <textarea matInput rows="3" formControlName="resposta"></textarea>
+            </mat-form-field>
+
+            <button mat-icon-button color="warn" type="button" (click)="removerFaqItem($index)" [disabled]="faqItens.length === 1" aria-label="Remover pergunta">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+          }
+        </div>
+      </div>
+      }
+
+      @case ('CTA') {
+      <div class="form-bloco-grid form-bloco-grid--double">
+        <mat-form-field appearance="outline" class="w-100">
+          <mat-label>Texto do botão</mat-label>
+          <input matInput formControlName="textoBotao" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-100">
+          <mat-label>URL</mat-label>
+          <input matInput formControlName="url" />
+        </mat-form-field>
+      </div>
+
+      <mat-checkbox formControlName="abrirEmNovaAba">Abrir em nova aba</mat-checkbox>
+      }
+
+      @case ('VIDEO') {
+      <mat-form-field appearance="outline" class="w-100">
+        <mat-label>URL do vídeo</mat-label>
+        <input matInput formControlName="url" />
+      </mat-form-field>
+      }
+
+      @case ('MAPA') {
+      <mat-form-field appearance="outline" class="w-100">
+        <mat-label>URL/embed do mapa</mat-label>
+        <input matInput formControlName="urlEmbed" />
+      </mat-form-field>
+      }
+
+      @case ('PRODUTOS') {
+      <mat-form-field appearance="outline" class="w-100">
+        <mat-label>Limite de itens</mat-label>
+        <input matInput type="number" min="1" formControlName="limite" />
+      </mat-form-field>
+      }
+
+      @case ('CATEGORIAS') {
+      <mat-form-field appearance="outline" class="w-100">
+        <mat-label>Limite de itens</mat-label>
+        <input matInput type="number" min="1" formControlName="limite" />
+      </mat-form-field>
+      }
+
+      @case ('MARCAS') {
+      <mat-form-field appearance="outline" class="w-100">
+        <mat-label>Limite de itens</mat-label>
+        <input matInput type="number" min="1" formControlName="limite" />
+      </mat-form-field>
+      }
+
+      @case ('GALERIA') {
+      <div class="form-bloco-alert">
+        Galeria com múltiplas imagens será implementada em uma próxima etapa.
+      </div>
+      }
+    }
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-stroked-button type="button" (click)="cancelar()">Cancelar</button>
+  <button mat-flat-button color="primary" type="button" (click)="salvar()" [disabled]="salvando">
+    {{ salvando ? 'Salvando...' : 'Salvar' }}
+  </button>
+</mat-dialog-actions>

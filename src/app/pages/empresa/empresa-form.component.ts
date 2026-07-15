@@ -71,6 +71,7 @@ export class EmpresaFormComponent implements OnInit {
   imagemPreview: string | ArrayBuffer | null = null;
   imagemOriginal: string | null = './assets/images/logos/LogoPadrao.png';
   imagemBlob: File | null = null;
+  removerLogo = false;
 
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
 
@@ -146,9 +147,6 @@ export class EmpresaFormComponent implements OnInit {
       facebookUrl: [''],
       siteUrl: [''],
       youtubeUrl: [''],
-      slugPublico: [''],
-      dominioCustom: [''],
-      siteAtivo: [true],
       ativa: [true],
       enderecoRequest: this.fb.group({
         cep: ['', Validators.required],
@@ -175,9 +173,6 @@ export class EmpresaFormComponent implements OnInit {
       facebookUrl: empresa.facebookUrl || '',
       siteUrl: empresa.siteUrl || '',
       youtubeUrl: empresa.youtubeUrl || '',
-      slugPublico: empresa.slugPublico || '',
-      dominioCustom: empresa.dominioCustom || '',
-      siteAtivo: empresa.siteAtivo ?? true,
       ativa: empresa.ativa ?? true,
       enderecoRequest: {
         cep: empresa.endereco?.cep || '',
@@ -190,11 +185,10 @@ export class EmpresaFormComponent implements OnInit {
       }
     });
 
-    this.imagemOriginal = empresa.logoPath
-      ? ImagemUtil.montarUrlImagemLogo(empresa.logoPath)
-      : this.IMAGEM_PADRAO;
+    this.imagemOriginal = empresa.logoUrl || this.IMAGEM_PADRAO;
 
     this.imagemPreview = this.imagemOriginal;
+    this.removerLogo = false;
   }
 
 
@@ -209,6 +203,7 @@ export class EmpresaFormComponent implements OnInit {
         const fileFromBlob = new File([blob], file.name, { type: blob.type });
         this.imagemBlob = fileFromBlob;
         this.form.get('logo')?.setValue(fileFromBlob);
+        this.removerLogo = false;
       })
       .catch(err => this.toastr.warning(err));
   }
@@ -218,6 +213,7 @@ export class EmpresaFormComponent implements OnInit {
     this.imagemBlob = null;
     this.form.get('logo')?.setValue(null);
     this.imagemOriginal = this.IMAGEM_PADRAO;
+    this.removerLogo = true;
 
     if (input) input.value = '';
   }
@@ -273,6 +269,10 @@ export class EmpresaFormComponent implements OnInit {
     // Adiciona a imagem do logo da empresa, se houver
     if (this.imagemBlob) {
       formData.append('logo', this.imagemBlob, this.imagemBlob.name);
+    }
+
+    if (this.removerLogo) {
+      formData.append('removerLogo', 'true');
     }
 
     // Adiciona o ID do usuário logado
@@ -349,15 +349,6 @@ export class EmpresaFormComponent implements OnInit {
   get youtubeUrlControl(): FormControl {
     return this.form.get('youtubeUrl') as FormControl;
   }
-  get slugPublicoControl(): FormControl {
-    return this.form.get('slugPublico') as FormControl;
-  }
-  get dominioCustomControl(): FormControl {
-    return this.form.get('dominioCustom') as FormControl;
-  }
-  get siteAtivoControl(): FormControl {
-    return this.form.get('siteAtivo') as FormControl;
-  }
   get logoControl(): FormControl {
     return this.form.get('logo') as FormControl;
   }
@@ -384,29 +375,4 @@ export class EmpresaFormComponent implements OnInit {
     return this.form.get('enderecoRequest.estado') as FormControl;
   }
 
-  get enderecoProvisorio(): string {
-    const slug = (this.slugPublicoControl.value || '').trim();
-    return slug ? `/loja/${slug}` : '/loja/seu-slug';
-  }
-
-  abrirSiteProvisorio(): void {
-    const slug = (this.slugPublicoControl.value || '').trim();
-    if (!slug) {
-      this.toastr.warning('Informe o slug público para abrir o site provisório.');
-      return;
-    }
-
-    window.open(`${window.location.origin}/loja/${slug}`, '_blank', 'noopener,noreferrer');
-  }
-
-  testarDominioCustom(): void {
-    const dominio = (this.dominioCustomControl.value || '').trim();
-    if (!dominio) {
-      this.toastr.warning('Informe o domínio próprio para testar.');
-      return;
-    }
-
-    const url = /^https?:\/\//i.test(dominio) ? dominio : `https://${dominio}`;
-    window.open(url, '_blank', 'noopener,noreferrer');
-  }
 }

@@ -35,6 +35,10 @@ export class StatusBadgeComponent {
     AGUARDANDO_CLIENTE: { icon: 'hourglass_empty', label: 'Aguard. cliente', className: 'chip-aguardando' },
     RESPONDIDO: { icon: 'chat_bubble', label: 'Respondido', className: 'chip-orcamento' },
     RESOLVIDO: { icon: 'verified', label: 'Resolvido', className: 'chip-pronto' },
+    NOVO: { icon: 'fiber_new', label: 'Novo', className: 'chip-pendente' },
+    EM_ATENDIMENTO: { icon: 'support_agent', label: 'Em atendimento', className: 'chip-orcamento' },
+    CONVERTIDO: { icon: 'check_circle', label: 'Convertido', className: 'chip-pronto' },
+    PERDIDO: { icon: 'cancel', label: 'Não convertido', className: 'chip-cancelado' },
   };
 
   get config(): StatusConfig {

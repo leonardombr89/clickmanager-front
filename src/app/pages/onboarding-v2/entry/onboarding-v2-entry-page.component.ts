@@ -185,6 +185,12 @@ export class OnboardingV2EntryPageComponent implements OnInit {
             return;
           }
 
+          if (isOnboardingV2Finished(progress)) {
+            this.toastr.success('Conta criada. Seu painel já está liberado.');
+            this.router.navigateByUrl(this.authService.getDefaultRouteForUsuario());
+            return;
+          }
+
           this.toastr.success('Conta criada. Vamos preparar sua base inicial.');
           this.router.navigateByUrl(resolveOnboardingV2RouteFromProgress(progress));
         },

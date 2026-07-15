@@ -71,14 +71,4 @@ export class ImagemUtil {
             : 'assets/images/profile/user-1.jpg';
     }
 
-    /**
-     * Monta a URL da logo da empresa
-     */
-    static montarUrlImagemLogo(nomeImagem: string | null | undefined): string {
-        const baseUrl = environment.apiUrl;
-        return nomeImagem
-          ? `${baseUrl}/api/imagens/logo/${nomeImagem}`
-          : './assets/images/logos/LogoPadrao.png';
-      }
-      
 }

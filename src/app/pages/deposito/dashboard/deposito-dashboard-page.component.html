@@ -1,42 +1,245 @@
 <section class="deposito-dashboard">
-  <mat-card class="cardWithShadow">
-    <app-card-header
-      titulo="Dashboard do depósito"
-      subtitulo="Uma visão inicial do módulo, pronta para receber indicadores e atalhos comerciais."
-      [mostrarDivisor]="true">
-    </app-card-header>
+  <mat-card class="deposito-dashboard__shell cardWithShadow">
+    <div class="deposito-dashboard__topbar">
+      <div>
+        <h1>Visão geral da empresa</h1>
+        <p>Acompanhe o desempenho do seu negócio e gerencie catálogo, orçamentos e oportunidades.</p>
+      </div>
+      <span class="deposito-dashboard__updated">
+        <i-tabler name="refresh" class="icon-16 d-flex"></i-tabler>
+        Atualizado agora há pouco
+      </span>
+    </div>
 
-    <div class="deposito-dashboard__hero">
-      <div class="deposito-dashboard__hero-copy">
-        <div class="deposito-dashboard__eyebrow">Visão geral</div>
-        <h1>Central do depósito</h1>
-        <p>
-          Esta página já está reservada para consolidar catálogo, operação comercial e administração em um único painel.
-        </p>
+    <div *ngIf="carregando" class="deposito-dashboard__loading">
+      <mat-spinner diameter="36"></mat-spinner>
+      <span>Carregando dashboard...</span>
+    </div>
+
+    <div *ngIf="erro && !carregando" class="deposito-dashboard__error">
+      <i-tabler name="alert-circle" class="icon-36 d-flex"></i-tabler>
+      <h2>Não foi possível carregar o dashboard.</h2>
+      <p>Tente novamente em alguns instantes.</p>
+      <button mat-flat-button color="primary" type="button" (click)="carregarDashboard()">Tentar novamente</button>
+    </div>
+
+    <ng-container *ngIf="dashboard && !carregando && !erro">
+      <div class="deposito-dashboard__metric-grid">
+        <app-metric-card
+          *ngFor="let indicador of indicadores"
+          [label]="indicador.label"
+          [value]="indicador.valor"
+          [detail]="indicador.detalhe"
+          [info]="indicador.info"
+          [icon]="indicador.icon"
+          [accent]="indicador.accent"
+          [disabled]="indicador.disabled || false">
+        </app-metric-card>
       </div>
 
-      <div class="deposito-dashboard__hero-grid">
-        <article class="deposito-dashboard__metric deposito-dashboard__metric--{{ indicador.accent }}" *ngFor="let indicador of indicadores">
-          <div class="deposito-dashboard__metric-head">
-            <span>{{ indicador.label }}</span>
-            <i-tabler [name]="indicador.icon" class="icon-20 d-flex"></i-tabler>
+      <section class="deposito-dashboard__summary">
+        <div class="deposito-dashboard__summary-copy">
+          <h2>{{ resumoTitulo }}</h2>
+          <p>Aqui está o resumo da sua operação hoje.</p>
+          <p>
+            Seu catálogo está ativo e você possui
+            <strong>{{ pluralizarComNumero(orcamentos?.novos || 0, 'novo orçamento', 'novos orçamentos') }}</strong>
+            e
+            <strong class="text-warning">{{ pluralizarComNumero(orcamentos?.emAtendimento || 0, 'em atendimento', 'em atendimento') }}</strong>.
+          </p>
+        </div>
+
+        <div class="deposito-dashboard__quick">
+          <h3>Ações rápidas</h3>
+          <div class="deposito-dashboard__quick-grid">
+            <a
+              mat-flat-button
+              color="primary"
+              routerLink="/page/deposito/itens/novo"
+              *temPermissao="'DEPOSITO_ITENS_CADASTRAR'">
+              <mat-icon>add</mat-icon>
+              Novo item
+            </a>
+
+            <ng-container *ngIf="podeMostrarAtalhoOrcamentos">
+              <a
+                mat-stroked-button
+                routerLink="/page/deposito/orcamentos"
+                *temPermissao="'DEPOSITO_ORCAMENTOS_VER'">
+                <mat-icon>receipt_long</mat-icon>
+                Ver orçamentos
+              </a>
+            </ng-container>
+
+            <button mat-stroked-button type="button" (click)="abrirMeuSite()" *temPermissao="'SITE_CONFIG_VER'">
+              <mat-icon>open_in_new</mat-icon>
+              Abrir meu site
+            </button>
           </div>
-          <strong>{{ indicador.valor }}</strong>
-          <small>{{ indicador.detalhe }}</small>
-        </article>
-      </div>
-    </div>
-  </mat-card>
+          <div class="deposito-dashboard__quick-help">
+            <span>Cadastrar um novo item no catálogo</span>
+            <span>Acompanhar solicitações recebidas</span>
+            <span>Visualizar sua loja online</span>
+          </div>
+        </div>
+      </section>
 
-  <div class="row">
-    <div class="col-lg-4" *ngFor="let destaque of destaques">
-      <mat-card class="deposito-dashboard__card cardWithShadow">
-      <div class="deposito-dashboard__icon">
-        <i-tabler [name]="destaque.icon" class="icon-24 d-flex"></i-tabler>
+      <div class="deposito-dashboard__main-grid">
+        <mat-card class="deposito-dashboard__panel deposito-dashboard__quality cardWithShadow">
+          <div class="deposito-dashboard__panel-header">
+            <div>
+              <h2>Qualidade do catálogo</h2>
+              <p>Itens que podem ser melhorados para uma apresentação completa.</p>
+            </div>
+          </div>
+
+          <div class="deposito-dashboard__quality-list">
+            <div class="deposito-dashboard__quality-item" [class.has-attention]="item.destaque" *ngFor="let item of qualidadeItens">
+              <div class="deposito-dashboard__quality-icon deposito-dashboard__quality-icon--{{ item.accent }}">
+                <i-tabler [name]="item.icon" class="icon-16 d-flex"></i-tabler>
+              </div>
+              <div>
+                <strong>{{ item.label }}</strong>
+                <span>{{ item.detalhe }}</span>
+              </div>
+              <em>{{ item.valor }}</em>
+            </div>
+          </div>
+
+          <a class="deposito-dashboard__link" routerLink="/page/deposito/itens" *temPermissao="'DEPOSITO_ITENS_VER'">
+            Ver todos os itens
+            <mat-icon>arrow_forward</mat-icon>
+          </a>
+        </mat-card>
+
+        <mat-card class="deposito-dashboard__panel deposito-dashboard__status cardWithShadow">
+          <div class="deposito-dashboard__panel-header">
+            <div>
+              <h2>Situação dos orçamentos</h2>
+              <p>Veja em que etapa estão as solicitações recebidas.</p>
+            </div>
+          </div>
+
+          <div class="deposito-dashboard__status-list">
+            <div class="deposito-dashboard__status-row" *ngFor="let item of statusOrcamentos">
+              <span class="deposito-dashboard__dot" [ngClass]="statusDotClass(item.status)"></span>
+              <span>{{ item.label }}</span>
+              <strong>{{ item.valor }}</strong>
+            </div>
+          </div>
+
+          <a
+            class="deposito-dashboard__link deposito-dashboard__link-button"
+            routerLink="/page/deposito/orcamentos"
+            *temPermissao="'DEPOSITO_ORCAMENTOS_VER'">
+            Ver todos os orçamentos
+            <mat-icon>arrow_forward</mat-icon>
+          </a>
+        </mat-card>
+
+        <mat-card class="deposito-dashboard__panel deposito-dashboard__recentes cardWithShadow">
+          <div class="deposito-dashboard__panel-header deposito-dashboard__panel-header--inline">
+            <div>
+              <h2>Orçamentos recentes</h2>
+              <p>Últimas solicitações enviadas pelos clientes.</p>
+            </div>
+            <a
+              class="deposito-dashboard__view-all"
+              routerLink="/page/deposito/orcamentos"
+              *temPermissao="'DEPOSITO_ORCAMENTOS_VER'">
+              Ver todos
+            </a>
+          </div>
+
+          <div class="deposito-dashboard__empty" *ngIf="!orcamentosRecentes.length">
+            Nenhum orçamento recebido até agora.
+          </div>
+
+          <div class="deposito-dashboard__table" *ngIf="orcamentosRecentes.length">
+            <table mat-table [dataSource]="orcamentosRecentes" class="w-100">
+              <ng-container matColumnDef="cliente">
+                <th mat-header-cell *matHeaderCellDef>Cliente</th>
+                <td mat-cell *matCellDef="let item">
+                  <strong>{{ item.nome }}</strong>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="telefone">
+                <th mat-header-cell *matHeaderCellDef>Contato</th>
+                <td mat-cell *matCellDef="let item">{{ item.telefone | telefone }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="itens">
+                <th mat-header-cell *matHeaderCellDef>Itens</th>
+                <td mat-cell *matCellDef="let item">{{ itensLabel(item.quantidadeItens) }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="data">
+                <th mat-header-cell *matHeaderCellDef>Recebido em</th>
+                <td mat-cell *matCellDef="let item">{{ item.criadoEm | date:'dd/MM/yyyy HH:mm' }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="status">
+                <th mat-header-cell *matHeaderCellDef>Status</th>
+                <td mat-cell *matCellDef="let item">
+                  <span class="status-badge" [ngClass]="classeStatus(item.status)">{{ labelStatus(item.status) }}</span>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="acao">
+                <th mat-header-cell *matHeaderCellDef>Ação</th>
+                <td mat-cell *matCellDef="let item">
+                  <a
+                    mat-stroked-button
+                    [routerLink]="['/page/deposito/orcamentos', item.id]"
+                    *temPermissao="'DEPOSITO_ORCAMENTOS_VER'">
+                    <mat-icon>visibility</mat-icon>
+                    Ver detalhes
+                  </a>
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="colunasRecentes"></tr>
+              <tr mat-row *matRowDef="let row; columns: colunasRecentes"></tr>
+            </table>
+          </div>
+
+          <div class="deposito-dashboard__recent-mobile" *ngIf="orcamentosRecentes.length">
+            <article class="deposito-dashboard__recent-card" *ngFor="let item of orcamentosRecentes">
+              <div>
+                <strong>{{ item.nome }}</strong>
+                <span>{{ item.telefone | telefone }}</span>
+              </div>
+              <span class="status-badge" [ngClass]="classeStatus(item.status)">{{ labelStatus(item.status) }}</span>
+              <div class="deposito-dashboard__recent-meta">
+                <span>{{ itensLabel(item.quantidadeItens) }}</span>
+                <span>{{ item.criadoEm | date:'dd/MM/yyyy HH:mm' }}</span>
+              </div>
+              <a
+                mat-stroked-button
+                [routerLink]="['/page/deposito/orcamentos', item.id]"
+                *temPermissao="'DEPOSITO_ORCAMENTOS_VER'">
+                <mat-icon>visibility</mat-icon>
+                Ver detalhes
+              </a>
+            </article>
+          </div>
+        </mat-card>
       </div>
-      <h2>{{ destaque.titulo }}</h2>
-      <p>{{ destaque.descricao }}</p>
-    </mat-card>
-    </div>
-  </div>
+
+      <div class="deposito-dashboard__site-alert" [class.is-disabled]="!orcamentos?.ativoNoSite">
+        <div class="deposito-dashboard__site-alert-icon">
+          <i-tabler name="alert-triangle" class="icon-28 d-flex"></i-tabler>
+        </div>
+        <div>
+          <strong>{{ siteOrcamentoMensagem }}</strong>
+          <span>{{ siteOrcamentoDescricao }}</span>
+        </div>
+        <button mat-stroked-button type="button" (click)="configurarSite()" *temPermissao="'SITE_CONFIG_VER'">
+          <mat-icon>settings</mat-icon>
+          Configurar site
+        </button>
+      </div>
+    </ng-container>
+  </mat-card>
 </section>

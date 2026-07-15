@@ -14,6 +14,26 @@ export type DepositoListParams = {
   sort?: string;
 };
 
+export type DepositoOrcamentoStatus =
+  | 'NOVO'
+  | 'EM_ATENDIMENTO'
+  | 'AGUARDANDO_CLIENTE'
+  | 'CONVERTIDO'
+  | 'PERDIDO';
+
+export type DepositoOrcamentoOrigem =
+  | 'SITE'
+  | 'WHATSAPP'
+  | 'ADMIN'
+  | 'OUTRO';
+
+export type DepositoOrcamentoListParams = DepositoListParams & {
+  status?: DepositoOrcamentoStatus;
+  origem?: DepositoOrcamentoOrigem;
+  dataInicio?: string;
+  dataFim?: string;
+};
+
 export type DepositoImagem = {
   id: number;
   storageKey: string;
@@ -157,6 +177,44 @@ export type DepositoItemRequest = {
   destaque?: boolean;
   controlaEstoque?: boolean;
   ativo?: boolean;
+};
+
+export type DepositoOrcamentoItem = {
+  id: number;
+  produtoId?: number | null;
+  produtoSlug?: string | null;
+  produtoNome?: string | null;
+  quantidade?: number | null;
+  unidadeVenda?: DepositoUnidadeVenda | null;
+  precoUnitario?: number | null;
+  precoPromocional?: number | null;
+  sobConsulta?: boolean | null;
+  observacao?: string | null;
+  subtotalEstimado?: number | null;
+  ordem?: number | null;
+};
+
+export type DepositoOrcamento = {
+  id: number;
+  empresaId?: number | null;
+  nome?: string | null;
+  telefone?: string | null;
+  email?: string | null;
+  quantidadeItens?: number | null;
+  criadoEm?: string | null;
+  nomeCliente?: string | null;
+  telefoneCliente?: string | null;
+  emailCliente?: string | null;
+  mensagem?: string | null;
+  observacaoInterna?: string | null;
+  origem?: DepositoOrcamentoOrigem | null;
+  protocolo?: string | null;
+  status?: DepositoOrcamentoStatus | null;
+  totalEstimado?: number | null;
+  createdAt?: string | null;
+  updatedAt?: string | null;
+  atualizadoEm?: string | null;
+  itens?: DepositoOrcamentoItem[] | null;
 };
 
 export type DepositoImagemUploadMetadata = {

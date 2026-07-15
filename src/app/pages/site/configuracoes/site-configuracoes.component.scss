@@ -1,0 +1,96 @@
+.site-config-card {
+  .mat-mdc-card-content {
+    padding-top: 24px;
+  }
+}
+
+.site-config-state {
+  min-height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.site-config-form {
+  display: grid;
+  gap: 20px;
+}
+
+.site-config-alert {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  background: #fff8e1;
+  color: #5f4300;
+}
+
+.site-config-section {
+  border: 1px solid #e5eaef;
+  border-radius: 8px;
+  padding: 20px;
+  display: grid;
+  gap: 16px;
+}
+
+.site-config-section__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+
+  h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+  }
+
+  p {
+    margin: 4px 0 0;
+    color: #5a6a85;
+    font-size: 14px;
+  }
+}
+
+.site-config-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.site-config-grid--two {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.site-config-actions,
+.site-config-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 767px) {
+  .site-config-section {
+    padding: 16px;
+  }
+
+  .site-config-section__header {
+    display: grid;
+  }
+
+  .site-config-grid--two {
+    grid-template-columns: 1fr;
+  }
+
+  .site-config-actions,
+  .site-config-footer {
+    justify-content: stretch;
+
+    button {
+      width: 100%;
+    }
+  }
+}

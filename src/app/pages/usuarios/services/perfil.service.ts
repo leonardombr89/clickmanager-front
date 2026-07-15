@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Perfil } from 'src/app/models/perfil.model';
 import { PerfilRequest } from 'src/app/models/perfil/perfil-request.model';
-import { Permissao } from 'src/app/models/permissao.model';
+import { PermissaoCatalogo } from 'src/app/models/permissao.model';
 import { Usuario } from 'src/app/models/usuario/usuario.model';
 import { ApiService } from 'src/app/services/api.service';
 
@@ -22,8 +22,16 @@ export class PerfilService {
     return this.api.get<Perfil>(`${this.endpoint}/${id}`);
   }
 
-  listarPermissoes(): Observable<Permissao[]> {
-    return this.api.get<Permissao[]>('api/permissoes');
+  listarPermissoes(): Observable<PermissaoCatalogo[]> {
+    return this.listarPermissoesDisponiveis();
+  }
+
+  listarPermissoesDisponiveis(): Observable<PermissaoCatalogo[]> {
+    return this.api.get<PermissaoCatalogo[]>('api/permissoes');
+  }
+
+  listarPermissoesPorPerfil(perfilId: number): Observable<PermissaoCatalogo[]> {
+    return this.api.get<PermissaoCatalogo[]>(`api/permissoes/perfil/${perfilId}`);
   }
 
   salvar(perfil: PerfilRequest): Observable<Perfil> {

@@ -58,7 +58,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   notificacoesNaoLidas = 0;
   carregandoNotificacoes = false;
   podeEnviarNotificacao = false;
-  private readonly permissoesEnviarNotificacao = ['NOTIFICACAO_ENVIAR', 'NOTIFICACAO_ENVIAR_EMPRESA'];
+  private readonly permissoesEnviarNotificacao = ['NOTIFICACAO_ENVIAR', 'NOTIFICACAO_ENVIAR_GLOBAL'];
   private readonly destroy$ = new Subject<void>();
   private ultimaCargaResumoAt = 0;
   private readonly intervaloMinimoResumoMs = 5000;

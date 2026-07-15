@@ -19,7 +19,12 @@
             primaryHint="Você poderá ajustar produtos e configurações no painel."
             (principal)="submit()"
           >
-            <ng-container *ngIf="!carregando && onboardingV2State.resumo(); else loadingTemplate">
+            <ng-container *ngIf="carregando; else loadedTemplate">
+              <ng-container *ngTemplateOutlet="loadingTemplate"></ng-container>
+            </ng-container>
+
+            <ng-template #loadedTemplate>
+            <ng-container *ngIf="onboardingV2State.resumo(); else errorTemplate">
               <section class="onboarding-page__section">
                 <div class="onboarding-v2-summary__grid">
                   <app-section-card
@@ -94,6 +99,7 @@
                 </app-section-card>
               </section>
             </ng-container>
+            </ng-template>
           </app-onboarding-shell>
         </div>
       </div>
@@ -105,4 +111,18 @@
   <div class="onboarding-v2-page__loading">
     <mat-spinner diameter="42"></mat-spinner>
   </div>
+</ng-template>
+
+<ng-template #errorTemplate>
+  <section class="onboarding-page__section">
+    <app-section-card
+      titulo="Não foi possível carregar o resumo"
+      [subtitulo]="onboardingV2State.error() || 'Tente carregar novamente ou entre direto no painel.'"
+      [divider]="true"
+    >
+      <button mat-stroked-button color="primary" type="button" (click)="loadStep()">
+        Tentar novamente
+      </button>
+    </app-section-card>
+  </section>
 </ng-template>
