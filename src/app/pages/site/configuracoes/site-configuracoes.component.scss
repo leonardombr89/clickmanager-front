@@ -145,6 +145,63 @@
   }
 }
 
+.site-config-favicon {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 16px;
+  border: 1px solid #dfe5ef;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.site-config-favicon__preview {
+  width: 72px;
+  height: 72px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  border: 1px solid #d9e2ef;
+  border-radius: 8px;
+  background: #ffffff;
+
+  img {
+    max-width: 44px;
+    max-height: 44px;
+    object-fit: contain;
+  }
+}
+
+.site-config-favicon__content {
+  min-width: 0;
+  display: grid;
+  gap: 6px;
+  flex: 1 1 auto;
+
+  strong {
+    color: #1f2937;
+    font-size: 15px;
+  }
+
+  span,
+  small {
+    color: #5a6a85;
+    font-size: 13px;
+  }
+}
+
+.site-config-favicon__error {
+  color: #c62828 !important;
+}
+
+.site-config-favicon__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 6px;
+}
+
 .site-config-actions,
 .site-config-footer {
   display: flex;
@@ -175,7 +232,13 @@
     grid-template-columns: 1fr;
   }
 
+  .site-config-favicon {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
   .site-config-actions,
+  .site-config-favicon__actions,
   .site-config-footer {
     justify-content: stretch;
 
