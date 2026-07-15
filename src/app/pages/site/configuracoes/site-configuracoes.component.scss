@@ -18,6 +18,39 @@
   gap: 20px;
 }
 
+.site-config-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 20px;
+  border: 1px solid #d9e7ff;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #f7fbff 0%, #eef6ff 100%);
+
+  > div {
+    min-width: 0;
+    display: grid;
+    gap: 4px;
+  }
+
+  strong {
+    color: #1b3764;
+    font-size: 18px;
+    overflow-wrap: anywhere;
+  }
+
+  button {
+    flex: 0 0 auto;
+  }
+}
+
+.site-config-summary__label {
+  color: #5a6a85;
+  font-size: 13px;
+  font-weight: 600;
+}
+
 .site-config-alert {
   display: flex;
   align-items: center;
@@ -31,16 +64,40 @@
 .site-config-section {
   border: 1px solid #e5eaef;
   border-radius: 8px;
-  padding: 20px;
+  padding: 22px;
   display: grid;
-  gap: 16px;
+  gap: 18px;
+  background: #ffffff;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+
+  &:hover {
+    border-color: #d4deea;
+    box-shadow: 0 10px 28px rgba(15, 23, 42, 0.04);
+  }
 }
 
 .site-config-section__header {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: flex-start;
   gap: 16px;
+
+  > mat-icon {
+    width: 40px;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    color: #1267c4;
+    background: #edf5ff;
+    flex: 0 0 auto;
+  }
+
+  > div {
+    min-width: 0;
+    flex: 1 1 auto;
+  }
 
   h3 {
     margin: 0;
@@ -64,6 +121,30 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.site-config-readonly-field {
+  min-height: 72px;
+  display: grid;
+  align-content: center;
+  gap: 6px;
+  padding: 12px 16px;
+  border: 1px solid #dfe5ef;
+  border-radius: 8px;
+  background: #f8fafc;
+
+  span {
+    color: #5a6a85;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  strong {
+    color: #1f2937;
+    font-size: 15px;
+    font-weight: 500;
+    overflow-wrap: anywhere;
+  }
+}
+
 .site-config-actions,
 .site-config-footer {
   display: flex;
@@ -78,7 +159,16 @@
   }
 
   .site-config-section__header {
-    display: grid;
+    display: flex;
+
+    mat-slide-toggle {
+      width: 100%;
+    }
+  }
+
+  .site-config-summary {
+    align-items: stretch;
+    flex-direction: column;
   }
 
   .site-config-grid--two {
