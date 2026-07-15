@@ -40,6 +40,14 @@ export class SiteConfiguracoesComponent implements OnInit {
   form!: FormGroup;
   carregando = false;
   salvando = false;
+  salvandoFavicon = false;
+  faviconUrl = '';
+  faviconPreviewUrl = '';
+  faviconArquivoNome = '';
+  faviconArquivoTamanho = '';
+  faviconErro = '';
+  private faviconSelecionado: File | null = null;
+  private readonly faviconFallbackUrl = 'favicon.ico';
 
   constructor(
     private readonly fb: FormBuilder,
@@ -117,6 +125,14 @@ export class SiteConfiguracoesComponent implements OnInit {
     return slug ? `/loja/${slug}` : '/loja/nome-da-empresa';
   }
 
+  get faviconPreview(): string {
+    return this.faviconPreviewUrl || this.faviconUrl || this.faviconFallbackUrl;
+  }
+
+  get podeSalvarFavicon(): boolean {
+    return this.podeEditar && !this.carregando && !this.salvandoFavicon && !!this.faviconSelecionado;
+  }
+
   carregarConfiguracao(): void {
     this.carregando = true;
     this.siteConfigService.buscar().subscribe({
@@ -178,7 +194,79 @@ export class SiteConfiguracoesComponent implements OnInit {
     window.open(url, '_blank', 'noopener,noreferrer');
   }
 
+  onFaviconSelecionado(event: Event): void {
+    const input = event.target as HTMLInputElement | null;
+    const file = input?.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    if (!this.validarFavicon(file)) {
+      this.limparInputArquivo(input);
+      return;
+    }
+
+    this.faviconSelecionado = file;
+    this.faviconArquivoNome = file.name;
+    this.faviconArquivoTamanho = this.formatarTamanho(file.size);
+    this.faviconErro = '';
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.faviconPreviewUrl = String(reader.result || '');
+    };
+    reader.readAsDataURL(file);
+    this.limparInputArquivo(input);
+  }
+
+  salvarFavicon(): void {
+    if (!this.podeSalvarFavicon || !this.faviconSelecionado) {
+      return;
+    }
+
+    this.salvandoFavicon = true;
+    this.siteConfigService.atualizarFavicon(this.faviconSelecionado).subscribe({
+      next: (config) => {
+        this.salvandoFavicon = false;
+        this.preencherFormulario(config);
+        this.limparFaviconSelecionado();
+        this.toastr.success('Favicon atualizado com sucesso!');
+      },
+      error: (err) => {
+        this.salvandoFavicon = false;
+        this.toastr.error(err?.userMessage || 'Erro ao atualizar o favicon.');
+      },
+    });
+  }
+
+  removerFavicon(): void {
+    if (!this.podeEditar || this.salvandoFavicon) {
+      return;
+    }
+
+    this.salvandoFavicon = true;
+    this.siteConfigService.removerFavicon().subscribe({
+      next: (config) => {
+        this.salvandoFavicon = false;
+        this.preencherFormulario(config);
+        this.limparFaviconSelecionado();
+        this.toastr.success('Favicon removido. O padrão do ClickManager será usado.');
+      },
+      error: (err) => {
+        this.salvandoFavicon = false;
+        this.toastr.error(err?.userMessage || 'Erro ao remover o favicon.');
+      },
+    });
+  }
+
+  cancelarFaviconSelecionado(): void {
+    this.limparFaviconSelecionado();
+  }
+
   private preencherFormulario(config: SiteConfigResponse): void {
+    this.faviconUrl = config.faviconUrl || '';
+    this.faviconPreviewUrl = '';
     this.form.patchValue({
       siteAtivo: config.siteAtivo ?? true,
       slugPublico: config.slugPublico || '',
@@ -227,5 +315,56 @@ export class SiteConfiguracoesComponent implements OnInit {
 
   private publicSiteBaseUrl(): string {
     return (environment.publicSiteBaseUrl || window.location.origin).replace(/\/$/, '');
+  }
+
+  private validarFavicon(file: File): boolean {
+    const tiposPermitidos = ['image/png', 'image/svg+xml', 'image/webp', 'image/x-icon', 'image/vnd.microsoft.icon'];
+    const nomeValido = /\.(png|svg|webp|ico)$/i.test(file.name);
+
+    if (!tiposPermitidos.includes(file.type) && !nomeValido) {
+      this.faviconErro = 'Formato inválido. Use PNG, SVG, WEBP ou ICO.';
+      this.limparFaviconSelecionado(false);
+      return false;
+    }
+
+    if (file.size > 1024 * 1024) {
+      this.faviconErro = 'O favicon deve ter até 1 MB.';
+      this.limparFaviconSelecionado(false);
+      return false;
+    }
+
+    return true;
+  }
+
+  private limparFaviconSelecionado(limparErro = true): void {
+    this.faviconSelecionado = null;
+    this.faviconPreviewUrl = '';
+    this.faviconArquivoNome = '';
+    this.faviconArquivoTamanho = '';
+    if (limparErro) {
+      this.faviconErro = '';
+    }
+  }
+
+  private limparInputArquivo(input?: HTMLInputElement | null): void {
+    if (input) {
+      input.value = '';
+    }
+  }
+
+  private formatarTamanho(bytes: number): string {
+    if (!Number.isFinite(bytes) || bytes <= 0) {
+      return '';
+    }
+
+    if (bytes < 1024) {
+      return `${bytes} B`;
+    }
+
+    if (bytes < 1024 * 1024) {
+      return `${(bytes / 1024).toFixed(1)} KB`;
+    }
+
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   }
 }

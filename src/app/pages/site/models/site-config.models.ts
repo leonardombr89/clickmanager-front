@@ -6,6 +6,7 @@ export interface SiteConfigResponse {
   siteAtivo: boolean;
   slugPublico: string;
   dominioCustom?: string | null;
+  faviconUrl?: string | null;
 
   orcamentoAtivo: boolean;
 
