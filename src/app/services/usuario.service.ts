@@ -7,9 +7,12 @@ import { Observable } from "rxjs";
 export class UsuarioService {
   constructor(private api: ApiService) {}
 
+  buscarAtual(): Observable<Usuario> {
+    return this.api.get<Usuario>('api/usuarios/me');
+  }
+
   buscarPorId(id: number): Observable<Usuario> {
     return this.api.get<Usuario>(`api/usuarios/${id}`);
   }
 
 }
-
