@@ -166,8 +166,40 @@ export class AuthService {
   }
 
   getDefaultRouteForUsuario(usuario?: Usuario | null): string {
+    if (this.temPermissaoDisponivel('DEPOSITO_DASHBOARD_VER', usuario)) {
+      return '/page/deposito';
+    }
+
+    if (this.temPermissaoDisponivel('DEPOSITO_ITENS_VER', usuario)) {
+      return '/page/deposito/itens';
+    }
+
+    if (this.temPermissaoDisponivel('DEPOSITO_CATEGORIAS_VER', usuario)) {
+      return '/page/deposito/categorias';
+    }
+
+    if (this.temPermissaoDisponivel('DEPOSITO_ORCAMENTOS_VER', usuario)) {
+      return '/page/deposito/orcamentos';
+    }
+
+    if (this.temPermissaoDisponivel('SITE_CONFIG_VER', usuario)) {
+      return '/page/site/configuracoes';
+    }
+
+    if (this.temPermissaoDisponivel('SITE_BANNERS_VER', usuario)) {
+      return '/page/site/banners';
+    }
+
+    if (this.temPermissaoDisponivel('SITE_PAGINAS_VER', usuario)) {
+      return '/page/site/paginas';
+    }
+
+    if (this.temPermissaoDisponivel('DADOS_EMPRESA', usuario)) {
+      return '/page/empresa';
+    }
+
     return this.getTipoEmpresa(usuario) === TipoEmpresa.DEPOSITO
-      ? '/page/deposito'
+      ? '/page/ajuda'
       : '/dashboards/dashboard1';
   }
 
@@ -254,5 +286,12 @@ export class AuthService {
   private persistirTokens(tokens: AuthTokens): void {
     this.tokenStorage.salvarTokens(tokens.accessToken, tokens.refreshToken);
     this.jwtPayload = decodeToken(tokens.accessToken);
+  }
+
+  private temPermissaoDisponivel(permissao: string, usuario?: Usuario | null): boolean {
+    const permissoesUsuario = usuario?.perfil?.permissoes || [];
+    const possuiNoUsuario = permissoesUsuario.some((item) => item?.chave === permissao);
+
+    return possuiNoUsuario || this.temPermissao(permissao);
   }
 }
