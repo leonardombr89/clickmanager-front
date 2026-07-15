@@ -68,10 +68,7 @@ export class AuthService {
   }
 
   public carregarUsuarioCompleto(): Observable<Usuario> {
-    const id = this.jwtPayload?.id;
-    if (!id) return throwError(() => new Error('Token inválido'));
-  
-    return this.usuarioService.buscarPorId(id).pipe(
+    return this.usuarioService.buscarAtual().pipe(
       tap(usuario => {
         if (usuario?.proprietario && usuario.empresa) {
           usuario.onboardingIgnorado = usuario.onboardingIgnorado ?? usuario.empresa.onboardingIgnorado;
