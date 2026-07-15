@@ -3,11 +3,14 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { CardHeaderComponent } from 'src/app/components/card-header/card-header.component';
+import { InputOptionsComponent } from 'src/app/components/inputs/input-options/input-options.component';
+import { InputTelefoneComponent } from 'src/app/components/inputs/input-telefone/input-telefone.component';
 import { InputTextareaComponent } from 'src/app/components/inputs/input-textarea/input-textarea.component';
 import { InputTextoRestritoComponent } from 'src/app/components/inputs/input-texto/input-texto-restrito.component';
 import { TemPermissaoDirective } from 'src/app/diretivas/tem-permissao.directive';
 import { MaterialModule } from 'src/app/material.module';
 import { AuthService } from 'src/app/services/auth.service';
+import { environment } from 'src/environments/environment';
 import { SiteConfigResponse, SiteConfigUpdateRequest, SiteWhatsappExibicao } from '../models/site-config.models';
 import { SiteConfigService } from '../services/site-config.service';
 
@@ -19,6 +22,8 @@ import { SiteConfigService } from '../services/site-config.service';
     ReactiveFormsModule,
     MaterialModule,
     CardHeaderComponent,
+    InputOptionsComponent,
+    InputTelefoneComponent,
     InputTextoRestritoComponent,
     InputTextareaComponent,
     TemPermissaoDirective,
@@ -109,7 +114,7 @@ export class SiteConfiguracoesComponent implements OnInit {
 
   get enderecoProvisorio(): string {
     const slug = this.normalizarTexto(this.slugPublicoControl.value);
-    return slug ? `/loja/${slug}` : '/loja/seu-slug';
+    return slug ? `/loja/${slug}` : '/loja/nome-da-empresa';
   }
 
   carregarConfiguracao(): void {
@@ -159,7 +164,7 @@ export class SiteConfiguracoesComponent implements OnInit {
       return;
     }
 
-    window.open(`${window.location.origin}/loja/${slug}`, '_blank', 'noopener,noreferrer');
+    window.open(`${this.publicSiteBaseUrl()}/loja/${slug}`, '_blank', 'noopener,noreferrer');
   }
 
   testarDominioCustom(): void {
@@ -180,7 +185,7 @@ export class SiteConfiguracoesComponent implements OnInit {
       dominioCustom: config.dominioCustom || '',
       orcamentoAtivo: config.orcamentoAtivo ?? true,
       whatsappAtivo: config.whatsappAtivo ?? true,
-      whatsappTelefone: config.whatsappTelefone || '',
+      whatsappTelefone: this.normalizarTelefoneParaFormulario(config.whatsappTelefone),
       whatsappExibicao: config.whatsappExibicao || 'ICONE_TEXTO',
       whatsappTexto: config.whatsappTexto || '',
       whatsappMensagemInicial: config.whatsappMensagemInicial || '',
@@ -210,5 +215,17 @@ export class SiteConfiguracoesComponent implements OnInit {
 
   private normalizarTexto(value: unknown): string {
     return String(value || '').trim();
+  }
+
+  private normalizarTelefoneParaFormulario(value?: string | null): string {
+    const telefone = String(value || '').replace(/\D/g, '');
+    if ((telefone.length === 12 || telefone.length === 13) && telefone.startsWith('55')) {
+      return telefone.slice(2);
+    }
+    return telefone;
+  }
+
+  private publicSiteBaseUrl(): string {
+    return (environment.publicSiteBaseUrl || window.location.origin).replace(/\/$/, '');
   }
 }
