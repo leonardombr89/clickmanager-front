@@ -18,6 +18,13 @@ import { RootRedirectGuard } from './guards/root-redirect.guard';
 
 export const routes: Routes = [
   {
+    path: 'loja/:slug',
+    loadComponent: () =>
+      import('./pages/public-store/public-store-page.component').then(
+        (m) => m.PublicStorePageComponent
+      ),
+  },
+  {
     path: '',
     pathMatch: 'full',
     canActivate: [AuthGuard, RootRedirectGuard],
