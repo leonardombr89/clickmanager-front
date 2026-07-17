@@ -9,6 +9,7 @@
       type="text"
       #inputRef
       [value]="valorFormatado"
+      [disabled]="control.disabled"
       (input)="onInput($event)"
       (paste)="onPaste($event)"
       (keydown)="bloquearNaoNumericos($event)"

@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { SitePaginaBlocoResponse, SitePaginaBlocoTipo } from 'src/app/pages/site/models/site-pagina-bloco.models';
+import { resolveStorageImageUrl } from 'src/app/pages/storage/utils/storage-media-url.util';
 
 @Component({
   selector: 'app-bloco-preview',
@@ -12,6 +13,10 @@ import { SitePaginaBlocoResponse, SitePaginaBlocoTipo } from 'src/app/pages/site
 })
 export class BlocoPreviewComponent {
   @Input() bloco: SitePaginaBlocoResponse | null = null;
+
+  get imagemUrl(): string {
+    return resolveStorageImageUrl(this.bloco, 'CARD', '');
+  }
 
   get tipoLabel(): string {
     return this.labelTipo(this.bloco?.tipo);

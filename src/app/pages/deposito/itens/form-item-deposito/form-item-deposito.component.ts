@@ -5,13 +5,14 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { InputTextareaComponent } from 'src/app/components/inputs/input-textarea/input-textarea.component';
 import { InputTextoRestritoComponent } from 'src/app/components/inputs/input-texto/input-texto-restrito.component';
+import { InputMoedaComponent } from 'src/app/components/inputs/input-moeda/input-moeda.component';
+import { InputNumericoComponent } from 'src/app/components/inputs/input-numerico/input-numerico.component';
 import { MobileTotalBarComponent } from 'src/app/components/mobile-total-bar/mobile-total-bar.component';
 import { PageCardComponent } from 'src/app/components/page-card/page-card.component';
 import { SectionCardComponent } from 'src/app/components/section-card/section-card.component';
 import { MaterialModule } from 'src/app/material.module';
 import { AuthService } from 'src/app/services/auth.service';
 import { DepositoImagemGaleriaComponent } from '../../components/deposito-imagem-galeria/deposito-imagem-galeria.component';
-import { DepositoImagemUploadComponent } from '../../components/deposito-imagem-upload/deposito-imagem-upload.component';
 import { ListaDinamicaInputComponent } from '../../components/lista-dinamica-input/lista-dinamica-input.component';
 import {
   DepositoCategoria,
@@ -36,8 +37,9 @@ import { depositoSlugify } from '../../utils/deposito-slug.util';
     MobileTotalBarComponent,
     InputTextoRestritoComponent,
     InputTextareaComponent,
+    InputMoedaComponent,
+    InputNumericoComponent,
     ListaDinamicaInputComponent,
-    DepositoImagemUploadComponent,
     DepositoImagemGaleriaComponent,
   ],
   templateUrl: './form-item-deposito.component.html',
@@ -97,15 +99,13 @@ export class FormItemDepositoComponent implements OnInit {
       tags: [[] as string[]],
       indicadoPara: [[] as string[]],
       voceEncontra: [[] as string[]],
-      whatsappLink: [''],
-      mensagemPadraoWhatsapp: [''],
-      precoVenda: [null],
-      precoPromocional: [null],
+      precoVenda: [null, [Validators.min(0)]],
+      precoPromocional: [null, [Validators.min(0)]],
       unidadeVenda: ['UNIDADE' as DepositoUnidadeVenda],
       exibirPreco: [true],
       sobConsulta: [false],
       orcamentoIndividual: [true],
-      ordem: [0],
+      ordem: [0, [Validators.min(0)]],
       destaque: [false],
       controlaEstoque: [true],
       ativo: [true],
@@ -123,6 +123,11 @@ export class FormItemDepositoComponent implements OnInit {
       const normalizado = depositoSlugify(String(valor || ''));
       this.slugEditadoManualmente = !!normalizado && normalizado !== depositoSlugify(String(this.nomeControl.value || ''));
     });
+
+    this.sobConsultaControl.valueChanges.subscribe((sobConsulta) => {
+      this.atualizarEstadoCamposPreco(!!sobConsulta);
+    });
+    this.atualizarEstadoCamposPreco(!!this.sobConsultaControl.value);
 
     this.carregarCategorias();
     this.carregarMarcas();
@@ -182,14 +187,6 @@ export class FormItemDepositoComponent implements OnInit {
 
   get voceEncontraControl(): FormControl<string[] | null> {
     return this.form.get('voceEncontra') as FormControl<string[] | null>;
-  }
-
-  get whatsappLinkControl(): FormControl {
-    return this.form.get('whatsappLink') as FormControl;
-  }
-
-  get mensagemPadraoWhatsappControl(): FormControl {
-    return this.form.get('mensagemPadraoWhatsapp') as FormControl;
   }
 
   get precoVendaControl(): FormControl {
@@ -287,9 +284,9 @@ export class FormItemDepositoComponent implements OnInit {
         this.toastr.success(this.isEditMode ? 'Item atualizado com sucesso!' : 'Item criado com sucesso!');
         this.router.navigate(['/page/deposito/itens']);
       },
-      error: () => {
+      error: (err) => {
         this.salvando = false;
-        this.toastr.error(this.isEditMode ? 'Erro ao atualizar o item.' : 'Erro ao criar o item.');
+        this.toastr.error(err?.userMessage || (this.isEditMode ? 'Erro ao atualizar o item.' : 'Erro ao criar o item.'));
       },
     });
   }
@@ -320,6 +317,18 @@ export class FormItemDepositoComponent implements OnInit {
 
   marcaLabel(marca: DepositoMarca): string {
     return marca.ativo ? marca.nome : `${marca.nome} (inativa)`;
+  }
+
+  private atualizarEstadoCamposPreco(sobConsulta: boolean): void {
+    const options = { emitEvent: false };
+    if (sobConsulta) {
+      this.precoVendaControl.disable(options);
+      this.precoPromocionalControl.disable(options);
+      return;
+    }
+
+    this.precoVendaControl.enable(options);
+    this.precoPromocionalControl.enable(options);
   }
 
   private carregarCategorias(): void {
@@ -381,8 +390,6 @@ export class FormItemDepositoComponent implements OnInit {
           tags: item.tags || [],
           indicadoPara: item.indicadoPara || [],
           voceEncontra: item.voceEncontra || [],
-          whatsappLink: item.whatsappLink || '',
-          mensagemPadraoWhatsapp: item.mensagemPadraoWhatsapp || '',
           precoVenda: item.precoVenda ?? null,
           precoPromocional: item.precoPromocional ?? null,
           unidadeVenda: item.unidadeVenda || 'UNIDADE',
@@ -421,8 +428,6 @@ export class FormItemDepositoComponent implements OnInit {
       tags: this.normalizarLista(raw.tags),
       indicadoPara: this.normalizarLista(raw.indicadoPara),
       voceEncontra: this.normalizarLista(raw.voceEncontra),
-      whatsappLink: String(raw.whatsappLink || '').trim() || null,
-      mensagemPadraoWhatsapp: String(raw.mensagemPadraoWhatsapp || '').trim() || null,
       precoVenda: this.normalizarPreco(raw.precoVenda),
       precoPromocional: this.normalizarPreco(raw.precoPromocional),
       unidadeVenda: raw.unidadeVenda || 'UNIDADE',

@@ -1,0 +1,45 @@
+.storage-list {
+  display: grid;
+  gap: 16px;
+}
+
+.storage-filters {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  align-items: start;
+}
+
+.storage-filters__actions {
+  display: flex;
+  gap: 8px;
+  min-height: 56px;
+  align-items: center;
+}
+
+.storage-loading {
+  display: flex;
+  justify-content: center;
+  padding: 32px;
+}
+
+.storage-pager {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+}
+
+td.mat-mdc-cell {
+  vertical-align: middle;
+}
+
+@media (max-width: 900px) {
+  .storage-filters {
+    grid-template-columns: 1fr;
+  }
+
+  .storage-pager {
+    justify-content: space-between;
+  }
+}

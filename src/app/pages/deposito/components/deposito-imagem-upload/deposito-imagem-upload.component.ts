@@ -3,10 +3,15 @@ import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { HttpErrorResponse } from '@angular/common/http';
 import { DepositoImagem } from '../../models/deposito.models';
 import { DepositoImagemService } from '../../services/deposito-imagem.service';
 import { getDepositoImageUrl } from '../../utils/deposito-image.util';
+import {
+  DEPOSITO_IMAGE_UPLOAD_LIMITS,
+  extractDepositoImageUploadError,
+  formatDepositoImageSize,
+  validateDepositoImageFile,
+} from '../../utils/deposito-image-upload-validation.util';
 
 @Component({
   selector: 'app-deposito-imagem-upload',
@@ -16,7 +21,6 @@ import { getDepositoImageUrl } from '../../utils/deposito-image.util';
   styleUrl: './deposito-imagem-upload.component.scss',
 })
 export class DepositoImagemUploadComponent implements OnChanges {
-  @Input({ required: true }) empresaSlug = '';
   @Input({ required: true }) context = 'geral';
   @Input({ required: true }) label = 'Imagem';
   @Input() imagemAtual?: DepositoImagem | null;
@@ -33,6 +37,8 @@ export class DepositoImagemUploadComponent implements OnChanges {
   arquivoTamanho = '';
   ultimoArquivoSelecionado: File | null = null;
   avisoPreview = '';
+  arrastandoArquivo = false;
+  readonly limitesUpload = DEPOSITO_IMAGE_UPLOAD_LIMITS;
 
   constructor(private readonly depositoImagemService: DepositoImagemService) {}
 
@@ -42,34 +48,65 @@ export class DepositoImagemUploadComponent implements OnChanges {
     }
   }
 
-  onFileSelected(event: Event): void {
+  async onFileSelected(event: Event): Promise<void> {
     const input = event.target as HTMLInputElement | null;
     const file = input?.files?.[0];
     if (!file) {
       return;
     }
 
-    if (!this.validarArquivo(file)) {
+    await this.processarArquivo(file);
+
+    if (input) {
       input.value = '';
+    }
+  }
+
+  onDragOver(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (!this.carregando) {
+      this.arrastandoArquivo = true;
+    }
+  }
+
+  onDragLeave(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.arrastandoArquivo = false;
+  }
+
+  async onDrop(event: DragEvent): Promise<void> {
+    event.preventDefault();
+    event.stopPropagation();
+    this.arrastandoArquivo = false;
+
+    if (this.carregando) {
       return;
     }
 
-    if (!this.empresaSlug?.trim()) {
-      this.erro = 'Não foi possível identificar a empresa para enviar a imagem.';
-      input.value = '';
+    const file = event.dataTransfer?.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    await this.processarArquivo(file);
+  }
+
+  private async processarArquivo(file: File): Promise<void> {
+    const validacao = await validateDepositoImageFile(file);
+    if (!validacao.valid) {
+      this.erro = validacao.message || 'Esta imagem não pode ser enviada.';
       return;
     }
 
     this.erro = '';
     this.arquivoNome = file.name;
-    this.arquivoTamanho = this.formatarTamanho(file.size);
+    this.arquivoTamanho = formatDepositoImageSize(file.size);
     this.ultimoArquivoSelecionado = file;
     this.previewLocal(file);
     this.enviarArquivo(file);
-
-    if (input) {
-      input.value = '';
-    }
   }
 
   tentarNovamente(): void {
@@ -117,22 +154,12 @@ export class DepositoImagemUploadComponent implements OnChanges {
   }
 
   private sincronizarImagemAtual(): void {
-    this.previewUrl = this.imagemAtual ? getDepositoImageUrl(this.imagemAtual, '') : '';
+    this.previewUrl = this.imagemAtual ? getDepositoImageUrl(this.imagemAtual, '', 'MEDIUM') : '';
     this.previewFallbackUrl = '';
     this.arquivoNome = this.imagemAtual?.titulo || '';
-    this.arquivoTamanho = this.imagemAtual?.size ? this.formatarTamanho(this.imagemAtual.size) : '';
+    this.arquivoTamanho = this.imagemAtual?.size ? formatDepositoImageSize(this.imagemAtual.size) : '';
     this.ultimoArquivoSelecionado = null;
     this.avisoPreview = '';
-  }
-
-  private validarArquivo(file: File): boolean {
-    const tiposPermitidos = ['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml', 'image/gif'];
-    if (!tiposPermitidos.includes(file.type)) {
-      this.erro = 'Formato inválido. Use PNG, JPG, WEBP, SVG ou GIF.';
-      return false;
-    }
-
-    return true;
   }
 
   private previewLocal(file: File): void {
@@ -150,7 +177,7 @@ export class DepositoImagemUploadComponent implements OnChanges {
     this.uploadingChange.emit(true);
 
     this.depositoImagemService
-      .upload(file, this.empresaSlug.trim(), this.context, {
+      .upload(file, this.context, {
         titulo: file.name,
         altText: this.label,
         principal: this.principal,
@@ -159,7 +186,7 @@ export class DepositoImagemUploadComponent implements OnChanges {
         next: (imagem) => {
           this.carregando = false;
           this.uploadingChange.emit(false);
-          this.previewUrl = getDepositoImageUrl(imagem, this.previewUrl);
+          this.previewUrl = getDepositoImageUrl(imagem, this.previewUrl, 'MEDIUM');
           this.imagemAtual = imagem;
           this.ultimoArquivoSelecionado = null;
           this.avisoPreview = '';
@@ -170,40 +197,8 @@ export class DepositoImagemUploadComponent implements OnChanges {
           this.uploadingChange.emit(false);
           this.imagemAtual = null;
           this.imagemSelecionada.emit(null);
-          this.erro = this.extrairMensagemErro(error);
+          this.erro = extractDepositoImageUploadError(error);
         },
       });
-  }
-
-  private extrairMensagemErro(error: unknown): string {
-    if (error instanceof HttpErrorResponse) {
-      const backendMessage =
-        error.error?.message
-        || error.error?.mensagem
-        || error.error?.error
-        || error.message;
-
-      if (typeof backendMessage === 'string' && backendMessage.trim()) {
-        return backendMessage.trim();
-      }
-    }
-
-    return 'Falha ao enviar a imagem. Tente novamente.';
-  }
-
-  private formatarTamanho(bytes: number): string {
-    if (!Number.isFinite(bytes) || bytes <= 0) {
-      return '';
-    }
-
-    if (bytes < 1024) {
-      return `${bytes} B`;
-    }
-
-    if (bytes < 1024 * 1024) {
-      return `${(bytes / 1024).toFixed(1)} KB`;
-    }
-
-    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   }
 }

@@ -13,11 +13,16 @@ export type SitePaginaBlocoTipo =
 
 export interface SitePaginaBlocoResponse {
   id: number;
+  arquivoId?: number | null;
   tipo: SitePaginaBlocoTipo;
   titulo?: string | null;
   subtitulo?: string | null;
   conteudoJson?: string | Record<string, unknown> | null;
   imagemUrl?: string | null;
+  displayUrl?: string | null;
+  url?: string | null;
+  thumbnailUrl?: string | null;
+  variantes?: Partial<Record<StorageImageVariantType, StorageImageVariant>> | StorageImageVariant[] | null;
   altText?: string | null;
   ordem?: number | null;
   ativo: boolean;
@@ -50,3 +55,4 @@ export interface SitePaginaBlocoOrdenacaoItem {
 export interface SitePaginaBlocoOrdenacaoRequest {
   blocos: SitePaginaBlocoOrdenacaoItem[];
 }
+import { StorageImageVariant, StorageImageVariantType } from '../../storage/models/storage.models';

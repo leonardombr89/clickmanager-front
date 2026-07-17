@@ -1,0 +1,45 @@
+<div class="storage-video-upload">
+  <div class="storage-video-upload__file">
+    <label>
+      <input type="file" accept="video/*,.mp4,.mov,.webm,.m4v" (change)="onFileSelected($event)" />
+      <span>
+        <mat-icon>upload</mat-icon>
+        {{ arquivoNome || 'Selecionar vídeo' }}
+      </span>
+    </label>
+    <small *ngIf="erro">{{ erro }}</small>
+  </div>
+
+  <form [formGroup]="form" class="storage-video-upload__form">
+    <mat-form-field appearance="outline">
+      <mat-label>Contexto</mat-label>
+      <input matInput formControlName="contexto" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Título</mat-label>
+      <input matInput formControlName="titulo" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Nome de exibição</mat-label>
+      <input matInput formControlName="nomeExibicao" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="storage-video-upload__wide">
+      <mat-label>Descrição</mat-label>
+      <textarea matInput formControlName="descricao" rows="2"></textarea>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="storage-video-upload__wide">
+      <mat-label>Texto alternativo</mat-label>
+      <input matInput formControlName="altText" />
+    </mat-form-field>
+  </form>
+
+  <button mat-flat-button color="primary" type="button" (click)="enviar()" [disabled]="enviando">
+    <mat-spinner *ngIf="enviando" diameter="18"></mat-spinner>
+    <mat-icon *ngIf="!enviando">cloud_upload</mat-icon>
+    Enviar vídeo
+  </button>
+</div>

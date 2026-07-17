@@ -194,6 +194,14 @@ export class AuthService {
       return '/page/site/paginas';
     }
 
+    if (this.temPermissaoDisponivel('STORAGE_DASHBOARD_VER', usuario)) {
+      return '/page/site/armazenamento';
+    }
+
+    if (this.temPermissaoDisponivel('STORAGE_ARQUIVOS_VER', usuario)) {
+      return '/page/site/armazenamento/arquivos';
+    }
+
     if (this.temPermissaoDisponivel('DADOS_EMPRESA', usuario)) {
       return '/page/empresa';
     }

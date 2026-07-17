@@ -1,0 +1,21 @@
+<div class="storage-reconciliation">
+  <div class="storage-reconciliation__header">
+    <div>
+      <h3>Reconciliação</h3>
+      <p>Executa uma verificação manual de referências e anomalias de armazenamento.</p>
+    </div>
+    <button mat-flat-button color="primary" type="button" *temPermissao="'STORAGE_RECONCILIAR'" [disabled]="executando" (click)="executar()">
+      <mat-spinner *ngIf="executando" diameter="18"></mat-spinner>
+      <mat-icon *ngIf="!executando">sync</mat-icon>
+      Executar reconciliação
+    </button>
+  </div>
+
+  <mat-card *ngIf="resultado" class="storage-reconciliation__result">
+    <div><span>Verificados</span><strong>{{ verificados }}</strong></div>
+    <div><span>Anomalias</span><strong>{{ resultado.anomalias || 0 }}</strong></div>
+    <div><span>Corrigidos</span><strong>{{ resultado.corrigidos || 0 }}</strong></div>
+    <div><span>Executado em</span><strong>{{ executadoEm }}</strong></div>
+    <p *ngIf="resultado.mensagem">{{ resultado.mensagem }}</p>
+  </mat-card>
+</div>

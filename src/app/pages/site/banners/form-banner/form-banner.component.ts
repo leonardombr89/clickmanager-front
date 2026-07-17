@@ -9,6 +9,7 @@ import { MobileTotalBarComponent } from 'src/app/components/mobile-total-bar/mob
 import { PageCardComponent } from 'src/app/components/page-card/page-card.component';
 import { SectionCardComponent } from 'src/app/components/section-card/section-card.component';
 import { MaterialModule } from 'src/app/material.module';
+import { resolveStorageImageUrl } from 'src/app/pages/storage/utils/storage-media-url.util';
 import { BannerPreviewComponent } from '../banner-preview/banner-preview.component';
 import { SiteBannerImageUploadComponent } from '../site-banner-image-upload/site-banner-image-upload.component';
 import { SiteBannerCorTexto, SiteBannerPosicaoTexto, SiteBannerResponse } from '../../models/site-banner.models';
@@ -252,7 +253,7 @@ export class FormBannerComponent implements OnInit {
   }
 
   private preencherFormulario(banner: SiteBannerResponse): void {
-    this.imagemAtualUrl = banner.imagemUrl || '';
+    this.imagemAtualUrl = resolveStorageImageUrl(banner, 'DESKTOP', '');
     this.previewImagemUrl = this.imagemAtualUrl;
     this.form.patchValue({
       titulo: banner.titulo || '',

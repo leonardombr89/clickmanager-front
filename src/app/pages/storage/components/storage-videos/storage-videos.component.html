@@ -1,0 +1,49 @@
+<div class="storage-videos">
+  <app-storage-video-upload *temPermissao="'STORAGE_VIDEOS_ENVIAR'" (videoEnviado)="onVideoEnviado($event)"></app-storage-video-upload>
+
+  <div class="storage-loading" *ngIf="carregando">
+    <mat-spinner diameter="36"></mat-spinner>
+  </div>
+
+  <div class="storage-videos__grid" *ngIf="!carregando">
+    <mat-card class="storage-video-card" *ngFor="let video of videos">
+      <div class="storage-video-card__media">
+        <video
+          *ngIf="isAtivo(video) && videoUrl(video)"
+          controls
+          preload="metadata"
+          [poster]="poster(video) || null"
+          [src]="videoUrl(video)">
+        </video>
+        <div class="storage-video-card__placeholder" *ngIf="!isAtivo(video) || !videoUrl(video)">
+          <mat-icon>{{ isFalha(video) ? 'error' : 'movie' }}</mat-icon>
+        </div>
+      </div>
+
+      <div class="storage-video-card__body">
+        <div class="storage-video-card__title">
+          <strong>{{ nomeVideo(video) }}</strong>
+          <app-storage-video-status [status]="video.status"></app-storage-video-status>
+        </div>
+        <span>{{ formatBytes(video.size) }}</span>
+        <p *ngIf="video.erroProcessamento">{{ video.erroProcessamento }}</p>
+      </div>
+
+      <div class="storage-video-card__actions">
+        <ng-container *temPermissao="'STORAGE_VIDEOS_REPROCESSAR'">
+          <button mat-stroked-button type="button" *ngIf="isFalha(video)" (click)="reprocessar(video)">
+            <mat-icon>replay</mat-icon>
+            Retry
+          </button>
+        </ng-container>
+        <button mat-stroked-button type="button" *ngIf="isProcessando(video)" (click)="cancelar(video)">
+          <mat-icon>cancel</mat-icon>
+          Cancelar
+        </button>
+        <button mat-icon-button color="warn" type="button" *temPermissao="'STORAGE_VIDEOS_EXCLUIR'" (click)="moverParaLixeira(video)" aria-label="Mover vídeo para lixeira">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </div>
+    </mat-card>
+  </div>
+</div>

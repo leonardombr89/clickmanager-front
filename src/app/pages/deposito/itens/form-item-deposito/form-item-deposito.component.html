@@ -63,12 +63,11 @@
             </mat-form-field>
           </div>
 
-          <div class="w-100">
-            <mat-label class="f-s-14 f-w-600 m-b-8 d-block">Ordem</mat-label>
-            <mat-form-field appearance="outline" class="w-100">
-              <input matInput type="number" min="0" [formControl]="ordemControl" placeholder="Ex.: 1" />
-            </mat-form-field>
-          </div>
+          <app-input-numerico
+            [control]="ordemControl"
+            label="Ordem"
+            placeholder="Ex.: 1">
+          </app-input-numerico>
         </div>
       </div>
     </app-section-card>
@@ -95,33 +94,15 @@
     <app-section-card titulo="Comercial / Preço" subtitulo="Defina como esse item aparece comercialmente no catálogo e no site.">
       <div class="cadastro-form-grid">
         <div class="cadastro-form-grid cadastro-form-grid--triple">
-          <div class="w-100">
-            <mat-label class="f-s-14 f-w-600 m-b-8 d-block">Preço de venda</mat-label>
-            <mat-form-field appearance="outline" class="w-100">
-              <input
-                matInput
-                type="number"
-                min="0"
-                step="0.01"
-                [formControl]="precoVendaControl"
-                [disabled]="sobConsultaControl.value"
-                placeholder="Ex.: 129.90" />
-            </mat-form-field>
-          </div>
+          <app-input-moeda
+            [control]="precoVendaControl"
+            label="Preço de venda">
+          </app-input-moeda>
 
-          <div class="w-100">
-            <mat-label class="f-s-14 f-w-600 m-b-8 d-block">Preço promocional</mat-label>
-            <mat-form-field appearance="outline" class="w-100">
-              <input
-                matInput
-                type="number"
-                min="0"
-                step="0.01"
-                [formControl]="precoPromocionalControl"
-                [disabled]="sobConsultaControl.value"
-                placeholder="Ex.: 99.90" />
-            </mat-form-field>
-          </div>
+          <app-input-moeda
+            [control]="precoPromocionalControl"
+            label="Preço promocional">
+          </app-input-moeda>
 
           <div class="w-100">
             <mat-label class="f-s-14 f-w-600 m-b-8 d-block">Unidade de venda</mat-label>
@@ -158,38 +139,17 @@
       </div>
     </app-section-card>
 
-    <app-section-card titulo="Mídia e contato" subtitulo="Envie a imagem principal, organize a galeria e ajuste o contato comercial.">
+    <app-section-card titulo="Mídia" subtitulo="Envie as imagens do produto e escolha a principal.">
       <div class="cadastro-form-grid">
-        <app-deposito-imagem-upload
-          [empresaSlug]="empresaSlug"
-          context="produtos"
-          label="Imagem principal"
-          [imagemAtual]="imagemPrincipalSelecionada"
-          [principal]="true"
-          (imagemSelecionada)="onImagemPrincipalSelecionada($event)"
-          (uploadingChange)="onUploadingImagemPrincipalChange($event)">
-        </app-deposito-imagem-upload>
-
         <app-deposito-imagem-galeria
-          [empresaSlug]="empresaSlug"
           context="produtos"
+          [gerenciarPrincipal]="true"
+          [imagemPrincipal]="imagemPrincipalSelecionada"
           [imagens]="galeriaSelecionada"
+          (imagemPrincipalChange)="onImagemPrincipalSelecionada($event)"
           (imagensChange)="onGaleriaSelecionada($event)"
           (uploadingChange)="onUploadingGaleriaChange($event)">
         </app-deposito-imagem-galeria>
-
-        <app-input-texto-restrito
-          [control]="whatsappLinkControl"
-          label="Link do WhatsApp"
-          placeholder="https://wa.me/...">
-        </app-input-texto-restrito>
-
-        <app-input-textarea
-          [control]="mensagemPadraoWhatsappControl"
-          label="Mensagem padrão do WhatsApp"
-          placeholder="Olá, quero orçamento deste produto."
-          [rows]="3">
-        </app-input-textarea>
       </div>
     </app-section-card>
 

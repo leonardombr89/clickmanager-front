@@ -3,7 +3,7 @@
 
   <div class="banner-preview__frame" [class.banner-preview__frame--empty]="!imagemUrl">
     @if (imagemUrl) {
-    <img [src]="imagemUrl" [alt]="altText || titulo || 'Banner do site'" />
+    <img [src]="imagemUrl" [alt]="altText || titulo || 'Banner do site'" decoding="async" />
     } @else {
     <div class="banner-preview__empty">Selecione uma imagem para visualizar o banner.</div>
     }
