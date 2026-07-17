@@ -17,6 +17,7 @@ import { ConfirmDialogComponent } from 'src/app/components/dialog/confirm-dialog
 import { InputPesquisaComponent } from 'src/app/components/inputs/input-pesquisa/input-pesquisa.component';
 import { MobileFabActionComponent } from 'src/app/components/mobile-fab-action/mobile-fab-action.component';
 import { TemPermissaoDirective } from 'src/app/diretivas/tem-permissao.directive';
+import { resolveStorageImageUrl } from 'src/app/pages/storage/utils/storage-media-url.util';
 import { SiteBannerResponse } from '../../models/site-banner.models';
 import { SiteBannerService } from '../../services/site-banner.service';
 
@@ -208,6 +209,10 @@ export class ListarBannersComponent implements OnInit {
 
   statusLabel(ativo: boolean): string {
     return ativo ? 'Ativo' : 'Inativo';
+  }
+
+  bannerImagemUrl(banner: SiteBannerResponse): string {
+    return resolveStorageImageUrl(banner, 'CARD', '');
   }
 
   vigenciaLabel(banner: SiteBannerResponse): string {

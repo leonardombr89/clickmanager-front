@@ -10,6 +10,11 @@
   gap: 12px;
 }
 
+.deposito-galeria__header > div {
+  display: grid;
+  gap: 3px;
+}
+
 .deposito-galeria__label {
   color: #0f172a;
   font-size: 0.88rem;
@@ -37,6 +42,12 @@
   border-radius: 22px;
   border: 1px dashed rgba(148, 163, 184, 0.5);
   background: rgba(248, 250, 252, 0.72);
+}
+
+.deposito-galeria__panel--dragging {
+  border-color: rgba(37, 99, 235, 0.85);
+  background: rgba(239, 246, 255, 0.92);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
 }
 
 .deposito-galeria__trigger {
@@ -77,12 +88,14 @@
 
 .deposito-galeria__grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fill, 180px);
+  justify-content: flex-start;
   gap: 14px;
 }
 
 .deposito-galeria__card {
   display: grid;
+  width: 180px;
   gap: 10px;
   padding: 12px;
   border-radius: 18px;
@@ -90,17 +103,40 @@
   background: #fff;
 }
 
+.deposito-galeria__card--primary {
+  border-color: rgba(37, 99, 235, 0.75);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
 .deposito-galeria__preview {
+  position: relative;
+  width: 154px;
+  height: 154px;
   overflow: hidden;
   border-radius: 14px;
   border: 1px solid rgba(226, 232, 240, 0.9);
   background: rgba(248, 250, 252, 0.8);
 }
 
+.deposito-galeria__primary-badge {
+  position: absolute;
+  left: 8px;
+  top: 8px;
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 0 9px;
+  border-radius: 999px;
+  background: rgba(37, 99, 235, 0.92);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
 .deposito-galeria__preview img {
   display: block;
   width: 100%;
-  aspect-ratio: 1 / 1;
+  height: 100%;
   object-fit: cover;
 }
 
@@ -112,11 +148,18 @@
 .deposito-galeria__meta strong {
   color: #0f172a;
   font-size: 0.9rem;
+  line-height: 1.25;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .deposito-galeria__meta small {
   color: #64748b;
   font-size: 0.8rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .deposito-galeria__actions {
@@ -129,6 +172,7 @@
   color: #dc2626;
   font-size: 0.84rem;
   font-weight: 600;
+  white-space: pre-line;
 }
 
 @media (max-width: 768px) {
@@ -142,6 +186,16 @@
   }
 
   .deposito-galeria__grid {
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
+  }
+
+  .deposito-galeria__card {
+    width: 100%;
+  }
+
+  .deposito-galeria__preview {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1 / 1;
   }
 }

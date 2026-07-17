@@ -36,8 +36,12 @@ export type DepositoOrcamentoListParams = DepositoListParams & {
 
 export type DepositoImagem = {
   id: number;
-  storageKey: string;
+  arquivoId?: number | null;
+  status?: string | null;
+  variantes?: Partial<Record<StorageImageVariantType, StorageImageVariant>> | StorageImageVariant[] | null;
+  storageKey?: string | null;
   url?: string | null;
+  imagemUrl?: string | null;
   displayUrl?: string | null;
   titulo?: string | null;
   descricao?: string | null;
@@ -50,6 +54,8 @@ export type DepositoImagem = {
   originalFilename?: string | null;
   contentType?: string | null;
   size?: number | null;
+  largura?: number | null;
+  altura?: number | null;
   ordem?: number | null;
   createdAt?: string | null;
   updatedAt?: string | null;
@@ -223,3 +229,4 @@ export type DepositoImagemUploadMetadata = {
   altText?: string | null;
   principal?: boolean | null;
 };
+import { StorageImageVariant, StorageImageVariantType } from '../../storage/models/storage.models';

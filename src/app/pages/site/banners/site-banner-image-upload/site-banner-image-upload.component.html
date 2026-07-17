@@ -9,7 +9,7 @@
   <div class="site-banner-upload__panel" [class.site-banner-upload__panel--has-image]="possuiImagem">
     @if (possuiImagem) {
     <div class="site-banner-upload__preview">
-      <img [src]="previewUrl" [alt]="altText || 'Banner do site'" />
+      <img [src]="previewUrl" [alt]="altText || 'Banner do site'" decoding="async" />
     </div>
     } @else {
     <div class="site-banner-upload__placeholder">

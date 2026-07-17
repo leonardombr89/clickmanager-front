@@ -9,15 +9,21 @@
     }
   </div>
 
-  <div class="deposito-upload__panel" [class.deposito-upload__panel--has-image]="possuiImagem">
+  <div
+    class="deposito-upload__panel"
+    [class.deposito-upload__panel--has-image]="possuiImagem"
+    [class.deposito-upload__panel--dragging]="arrastandoArquivo"
+    (dragover)="onDragOver($event)"
+    (dragleave)="onDragLeave($event)"
+    (drop)="onDrop($event)">
     @if (possuiImagem) {
     <div class="deposito-upload__preview">
-      <img [src]="previewUrl" [alt]="altPreview" (error)="onPreviewError()" />
+      <img [src]="previewUrl" [alt]="altPreview" decoding="async" (error)="onPreviewError()" />
     </div>
     } @else {
     <div class="deposito-upload__placeholder">
       <mat-icon>image</mat-icon>
-      <span>Nenhuma imagem enviada ainda.</span>
+      <span>Selecione ou arraste uma imagem para cá.</span>
     </div>
     }
 
@@ -29,13 +35,15 @@
       <small>{{ arquivoTamanho }}</small>
       }
       @if (!arquivoNome && !carregando) {
-      <small>PNG, JPG, WEBP, SVG ou GIF</small>
+      <small>JPG, PNG, WEBP, SVG ou ICO até 10 MB.</small>
+      <small>Resolução máxima: 10000 x 10000 px e até 40 MP.</small>
+      <small>Você também pode arrastar o arquivo para esta área.</small>
       }
     </div>
 
     <div class="deposito-upload__actions">
       <label class="deposito-upload__file-trigger">
-        <input type="file" accept="image/*" [disabled]="carregando" (change)="onFileSelected($event)" />
+        <input type="file" [disabled]="carregando" (change)="onFileSelected($event)" />
         <span>{{ possuiImagem ? 'Trocar imagem' : 'Selecionar imagem' }}</span>
       </label>
 

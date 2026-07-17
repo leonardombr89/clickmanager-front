@@ -3,60 +3,120 @@ import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { DepositoImagem } from '../../models/deposito.models';
 import { DepositoImagemService } from '../../services/deposito-imagem.service';
 import { getDepositoImageUrl } from '../../utils/deposito-image.util';
+import {
+  DEPOSITO_IMAGE_UPLOAD_LIMITS,
+  extractDepositoImageUploadError,
+  validateDepositoImageFile,
+} from '../../utils/deposito-image-upload-validation.util';
+
+interface UploadGaleriaResultado {
+  imagem: DepositoImagem | null;
+  fileName: string;
+  erro?: string;
+}
 
 @Component({
   selector: 'app-deposito-imagem-galeria',
   standalone: true,
-  imports: [CommonModule, MatButtonModule, MatIconModule, MatProgressSpinnerModule],
+  imports: [CommonModule, MatButtonModule, MatIconModule, MatProgressSpinnerModule, MatTooltipModule],
   templateUrl: './deposito-imagem-galeria.component.html',
   styleUrl: './deposito-imagem-galeria.component.scss',
 })
 export class DepositoImagemGaleriaComponent implements OnChanges {
-  @Input({ required: true }) empresaSlug = '';
   @Input() context = 'produtos';
+  @Input() imagemPrincipal?: DepositoImagem | null;
   @Input() imagens: DepositoImagem[] = [];
+  @Input() gerenciarPrincipal = false;
 
+  @Output() imagemPrincipalChange = new EventEmitter<DepositoImagem | null>();
   @Output() imagensChange = new EventEmitter<DepositoImagem[]>();
   @Output() uploadingChange = new EventEmitter<boolean>();
 
+  imagemPrincipalInterna: DepositoImagem | null = null;
   imagensInternas: DepositoImagem[] = [];
   carregando = false;
   erro = '';
+  arrastandoArquivos = false;
+  readonly limitesUpload = DEPOSITO_IMAGE_UPLOAD_LIMITS;
 
   constructor(private readonly depositoImagemService: DepositoImagemService) {}
 
   ngOnChanges(changes: SimpleChanges): void {
+    if (changes['imagemPrincipal']) {
+      this.imagemPrincipalInterna = this.imagemPrincipal || null;
+    }
+
     if (changes['imagens']) {
-      this.imagensInternas = [...(this.imagens || [])];
+      this.imagensInternas = this.removerDuplicadas(this.imagens || [], this.imagemPrincipalInterna?.id);
     }
   }
 
-  onFilesSelected(event: Event): void {
+  async onFilesSelected(event: Event): Promise<void> {
     const input = event.target as HTMLInputElement | null;
     const files = Array.from(input?.files || []);
     if (!files.length) {
       return;
     }
 
-    if (!this.empresaSlug?.trim()) {
-      this.erro = 'Não foi possível identificar a empresa para enviar as imagens.';
-      if (input) {
-        input.value = '';
-      }
+    await this.processarArquivos(files);
+
+    if (input) {
+      input.value = '';
+    }
+  }
+
+  onDragOver(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (!this.carregando) {
+      this.arrastandoArquivos = true;
+    }
+  }
+
+  onDragLeave(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.arrastandoArquivos = false;
+  }
+
+  async onDrop(event: DragEvent): Promise<void> {
+    event.preventDefault();
+    event.stopPropagation();
+    this.arrastandoArquivos = false;
+
+    if (this.carregando) {
       return;
     }
 
-    const arquivosValidos = files.filter((file) => this.validarArquivo(file));
+    const files = Array.from(event.dataTransfer?.files || []);
+    if (!files.length) {
+      return;
+    }
+
+    await this.processarArquivos(files);
+  }
+
+  private async processarArquivos(files: File[]): Promise<void> {
+    const validacoes = await Promise.all(
+      files.map(async (file) => ({
+        file,
+        validacao: await validateDepositoImageFile(file),
+      }))
+    );
+    const arquivosValidos = validacoes.filter((item) => item.validacao.valid).map((item) => item.file);
+    const mensagensInvalidas = validacoes
+      .filter((item) => !item.validacao.valid)
+      .map((item) => `${item.file.name}: ${item.validacao.message || 'imagem inválida'}`);
+
     if (!arquivosValidos.length) {
-      this.erro = 'Nenhuma imagem válida foi selecionada.';
-      if (input) {
-        input.value = '';
-      }
+      this.erro = mensagensInvalidas.join('\n\n') || 'Nenhuma imagem válida foi selecionada.';
       return;
     }
 
@@ -66,62 +126,92 @@ export class DepositoImagemGaleriaComponent implements OnChanges {
 
     forkJoin(
       arquivosValidos.map((file) =>
-        this.depositoImagemService.upload(file, this.empresaSlug.trim(), this.context, {
+        this.depositoImagemService.upload(file, this.context, {
           titulo: file.name,
           principal: false,
-        }).pipe(catchError(() => of(null)))
+        }).pipe(
+          catchError((error: unknown) =>
+            of({
+              imagem: null,
+              fileName: file.name,
+              erro: extractDepositoImageUploadError(error),
+            } satisfies UploadGaleriaResultado)
+          )
+        )
       )
     ).subscribe({
       next: (resultado) => {
-        const novasImagens = resultado.filter((item): item is DepositoImagem => !!item);
-        this.imagensInternas = [...this.imagensInternas, ...novasImagens];
+        const resultados = resultado.map((item, index): UploadGaleriaResultado => {
+          if (item && 'imagem' in item) {
+            return item;
+          }
+
+          return {
+            imagem: item as DepositoImagem,
+            fileName: arquivosValidos[index]?.name || 'imagem',
+          };
+        });
+        const novasImagens = resultados
+          .map((item) => item.imagem)
+          .filter((item): item is DepositoImagem => !!item);
+        const mensagensUpload = resultados
+          .filter((item) => item.erro)
+          .map((item) => `${item.fileName}: ${item.erro}`);
+
+        this.adicionarNovasImagens(novasImagens);
         this.emitirMudanca();
         this.carregando = false;
         this.uploadingChange.emit(false);
 
-        if (novasImagens.length !== arquivosValidos.length) {
-          this.erro = 'Algumas imagens não puderam ser enviadas.';
-        }
-
-        if (input) {
-          input.value = '';
-        }
+        this.erro = [...mensagensInvalidas, ...mensagensUpload].join('\n\n');
       },
       error: () => {
         this.carregando = false;
         this.uploadingChange.emit(false);
         this.erro = 'Falha ao enviar as imagens da galeria.';
-        if (input) {
-          input.value = '';
-        }
       },
     });
   }
 
   moverParaCima(index: number): void {
-    if (index <= 0) {
+    const galeriaIndex = this.getGaleriaIndex(index);
+    if (galeriaIndex <= 0) {
       return;
     }
 
     const lista = [...this.imagensInternas];
-    [lista[index - 1], lista[index]] = [lista[index], lista[index - 1]];
+    [lista[galeriaIndex - 1], lista[galeriaIndex]] = [lista[galeriaIndex], lista[galeriaIndex - 1]];
     this.imagensInternas = lista;
     this.emitirMudanca();
   }
 
   moverParaBaixo(index: number): void {
-    if (index >= this.imagensInternas.length - 1) {
+    const galeriaIndex = this.getGaleriaIndex(index);
+    if (galeriaIndex < 0 || galeriaIndex >= this.imagensInternas.length - 1) {
       return;
     }
 
     const lista = [...this.imagensInternas];
-    [lista[index + 1], lista[index]] = [lista[index], lista[index + 1]];
+    [lista[galeriaIndex + 1], lista[galeriaIndex]] = [lista[galeriaIndex], lista[galeriaIndex + 1]];
     this.imagensInternas = lista;
     this.emitirMudanca();
   }
 
   remover(index: number): void {
-    this.imagensInternas = this.imagensInternas.filter((_, idx) => idx !== index);
+    const imagem = this.imagensParaExibicao[index];
+    if (!imagem) {
+      return;
+    }
+
+    if (this.isImagemPrincipal(imagem)) {
+      this.imagemPrincipalInterna = this.imagensInternas[0] || null;
+      this.imagensInternas = this.imagensInternas.filter((item) => item.id !== this.imagemPrincipalInterna?.id);
+      this.imagemPrincipalChange.emit(this.imagemPrincipalInterna);
+      this.emitirMudanca();
+      return;
+    }
+
+    this.imagensInternas = this.imagensInternas.filter((item) => item.id !== imagem.id);
     this.emitirMudanca();
   }
 
@@ -129,16 +219,87 @@ export class DepositoImagemGaleriaComponent implements OnChanges {
     return imagem.id ?? index;
   }
 
+  get imagensParaExibicao(): DepositoImagem[] {
+    if (!this.gerenciarPrincipal || !this.imagemPrincipalInterna) {
+      return this.imagensInternas;
+    }
+
+    return [
+      this.imagemPrincipalInterna,
+      ...this.imagensInternas.filter((imagem) => imagem.id !== this.imagemPrincipalInterna?.id),
+    ];
+  }
+
+  get possuiImagens(): boolean {
+    return this.imagensParaExibicao.length > 0;
+  }
+
+  isImagemPrincipal(imagem: DepositoImagem): boolean {
+    return this.gerenciarPrincipal && !!this.imagemPrincipalInterna?.id && this.imagemPrincipalInterna.id === imagem.id;
+  }
+
+  podeMoverParaCima(index: number, imagem: DepositoImagem): boolean {
+    return !this.isImagemPrincipal(imagem) && this.getGaleriaIndex(index) > 0;
+  }
+
+  podeMoverParaBaixo(index: number, imagem: DepositoImagem): boolean {
+    const galeriaIndex = this.getGaleriaIndex(index);
+    return !this.isImagemPrincipal(imagem) && galeriaIndex >= 0 && galeriaIndex < this.imagensInternas.length - 1;
+  }
+
+  definirPrincipal(imagem: DepositoImagem): void {
+    if (!this.gerenciarPrincipal || this.isImagemPrincipal(imagem)) {
+      return;
+    }
+
+    const principalAnterior = this.imagemPrincipalInterna;
+    this.imagemPrincipalInterna = imagem;
+    this.imagensInternas = this.removerDuplicadas(
+      [
+        ...(principalAnterior ? [principalAnterior] : []),
+        ...this.imagensInternas.filter((item) => item.id !== imagem.id),
+      ],
+      imagem.id
+    );
+    this.imagemPrincipalChange.emit(imagem);
+    this.emitirMudanca();
+  }
+
   getImagemSrc(imagem?: DepositoImagem | null): string {
-    return getDepositoImageUrl(imagem);
+    return getDepositoImageUrl(imagem, undefined, 'THUMBNAIL');
   }
 
   private emitirMudanca(): void {
     this.imagensChange.emit([...this.imagensInternas]);
   }
 
-  private validarArquivo(file: File): boolean {
-    const tiposPermitidos = ['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml', 'image/gif'];
-    return tiposPermitidos.includes(file.type);
+  private adicionarNovasImagens(novasImagens: DepositoImagem[]): void {
+    if (!novasImagens.length) {
+      return;
+    }
+
+    const imagensParaGaleria = [...novasImagens];
+    if (this.gerenciarPrincipal && !this.imagemPrincipalInterna) {
+      this.imagemPrincipalInterna = imagensParaGaleria.shift() || null;
+      this.imagemPrincipalChange.emit(this.imagemPrincipalInterna);
+    }
+
+    this.imagensInternas = this.removerDuplicadas([...this.imagensInternas, ...imagensParaGaleria], this.imagemPrincipalInterna?.id);
+  }
+
+  private removerDuplicadas(imagens: DepositoImagem[], ignorarId?: number | null): DepositoImagem[] {
+    const ids = new Set<number>();
+    return imagens.filter((imagem) => {
+      if (!Number.isFinite(imagem.id) || imagem.id === ignorarId || ids.has(imagem.id)) {
+        return false;
+      }
+
+      ids.add(imagem.id);
+      return true;
+    });
+  }
+
+  private getGaleriaIndex(displayIndex: number): number {
+    return this.gerenciarPrincipal && this.imagemPrincipalInterna ? displayIndex - 1 : displayIndex;
   }
 }

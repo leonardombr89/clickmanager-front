@@ -1,0 +1,27 @@
+.storage-trash {
+  display: grid;
+  gap: 16px;
+}
+
+.storage-loading {
+  display: flex;
+  justify-content: center;
+  padding: 32px;
+}
+
+.storage-pager {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+}
+
+td.mat-mdc-cell {
+  vertical-align: middle;
+}
+
+@media (max-width: 900px) {
+  .storage-pager {
+    justify-content: space-between;
+  }
+}

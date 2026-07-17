@@ -1,8 +1,9 @@
 <div class="deposito-galeria">
   <div class="deposito-galeria__header">
     <div>
-      <div class="deposito-galeria__label">Galeria do produto</div>
-      <small>Envie várias imagens e ajuste a ordem de exibição.</small>
+      <div class="deposito-galeria__label">{{ gerenciarPrincipal ? 'Imagens do produto' : 'Galeria do produto' }}</div>
+      <small>Ideal para produtos: imagens quadradas com 1800 x 1800 px. Use no mínimo 1200 x 1200 px para boa exibição.</small>
+      <small>JPG, PNG, WEBP, SVG ou ICO até 10 MB. Resolução máxima: 10000 x 10000 px e até 40 MP.</small>
     </div>
 
     @if (carregando) {
@@ -13,24 +14,32 @@
     }
   </div>
 
-  <div class="deposito-galeria__panel">
+  <div
+    class="deposito-galeria__panel"
+    [class.deposito-galeria__panel--dragging]="arrastandoArquivos"
+    (dragover)="onDragOver($event)"
+    (dragleave)="onDragLeave($event)"
+    (drop)="onDrop($event)">
     <label class="deposito-galeria__trigger">
-      <input type="file" accept="image/*" multiple [disabled]="carregando" (change)="onFilesSelected($event)" />
+      <input type="file" multiple [disabled]="carregando" (change)="onFilesSelected($event)" />
       <mat-icon>add_photo_alternate</mat-icon>
-      <span>Adicionar imagens</span>
+      <span>{{ gerenciarPrincipal ? 'Selecionar imagens' : 'Adicionar imagens' }}</span>
     </label>
 
-    @if (!imagensInternas.length) {
+    @if (!possuiImagens) {
     <div class="deposito-galeria__empty">
       <mat-icon>photo_library</mat-icon>
-      <span>Nenhuma imagem adicionada à galeria.</span>
+      <span>Nenhuma imagem adicionada. Selecione ou arraste imagens para cá.</span>
     </div>
     } @else {
     <div class="deposito-galeria__grid">
-      @for (imagem of imagensInternas; track trackByImagem($index, imagem)) {
-      <article class="deposito-galeria__card">
+      @for (imagem of imagensParaExibicao; track trackByImagem($index, imagem)) {
+      <article class="deposito-galeria__card" [class.deposito-galeria__card--primary]="isImagemPrincipal(imagem)">
         <div class="deposito-galeria__preview">
-          <img [src]="getImagemSrc(imagem)" [alt]="imagem.altText || imagem.titulo || 'Imagem da galeria'" />
+          <img [src]="getImagemSrc(imagem)" [alt]="imagem.altText || imagem.titulo || 'Imagem da galeria'" loading="lazy" decoding="async" />
+          @if (isImagemPrincipal(imagem)) {
+          <span class="deposito-galeria__primary-badge">Principal</span>
+          }
         </div>
 
         <div class="deposito-galeria__meta">
@@ -39,14 +48,19 @@
         </div>
 
         <div class="deposito-galeria__actions">
-          <button mat-icon-button type="button" (click)="moverParaCima($index)" [disabled]="$index === 0 || carregando">
+          @if (gerenciarPrincipal && !isImagemPrincipal(imagem)) {
+          <button mat-icon-button type="button" matTooltip="Definir como principal" (click)="definirPrincipal(imagem)" [disabled]="carregando">
+            <mat-icon>star</mat-icon>
+          </button>
+          }
+          <button mat-icon-button type="button" (click)="moverParaCima($index)" [disabled]="!podeMoverParaCima($index, imagem) || carregando">
             <mat-icon>arrow_back</mat-icon>
           </button>
           <button
             mat-icon-button
             type="button"
             (click)="moverParaBaixo($index)"
-            [disabled]="$index === imagensInternas.length - 1 || carregando">
+            [disabled]="!podeMoverParaBaixo($index, imagem) || carregando">
             <mat-icon>arrow_forward</mat-icon>
           </button>
           <button mat-icon-button type="button" color="warn" (click)="remover($index)" [disabled]="carregando">

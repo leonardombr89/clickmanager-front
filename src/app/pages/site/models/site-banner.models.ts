@@ -20,12 +20,17 @@ export type SiteBannerCorTexto = 'CLARO' | 'ESCURO';
 
 export interface SiteBannerResponse {
   id: number;
+  arquivoId?: number | null;
   titulo?: string | null;
   subtitulo?: string | null;
   descricao?: string | null;
   ctaTexto?: string | null;
   ctaUrl?: string | null;
   imagemUrl?: string | null;
+  displayUrl?: string | null;
+  url?: string | null;
+  thumbnailUrl?: string | null;
+  variantes?: Partial<Record<StorageImageVariantType, StorageImageVariant>> | StorageImageVariant[] | null;
   altText?: string | null;
   ordem?: number | null;
   ativo: boolean;
@@ -90,3 +95,4 @@ export interface SiteBannerOrdenacaoItem {
 export interface SiteBannerOrdenacaoRequest {
   banners: SiteBannerOrdenacaoItem[];
 }
+import { StorageImageVariant, StorageImageVariantType } from '../../storage/models/storage.models';

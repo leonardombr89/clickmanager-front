@@ -17,13 +17,11 @@ export class DepositoImagemService {
 
   upload(
     file: File,
-    empresaSlug: string,
     context: string,
     metadata: DepositoImagemUploadMetadata = {}
   ): Observable<DepositoImagem> {
     const formData = new FormData();
     formData.append('file', file, file.name);
-    formData.append('empresaSlug', empresaSlug);
     formData.append('context', context);
 
     if (metadata.titulo?.trim()) {

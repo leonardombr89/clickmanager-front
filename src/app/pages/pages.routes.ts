@@ -48,6 +48,7 @@ import { FormBannerComponent } from './site/banners/form-banner/form-banner.comp
 import { ListarPaginasComponent } from './site/paginas/listar-paginas/listar-paginas.component';
 import { FormPaginaComponent } from './site/paginas/form-pagina/form-pagina.component';
 import { SiteConfiguracoesComponent } from './site/configuracoes/site-configuracoes.component';
+import { StorageAdminPageComponent } from './storage/components/storage-admin-page/storage-admin-page.component';
 
 export const PagesRoutes: Routes = [
   {
@@ -282,6 +283,76 @@ export const PagesRoutes: Routes = [
       urls: [
         { title: 'Meu Site', url: '/page/site/configuracoes' },
         { title: 'Configurações' }
+      ]
+    }
+  },
+  {
+    path: 'site/armazenamento',
+    component: StorageAdminPageComponent,
+    canActivate: [permissionGuard],
+    data: {
+      ...SHARED_ROUTE_DATA,
+      requiredPermission: ['STORAGE_DASHBOARD_VER', 'STORAGE_ARQUIVOS_VER', 'STORAGE_LIXEIRA_VER', 'STORAGE_VIDEOS_VER'],
+      title: 'Armazenamento',
+      urls: [
+        { title: 'Meu Site', url: '/page/site/banners' },
+        { title: 'Armazenamento' }
+      ]
+    }
+  },
+  {
+    path: 'site/armazenamento/arquivos',
+    component: StorageAdminPageComponent,
+    canActivate: [permissionGuard],
+    data: {
+      ...SHARED_ROUTE_DATA,
+      requiredPermission: ['STORAGE_ARQUIVOS_VER'],
+      title: 'Arquivos do Storage',
+      urls: [
+        { title: 'Armazenamento', url: '/page/site/armazenamento' },
+        { title: 'Arquivos' }
+      ]
+    }
+  },
+  {
+    path: 'site/armazenamento/lixeira',
+    component: StorageAdminPageComponent,
+    canActivate: [permissionGuard],
+    data: {
+      ...SHARED_ROUTE_DATA,
+      requiredPermission: ['STORAGE_LIXEIRA_VER'],
+      title: 'Lixeira do Storage',
+      urls: [
+        { title: 'Armazenamento', url: '/page/site/armazenamento' },
+        { title: 'Lixeira' }
+      ]
+    }
+  },
+  {
+    path: 'site/armazenamento/videos',
+    component: StorageAdminPageComponent,
+    canActivate: [permissionGuard],
+    data: {
+      ...SHARED_ROUTE_DATA,
+      requiredPermission: ['STORAGE_VIDEOS_VER'],
+      title: 'Vídeos do Storage',
+      urls: [
+        { title: 'Armazenamento', url: '/page/site/armazenamento' },
+        { title: 'Vídeos' }
+      ]
+    }
+  },
+  {
+    path: 'site/armazenamento/reconciliacao',
+    component: StorageAdminPageComponent,
+    canActivate: [permissionGuard],
+    data: {
+      ...SHARED_ROUTE_DATA,
+      requiredPermission: ['STORAGE_RECONCILIAR'],
+      title: 'Reconciliação do Storage',
+      urls: [
+        { title: 'Armazenamento', url: '/page/site/armazenamento' },
+        { title: 'Reconciliação' }
       ]
     }
   },

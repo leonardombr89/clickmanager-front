@@ -1,0 +1,15 @@
+<div class="storage-dashboard">
+  <div class="storage-loading" *ngIf="carregando">
+    <mat-spinner diameter="36"></mat-spinner>
+  </div>
+
+  <div class="storage-dashboard__grid" *ngIf="!carregando">
+    <mat-card class="storage-dashboard__card" *ngFor="let card of cards">
+      <mat-icon>{{ card.icon }}</mat-icon>
+      <div>
+        <span>{{ card.label }}</span>
+        <strong>{{ card.value }}</strong>
+      </div>
+    </mat-card>
+  </div>
+</div>

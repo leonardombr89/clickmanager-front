@@ -7,7 +7,7 @@
   <div class="bloco-upload__panel" [class.bloco-upload__panel--has-image]="possuiImagem">
     @if (possuiImagem) {
     <div class="bloco-upload__preview">
-      <img [src]="previewUrl" [alt]="altText || 'Imagem do bloco'" />
+      <img [src]="previewUrl" [alt]="altText || 'Imagem do bloco'" decoding="async" />
     </div>
     } @else {
     <div class="bloco-upload__placeholder">

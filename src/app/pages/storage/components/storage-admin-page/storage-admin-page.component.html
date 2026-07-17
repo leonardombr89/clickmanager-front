@@ -1,0 +1,36 @@
+<app-page-card
+  titulo="Armazenamento"
+  subtitulo="Gerencie arquivos, lixeira, vídeos e reconciliação do Storage."
+  [contentPadding]="true">
+  <mat-tab-group animationDuration="150ms" mat-stretch-tabs="false" mat-align-tabs="start">
+    <mat-tab label="Visão geral">
+      <div class="storage-tab" *temPermissao="'STORAGE_DASHBOARD_VER'">
+        <app-storage-dashboard></app-storage-dashboard>
+      </div>
+    </mat-tab>
+
+    <mat-tab label="Arquivos">
+      <div class="storage-tab" *temPermissao="'STORAGE_ARQUIVOS_VER'">
+        <app-storage-arquivos-lista></app-storage-arquivos-lista>
+      </div>
+    </mat-tab>
+
+    <mat-tab label="Lixeira">
+      <div class="storage-tab" *temPermissao="'STORAGE_LIXEIRA_VER'">
+        <app-storage-lixeira></app-storage-lixeira>
+      </div>
+    </mat-tab>
+
+    <mat-tab label="Vídeos">
+      <div class="storage-tab" *temPermissao="'STORAGE_VIDEOS_VER'">
+        <app-storage-videos></app-storage-videos>
+      </div>
+    </mat-tab>
+
+    <mat-tab label="Reconciliação">
+      <div class="storage-tab" *temPermissao="'STORAGE_RECONCILIAR'">
+        <app-storage-reconciliacao></app-storage-reconciliacao>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</app-page-card>

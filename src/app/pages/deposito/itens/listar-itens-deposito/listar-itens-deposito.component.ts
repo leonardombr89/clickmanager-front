@@ -171,7 +171,7 @@ export class ListarItensDepositoComponent implements OnInit {
   }
 
   getImagemSrc(imagem?: DepositoImagem | null): string {
-    return getDepositoImageUrl(imagem);
+    return getDepositoImageUrl(imagem, undefined, 'CARD');
   }
 
   formatarPreco(valor?: number | null): string {

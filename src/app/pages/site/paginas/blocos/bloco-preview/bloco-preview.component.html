@@ -1,7 +1,7 @@
 <div class="bloco-preview">
   <div class="bloco-preview__image">
-    @if (bloco?.imagemUrl) {
-    <img [src]="bloco?.imagemUrl" [alt]="bloco?.altText || bloco?.titulo || tipoLabel" />
+    @if (imagemUrl) {
+    <img [src]="imagemUrl" [alt]="bloco?.altText || bloco?.titulo || tipoLabel" loading="lazy" decoding="async" />
     } @else {
     <mat-icon>widgets</mat-icon>
     }

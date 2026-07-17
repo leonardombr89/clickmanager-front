@@ -486,6 +486,10 @@ export class FullComponent implements OnInit, OnDestroy {
       return !!item.startsWith?.some((route) => this.currentRoute.startsWith(route));
     }
 
+    if (item.key === 'dashboard' && item.route === '/page/deposito') {
+      return this.currentRoute === item.route;
+    }
+
     return (item.startsWith ?? [item.route]).some((route) => this.currentRoute.startsWith(route));
   }
 
@@ -673,42 +677,31 @@ export class FullComponent implements OnInit, OnDestroy {
   private buildMobileNavGroups(items: NavItem[]): MobileNavGroup[] {
     const groups: MobileNavGroup[] = [];
     const primaryRoutes = this.tipoEmpresaAtual === TipoEmpresa.DEPOSITO
-      ? new Set(['/page/empresa', '/page/usuarios/listar', '/page/deposito'])
+      ? new Set(['/page/deposito', '/page/deposito/itens', '/page/deposito/orcamentos'])
       : new Set(['/dashboards/dashboard1', '/page/pedido', '/smartcalc', '/page/cliente']);
     const secondaryItems = items.filter((item) => !item.navCap && !primaryRoutes.has(item.route || ''));
 
-    const groupMap: Record<string, (item: NavItem) => boolean> = this.tipoEmpresaAtual === TipoEmpresa.DEPOSITO
-      ? {
-          Dashboard: (item) =>
-            item.displayName === 'Dashboard',
-          Catálogo: (item) =>
-            item.displayName === 'Catálogo',
-          Comercial: (item) =>
-            item.displayName === 'Comercial',
-          Administração: (item) =>
-            item.displayName === 'Administração',
-        }
-      : {
-          Administração: (item) =>
-            [
-              '/page/usuarios/listar',
-              '/page/perfil',
-              '/page/empresa',
-              '/config',
-              '/page/calculadora/config/criar'
-            ].some((route) => item.route?.startsWith(route)),
-          'Cadastros técnicos': (item) =>
-            [
-              '/cadastro-tecnico',
-              '/page/funcionarios',
-              '/page/deposito'
-            ].some((route) => item.route?.startsWith(route)),
-          Ajuda: (item) =>
-            [
-              '/page/suporte',
-              '/page/ajuda'
-            ].some((route) => item.route?.startsWith(route)),
-        };
+    const groupMap: Record<string, (item: NavItem) => boolean> = {
+      Administração: (item) =>
+        [
+          '/page/usuarios/listar',
+          '/page/perfil',
+          '/page/empresa',
+          '/config',
+          '/page/calculadora/config/criar'
+        ].some((route) => item.route?.startsWith(route)),
+      'Cadastros técnicos': (item) =>
+        [
+          '/cadastro-tecnico',
+          '/page/funcionarios',
+          '/page/deposito'
+        ].some((route) => item.route?.startsWith(route)),
+      Ajuda: (item) =>
+        [
+          '/page/suporte',
+          '/page/ajuda'
+        ].some((route) => item.route?.startsWith(route)),
+    };
 
     Object.entries(groupMap).forEach(([title, matcher]) => {
       const groupItems = secondaryItems.filter((item) => matcher(item));
@@ -832,11 +825,11 @@ export class FullComponent implements OnInit, OnDestroy {
     this.mobileBottomNavItems = tipoEmpresa === TipoEmpresa.DEPOSITO
       ? [
           {
-            key: 'empresa',
-            label: 'Empresa',
-            icon: 'building',
-            route: '/page/empresa',
-            startsWith: ['/page/empresa'],
+            key: 'dashboard',
+            label: 'Dashboard',
+            icon: 'layout-dashboard',
+            route: '/page/deposito',
+            startsWith: ['/page/deposito'],
           },
           {
             key: 'atalhos',
@@ -845,19 +838,19 @@ export class FullComponent implements OnInit, OnDestroy {
             action: 'apps',
           },
           {
-            key: 'dashboard',
-            label: 'Dashboard',
-            icon: 'layout-dashboard',
-            route: '/page/deposito',
-            startsWith: ['/page/deposito'],
+            key: 'catalogo',
+            label: 'Catálogo',
+            icon: 'package',
+            route: '/page/deposito/itens',
+            startsWith: ['/page/deposito/itens', '/page/deposito/categorias', '/page/deposito/marcas'],
             special: true,
           },
           {
-            key: 'usuarios',
-            label: 'Usuários',
-            icon: 'users',
-            route: '/page/usuarios/listar',
-            startsWith: ['/page/usuarios'],
+            key: 'orcamentos',
+            label: 'Orçamentos',
+            icon: 'file-text',
+            route: '/page/deposito/orcamentos',
+            startsWith: ['/page/deposito/orcamentos'],
           },
           {
             key: 'mais',
