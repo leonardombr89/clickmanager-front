@@ -1,0 +1,8 @@
+.grid { display: grid; gap: 12px; }
+.triple { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.span-2 { grid-column: span 2; }
+.provider { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-bottom: 12px; }
+.provider div { border: 1px solid #e5eaef; border-radius: 8px; padding: 12px; display: grid; gap: 4px; }
+.provider span { color: #6b7280; font-size: 12px; }
+.radio-stack { display: grid; gap: 10px; }
+@media (max-width: 900px) { .triple, .provider { grid-template-columns: 1fr; } .span-2 { grid-column: auto; } }

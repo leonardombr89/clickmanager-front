@@ -1,0 +1,24 @@
+.calc-layout { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 18px; align-items: start; }
+.calc-main, .ambientes, .orcamento { display: grid; gap: 16px; }
+.calc-result { position: sticky; top: 86px; }
+.produto-option { display: grid; gap: 2px; line-height: 1.25; }
+.produto-option small, .produto-card span, .produto-card small, .empty, .perda small { color: #6b7280; }
+.produto-card { display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 14px; align-items: center; border: 1px solid #e5eaef; border-radius: 8px; padding: 12px; }
+.produto-card > div:last-child { display: grid; gap: 4px; }
+.produto-img { width: 92px; aspect-ratio: 1; border-radius: 8px; background: #f3f6f9 center/cover no-repeat; display: grid; place-items: center; color: #7c8fac; }
+.perda { display: grid; grid-template-columns: auto minmax(220px, 1fr) 160px; gap: 12px; align-items: center; }
+.perda small { grid-column: 1 / -1; }
+.ambiente { display: grid; grid-template-columns: 1.2fr 1fr 1fr 110px 120px 88px; gap: 10px; align-items: center; border: 1px solid #e5eaef; border-radius: 8px; padding: 10px; }
+.area-preview { display: grid; gap: 2px; }
+.area-preview span { font-size: 12px; color: #6b7280; }
+.row-actions, .actions { display: flex; justify-content: flex-end; gap: 10px; align-items: center; }
+.calc-alert { display: flex; gap: 8px; align-items: center; border: 1px solid #d7dde5; border-radius: 8px; padding: 10px 12px; margin-bottom: 10px; background: #f8fafc; }
+.calc-alert--error { border-color: #f5c2c7; background: #fff5f5; color: #b42318; }
+.calc-alert--success { border-color: #bbf7d0; background: #f0fdf4; color: #166534; }
+.headline { font-size: 20px; margin-bottom: 14px; }
+dl { display: grid; gap: 10px; margin: 0; }
+dl div { display: flex; justify-content: space-between; gap: 12px; border-bottom: 1px solid #eef2f6; padding-bottom: 8px; }
+dt { color: #6b7280; } dd { margin: 0; font-weight: 600; text-align: right; }
+.total { font-size: 18px; border-bottom: 0 !important; }
+@media (max-width: 1100px) { .calc-layout { grid-template-columns: 1fr; } .calc-result { position: static; } }
+@media (max-width: 760px) { .perda, .ambiente { grid-template-columns: 1fr; } .row-actions, .actions { justify-content: stretch; } .actions button { flex: 1; } }

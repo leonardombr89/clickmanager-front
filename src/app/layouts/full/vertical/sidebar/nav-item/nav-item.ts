@@ -17,4 +17,5 @@ export interface NavItem {
     bgcolor?:string;
     requiredPermission?: string[];
     allowedEmpresaTipos?: TipoEmpresa[];
+    catalogoModo?: 'LEGADO_DEPOSITO' | 'CATALOGO_NOVO';
 }

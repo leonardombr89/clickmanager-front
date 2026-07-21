@@ -40,8 +40,8 @@ import { FormMarcaDepositoComponent } from './deposito/marcas/form-marca-deposit
 import { ListarItensDepositoComponent } from './deposito/itens/listar-itens-deposito/listar-itens-deposito.component';
 import { FormItemDepositoComponent } from './deposito/itens/form-item-deposito/form-item-deposito.component';
 import { DepositoDashboardPageComponent } from './deposito/dashboard/deposito-dashboard-page.component';
-import { ListarOrcamentosDepositoComponent } from './deposito/orcamentos/listar-orcamentos-deposito/listar-orcamentos-deposito.component';
-import { DetalheOrcamentoDepositoComponent } from './deposito/orcamentos/detalhe-orcamento-deposito/detalhe-orcamento-deposito.component';
+import { ListarOrcamentosComponent } from './orcamentos/listar-orcamentos/listar-orcamentos.component';
+import { DetalheOrcamentoComponent } from './orcamentos/detalhe-orcamento/detalhe-orcamento.component';
 import { DEPOSITO_ROUTE_DATA, GRAFICA_ROUTE_DATA, SHARED_ROUTE_DATA } from '../guards/empresa-tipo-route-data';
 import { ListarBannersComponent } from './site/banners/listar-banners/listar-banners.component';
 import { FormBannerComponent } from './site/banners/form-banner/form-banner.component';
@@ -49,6 +49,7 @@ import { ListarPaginasComponent } from './site/paginas/listar-paginas/listar-pag
 import { FormPaginaComponent } from './site/paginas/form-pagina/form-pagina.component';
 import { SiteConfiguracoesComponent } from './site/configuracoes/site-configuracoes.component';
 import { StorageAdminPageComponent } from './storage/components/storage-admin-page/storage-admin-page.component';
+import { depositoLegadoGuard } from './catalogo/shared/guards/catalogo-versao.guard';
 
 export const PagesRoutes: Routes = [
   {
@@ -61,7 +62,7 @@ export const PagesRoutes: Routes = [
   {
     path: 'empresa',
     component: EmpresaFormComponent,
-    canActivate: [permissionGuard],
+    canActivate: [depositoLegadoGuard, permissionGuard],
     data: {
       ...SHARED_ROUTE_DATA,
       requiredPermission: ['DADOS_EMPRESA'],
@@ -75,7 +76,7 @@ export const PagesRoutes: Routes = [
   {
     path: 'perfil',
     component: GerenciarPerfilComponent,
-    canActivate: [permissionGuard],
+    canActivate: [depositoLegadoGuard, permissionGuard],
     data: {
       ...SHARED_ROUTE_DATA,
       requiredPermission: ['PERFIS_PERMISSOES_VER'],
@@ -191,7 +192,7 @@ export const PagesRoutes: Routes = [
   {
     path: 'site/banners',
     component: ListarBannersComponent,
-    canActivate: [permissionGuard],
+    canActivate: [depositoLegadoGuard, permissionGuard],
     data: {
       ...SHARED_ROUTE_DATA,
       requiredPermission: ['SITE_BANNERS_VER'],
@@ -205,7 +206,7 @@ export const PagesRoutes: Routes = [
   {
     path: 'site/banners/novo',
     component: FormBannerComponent,
-    canActivate: [permissionGuard],
+    canActivate: [depositoLegadoGuard, permissionGuard],
     data: {
       ...SHARED_ROUTE_DATA,
       requiredPermission: ['SITE_BANNERS_CADASTRAR'],
@@ -219,7 +220,7 @@ export const PagesRoutes: Routes = [
   {
     path: 'site/banners/editar/:id',
     component: FormBannerComponent,
-    canActivate: [permissionGuard],
+    canActivate: [depositoLegadoGuard, permissionGuard],
     data: {
       ...SHARED_ROUTE_DATA,
       requiredPermission: ['SITE_BANNERS_EDITAR'],
@@ -233,7 +234,7 @@ export const PagesRoutes: Routes = [
   {
     path: 'site/paginas',
     component: ListarPaginasComponent,
-    canActivate: [permissionGuard],
+    canActivate: [depositoLegadoGuard, permissionGuard],
     data: {
       ...SHARED_ROUTE_DATA,
       requiredPermission: ['SITE_PAGINAS_VER'],
@@ -708,9 +709,18 @@ export const PagesRoutes: Routes = [
     }
   },
   {
+    path: 'catalogo',
+    loadChildren: () =>
+      import('./catalogo/catalogo.routes').then((m) => m.CatalogoRoutes),
+    data: {
+      ...DEPOSITO_ROUTE_DATA,
+      title: 'Catálogo',
+    }
+  },
+  {
     path: 'deposito/categorias',
     component: ListarCategoriasDepositoComponent,
-    canActivate: [permissionGuard],
+    canActivate: [depositoLegadoGuard, permissionGuard],
     data: {
       ...DEPOSITO_ROUTE_DATA,
       requiredPermission: ['DEPOSITO_CATEGORIAS_VER'],
@@ -724,7 +734,7 @@ export const PagesRoutes: Routes = [
   {
     path: 'deposito/categorias/nova',
     component: FormCategoriaDepositoComponent,
-    canActivate: [permissionGuard],
+    canActivate: [depositoLegadoGuard, permissionGuard],
     data: {
       ...DEPOSITO_ROUTE_DATA,
       requiredPermission: ['DEPOSITO_CATEGORIAS_CADASTRAR'],
@@ -738,7 +748,7 @@ export const PagesRoutes: Routes = [
   {
     path: 'deposito/categorias/editar/:id',
     component: FormCategoriaDepositoComponent,
-    canActivate: [permissionGuard],
+    canActivate: [depositoLegadoGuard, permissionGuard],
     data: {
       ...DEPOSITO_ROUTE_DATA,
       requiredPermission: ['DEPOSITO_CATEGORIAS_EDITAR'],
@@ -752,7 +762,7 @@ export const PagesRoutes: Routes = [
   {
     path: 'deposito/itens',
     component: ListarItensDepositoComponent,
-    canActivate: [permissionGuard],
+    canActivate: [depositoLegadoGuard, permissionGuard],
     data: {
       ...DEPOSITO_ROUTE_DATA,
       requiredPermission: ['DEPOSITO_ITENS_VER'],
@@ -766,7 +776,7 @@ export const PagesRoutes: Routes = [
   {
     path: 'deposito/itens/novo',
     component: FormItemDepositoComponent,
-    canActivate: [permissionGuard],
+    canActivate: [depositoLegadoGuard, permissionGuard],
     data: {
       ...DEPOSITO_ROUTE_DATA,
       requiredPermission: ['DEPOSITO_ITENS_CADASTRAR'],
@@ -780,7 +790,7 @@ export const PagesRoutes: Routes = [
   {
     path: 'deposito/itens/editar/:id',
     component: FormItemDepositoComponent,
-    canActivate: [permissionGuard],
+    canActivate: [depositoLegadoGuard, permissionGuard],
     data: {
       ...DEPOSITO_ROUTE_DATA,
       requiredPermission: ['DEPOSITO_ITENS_EDITAR'],
@@ -794,7 +804,7 @@ export const PagesRoutes: Routes = [
   {
     path: 'deposito/marcas',
     component: ListarMarcasDepositoComponent,
-    canActivate: [permissionGuard],
+    canActivate: [depositoLegadoGuard, permissionGuard],
     data: {
       ...DEPOSITO_ROUTE_DATA,
       requiredPermission: ['DEPOSITO_MARCAS_VER'],
@@ -808,7 +818,7 @@ export const PagesRoutes: Routes = [
   {
     path: 'deposito/marcas/nova',
     component: FormMarcaDepositoComponent,
-    canActivate: [permissionGuard],
+    canActivate: [depositoLegadoGuard, permissionGuard],
     data: {
       ...DEPOSITO_ROUTE_DATA,
       requiredPermission: ['DEPOSITO_MARCAS_CADASTRAR'],
@@ -822,7 +832,7 @@ export const PagesRoutes: Routes = [
   {
     path: 'deposito/marcas/editar/:id',
     component: FormMarcaDepositoComponent,
-    canActivate: [permissionGuard],
+    canActivate: [depositoLegadoGuard, permissionGuard],
     data: {
       ...DEPOSITO_ROUTE_DATA,
       requiredPermission: ['DEPOSITO_MARCAS_EDITAR'],
@@ -835,28 +845,37 @@ export const PagesRoutes: Routes = [
   },
   {
     path: 'deposito/orcamentos',
-    component: ListarOrcamentosDepositoComponent,
+    redirectTo: 'orcamentos',
+    pathMatch: 'full',
+  },
+  {
+    path: 'deposito/orcamentos/:id',
+    redirectTo: 'orcamentos/:id',
+    pathMatch: 'full',
+  },
+  {
+    path: 'orcamentos',
+    component: ListarOrcamentosComponent,
     canActivate: [permissionGuard],
     data: {
-      ...DEPOSITO_ROUTE_DATA,
+      ...SHARED_ROUTE_DATA,
       requiredPermission: ['DEPOSITO_ORCAMENTOS_VER'],
-      title: 'Orçamentos do Depósito',
+      title: 'Orçamentos',
       urls: [
-        { title: 'Depósito', url: '/page/deposito' },
         { title: 'Orçamentos' }
       ]
     }
   },
   {
-    path: 'deposito/orcamentos/:id',
-    component: DetalheOrcamentoDepositoComponent,
+    path: 'orcamentos/:id',
+    component: DetalheOrcamentoComponent,
     canActivate: [permissionGuard],
     data: {
-      ...DEPOSITO_ROUTE_DATA,
+      ...SHARED_ROUTE_DATA,
       requiredPermission: ['DEPOSITO_ORCAMENTOS_VER'],
       title: 'Detalhes do Orçamento',
       urls: [
-        { title: 'Orçamentos', url: '/page/deposito/orcamentos' },
+        { title: 'Orçamentos', url: '/page/orcamentos' },
         { title: 'Detalhes' }
       ]
     }

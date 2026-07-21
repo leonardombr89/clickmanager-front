@@ -10,6 +10,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTableModule } from '@angular/material/table';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { TablerIconsModule } from 'angular-tabler-icons';
 import { ToastrService } from 'ngx-toastr';
@@ -17,18 +18,18 @@ import { CardHeaderComponent } from 'src/app/components/card-header/card-header.
 import { ConfirmDialogComponent } from 'src/app/components/dialog/confirm-dialog/confirm-dialog.component';
 import { SectionCardComponent } from 'src/app/components/section-card/section-card.component';
 import { StatusBadgeComponent } from 'src/app/components/status-badge/status-badge.component';
+import { Orcamento, OrcamentoItem, OrcamentoStatus } from 'src/app/models/orcamento/orcamento.model';
 import { TelefonePipe } from 'src/app/pipe/telefone.pipe';
 import { AuthService } from 'src/app/services/auth.service';
-import { DepositoOrcamento, DepositoOrcamentoItem, DepositoOrcamentoStatus } from '../../models/deposito.models';
-import { DepositoService } from '../../services/deposito.service';
+import { OrcamentoService } from 'src/app/services/orcamento.service';
 
 type StatusOption = {
-  value: DepositoOrcamentoStatus;
+  value: OrcamentoStatus;
   label: string;
 };
 
 @Component({
-  selector: 'app-detalhe-orcamento-deposito',
+  selector: 'app-detalhe-orcamento',
   standalone: true,
   imports: [
     CommonModule,
@@ -42,6 +43,7 @@ type StatusOption = {
     MatMenuModule,
     MatProgressSpinnerModule,
     MatTableModule,
+    MatTooltipModule,
     TablerIconsModule,
     CardHeaderComponent,
     SectionCardComponent,
@@ -49,11 +51,11 @@ type StatusOption = {
     TelefonePipe,
     DatePipe,
   ],
-  templateUrl: './detalhe-orcamento-deposito.component.html',
-  styleUrl: './detalhe-orcamento-deposito.component.scss',
+  templateUrl: './detalhe-orcamento.component.html',
+  styleUrl: './detalhe-orcamento.component.scss',
 })
-export class DetalheOrcamentoDepositoComponent implements OnInit {
-  orcamento: DepositoOrcamento | null = null;
+export class DetalheOrcamentoComponent implements OnInit {
+  orcamento: Orcamento | null = null;
   observacaoInterna = '';
   carregando = false;
   salvandoObservacao = false;
@@ -70,7 +72,7 @@ export class DetalheOrcamentoDepositoComponent implements OnInit {
   constructor(
     private readonly route: ActivatedRoute,
     private readonly router: Router,
-    private readonly depositoService: DepositoService,
+    private readonly orcamentoService: OrcamentoService,
     private readonly authService: AuthService,
     private readonly dialog: MatDialog,
     private readonly toastr: ToastrService,
@@ -104,7 +106,7 @@ export class DetalheOrcamentoDepositoComponent implements OnInit {
 
   carregarOrcamento(id: number): void {
     this.carregando = true;
-    this.depositoService.detalharOrcamento(id).subscribe({
+    this.orcamentoService.detalhar(id).subscribe({
       next: (response) => {
         this.orcamento = response;
         this.observacaoInterna = response.observacaoInterna || '';
@@ -119,11 +121,11 @@ export class DetalheOrcamentoDepositoComponent implements OnInit {
   }
 
   voltar(): void {
-    this.router.navigate(['/page/deposito/orcamentos']);
+    this.router.navigate(['/page/orcamentos']);
   }
 
-  alterarStatus(novoStatus: DepositoOrcamentoStatus | string): void {
-    const status = novoStatus as DepositoOrcamentoStatus;
+  alterarStatus(novoStatus: OrcamentoStatus | string): void {
+    const status = novoStatus as OrcamentoStatus;
     if (!this.orcamento?.id || !this.podeEditar || status === this.orcamento.status || this.atualizandoStatus) {
       return;
     }
@@ -136,11 +138,11 @@ export class DetalheOrcamentoDepositoComponent implements OnInit {
     this.executarAlteracaoStatus(status);
   }
 
-  marcarStatus(status: DepositoOrcamentoStatus): void {
+  marcarStatus(status: OrcamentoStatus): void {
     this.alterarStatus(status);
   }
 
-  deveMostrarAcaoStatus(status: DepositoOrcamentoStatus): boolean {
+  deveMostrarAcaoStatus(status: OrcamentoStatus): boolean {
     return this.podeEditar && this.orcamento?.status !== status;
   }
 
@@ -150,8 +152,8 @@ export class DetalheOrcamentoDepositoComponent implements OnInit {
     }
 
     this.salvandoObservacao = true;
-    this.depositoService
-      .atualizarObservacaoInternaOrcamento(this.orcamento.id, this.observacaoInterna.trim() || null)
+    this.orcamentoService
+      .atualizarObservacaoInterna(this.orcamento.id, this.observacaoInterna.trim() || null)
       .subscribe({
         next: (response) => {
           this.orcamento = response;
@@ -191,29 +193,34 @@ export class DetalheOrcamentoDepositoComponent implements OnInit {
     return quantidade === 1 ? '1 item' : `${quantidade} itens`;
   }
 
-  quantidadeLabel(item: DepositoOrcamentoItem): string {
+  quantidadeLabel(item: OrcamentoItem): string {
     const quantidade = item.quantidade ?? 0;
     return `${quantidade} ${this.formatarUnidadeVenda(item.unidadeVenda)}`;
   }
 
-  valorUnitario(item: DepositoOrcamentoItem): number | null {
+  valorUnitario(item: OrcamentoItem): number | null {
     return item.precoPromocional ?? item.precoUnitario ?? null;
   }
 
-  statusLabel(status: DepositoOrcamentoStatus | null | undefined): string {
+  statusLabel(status: OrcamentoStatus | null | undefined): string {
     const option = this.statusOptions.find((item) => item.value === status);
     return option?.label || 'Sem status';
   }
 
-  statusClass(status: DepositoOrcamentoStatus | null | undefined): string {
+  statusClass(status: OrcamentoStatus | null | undefined): string {
     return `status-pill--${String(status || 'DESCONHECIDO').toLowerCase().replace(/_/g, '-')}`;
   }
 
   origemLabel(origem: string | null | undefined): string {
     const labels: Record<string, string> = {
-      SITE: 'Site público',
+      SITE_PUBLICO: 'Site Público',
+      SITE: 'Site Público',
+      SMARTCALC: 'SmartCalc',
+      CADASTRO_MANUAL: 'Cadastro Manual',
+      MANUAL: 'Cadastro Manual',
       WHATSAPP: 'WhatsApp',
-      ADMIN: 'Admin',
+      ADMIN: 'Cadastro Manual',
+      INTEGRACAO: 'Integração',
       OUTRO: 'Outro',
     };
 
@@ -256,14 +263,14 @@ export class DetalheOrcamentoDepositoComponent implements OnInit {
     return `${prefixo} há ${dias} ${dias === 1 ? 'dia' : 'dias'}`;
   }
 
-  private confirmarAlteracaoStatus(status: DepositoOrcamentoStatus): void {
+  private confirmarAlteracaoStatus(status: OrcamentoStatus): void {
     const convertido = status === 'CONVERTIDO';
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '420px',
       data: {
         title: convertido ? 'Marcar como convertido' : 'Marcar como não convertido',
         message: convertido
-          ? 'Deseja marcar este orçamento como convertido? Isso não cria pedido automaticamente.'
+          ? 'Deseja marcar este orçamento como convertido? A criação do pedido será habilitada em uma etapa futura.'
           : 'Deseja marcar este orçamento como não convertido?',
         confirmText: convertido ? 'Marcar convertido' : 'Marcar não convertido',
         confirmColor: convertido ? 'primary' : 'warn',
@@ -277,13 +284,13 @@ export class DetalheOrcamentoDepositoComponent implements OnInit {
     });
   }
 
-  private executarAlteracaoStatus(status: DepositoOrcamentoStatus): void {
+  private executarAlteracaoStatus(status: OrcamentoStatus): void {
     if (!this.orcamento?.id) {
       return;
     }
 
     this.atualizandoStatus = true;
-    this.depositoService.alterarStatusOrcamento(this.orcamento.id, status).subscribe({
+    this.orcamentoService.alterarStatus(this.orcamento.id, status).subscribe({
       next: (response) => {
         this.orcamento = response;
         this.observacaoInterna = response.observacaoInterna || '';

@@ -14,6 +14,14 @@
     } @else if (orcamento) {
     <app-section-card titulo="Resumo do orçamento" [divider]="true">
       <div actions class="detail-actions">
+        <button
+          mat-stroked-button
+          type="button"
+          disabled
+          matTooltip="Conversão em pedido será habilitada em uma etapa futura">
+          <mat-icon>shopping_cart_checkout</mat-icon>
+          Converter em pedido
+        </button>
         <button mat-stroked-button type="button" [matMenuTriggerFor]="statusMenu" *ngIf="podeEditar">
           <mat-icon>sync_alt</mat-icon>
           Alterar status

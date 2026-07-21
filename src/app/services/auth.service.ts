@@ -170,6 +170,18 @@ export class AuthService {
       return '/page/deposito';
     }
 
+    if (this.temPermissaoDisponivel('CATALOGO_PRODUTOS_VER', usuario)) {
+      return '/page/catalogo/produtos';
+    }
+
+    if (this.temPermissaoDisponivel('CATALOGO_CATEGORIAS_VER', usuario)) {
+      return '/page/catalogo/categorias';
+    }
+
+    if (this.temPermissaoDisponivel('CATALOGO_MARCAS_VER', usuario)) {
+      return '/page/catalogo/marcas';
+    }
+
     if (this.temPermissaoDisponivel('DEPOSITO_ITENS_VER', usuario)) {
       return '/page/deposito/itens';
     }
@@ -179,7 +191,7 @@ export class AuthService {
     }
 
     if (this.temPermissaoDisponivel('DEPOSITO_ORCAMENTOS_VER', usuario)) {
-      return '/page/deposito/orcamentos';
+      return '/page/orcamentos';
     }
 
     if (this.temPermissaoDisponivel('SITE_CONFIG_VER', usuario)) {

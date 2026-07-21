@@ -53,6 +53,7 @@ import {
     buildPedidoWhatsAppSendMessage,
     toE164BR
 } from '../pedido-whatsapp.utils';
+import { AuthService } from 'src/app/services/auth.service';
 
 const MOBILE_FLOW_STEPS = ['RASCUNHO', 'AGUARDANDO_PAGAMENTO', 'PENDENTE', 'EM_PRODUCAO', 'PRONTO', 'ENTREGUE'] as const;
 
@@ -164,6 +165,7 @@ export class DetalhesPedidoComponent implements OnInit {
         private fb: FormBuilder,
         private toastr: ToastrService,
         private dialog: MatDialog,
+        private auth: AuthService,
     ) { }
 
     ngOnInit(): void {
@@ -403,6 +405,15 @@ export class DetalhesPedidoComponent implements OnInit {
             return;
         }
         window.open(`/pedido/imprimir/${this.pedido.id}`, '_blank');
+    }
+
+    get podeEmitirNotaFiscal(): boolean {
+        return false;
+    }
+
+    emitirNotaFiscal(): void {
+        if (!this.pedido?.id || !this.podeEmitirNotaFiscal) return;
+        this.router.navigate(['/apps/fiscal/emitir', this.pedido.id]);
     }
 
     imprimirPedidoDuasVias(): void {

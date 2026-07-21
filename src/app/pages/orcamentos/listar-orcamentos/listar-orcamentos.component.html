@@ -55,7 +55,7 @@
       } @else if (!orcamentosFiltrados.length) {
       <div class="orcamento-state orcamento-state--empty">
         <strong>Nenhum orçamento encontrado</strong>
-        <span>{{ possuiFiltros ? 'Nenhum orçamento corresponde aos filtros selecionados.' : 'As solicitações enviadas pelo site aparecerão aqui.' }}</span>
+        <span>{{ possuiFiltros ? 'Nenhum orçamento corresponde aos filtros selecionados.' : 'As solicitações recebidas pelos canais comerciais aparecerão aqui.' }}</span>
         <button mat-stroked-button type="button" (click)="limparFiltros()" *ngIf="possuiFiltros">Limpar filtros</button>
       </div>
       } @else {
@@ -75,7 +75,7 @@
           <td mat-cell *matCellDef="let orcamento" class="f-s-14">
             <div class="orcamento-main-cell">
               <strong>{{ clienteLabel(orcamento) }}</strong>
-              <span>{{ itensLabel(orcamento) }}</span>
+              <span>{{ itensLabel(orcamento) }} • {{ origemLabel(orcamento.origem) }}</span>
             </div>
           </td>
         </ng-container>
@@ -112,17 +112,21 @@
         <ng-container matColumnDef="acao">
           <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">Ações</th>
           <td mat-cell *matCellDef="let orcamento" class="action-link">
-            <a [routerLink]="['/page/deposito/orcamentos', orcamento.id]" class="m-r-10 cursor-pointer">
+            <a [routerLink]="['/page/orcamentos', orcamento.id]" class="m-r-10 cursor-pointer">
               <i-tabler name="eye" class="icon-18"></i-tabler>
             </a>
             <button mat-icon-button type="button" [matMenuTriggerFor]="acoesMenu" aria-label="Abrir ações do orçamento">
               <mat-icon>more_vert</mat-icon>
             </button>
             <mat-menu #acoesMenu="matMenu">
-              <a mat-menu-item [routerLink]="['/page/deposito/orcamentos', orcamento.id]">
+              <a mat-menu-item [routerLink]="['/page/orcamentos', orcamento.id]">
                 <mat-icon>visibility</mat-icon>
                 <span>Ver detalhes</span>
               </a>
+              <button mat-menu-item type="button" disabled matTooltip="Conversão em pedido será habilitada em uma etapa futura">
+                <mat-icon>shopping_cart_checkout</mat-icon>
+                <span>Converter em pedido</span>
+              </button>
               <button mat-menu-item type="button" (click)="marcarStatus(orcamento, 'EM_ATENDIMENTO')" *ngIf="deveMostrarAcaoStatus(orcamento, 'EM_ATENDIMENTO')">
                 <mat-icon>support_agent</mat-icon>
                 <span>Marcar em atendimento</span>
@@ -189,7 +193,7 @@
     } @else if (!orcamentosFiltrados.length) {
     <div class="cadastro-mobile__state cadastro-mobile__state--empty">
       <strong>Nenhum orçamento encontrado</strong>
-      <span>As solicitações enviadas pelo site aparecerão aqui.</span>
+      <span>As solicitações recebidas pelos canais comerciais aparecerão aqui.</span>
     </div>
     } @else {
       @for (orcamento of orcamentosFiltrados; track orcamento.id) {
@@ -197,7 +201,7 @@
         <div class="cadastro-mobile-card__head">
           <div class="cadastro-mobile-card__identity">
             <strong>{{ clienteLabel(orcamento) }}</strong>
-            <span>{{ protocoloLabel(orcamento) }} • {{ dataCriacao(orcamento) | date:'dd/MM/yyyy HH:mm' }}</span>
+            <span>{{ protocoloLabel(orcamento) }} • {{ origemLabel(orcamento.origem) }} • {{ dataCriacao(orcamento) | date:'dd/MM/yyyy HH:mm' }}</span>
           </div>
 
           <button
@@ -221,10 +225,14 @@
         </div>
 
         <mat-menu #mobileMenu="matMenu">
-          <a mat-menu-item [routerLink]="['/page/deposito/orcamentos', orcamento.id]">
+          <a mat-menu-item [routerLink]="['/page/orcamentos', orcamento.id]">
             <mat-icon>visibility</mat-icon>
             <span>Ver detalhes</span>
           </a>
+          <button mat-menu-item type="button" disabled matTooltip="Conversão em pedido será habilitada em uma etapa futura">
+            <mat-icon>shopping_cart_checkout</mat-icon>
+            <span>Converter em pedido</span>
+          </button>
           <button mat-menu-item type="button" (click)="marcarStatus(orcamento, 'EM_ATENDIMENTO')" *ngIf="deveMostrarAcaoStatus(orcamento, 'EM_ATENDIMENTO')">
             <mat-icon>support_agent</mat-icon>
             <span>Marcar em atendimento</span>

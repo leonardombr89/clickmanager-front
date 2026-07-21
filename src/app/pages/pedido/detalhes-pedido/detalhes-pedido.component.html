@@ -117,6 +117,10 @@
                         <mat-icon class="m-r-4">chat</mat-icon>
                         WhatsApp
                     </button>
+                    <button mat-flat-button color="primary" type="button" *ngIf="podeEmitirNotaFiscal" (click)="emitirNotaFiscal()">
+                        <mat-icon class="m-r-4">receipt_long</mat-icon>
+                        Emitir nota fiscal
+                    </button>
                 </div>
             </app-section-card>
 

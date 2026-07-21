@@ -33,6 +33,7 @@ import { NotificacaoItem } from 'src/app/pages/notificacoes/models/notificacao.m
 import { NotificacaoService } from 'src/app/pages/notificacoes/services/notificacao.service';
 import { NotificacaoEnviarDialogComponent } from 'src/app/pages/notificacoes/components/notificacao-enviar-dialog.component';
 import { resolveTipoEmpresa, TipoEmpresa } from 'src/app/models/empresa/tipo-empresa.enum';
+import { CatalogoEmpresaContextService, CatalogoVersaoAdministrativa } from 'src/app/pages/catalogo/shared/services/catalogo-empresa-context.service';
 
 const MOBILE_VIEW = 'screen and (max-width: 768px)';
 const TABLET_VIEW = 'screen and (min-width: 769px) and (max-width: 1024px)';
@@ -128,6 +129,7 @@ export class FullComponent implements OnInit, OnDestroy {
   private readonly permissoesEnviarNotificacao = ['NOTIFICACAO_ENVIAR', 'NOTIFICACAO_ENVIAR_GLOBAL'];
   private notificationTouchStartX: number | null = null;
   mobileBottomNavItems: MobileBottomNavItem[] = [];
+  private versaoCatalogoAtual: CatalogoVersaoAdministrativa = 'LEGADO_DEPOSITO';
 
   get isOver(): boolean {
     return this.isMobileScreen;
@@ -161,6 +163,8 @@ export class FullComponent implements OnInit, OnDestroy {
       url.startsWith('/page/cadastro-tecnico/materiais') ||
       url.startsWith('/page/cadastro-tecnico/produtos') ||
       url.startsWith('/page/deposito') ||
+      url.startsWith('/page/orcamentos') ||
+      url.startsWith('/page/catalogo') ||
       url.startsWith('/page/ajuda') ||
       url.startsWith('/page/cadastro-tecnico/servico') ||
       url.startsWith('/page/cadastro-tecnico/servicos') ||
@@ -212,6 +216,7 @@ export class FullComponent implements OnInit, OnDestroy {
     private billingState: BillingStateService,
     private onboardingFlow: OnboardingFlowService,
     private notificacaoService: NotificacaoService,
+    private catalogoContext: CatalogoEmpresaContextService,
   ) {
     this.htmlElement = document.querySelector('html')!;
     this.layoutChangesSubscription = this.breakpointObserver
@@ -257,10 +262,11 @@ export class FullComponent implements OnInit, OnDestroy {
       .subscribe(usuario => {  
         this.usuarioLogado = usuario;
         this.tipoEmpresaAtual = resolveTipoEmpresa(usuario.empresa?.tipoEmpresa);
+        this.versaoCatalogoAtual = this.catalogoContext.snapshot().versaoCatalogo;
         this.aplicarConfiguracaoPorTipoEmpresa(this.tipoEmpresaAtual);
         this.atualizarPermissaoEnvioNotificacao();
         const permissoes = (usuario.perfil?.permissoes || []).map(p => p.chave);
-        this.navItemsFiltrados = this.filtrarMenus(navItems, permissoes, this.tipoEmpresaAtual);
+        this.navItemsFiltrados = this.filtrarMenus(navItems, permissoes, this.tipoEmpresaAtual, this.versaoCatalogoAtual);
         this.mobileNavGroups = this.buildMobileNavGroups(this.navItemsFiltrados);
         this.currentPageTitle = this.resolveCurrentPageTitle(this.router.url);
         this.carregarStatusBilling();
@@ -283,17 +289,29 @@ export class FullComponent implements OnInit, OnDestroy {
     this.layoutChangesSubscription.unsubscribe();
   }
 
-  filtrarMenus(items: NavItem[], permissoesUsuario: string[], tipoEmpresa: TipoEmpresa): NavItem[] {  
+  filtrarMenus(
+    items: NavItem[],
+    permissoesUsuario: string[],
+    tipoEmpresa: TipoEmpresa,
+    versaoCatalogo: CatalogoVersaoAdministrativa
+  ): NavItem[] {
     const possuiPermissao = (requeridas?: string[]) => {
       return !requeridas || requeridas.some(p => permissoesUsuario.includes(p));
     };
 
     const aceitaTipoEmpresa = (tiposPermitidos?: TipoEmpresa[]) =>
       !tiposPermitidos || tiposPermitidos.includes(tipoEmpresa);
+
+    const aceitaVersaoCatalogo = (modo?: CatalogoVersaoAdministrativa) =>
+      !modo || tipoEmpresa !== TipoEmpresa.DEPOSITO || modo === versaoCatalogo;
   
     const filtrar = (menus: NavItem[]): NavItem[] =>
       menus
-        .filter(menu => aceitaTipoEmpresa(menu.allowedEmpresaTipos) && possuiPermissao(menu.requiredPermission))
+        .filter(menu =>
+          aceitaTipoEmpresa(menu.allowedEmpresaTipos)
+          && aceitaVersaoCatalogo(menu.catalogoModo)
+          && possuiPermissao(menu.requiredPermission)
+        )
         .map(menu => ({
           ...menu,
           children: menu.children ? filtrar(menu.children) : undefined
@@ -677,7 +695,11 @@ export class FullComponent implements OnInit, OnDestroy {
   private buildMobileNavGroups(items: NavItem[]): MobileNavGroup[] {
     const groups: MobileNavGroup[] = [];
     const primaryRoutes = this.tipoEmpresaAtual === TipoEmpresa.DEPOSITO
-      ? new Set(['/page/deposito', '/page/deposito/itens', '/page/deposito/orcamentos'])
+      ? new Set([
+          '/page/deposito',
+          this.catalogoPrincipalRoute(),
+          '/page/orcamentos'
+        ])
       : new Set(['/dashboards/dashboard1', '/page/pedido', '/smartcalc', '/page/cliente']);
     const secondaryItems = items.filter((item) => !item.navCap && !primaryRoutes.has(item.route || ''));
 
@@ -822,6 +844,12 @@ export class FullComponent implements OnInit, OnDestroy {
   }
 
   private aplicarConfiguracaoPorTipoEmpresa(tipoEmpresa: TipoEmpresa): void {
+    const catalogoNovoAtivo = tipoEmpresa === TipoEmpresa.DEPOSITO && this.versaoCatalogoAtual === 'CATALOGO_NOVO';
+    const catalogoRoute = this.catalogoPrincipalRoute();
+    const catalogoStartsWith = catalogoNovoAtivo
+      ? ['/page/catalogo']
+      : ['/page/deposito/itens', '/page/deposito/categorias', '/page/deposito/marcas'];
+
     this.mobileBottomNavItems = tipoEmpresa === TipoEmpresa.DEPOSITO
       ? [
           {
@@ -841,16 +869,16 @@ export class FullComponent implements OnInit, OnDestroy {
             key: 'catalogo',
             label: 'Catálogo',
             icon: 'package',
-            route: '/page/deposito/itens',
-            startsWith: ['/page/deposito/itens', '/page/deposito/categorias', '/page/deposito/marcas'],
+            route: catalogoRoute,
+            startsWith: catalogoStartsWith,
             special: true,
           },
           {
             key: 'orcamentos',
             label: 'Orçamentos',
             icon: 'file-text',
-            route: '/page/deposito/orcamentos',
-            startsWith: ['/page/deposito/orcamentos'],
+            route: '/page/orcamentos',
+            startsWith: ['/page/orcamentos'],
           },
           {
             key: 'mais',
@@ -898,27 +926,53 @@ export class FullComponent implements OnInit, OnDestroy {
 
     this.apps = tipoEmpresa === TipoEmpresa.DEPOSITO
       ? [
-          {
-            id: 1,
-            img: 'assets/images/svgs/icon-dd-invoice.svg',
-            title: 'Itens',
-            subtitle: 'Catálogo interno',
-            link: '/page/deposito/itens',
-          },
-          {
-            id: 2,
-            img: 'assets/images/svgs/icon-mailbox.svg',
-            title: 'Categorias',
-            subtitle: 'Organização do catálogo',
-            link: '/page/deposito/categorias',
-          },
-          {
-            id: 3,
-            img: 'assets/images/svgs/icon-dd-lifebuoy.svg',
-            title: 'Marcas',
-            subtitle: 'Fabricantes e linhas',
-            link: '/page/deposito/marcas',
-          },
+          ...(catalogoNovoAtivo
+            ? [
+                {
+                  id: 1,
+                  img: 'assets/images/svgs/icon-dd-invoice.svg',
+                  title: 'Produtos do Catálogo',
+                  subtitle: 'Catálogo administrativo',
+                  link: '/page/catalogo/produtos',
+                },
+                {
+                  id: 2,
+                  img: 'assets/images/svgs/icon-mailbox.svg',
+                  title: 'Categorias do Catálogo',
+                  subtitle: 'Hierarquia e características',
+                  link: '/page/catalogo/categorias',
+                },
+                {
+                  id: 3,
+                  img: 'assets/images/svgs/icon-dd-lifebuoy.svg',
+                  title: 'Marcas do Catálogo',
+                  subtitle: 'Fabricantes e linhas',
+                  link: '/page/catalogo/marcas',
+                },
+              ]
+            : [
+                {
+                  id: 1,
+                  img: 'assets/images/svgs/icon-dd-invoice.svg',
+                  title: 'Itens',
+                  subtitle: 'Catálogo do depósito',
+                  link: '/page/deposito/itens',
+                },
+                {
+                  id: 2,
+                  img: 'assets/images/svgs/icon-mailbox.svg',
+                  title: 'Categorias',
+                  subtitle: 'Organização do catálogo',
+                  link: '/page/deposito/categorias',
+                },
+                {
+                  id: 3,
+                  img: 'assets/images/svgs/icon-dd-lifebuoy.svg',
+                  title: 'Marcas',
+                  subtitle: 'Fabricantes e linhas',
+                  link: '/page/deposito/marcas',
+                },
+              ]),
           {
             id: 4,
             img: 'assets/images/svgs/icon-user-male.svg',
@@ -943,6 +997,26 @@ export class FullComponent implements OnInit, OnDestroy {
             link: '/page/deposito/itens',
           },
         ];
+  }
+
+  private catalogoPrincipalRoute(): string {
+    if (this.tipoEmpresaAtual !== TipoEmpresa.DEPOSITO || this.versaoCatalogoAtual === 'LEGADO_DEPOSITO') {
+      return this.authService.temPermissao('DEPOSITO_ITENS_VER')
+        ? '/page/deposito/itens'
+        : this.authService.temPermissao('DEPOSITO_CATEGORIAS_VER')
+          ? '/page/deposito/categorias'
+          : '/page/deposito/marcas';
+    }
+
+    if (this.authService.temPermissao('CATALOGO_PRODUTOS_VER')) {
+      return '/page/catalogo/produtos';
+    }
+
+    if (this.authService.temPermissao('CATALOGO_CATEGORIAS_VER')) {
+      return '/page/catalogo/categorias';
+    }
+
+    return '/page/catalogo/marcas';
   }
 
   private atualizarPermissaoEnvioNotificacao(): void {

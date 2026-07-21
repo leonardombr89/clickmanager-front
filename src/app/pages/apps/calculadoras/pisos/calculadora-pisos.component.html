@@ -1,0 +1,110 @@
+<app-page-card titulo="Calculadora de pisos" subtitulo="Calcule caixas por ambientes, perda e sobra estimada." [mostrarDivisor]="true">
+  <div class="calc-alert calc-alert--error" *ngIf="erro"><mat-icon>error</mat-icon>{{ erro }}</div>
+  <div class="calc-alert calc-alert--success" *ngIf="sucesso"><mat-icon>check_circle</mat-icon>{{ sucesso }}</div>
+
+  <div class="calc-layout">
+    <div class="calc-main">
+      <app-section-card titulo="Produto" subtitulo="Busque produtos ativos do catálogo novo configurados para venda por área.">
+        <mat-form-field appearance="outline" class="w-100">
+          <mat-label>Buscar produto</mat-label>
+          <input matInput [formControl]="buscaProduto" [matAutocomplete]="autoProduto" placeholder="Código, nome, categoria ou marca" />
+          <mat-progress-spinner matSuffix *ngIf="carregandoProduto" mode="indeterminate" diameter="20"></mat-progress-spinner>
+          <mat-autocomplete #autoProduto="matAutocomplete" [displayWith]="displayProduto" (optionSelected)="selecionarProduto($event)">
+            <mat-option *ngFor="let produto of produtos$ | async" [value]="produto">
+              <div class="produto-option">
+                <span>{{ produto.codigo }} - {{ produto.nome }}</span>
+                <small>{{ produto.categoria || 'Sem categoria' }} • {{ produto.marca || 'Sem marca' }} • {{ produto.unidadeVenda || '-' }} • {{ produto.metragemPorEmbalagem || 0 }} m²/emb.</small>
+              </div>
+            </mat-option>
+          </mat-autocomplete>
+        </mat-form-field>
+
+        <div class="produto-card" *ngIf="produtoSelecionado; else produtoVazio">
+          <div class="produto-img" [style.backgroundImage]="produtoSelecionado.imagemUrl ? 'url(' + produtoSelecionado.imagemUrl + ')' : ''">
+            <mat-icon *ngIf="!produtoSelecionado.imagemUrl">inventory_2</mat-icon>
+          </div>
+          <div>
+            <strong>{{ produtoSelecionado.nome }}</strong>
+            <span>{{ produtoSelecionado.codigo }} • {{ produtoSelecionado.categoria || 'Sem categoria' }} • {{ produtoSelecionado.marca || 'Sem marca' }}</span>
+            <span>Unidade: {{ produtoSelecionado.unidadeVenda || '-' }} • Caixa: {{ formatNumber(produtoSelecionado.metragemPorEmbalagem) }} m² • Preço: {{ produtoSelecionado.precoUnitario | currency:'BRL':'symbol':'1.2-2' }}</span>
+            <small *ngIf="!produtoSelecionado.metragemPorEmbalagem">Este produto ainda não possui metragem por embalagem configurada.</small>
+          </div>
+        </div>
+        <ng-template #produtoVazio><p class="empty">Nenhum produto selecionado.</p></ng-template>
+      </app-section-card>
+
+      <app-section-card titulo="Ambientes" subtitulo="Informe largura, comprimento e quantidade de ambientes iguais.">
+        <form [formGroup]="form">
+          <div class="perda">
+            <mat-label>Percentual de perda</mat-label>
+            <mat-button-toggle-group formControlName="percentualPerda">
+              <mat-button-toggle *ngFor="let option of perdaOptions" [value]="option">{{ option }}%</mat-button-toggle>
+            </mat-button-toggle-group>
+            <mat-form-field appearance="outline">
+              <mat-label>Personalizado</mat-label>
+              <input matInput type="number" min="0" max="100" formControlName="percentualPerda" />
+              <span matSuffix>%</span>
+            </mat-form-field>
+            <small>A perda cobre recortes, quebras e ajustes durante a instalação.</small>
+          </div>
+
+          <div formArrayName="ambientes" class="ambientes">
+            <div class="ambiente" *ngFor="let ambiente of ambientes.controls; let i = index" [formGroupName]="i">
+              <mat-form-field appearance="outline"><mat-label>Nome</mat-label><input matInput formControlName="nome" /></mat-form-field>
+              <mat-form-field appearance="outline"><mat-label>Largura</mat-label><input matInput formControlName="largura" inputmode="decimal" /><span matSuffix>m</span></mat-form-field>
+              <mat-form-field appearance="outline"><mat-label>Comprimento</mat-label><input matInput formControlName="comprimento" inputmode="decimal" /><span matSuffix>m</span></mat-form-field>
+              <mat-form-field appearance="outline"><mat-label>Quantidade</mat-label><input matInput type="number" min="1" formControlName="quantidade" /></mat-form-field>
+              <div class="area-preview"><span>Área</span><strong>{{ formatNumber(areaAmbiente(ambiente)) }} m²</strong></div>
+              <div class="row-actions">
+                <button mat-icon-button type="button" matTooltip="Duplicar" (click)="duplicarAmbiente(i)"><mat-icon>content_copy</mat-icon></button>
+                <button mat-icon-button type="button" matTooltip="Remover" (click)="removerAmbiente(i)"><mat-icon>delete</mat-icon></button>
+              </div>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button mat-stroked-button color="primary" type="button" (click)="addAmbiente()"><mat-icon>add</mat-icon>Adicionar ambiente</button>
+            <button mat-flat-button color="primary" type="button" [disabled]="calculando" (click)="calcular()">
+              <mat-icon>calculate</mat-icon>{{ calculando ? 'Calculando...' : 'Calcular quantidade' }}
+            </button>
+          </div>
+        </form>
+      </app-section-card>
+    </div>
+
+    <aside class="calc-result">
+      <app-section-card titulo="Resultado" subtitulo="O backend é a fonte oficial do cálculo.">
+        <div class="empty" *ngIf="!resultado">Preencha produto e ambientes para calcular.</div>
+        <ng-container *ngIf="resultado">
+          <div class="calc-alert" *ngIf="resultadoDesatualizado"><mat-icon>sync_problem</mat-icon>Resultado desatualizado. Calcule novamente antes de adicionar ao orçamento.</div>
+          <div class="headline">Você precisará de <strong>{{ resultado.quantidadeCaixas }} caixas</strong></div>
+          <dl>
+            <div><dt>Área dos ambientes</dt><dd>{{ formatNumber(resultado.areaTotal) }} m²</dd></div>
+            <div><dt>Perda de {{ resultado.percentualPerda }}%</dt><dd>{{ formatNumber(resultado.areaPerda) }} m²</dd></div>
+            <div><dt>Área necessária</dt><dd>{{ formatNumber(resultado.areaNecessaria) }} m²</dd></div>
+            <div><dt>Cada caixa</dt><dd>{{ formatNumber(resultado.produto.metragemPorEmbalagem) }} m²</dd></div>
+            <div><dt>Área comprada</dt><dd>{{ formatNumber(resultado.areaComprada) }} m²</dd></div>
+            <div><dt>Sobra estimada</dt><dd>{{ formatNumber(resultado.sobraEstimada) }} m²</dd></div>
+            <div><dt>Valor unitário</dt><dd>{{ resultado.valorUnitario | currency:'BRL':'symbol':'1.2-2' }}</dd></div>
+            <div class="total"><dt>Total</dt><dd>{{ resultado.valorTotal | currency:'BRL':'symbol':'1.2-2' }}</dd></div>
+          </dl>
+          <div class="calc-alert" *ngFor="let aviso of avisosLocais()"><mat-icon>warning</mat-icon>{{ aviso }}</div>
+
+          <div class="orcamento" *ngIf="podeAdicionarOrcamento">
+            <mat-radio-group [formControl]="modoOrcamento">
+              <mat-radio-button value="EXISTENTE">Selecionar orçamento existente</mat-radio-button>
+              <mat-radio-button value="NOVO">Criar novo orçamento</mat-radio-button>
+            </mat-radio-group>
+            <mat-form-field appearance="outline" *ngIf="modoOrcamento.value === 'EXISTENTE'">
+              <mat-label>ID do orçamento</mat-label>
+              <input matInput type="number" [formControl]="orcamentoId" />
+            </mat-form-field>
+            <button mat-flat-button color="primary" type="button" [disabled]="adicionando || resultadoDesatualizado" (click)="adicionarAoOrcamento()">
+              <mat-icon>playlist_add</mat-icon>{{ adicionando ? 'Adicionando...' : 'Adicionar ao orçamento' }}
+            </button>
+          </div>
+        </ng-container>
+      </app-section-card>
+    </aside>
+  </div>
+</app-page-card>

@@ -17,6 +17,7 @@ export interface Empresa {
     siteUrl?: string | null;
     youtubeUrl?: string | null;
     tipoEmpresa?: TipoEmpresa | null;
+    versaoCatalogo?: 'LEGADO_DEPOSITO' | 'CATALOGO_NOVO' | null;
     dataCriacao?: string;
     ativa?: boolean;
     endereco?: Endereco;
