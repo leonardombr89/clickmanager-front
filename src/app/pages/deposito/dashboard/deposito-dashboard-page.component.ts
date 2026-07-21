@@ -19,6 +19,13 @@ import {
   DepositoDashboardOrcamentoStatus,
 } from './models/deposito-dashboard.models';
 import { DepositoDashboardService } from './services/deposito-dashboard.service';
+import { CatalogoEmpresaContextService } from '../../catalogo/shared/services/catalogo-empresa-context.service';
+import {
+  CatalogoCategoriaService,
+  CatalogoMarcaService,
+  CatalogoProdutoService,
+} from '../../catalogo/shared/services/catalogo.service';
+import { forkJoin } from 'rxjs';
 
 interface DashboardMetric {
   label: string;
@@ -69,12 +76,17 @@ export class DepositoDashboardPageComponent implements OnInit {
   dashboard: DepositoDashboardResponse | null = null;
   carregando = false;
   erro = false;
+  catalogoNovoAtivo = false;
   readonly colunasRecentes = ['cliente', 'telefone', 'itens', 'data', 'status', 'acao'];
 
   constructor(
     private readonly dashboardService: DepositoDashboardService,
     private readonly authService: AuthService,
     private readonly router: Router,
+    private readonly catalogoContext: CatalogoEmpresaContextService,
+    private readonly catalogoProdutoService: CatalogoProdutoService,
+    private readonly catalogoCategoriaService: CatalogoCategoriaService,
+    private readonly catalogoMarcaService: CatalogoMarcaService,
   ) {}
 
   ngOnInit(): void {
@@ -84,10 +96,15 @@ export class DepositoDashboardPageComponent implements OnInit {
   carregarDashboard(): void {
     this.carregando = true;
     this.erro = false;
+    this.catalogoNovoAtivo = this.catalogoContext.usaCatalogoNovo();
 
     this.dashboardService.buscarDashboard().subscribe({
       next: (response) => {
         this.dashboard = response;
+        if (this.catalogoNovoAtivo) {
+          this.carregarResumoCatalogoNovo(response);
+          return;
+        }
         this.carregando = false;
       },
       error: () => {
@@ -122,9 +139,9 @@ export class DepositoDashboardPageComponent implements OnInit {
 
     return [
       {
-        label: 'Itens do catálogo',
+        label: this.catalogoNovoAtivo ? 'Produtos do catálogo' : 'Itens do catálogo',
         valor: String(catalogo.itensAtivos),
-        detalhe: this.pluralizar(catalogo.itensAtivos, 'item ativo', 'itens ativos'),
+        detalhe: this.pluralizar(catalogo.itensAtivos, this.catalogoNovoAtivo ? 'produto ativo' : 'item ativo', this.catalogoNovoAtivo ? 'produtos ativos' : 'itens ativos'),
         info: `${catalogo.totalItens} ${this.pluralizar(catalogo.totalItens, 'cadastrado no total', 'cadastrados no total')}`,
         icon: 'package',
         accent: 'primary',
@@ -193,7 +210,9 @@ export class DepositoDashboardPageComponent implements OnInit {
 
   get resumoCatalogo(): string {
     const itensAtivos = this.catalogo?.itensAtivos ?? 0;
-    return `Seu catálogo possui ${this.pluralizarComNumero(itensAtivos, 'item ativo', 'itens ativos')}.`;
+    return this.catalogoNovoAtivo
+      ? `Seu catálogo possui ${this.pluralizarComNumero(itensAtivos, 'produto ativo', 'produtos ativos')}.`
+      : `Seu catálogo possui ${this.pluralizarComNumero(itensAtivos, 'item ativo', 'itens ativos')}.`;
   }
 
   get resumoOrcamentos(): string {
@@ -241,6 +260,39 @@ export class DepositoDashboardPageComponent implements OnInit {
     const catalogo = this.catalogo;
     if (!catalogo) {
       return [];
+    }
+
+    if (this.catalogoNovoAtivo) {
+      return [
+        {
+          label: 'Inativos',
+          detalhe: 'Produtos cadastrados como inativos',
+          valor: catalogo.itensInativos,
+          icon: 'trash',
+          accent: 'danger',
+        },
+        {
+          label: 'Em destaque',
+          detalhe: 'Produtos em destaque no catálogo',
+          valor: catalogo.itensDestaque,
+          icon: 'star',
+          accent: 'success',
+        },
+        {
+          label: 'Categorias ativas',
+          detalhe: 'Categorias disponíveis para cadastro',
+          valor: catalogo.categoriasAtivas,
+          icon: 'category',
+          accent: 'warning',
+        },
+        {
+          label: 'Marcas ativas',
+          detalhe: 'Marcas disponíveis para cadastro',
+          valor: catalogo.marcasAtivas,
+          icon: 'tag',
+          accent: 'primary',
+        },
+      ];
     }
 
     return [
@@ -343,6 +395,34 @@ export class DepositoDashboardPageComponent implements OnInit {
     this.router.navigate(['/page/site/configuracoes']);
   }
 
+  get novoCadastroRoute(): string {
+    return this.catalogoNovoAtivo ? '/page/catalogo/produtos/novo' : '/page/deposito/itens/novo';
+  }
+
+  get listaCatalogoRoute(): string {
+    return this.catalogoNovoAtivo ? '/page/catalogo/produtos' : '/page/deposito/itens';
+  }
+
+  get permissaoCriarCatalogo(): string {
+    return this.catalogoNovoAtivo ? 'CATALOGO_PRODUTOS_CADASTRAR' : 'DEPOSITO_ITENS_CADASTRAR';
+  }
+
+  get permissaoVerCatalogo(): string {
+    return this.catalogoNovoAtivo ? 'CATALOGO_PRODUTOS_VER' : 'DEPOSITO_ITENS_VER';
+  }
+
+  get novoCadastroLabel(): string {
+    return this.catalogoNovoAtivo ? 'Novo produto' : 'Novo item';
+  }
+
+  get ajudaCadastroLabel(): string {
+    return this.catalogoNovoAtivo ? 'Cadastrar um novo produto no catálogo' : 'Cadastrar um novo item no catálogo';
+  }
+
+  get listaCatalogoLabel(): string {
+    return this.catalogoNovoAtivo ? 'Ver todos os produtos' : 'Ver todos os itens';
+  }
+
   labelStatus(status: DepositoDashboardOrcamentoStatus | null | undefined): string {
     const labels: Record<string, string> = {
       NOVO: 'Novo',
@@ -377,7 +457,7 @@ export class DepositoDashboardPageComponent implements OnInit {
       return;
     }
 
-    this.router.navigate(['/page/deposito/orcamentos']);
+    this.router.navigate(['/page/orcamentos']);
   }
 
   private formatarTexto(valor: string): string {
@@ -416,5 +496,45 @@ export class DepositoDashboardPageComponent implements OnInit {
 
   pluralizar(quantidade: number, singular: string, plural: string): string {
     return quantidade === 1 ? singular : plural;
+  }
+
+  private carregarResumoCatalogoNovo(response: DepositoDashboardResponse): void {
+    forkJoin({
+      produtos: this.catalogoProdutoService.listar({ page: 0, size: 1 }),
+      produtosAtivos: this.catalogoProdutoService.listar({ page: 0, size: 1, ativo: true }),
+      produtosInativos: this.catalogoProdutoService.listar({ page: 0, size: 1, ativo: false }),
+      produtosDestaque: this.catalogoProdutoService.listar({ page: 0, size: 1, destaque: true }),
+      categorias: this.catalogoCategoriaService.listar({ page: 0, size: 1 }),
+      categoriasAtivas: this.catalogoCategoriaService.listar({ page: 0, size: 1, ativo: true }),
+      categoriasInativas: this.catalogoCategoriaService.listar({ page: 0, size: 1, ativo: false }),
+      marcas: this.catalogoMarcaService.listar({ page: 0, size: 1 }),
+      marcasAtivas: this.catalogoMarcaService.listar({ page: 0, size: 1, ativo: true }),
+      marcasInativas: this.catalogoMarcaService.listar({ page: 0, size: 1, ativo: false }),
+    }).subscribe({
+      next: (resumo) => {
+        this.dashboard = {
+          ...response,
+          catalogo: {
+            totalItens: resumo.produtos.totalElements || 0,
+            itensAtivos: resumo.produtosAtivos.totalElements || 0,
+            itensInativos: resumo.produtosInativos.totalElements || 0,
+            itensSemImagem: 0,
+            itensSemCategoria: 0,
+            itensDestaque: resumo.produtosDestaque.totalElements || 0,
+            totalCategorias: resumo.categorias.totalElements || 0,
+            categoriasAtivas: resumo.categoriasAtivas.totalElements || 0,
+            categoriasInativas: resumo.categoriasInativas.totalElements || 0,
+            totalMarcas: resumo.marcas.totalElements || 0,
+            marcasAtivas: resumo.marcasAtivas.totalElements || 0,
+            marcasInativas: resumo.marcasInativas.totalElements || 0,
+          },
+        };
+        this.carregando = false;
+      },
+      error: () => {
+        this.dashboard = response;
+        this.carregando = false;
+      },
+    });
   }
 }

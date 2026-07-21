@@ -12,6 +12,7 @@ import { MatPaginator, MatPaginatorModule, PageEvent } from '@angular/material/p
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTableModule } from '@angular/material/table';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule } from '@angular/router';
 import { TablerIconsModule } from 'angular-tabler-icons';
 import { ToastrService } from 'ngx-toastr';
@@ -26,16 +27,15 @@ import { MetricCardComponent } from 'src/app/components/metric-card/metric-card.
 import { StatusBadgeComponent } from 'src/app/components/status-badge/status-badge.component';
 import { TelefonePipe } from 'src/app/pipe/telefone.pipe';
 import { AuthService } from 'src/app/services/auth.service';
-import { DepositoDashboardOrcamentoResumo } from '../../dashboard/models/deposito-dashboard.models';
-import { DepositoDashboardService } from '../../dashboard/services/deposito-dashboard.service';
-import { DepositoOrcamento, DepositoOrcamentoListParams, DepositoOrcamentoStatus } from '../../models/deposito.models';
-import { DepositoService } from '../../services/deposito.service';
+import { Orcamento, OrcamentoListagemParams, OrcamentoOrigem, OrcamentoResumo, OrcamentoStatus } from 'src/app/models/orcamento/orcamento.model';
+import { OrcamentoResumoService } from 'src/app/services/orcamento-resumo.service';
+import { OrcamentoService } from 'src/app/services/orcamento.service';
 
 type PeriodoFiltro = 'TODOS' | 'HOJE' | '7_DIAS' | '30_DIAS' | 'PERSONALIZADO';
 type OrdenacaoFiltro = 'RECENTES' | 'ANTIGOS' | 'MAIOR_VALOR' | 'MENOR_VALOR';
 
 type StatusOption = {
-  value: DepositoOrcamentoStatus;
+  value: OrcamentoStatus;
   label: string;
 };
 
@@ -48,7 +48,7 @@ type IndicadorOrcamento = {
 };
 
 @Component({
-  selector: 'app-listar-orcamentos-deposito',
+  selector: 'app-listar-orcamentos',
   standalone: true,
   imports: [
     CommonModule,
@@ -64,6 +64,7 @@ type IndicadorOrcamento = {
     MatProgressSpinnerModule,
     MatSelectModule,
     MatTableModule,
+    MatTooltipModule,
     TablerIconsModule,
     CardHeaderComponent,
     ListFilterBarComponent,
@@ -72,19 +73,20 @@ type IndicadorOrcamento = {
     TelefonePipe,
     DatePipe,
   ],
-  templateUrl: './listar-orcamentos-deposito.component.html',
-  styleUrl: './listar-orcamentos-deposito.component.scss',
+  templateUrl: './listar-orcamentos.component.html',
+  styleUrl: './listar-orcamentos.component.scss',
 })
-export class ListarOrcamentosDepositoComponent implements OnInit {
-  orcamentos: DepositoOrcamento[] = [];
+export class ListarOrcamentosComponent implements OnInit {
+  orcamentos: Orcamento[] = [];
   totalOrcamentos = 0;
-  resumoOrcamentos: DepositoDashboardOrcamentoResumo | null = null;
+  resumoOrcamentos: OrcamentoResumo | null = null;
   carregando = false;
   erro = false;
   pagina = 0;
   tamanhoPagina = 10;
   termoPesquisa = '';
-  statusSelecionado: DepositoOrcamentoStatus | '' = '';
+  statusSelecionado: OrcamentoStatus | '' = '';
+  origemSelecionada: OrcamentoOrigem | '' = '';
   periodoSelecionado: PeriodoFiltro = 'TODOS';
   ordenacaoSelecionada: OrdenacaoFiltro = 'RECENTES';
   dataInicioPersonalizada = '';
@@ -103,6 +105,18 @@ export class ListarOrcamentosDepositoComponent implements OnInit {
         { value: 'AGUARDANDO_CLIENTE', label: 'Aguardando cliente' },
         { value: 'CONVERTIDO', label: 'Convertidos' },
         { value: 'PERDIDO', label: 'Não convertidos' },
+      ],
+    },
+    {
+      key: 'origem',
+      label: 'Origem',
+      value: '',
+      options: [
+        { value: '', label: 'Todas' },
+        { value: 'SITE', label: 'Site Público' },
+        { value: 'SMARTCALC', label: 'SmartCalc' },
+        { value: 'ADMIN', label: 'Cadastro Manual' },
+        { value: 'INTEGRACAO', label: 'Integrações' },
       ],
     },
     {
@@ -138,12 +152,11 @@ export class ListarOrcamentosDepositoComponent implements OnInit {
     { value: 'CONVERTIDO', label: 'Convertido' },
     { value: 'PERDIDO', label: 'Não convertido' },
   ];
-
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
   constructor(
-    private readonly depositoService: DepositoService,
-    private readonly dashboardService: DepositoDashboardService,
+    private readonly orcamentoService: OrcamentoService,
+    private readonly orcamentoResumoService: OrcamentoResumoService,
     private readonly authService: AuthService,
     private readonly dialog: MatDialog,
     private readonly toastr: ToastrService,
@@ -171,11 +184,12 @@ export class ListarOrcamentosDepositoComponent implements OnInit {
   get possuiFiltros(): boolean {
     return !!this.termoPesquisa.trim()
       || !!this.statusSelecionado
+      || !!this.origemSelecionada
       || this.periodoSelecionado !== 'TODOS'
       || this.ordenacaoSelecionada !== 'RECENTES';
   }
 
-  get orcamentosFiltrados(): DepositoOrcamento[] {
+  get orcamentosFiltrados(): Orcamento[] {
     const termo = this.termoPesquisa.trim().toLowerCase();
     if (!termo) {
       return this.orcamentos;
@@ -190,9 +204,9 @@ export class ListarOrcamentosDepositoComponent implements OnInit {
   }
 
   carregarResumoIndicadores(): void {
-    this.dashboardService.buscarDashboard().subscribe({
+    this.orcamentoResumoService.buscarResumo().subscribe({
       next: (response) => {
-        this.resumoOrcamentos = response.orcamentos;
+        this.resumoOrcamentos = response;
         this.atualizarIndicadores();
       },
       error: () => {
@@ -205,8 +219,8 @@ export class ListarOrcamentosDepositoComponent implements OnInit {
   carregarOrcamentos(): void {
     this.carregando = true;
     this.erro = false;
-    this.depositoService
-      .listarOrcamentos(this.buildFiltros())
+    this.orcamentoService
+      .listar(this.buildFiltros())
       .subscribe({
         next: (response) => {
           this.orcamentos = response.content || [];
@@ -233,7 +247,10 @@ export class ListarOrcamentosDepositoComponent implements OnInit {
 
   onFiltroChange(event: ListFilterChange): void {
     if (event.key === 'status') {
-      this.statusSelecionado = event.value as DepositoOrcamentoStatus | '';
+      this.statusSelecionado = event.value as OrcamentoStatus | '';
+    }
+    if (event.key === 'origem') {
+      this.origemSelecionada = event.value as OrcamentoOrigem | '';
     }
     if (event.key === 'periodo') {
       this.periodoSelecionado = event.value as PeriodoFiltro;
@@ -254,6 +271,7 @@ export class ListarOrcamentosDepositoComponent implements OnInit {
   limparFiltros(): void {
     this.termoPesquisa = '';
     this.statusSelecionado = '';
+    this.origemSelecionada = '';
     this.periodoSelecionado = 'TODOS';
     this.ordenacaoSelecionada = 'RECENTES';
     this.dataInicioPersonalizada = '';
@@ -263,8 +281,8 @@ export class ListarOrcamentosDepositoComponent implements OnInit {
     this.carregarOrcamentos();
   }
 
-  alterarStatus(orcamento: DepositoOrcamento, novoStatus: DepositoOrcamentoStatus | string): void {
-    const status = novoStatus as DepositoOrcamentoStatus;
+  alterarStatus(orcamento: Orcamento, novoStatus: OrcamentoStatus | string): void {
+    const status = novoStatus as OrcamentoStatus;
     if (!this.podeEditar || !orcamento?.id || status === orcamento.status || this.linhaAtualizando(orcamento)) {
       return;
     }
@@ -277,11 +295,11 @@ export class ListarOrcamentosDepositoComponent implements OnInit {
     this.executarAlteracaoStatus(orcamento, status);
   }
 
-  marcarStatus(orcamento: DepositoOrcamento, status: DepositoOrcamentoStatus): void {
+  marcarStatus(orcamento: Orcamento, status: OrcamentoStatus): void {
     this.alterarStatus(orcamento, status);
   }
 
-  excluir(orcamento: DepositoOrcamento): void {
+  excluir(orcamento: Orcamento): void {
     if (!this.podeExcluir || !orcamento?.id) {
       return;
     }
@@ -301,7 +319,7 @@ export class ListarOrcamentosDepositoComponent implements OnInit {
         return;
       }
 
-      this.depositoService.excluirOrcamento(orcamento.id).subscribe({
+      this.orcamentoService.excluir(orcamento.id).subscribe({
         next: () => {
           this.toastr.success('Orçamento excluído com sucesso.');
           this.carregarResumoIndicadores();
@@ -312,7 +330,7 @@ export class ListarOrcamentosDepositoComponent implements OnInit {
     });
   }
 
-  copiarContato(orcamento: DepositoOrcamento): void {
+  copiarContato(orcamento: Orcamento): void {
     const contato = this.telefoneOrcamento(orcamento) || this.emailOrcamento(orcamento);
     if (!contato) {
       this.toastr.info('Este orçamento não possui contato informado.');
@@ -324,14 +342,14 @@ export class ListarOrcamentosDepositoComponent implements OnInit {
       .catch(() => this.toastr.error('Não foi possível copiar o contato.'));
   }
 
-  copiarProtocolo(orcamento: DepositoOrcamento): void {
+  copiarProtocolo(orcamento: Orcamento): void {
     const protocolo = this.protocoloLabel(orcamento);
     navigator.clipboard?.writeText(protocolo)
       .then(() => this.toastr.success('Protocolo copiado.'))
       .catch(() => this.toastr.error('Não foi possível copiar o protocolo.'));
   }
 
-  abrirWhatsApp(orcamento: DepositoOrcamento): void {
+  abrirWhatsApp(orcamento: Orcamento): void {
     const telefone = this.telefoneNormalizado(orcamento);
     if (!telefone) {
       this.toastr.info('Este orçamento não possui telefone para WhatsApp.');
@@ -341,50 +359,66 @@ export class ListarOrcamentosDepositoComponent implements OnInit {
     window.open(`https://wa.me/${telefone}`, '_blank', 'noopener,noreferrer');
   }
 
-  trackByOrcamento(index: number, orcamento: DepositoOrcamento): number {
+  trackByOrcamento(index: number, orcamento: Orcamento): number {
     return orcamento.id ?? index;
   }
 
-  protocoloLabel(orcamento: DepositoOrcamento): string {
+  protocoloLabel(orcamento: Orcamento): string {
     return orcamento.protocolo || `#${orcamento.id}`;
   }
 
-  clienteLabel(orcamento: DepositoOrcamento): string {
+  clienteLabel(orcamento: Orcamento): string {
     return orcamento.nomeCliente || orcamento.nome || 'Cliente não informado';
   }
 
-  telefoneOrcamento(orcamento: DepositoOrcamento): string | null {
+  telefoneOrcamento(orcamento: Orcamento): string | null {
     return orcamento.telefoneCliente || orcamento.telefone || null;
   }
 
-  emailOrcamento(orcamento: DepositoOrcamento): string | null {
+  emailOrcamento(orcamento: Orcamento): string | null {
     return orcamento.emailCliente || orcamento.email || null;
   }
 
-  dataCriacao(orcamento: DepositoOrcamento): string | null {
+  dataCriacao(orcamento: Orcamento): string | null {
     return orcamento.createdAt || orcamento.criadoEm || null;
   }
 
-  dataAtualizacao(orcamento: DepositoOrcamento): string | null {
+  dataAtualizacao(orcamento: Orcamento): string | null {
     return orcamento.atualizadoEm || orcamento.updatedAt || null;
   }
 
-  itensLabel(orcamento: DepositoOrcamento): string {
+  itensLabel(orcamento: Orcamento): string {
     const quantidade = orcamento.quantidadeItens ?? orcamento.itens?.length ?? 0;
     return quantidade === 1 ? '1 item' : `${quantidade} itens`;
   }
 
-  totalLabel(orcamento: DepositoOrcamento): number | null {
+  totalLabel(orcamento: Orcamento): number | null {
     return orcamento.totalEstimado ?? null;
   }
 
-  statusLabel(status: DepositoOrcamentoStatus | null | undefined): string {
+  statusLabel(status: OrcamentoStatus | null | undefined): string {
     const option = this.statusOptions.find((item) => item.value === status);
     return option?.label || 'Sem status';
   }
 
-  statusClass(status: DepositoOrcamentoStatus | null | undefined): string {
+  statusClass(status: OrcamentoStatus | null | undefined): string {
     return `status-pill--${String(status || 'DESCONHECIDO').toLowerCase().replace(/_/g, '-')}`;
+  }
+
+  origemLabel(origem: string | null | undefined): string {
+    const labels: Record<string, string> = {
+      SITE_PUBLICO: 'Site Público',
+      SITE: 'Site Público',
+      SMARTCALC: 'SmartCalc',
+      CADASTRO_MANUAL: 'Cadastro Manual',
+      MANUAL: 'Cadastro Manual',
+      ADMIN: 'Cadastro Manual',
+      INTEGRACAO: 'Integração',
+      WHATSAPP: 'WhatsApp',
+      OUTRO: 'Outro',
+    };
+
+    return origem ? labels[origem] || origem : 'Origem não informada';
   }
 
   tempoRelativo(iso: string | null | undefined, prefixo: string): string {
@@ -411,26 +445,26 @@ export class ListarOrcamentosDepositoComponent implements OnInit {
     return `${prefixo} há ${dias} ${dias === 1 ? 'dia' : 'dias'}`;
   }
 
-  linhaAtualizando(orcamento: DepositoOrcamento): boolean {
+  linhaAtualizando(orcamento: Orcamento): boolean {
     return this.linhasAtualizando.has(orcamento.id);
   }
 
-  deveMostrarAcaoStatus(orcamento: DepositoOrcamento, status: DepositoOrcamentoStatus): boolean {
+  deveMostrarAcaoStatus(orcamento: Orcamento, status: OrcamentoStatus): boolean {
     return this.podeEditar && orcamento.status !== status;
   }
 
-  possuiTelefone(orcamento: DepositoOrcamento): boolean {
+  possuiTelefone(orcamento: Orcamento): boolean {
     return !!this.telefoneNormalizado(orcamento);
   }
 
-  private confirmarAlteracaoStatus(orcamento: DepositoOrcamento, status: DepositoOrcamentoStatus): void {
+  private confirmarAlteracaoStatus(orcamento: Orcamento, status: OrcamentoStatus): void {
     const convertido = status === 'CONVERTIDO';
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '420px',
       data: {
         title: convertido ? 'Marcar como convertido' : 'Marcar como não convertido',
         message: convertido
-          ? 'Deseja marcar este orçamento como convertido? Isso não cria pedido automaticamente.'
+          ? 'Deseja marcar este orçamento como convertido? A criação do pedido será habilitada em uma etapa futura.'
           : 'Deseja marcar este orçamento como não convertido?',
         confirmText: convertido ? 'Marcar convertido' : 'Marcar não convertido',
         confirmColor: convertido ? 'primary' : 'warn',
@@ -444,9 +478,9 @@ export class ListarOrcamentosDepositoComponent implements OnInit {
     });
   }
 
-  private executarAlteracaoStatus(orcamento: DepositoOrcamento, status: DepositoOrcamentoStatus): void {
+  private executarAlteracaoStatus(orcamento: Orcamento, status: OrcamentoStatus): void {
     this.linhasAtualizando.add(orcamento.id);
-    this.depositoService.alterarStatusOrcamento(orcamento.id, status).subscribe({
+    this.orcamentoService.alterarStatus(orcamento.id, status).subscribe({
       next: (response) => {
         this.orcamentos = this.orcamentos.map((item) => item.id === response.id ? { ...item, ...response } : item);
         this.linhasAtualizando.delete(orcamento.id);
@@ -460,13 +494,14 @@ export class ListarOrcamentosDepositoComponent implements OnInit {
     });
   }
 
-  private buildFiltros(): DepositoOrcamentoListParams {
+  private buildFiltros(): OrcamentoListagemParams {
     const periodo = this.periodoFiltro();
     return {
       page: this.pagina,
       size: this.tamanhoPagina,
       sort: this.sortFiltro(),
       status: this.statusSelecionado || undefined,
+      origem: this.origemSelecionada || undefined,
       dataInicio: periodo.dataInicio,
       dataFim: periodo.dataFim,
     };
@@ -518,7 +553,7 @@ export class ListarOrcamentosDepositoComponent implements OnInit {
     return novaData;
   }
 
-  private telefoneNormalizado(orcamento: DepositoOrcamento): string | null {
+  private telefoneNormalizado(orcamento: Orcamento): string | null {
     const telefone = this.telefoneOrcamento(orcamento)?.replace(/\D/g, '') || '';
     if (!telefone) {
       return null;
@@ -540,6 +575,9 @@ export class ListarOrcamentosDepositoComponent implements OnInit {
     this.filtrosOrcamento = this.filtrosOrcamento.map((filter) => {
       if (filter.key === 'status') {
         return { ...filter, value: this.statusSelecionado };
+      }
+      if (filter.key === 'origem') {
+        return { ...filter, value: this.origemSelecionada };
       }
       if (filter.key === 'periodo') {
         return { ...filter, value: this.periodoSelecionado };

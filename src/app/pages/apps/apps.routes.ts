@@ -22,7 +22,8 @@ import { AppEditInvoiceComponent } from './invoice/edit-invoice/edit-invoice.com
 import { AppContactListComponent } from './contact-list/contact-list.component';
 import { GerenciarPerfilComponent } from '../perfil/gerenciar-perfil/gerenciar-perfil.component';
 import { AppNotificacoesComponent } from '../notificacoes/notificacoes.component';
-import { GRAFICA_ROUTE_DATA, SHARED_ROUTE_DATA } from '../../guards/empresa-tipo-route-data';
+import { DEPOSITO_ROUTE_DATA, GRAFICA_ROUTE_DATA, SHARED_ROUTE_DATA } from '../../guards/empresa-tipo-route-data';
+import { permissionGuard } from 'src/app/guards/permission.guard';
 
 export const AppsRoutes: Routes = [
   {
@@ -40,6 +41,40 @@ export const AppsRoutes: Routes = [
             { title: 'SmartCalc' }
           ]
         }
+      },
+      {
+        path: 'calculadoras',
+        loadChildren: () => import('./calculadoras/calculadoras.routes').then((m) => m.CalculadorasRoutes),
+        canActivate: [permissionGuard],
+        data: {
+          ...DEPOSITO_ROUTE_DATA,
+          requiredPermission: ['CALCULADORA_PISOS_USAR'],
+          title: 'Calculadoras',
+          urls: [
+            { title: 'Orçamentos', url: '/page/orcamentos' },
+            { title: 'Calculadoras' },
+          ],
+        },
+      },
+      {
+        path: 'fiscal',
+        loadChildren: () => import('./fiscal/fiscal.routes').then((m) => m.FiscalRoutes),
+        canActivate: [permissionGuard],
+        data: {
+          ...DEPOSITO_ROUTE_DATA,
+          requiredPermission: [
+            'FISCAL_DOCUMENTOS_VER',
+            'FISCAL_CONFIGURACAO_VER',
+            'FISCAL_PRODUTOS_VER',
+            'FISCAL_REGRAS_VER',
+            'FISCAL_EMITIR',
+            'FISCAL_INUTILIZAR'
+          ],
+          title: 'Fiscal',
+          urls: [
+            { title: 'Fiscal' },
+          ],
+        },
       },
       {
         path: 'perfil',
