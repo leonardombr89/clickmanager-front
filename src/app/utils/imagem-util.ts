@@ -19,7 +19,8 @@ export class ImagemUtil {
         file: File,
         alturaFinal: number = 300,
         larguraFinal: number = 300,
-        qualidade: number = 0.8
+        qualidade: number = 0.8,
+        modoAjuste: 'cover' | 'contain' = 'cover'
     ): Promise<{ preview: string; blob: Blob }> {
         return new Promise((resolve, reject) => {
             if (!file) return reject('Arquivo inválido');
@@ -38,15 +39,25 @@ export class ImagemUtil {
                     canvas.height = alturaFinal;
     
                     const ctx = canvas.getContext('2d');
-                    ctx?.clearRect(0, 0, canvas.width, canvas.height);
+                    if (!ctx) {
+                        return reject('Não foi possível processar a imagem');
+                    }
+
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                    if (file.type === 'image/jpeg') {
+                        ctx.fillStyle = '#ffffff';
+                        ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    }
     
-                    const scale = Math.max(larguraFinal / img.width, alturaFinal / img.height);
+                    const scaleFn = modoAjuste === 'contain' ? Math.min : Math.max;
+                    const scale = scaleFn(larguraFinal / img.width, alturaFinal / img.height);
                     const newWidth = img.width * scale;
                     const newHeight = img.height * scale;
                     const offsetX = (larguraFinal - newWidth) / 2;
                     const offsetY = (alturaFinal - newHeight) / 2;
     
-                    ctx?.drawImage(img, offsetX, offsetY, newWidth, newHeight);
+                    ctx.drawImage(img, offsetX, offsetY, newWidth, newHeight);
     
                     const base64 = canvas.toDataURL(file.type, qualidade);
                     const blob = this.base64ParaBlob(base64, file.type);

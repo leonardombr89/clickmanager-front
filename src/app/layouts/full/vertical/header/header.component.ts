@@ -6,6 +6,7 @@ import {
   ViewEncapsulation,
   OnInit,
   OnDestroy,
+  effect,
 } from '@angular/core';
 import { CoreService } from 'src/app/services/core.service';
 import { MatDialog } from '@angular/material/dialog';
@@ -21,12 +22,16 @@ import { NotificacaoItem } from 'src/app/pages/notificacoes/models/notificacao.m
 import { NotificacaoService } from 'src/app/pages/notificacoes/services/notificacao.service';
 import { NotificacaoEnviarDialogComponent } from 'src/app/pages/notificacoes/components/notificacao-enviar-dialog.component';
 import { Subject, filter, takeUntil } from 'rxjs';
+import {
+  APLICATIVOS_CATALOGO,
+  AplicativoCatalogo,
+  AtalhoEmpresa,
+  ConfiguracaoAplicativos,
+} from 'src/app/models/config/configuracao-aplicativos.model';
+import { ConfiguracaoAplicativosService } from 'src/app/services/configuracao-aplicativos.service';
 
-interface quicklinks {
-  id: number;
-  title: string;
-  link: string;
-}
+type HeaderAppLink = AplicativoCatalogo;
+type HeaderQuicklink = AtalhoEmpresa;
 
 @Component({
   selector: 'app-header',
@@ -52,6 +57,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   ImagemUtil = ImagemUtil;
   usuarioLogado: Usuario | null = null;
+  apps: HeaderAppLink[] = [];
+  quicklinks: HeaderQuicklink[] = [];
 
   options = this.settings.getOptions();
   notificacoes: NotificacaoItem[] = [];
@@ -69,14 +76,20 @@ export class HeaderComponent implements OnInit, OnDestroy {
     public dialog: MatDialog,
     private authService: AuthService,
     private notificacaoService: NotificacaoService,
-    private router: Router
-  ) { }
+    private router: Router,
+    private configuracaoAplicativosService: ConfiguracaoAplicativosService
+  ) {
+    effect(() => {
+      this.atualizarLinksEmpresa(this.configuracaoAplicativosService.configuracao());
+    });
+  }
 
   ngOnInit() {
     this.authService.usuario$
       .pipe(takeUntil(this.destroy$))
       .subscribe(usuario => {
       this.usuarioLogado = usuario;
+      this.carregarLinksEmpresa();
       this.atualizarPermissaoEnvio();
       if (usuario?.id) {
         this.carregarResumoNotificacoes(true);
@@ -96,6 +109,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
         if (!this.usuarioLogado?.id) return;
         this.carregarResumoNotificacoes();
       });
+
   }
 
   ngOnDestroy(): void {
@@ -126,13 +140,22 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.router.navigate(['/smartcalc']);
   }
 
-  quicklinks: quicklinks[] = [
-    {
-      id: 1,
-      title: 'Zap Grafica',
-      link: 'https://zapgrafica.com.br/home',
+  abrirApp(app: HeaderAppLink): void {
+    if (!app?.rota) return;
+    this.router.navigate([app.rota]);
+  }
+
+  abrirAtalho(atalho: HeaderQuicklink, event?: Event): void {
+    event?.preventDefault();
+    if (!atalho?.url) return;
+
+    if (atalho.novaAba) {
+      window.open(atalho.url, '_blank', 'noopener,noreferrer');
+      return;
     }
-  ];
+
+    window.location.href = atalho.url;
+  }
 
   onOpenNotificacoesMenu(): void {
     this.atualizarPermissaoEnvio();
@@ -256,5 +279,34 @@ export class HeaderComponent implements OnInit, OnDestroy {
     }
 
     this.router.navigate(['/theme-pages/account-setting', usuarioId], { queryParams });
+  }
+
+  private carregarLinksEmpresa(): void {
+    if (!this.usuarioLogado?.id) {
+      this.apps = [];
+      this.quicklinks = [];
+      return;
+    }
+
+    this.configuracaoAplicativosService.carregar().subscribe({
+      error: () => {
+        this.apps = [];
+        this.quicklinks = [];
+      },
+    });
+  }
+
+  private atualizarLinksEmpresa(configuracao: ConfiguracaoAplicativos | null): void {
+    const aplicativosAtivos = new Set(
+      (configuracao?.aplicativos || [])
+        .filter((app) => app.ativo)
+        .map((app) => app.aplicativo)
+    );
+
+    this.apps = APLICATIVOS_CATALOGO.filter((app) => aplicativosAtivos.has(app.aplicativo));
+    this.quicklinks = (configuracao?.atalhos || [])
+      .filter((atalho) => atalho.ativo)
+      .slice()
+      .sort((a, b) => (a.ordem ?? 0) - (b.ordem ?? 0));
   }
 }

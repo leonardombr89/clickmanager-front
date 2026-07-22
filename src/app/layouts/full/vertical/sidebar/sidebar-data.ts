@@ -147,11 +147,11 @@ export const navItems: NavItem[] = [
         allowedEmpresaTipos: [TipoEmpresa.DEPOSITO],
     },
     {
-        displayName: 'Gerenciar Orçamentos',
+        displayName: 'Central de Orçamentos',
         iconName: 'file-text',
         bgcolor: 'primary',
         route: '/page/orcamentos',
-        requiredPermission: ['DEPOSITO_ORCAMENTOS_VER'],
+        requiredPermission: ['ORCAMENTOS_VER'],
         allowedEmpresaTipos: [TipoEmpresa.DEPOSITO],
     },
     {
@@ -266,7 +266,7 @@ export const navItems: NavItem[] = [
 	        displayName: 'Meu Site',
 	        iconName: 'world',
 	        bgcolor: 'primary',
-	        requiredPermission: ['SITE_BANNERS_VER', 'SITE_PAGINAS_VER', 'SITE_CONFIG_VER', 'STORAGE_DASHBOARD_VER', 'STORAGE_ARQUIVOS_VER', 'STORAGE_LIXEIRA_VER', 'STORAGE_VIDEOS_VER'],
+	        requiredPermission: ['SITE_BANNERS_VER', 'SITE_PAGINAS_VER', 'SITE_CONFIG_VER'],
 	        allowedEmpresaTipos: [TipoEmpresa.GRAFICA, TipoEmpresa.DEPOSITO],
 	        children: [
             {
@@ -292,14 +292,6 @@ export const navItems: NavItem[] = [
 	                route: '/page/site/configuracoes',
 	                requiredPermission: ['SITE_CONFIG_VER'],
 	                allowedEmpresaTipos: [TipoEmpresa.GRAFICA, TipoEmpresa.DEPOSITO],
-	            },
-	            {
-	                displayName: 'Armazenamento',
-	                iconName: 'point',
-	                bgcolor: 'transparent',
-	                route: '/page/site/armazenamento',
-	                requiredPermission: ['STORAGE_DASHBOARD_VER', 'STORAGE_ARQUIVOS_VER', 'STORAGE_LIXEIRA_VER', 'STORAGE_VIDEOS_VER'],
-	                allowedEmpresaTipos: [TipoEmpresa.GRAFICA, TipoEmpresa.DEPOSITO],
 	            }
 	        ]
 	    },
@@ -316,9 +308,32 @@ export const navItems: NavItem[] = [
         iconName: 'settings-automation',
         bgcolor: 'primary',
         route: '/config',
-        requiredPermission: ['CONFIG_EMAIL', 'FOLHA_CONFIGURAR'],
-        allowedEmpresaTipos: [TipoEmpresa.GRAFICA],
+        allowedEmpresaTipos: [TipoEmpresa.GRAFICA, TipoEmpresa.DEPOSITO],
         children: [
+            {
+                displayName: 'Minha assinatura',
+                iconName: 'point',
+                bgcolor: 'transparent',
+                route: '/billing/minha-assinatura',
+                allowedEmpresaTipos: [TipoEmpresa.GRAFICA, TipoEmpresa.DEPOSITO],
+                proprietarioOnly: true,
+            },
+            {
+                displayName: 'Armazenamento',
+                iconName: 'point',
+                bgcolor: 'transparent',
+                route: '/page/site/armazenamento',
+                requiredPermission: ['STORAGE_DASHBOARD_VER', 'STORAGE_ARQUIVOS_VER', 'STORAGE_LIXEIRA_VER', 'STORAGE_VIDEOS_VER'],
+                allowedEmpresaTipos: [TipoEmpresa.GRAFICA, TipoEmpresa.DEPOSITO],
+            },
+            {
+                displayName: 'Aplicativos e atalhos',
+                iconName: 'point',
+                bgcolor: 'transparent',
+                route: '/page/config/aplicativos-atalhos',
+                requiredPermission: ['CONFIGURACOES_APLICATIVOS_ATALHOS_VER', 'CONFIGURACOES_APLICATIVOS_ATALHOS_EDITAR'],
+                allowedEmpresaTipos: [TipoEmpresa.GRAFICA, TipoEmpresa.DEPOSITO],
+            },
             {
                 displayName: 'Servidor de E-mail',
                 iconName: 'point',

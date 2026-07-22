@@ -3,6 +3,10 @@
   <app-card-header
     titulo="Gestão de orçamentos"
     subtitulo="Acompanhe as solicitações recebidas e organize os atendimentos."
+    botaoTexto="Novo orçamento"
+    botaoIcone="add"
+    botaoRota="/page/orcamentos/novo"
+    permissao="ORCAMENTOS_CRIAR"
     [mostrarDivisor]="true">
   </app-card-header>
 
@@ -151,9 +155,9 @@
                 <mat-icon>chat</mat-icon>
                 <span>Conversar pelo WhatsApp</span>
               </button>
-              <button mat-menu-item type="button" (click)="excluir(orcamento)" *ngIf="podeExcluir">
-                <mat-icon>delete</mat-icon>
-                <span>Excluir</span>
+              <button mat-menu-item type="button" (click)="cancelar(orcamento)" *ngIf="podeCancelar">
+                <mat-icon>block</mat-icon>
+                <span>Cancelar orçamento</span>
               </button>
             </mat-menu>
           </td>
@@ -178,6 +182,11 @@
 } @else {
 <section class="cadastro-mobile">
   <div class="cadastro-mobile__sticky">
+    <a mat-flat-button color="primary" routerLink="/page/orcamentos/novo" class="w-100 m-b-12" *ngIf="podeCriar">
+      <mat-icon>add</mat-icon>
+      Novo orçamento
+    </a>
+
     <div class="cadastro-mobile__search">
       <mat-icon>search</mat-icon>
       <input type="search" placeholder="Buscar orçamento..." (input)="onPesquisar($any($event.target).value)" />
@@ -252,6 +261,10 @@
           <button mat-menu-item type="button" (click)="abrirWhatsApp(orcamento)" *ngIf="possuiTelefone(orcamento)">
             <mat-icon>chat</mat-icon>
             <span>Conversar pelo WhatsApp</span>
+          </button>
+          <button mat-menu-item type="button" (click)="cancelar(orcamento)" *ngIf="podeCancelar">
+            <mat-icon>block</mat-icon>
+            <span>Cancelar orçamento</span>
           </button>
         </mat-menu>
       </article>

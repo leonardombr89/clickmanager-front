@@ -28,19 +28,21 @@
         <div class="col-sm-8 b-r-1 p-r-0">
           <div class="p-32 p-b-0">
             <div class="row">
+              @for (app of apps; track app.aplicativo) {
               <div class="col-sm-6 text-hover-primary">
-                <a (click)="abrirSmartCalc()"
+                <a (click)="abrirApp(app)"
                   class="d-flex align-items-center text-decoration-none m-b-24 cursor-pointer">
                   <span
                     class="text-primary bg-light-primary rounded icon-40 d-flex align-items-center justify-content-center">
-                    <img src="assets/images/svgs/icon-connect.svg" width="20" />
+                    <img [src]="app.imagem" width="20" />
                   </span>
                   <div class="m-l-16">
-                    <h5 class="f-s-14 f-w-600 m-0 textprimary hover-text">SmartCalc</h5>
-                    <span class="text-body f-s-12">Calculadora Inteligente</span>
+                    <h5 class="f-s-14 f-w-600 m-0 textprimary hover-text">{{ app.nome }}</h5>
+                    <span class="text-body f-s-12">{{ app.descricao }}</span>
                   </div>
                 </a>
               </div>
+              }
             </div>
 
           </div>
@@ -54,13 +56,16 @@
         <div class="col-sm-4">
           <div class="p-x-16 p-y-32">
             <h4 class="f-s-18 f-w-600 m-b-16">Atalhos</h4>
-            @for (quicklink of quicklinks; track quicklink.title) {
+            @for (quicklink of quicklinks; track quicklink.id || quicklink.url) {
             <div class="text-hover-primary">
-              <a [href]="quicklink.link" target="_blank" rel="noopener"
+              <a [href]="quicklink.url" (click)="abrirAtalho(quicklink, $event)"
                 class="hover-text text-decoration-none text-body f-w-600 d-block p-y-8">
-                {{ quicklink.title }}
+                {{ quicklink.nome }}
               </a>
             </div>
+            }
+            @if(!quicklinks.length) {
+            <span class="text-muted f-s-13">Nenhum atalho cadastrado.</span>
             }
           </div>
         </div>

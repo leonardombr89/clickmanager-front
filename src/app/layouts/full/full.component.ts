@@ -1,5 +1,5 @@
 import { BreakpointObserver, MediaMatcher } from '@angular/cdk/layout';
-import { Component, Inject, OnDestroy, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
+import { Component, Inject, OnDestroy, OnInit, ViewChild, ViewEncapsulation, effect } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { MatSidenav, MatSidenavContent } from '@angular/material/sidenav';
 import { MatDialog } from '@angular/material/dialog';
@@ -34,6 +34,13 @@ import { NotificacaoService } from 'src/app/pages/notificacoes/services/notifica
 import { NotificacaoEnviarDialogComponent } from 'src/app/pages/notificacoes/components/notificacao-enviar-dialog.component';
 import { resolveTipoEmpresa, TipoEmpresa } from 'src/app/models/empresa/tipo-empresa.enum';
 import { CatalogoEmpresaContextService, CatalogoVersaoAdministrativa } from 'src/app/pages/catalogo/shared/services/catalogo-empresa-context.service';
+import {
+  APLICATIVOS_CATALOGO,
+  AplicativoCatalogo,
+  AtalhoEmpresa,
+  ConfiguracaoAplicativos,
+} from 'src/app/models/config/configuracao-aplicativos.model';
+import { ConfiguracaoAplicativosService } from 'src/app/services/configuracao-aplicativos.service';
 
 const MOBILE_VIEW = 'screen and (max-width: 768px)';
 const TABLET_VIEW = 'screen and (min-width: 769px) and (max-width: 1024px)';
@@ -41,20 +48,6 @@ const MONITOR_VIEW = 'screen and (min-width: 1024px)';
 const BELOWMONITOR = 'screen and (max-width: 1023px)';
 
 // for mobile app sidebar
-interface apps {
-  id: number;
-  img: string;
-  title: string;
-  subtitle: string;
-  link: string;
-}
-
-interface quicklinks {
-  id: number;
-  title: string;
-  link: string;
-}
-
 interface MobileNavGroup {
   title: string;
   items: NavItem[];
@@ -193,15 +186,9 @@ export class FullComponent implements OnInit, OnDestroy {
   }
 
   // for mobile app sidebar
-  apps: apps[] = [];
+  apps: AplicativoCatalogo[] = [];
 
-  quicklinks: quicklinks[] = [
-    {
-      id: 1,
-      title: 'Zap Grafica',
-      link: 'https://zapgrafica.com.br/home',
-    },
-  ];
+  quicklinks: AtalhoEmpresa[] = [];
 
   constructor(
     private settings: CoreService,
@@ -217,7 +204,12 @@ export class FullComponent implements OnInit, OnDestroy {
     private onboardingFlow: OnboardingFlowService,
     private notificacaoService: NotificacaoService,
     private catalogoContext: CatalogoEmpresaContextService,
+    private configuracaoAplicativosService: ConfiguracaoAplicativosService,
   ) {
+    effect(() => {
+      this.atualizarLinksEmpresa(this.configuracaoAplicativosService.configuracao());
+    });
+
     this.htmlElement = document.querySelector('html')!;
     this.layoutChangesSubscription = this.breakpointObserver
       .observe([MOBILE_VIEW, TABLET_VIEW, MONITOR_VIEW, BELOWMONITOR])
@@ -264,9 +256,10 @@ export class FullComponent implements OnInit, OnDestroy {
         this.tipoEmpresaAtual = resolveTipoEmpresa(usuario.empresa?.tipoEmpresa);
         this.versaoCatalogoAtual = this.catalogoContext.snapshot().versaoCatalogo;
         this.aplicarConfiguracaoPorTipoEmpresa(this.tipoEmpresaAtual);
+        this.carregarLinksEmpresa();
         this.atualizarPermissaoEnvioNotificacao();
         const permissoes = (usuario.perfil?.permissoes || []).map(p => p.chave);
-        this.navItemsFiltrados = this.filtrarMenus(navItems, permissoes, this.tipoEmpresaAtual, this.versaoCatalogoAtual);
+        this.navItemsFiltrados = this.filtrarMenus(navItems, permissoes, this.tipoEmpresaAtual, this.versaoCatalogoAtual, usuario);
         this.mobileNavGroups = this.buildMobileNavGroups(this.navItemsFiltrados);
         this.currentPageTitle = this.resolveCurrentPageTitle(this.router.url);
         this.carregarStatusBilling();
@@ -293,7 +286,8 @@ export class FullComponent implements OnInit, OnDestroy {
     items: NavItem[],
     permissoesUsuario: string[],
     tipoEmpresa: TipoEmpresa,
-    versaoCatalogo: CatalogoVersaoAdministrativa
+    versaoCatalogo: CatalogoVersaoAdministrativa,
+    usuario: Usuario
   ): NavItem[] {
     const possuiPermissao = (requeridas?: string[]) => {
       return !requeridas || requeridas.some(p => permissoesUsuario.includes(p));
@@ -304,12 +298,16 @@ export class FullComponent implements OnInit, OnDestroy {
 
     const aceitaVersaoCatalogo = (modo?: CatalogoVersaoAdministrativa) =>
       !modo || tipoEmpresa !== TipoEmpresa.DEPOSITO || modo === versaoCatalogo;
+
+    const aceitaProprietario = (proprietarioOnly?: boolean) =>
+      !proprietarioOnly || usuario.proprietario === true;
   
     const filtrar = (menus: NavItem[]): NavItem[] =>
       menus
         .filter(menu =>
           aceitaTipoEmpresa(menu.allowedEmpresaTipos)
           && aceitaVersaoCatalogo(menu.catalogoModo)
+          && aceitaProprietario(menu.proprietarioOnly)
           && possuiPermissao(menu.requiredPermission)
         )
         .map(menu => ({
@@ -924,79 +922,50 @@ export class FullComponent implements OnInit, OnDestroy {
           }
         ];
 
-    this.apps = tipoEmpresa === TipoEmpresa.DEPOSITO
-      ? [
-          ...(catalogoNovoAtivo
-            ? [
-                {
-                  id: 1,
-                  img: 'assets/images/svgs/icon-dd-invoice.svg',
-                  title: 'Produtos do Catálogo',
-                  subtitle: 'Catálogo administrativo',
-                  link: '/page/catalogo/produtos',
-                },
-                {
-                  id: 2,
-                  img: 'assets/images/svgs/icon-mailbox.svg',
-                  title: 'Categorias do Catálogo',
-                  subtitle: 'Hierarquia e características',
-                  link: '/page/catalogo/categorias',
-                },
-                {
-                  id: 3,
-                  img: 'assets/images/svgs/icon-dd-lifebuoy.svg',
-                  title: 'Marcas do Catálogo',
-                  subtitle: 'Fabricantes e linhas',
-                  link: '/page/catalogo/marcas',
-                },
-              ]
-            : [
-                {
-                  id: 1,
-                  img: 'assets/images/svgs/icon-dd-invoice.svg',
-                  title: 'Itens',
-                  subtitle: 'Catálogo do depósito',
-                  link: '/page/deposito/itens',
-                },
-                {
-                  id: 2,
-                  img: 'assets/images/svgs/icon-mailbox.svg',
-                  title: 'Categorias',
-                  subtitle: 'Organização do catálogo',
-                  link: '/page/deposito/categorias',
-                },
-                {
-                  id: 3,
-                  img: 'assets/images/svgs/icon-dd-lifebuoy.svg',
-                  title: 'Marcas',
-                  subtitle: 'Fabricantes e linhas',
-                  link: '/page/deposito/marcas',
-                },
-              ]),
-          {
-            id: 4,
-            img: 'assets/images/svgs/icon-user-male.svg',
-            title: 'Usuários',
-            subtitle: 'Equipe e acessos',
-            link: '/page/usuarios/listar',
-          },
-        ]
-      : [
-          {
-            id: 1,
-            img: 'assets/images/svgs/icon-connect.svg',
-            title: 'SmartCalc',
-            subtitle: 'Calculadora Inteligente',
-            link: '/smartcalc',
-          },
-          {
-            id: 2,
-            img: 'assets/images/svgs/icon-dd-invoice.svg',
-            title: 'Depósito',
-            subtitle: 'Catálogo interno',
-            link: '/page/deposito/itens',
-          },
-        ];
+    this.atualizarLinksEmpresa(this.configuracaoAplicativosService.configuracao());
+  }
+
+  abrirAtalhoMobile(atalho: AtalhoEmpresa, event: Event): void {
+    event.preventDefault();
+    this.closeMobileOverlays();
+
+    if (!atalho?.url) return;
+
+    if (atalho.novaAba) {
+      window.open(atalho.url, '_blank', 'noopener,noreferrer');
+      return;
+    }
+
+    window.location.href = atalho.url;
+  }
+
+  private carregarLinksEmpresa(): void {
+    if (!this.usuarioLogado?.id) {
+      this.apps = [];
+      this.quicklinks = [];
+      return;
+    }
+
+    this.configuracaoAplicativosService.carregar().subscribe({
+      error: () => {
+        this.apps = [];
+        this.quicklinks = [];
+      },
+    });
+  }
+
+  private atualizarLinksEmpresa(configuracao: ConfiguracaoAplicativos | null): void {
+    const aplicativosAtivos = new Set(
+      (configuracao?.aplicativos || [])
+        .filter((app) => app.ativo)
+        .map((app) => app.aplicativo)
+    );
+
+    this.apps = APLICATIVOS_CATALOGO.filter((app) => aplicativosAtivos.has(app.aplicativo));
+    this.quicklinks = (configuracao?.atalhos || [])
+      .filter((atalho) => atalho.ativo)
+      .slice()
+      .sort((a, b) => (a.ordem ?? 0) - (b.ordem ?? 0));
   }
 
   private catalogoPrincipalRoute(): string {

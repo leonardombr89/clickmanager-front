@@ -272,13 +272,13 @@
   </div>
 
   <div class="mobile-sheet__section">
-    @for(app of apps; track app.title) {
-    <a [routerLink]="[app.link]" class="mobile-action-link" (click)="closeMobileOverlays()">
+    @for(app of apps; track app.aplicativo) {
+    <a [routerLink]="[app.rota]" class="mobile-action-link" (click)="closeMobileOverlays()">
       <span class="d-flex align-items-center gap-12">
-        <img [src]="app.img" [alt]="app.title" width="20" height="20" />
+        <img [src]="app.imagem" [alt]="app.nome" width="20" height="20" />
         <span class="d-flex flex-column">
-          <strong>{{ app.title }}</strong>
-          <small>{{ app.subtitle }}</small>
+          <strong>{{ app.nome }}</strong>
+          <small>{{ app.descricao }}</small>
         </span>
       </span>
       <i-tabler name="chevron-right" class="icon-18 d-flex"></i-tabler>
@@ -289,10 +289,10 @@
       <span>Minha assinatura</span>
       <i-tabler name="chevron-right" class="icon-18 d-flex"></i-tabler>
     </a>
-    @for(quicklink of quicklinks; track quicklink.title) {
-    <a [href]="quicklink.link" target="_blank" rel="noopener" class="mobile-action-link" (click)="closeMobileOverlays()">
-      <span>{{ quicklink.title }}</span>
-      <i-tabler name="external-link" class="icon-18 d-flex"></i-tabler>
+    @for(quicklink of quicklinks; track quicklink.id || quicklink.url) {
+    <a [href]="quicklink.url" class="mobile-action-link" (click)="abrirAtalhoMobile(quicklink, $event)">
+      <span>{{ quicklink.nome }}</span>
+      <i-tabler [name]="quicklink.novaAba ? 'external-link' : 'chevron-right'" class="icon-18 d-flex"></i-tabler>
     </a>
     }
   </div>

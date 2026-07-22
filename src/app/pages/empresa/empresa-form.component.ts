@@ -196,7 +196,7 @@ export class EmpresaFormComponent implements OnInit {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (!file) return;
 
-    ImagemUtil.processarImagemSelecionada(file, 216, 340)
+    ImagemUtil.processarImagemSelecionada(file, 216, 340, 0.8, 'contain')
       .then(({ preview, blob }) => {
         this.imagemPreview = preview;
 
