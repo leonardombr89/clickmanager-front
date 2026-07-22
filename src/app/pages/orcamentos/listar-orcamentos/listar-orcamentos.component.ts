@@ -113,10 +113,12 @@ export class ListarOrcamentosComponent implements OnInit {
       value: '',
       options: [
         { value: '', label: 'Todas' },
-        { value: 'SITE', label: 'Site Público' },
+        { value: 'SITE', label: 'Site' },
+        { value: 'BALCAO', label: 'Balcão' },
         { value: 'SMARTCALC', label: 'SmartCalc' },
-        { value: 'ADMIN', label: 'Cadastro Manual' },
-        { value: 'INTEGRACAO', label: 'Integrações' },
+        { value: 'API', label: 'API' },
+        { value: 'INTEGRACAO', label: 'Integração' },
+        { value: 'OUTRO', label: 'Outro' },
       ],
     },
     {
@@ -174,11 +176,15 @@ export class ListarOrcamentosComponent implements OnInit {
   }
 
   get podeEditar(): boolean {
-    return this.authService.temPermissao('DEPOSITO_ORCAMENTOS_EDITAR');
+    return this.authService.temPermissao('ORCAMENTOS_EDITAR');
   }
 
-  get podeExcluir(): boolean {
-    return this.authService.temPermissao('DEPOSITO_ORCAMENTOS_EXCLUIR');
+  get podeCriar(): boolean {
+    return this.authService.temPermissao('ORCAMENTOS_CRIAR');
+  }
+
+  get podeCancelar(): boolean {
+    return this.authService.temPermissao('ORCAMENTOS_CANCELAR');
   }
 
   get possuiFiltros(): boolean {
@@ -299,17 +305,17 @@ export class ListarOrcamentosComponent implements OnInit {
     this.alterarStatus(orcamento, status);
   }
 
-  excluir(orcamento: Orcamento): void {
-    if (!this.podeExcluir || !orcamento?.id) {
+  cancelar(orcamento: Orcamento): void {
+    if (!this.podeCancelar || !orcamento?.id) {
       return;
     }
 
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '420px',
       data: {
-        title: 'Excluir orçamento',
-        message: `Deseja excluir o orçamento ${this.protocoloLabel(orcamento)}?`,
-        confirmText: 'Excluir',
+        title: 'Cancelar orçamento',
+        message: `Deseja cancelar o orçamento ${this.protocoloLabel(orcamento)}?`,
+        confirmText: 'Cancelar orçamento',
         confirmColor: 'warn',
       },
     });
@@ -319,13 +325,13 @@ export class ListarOrcamentosComponent implements OnInit {
         return;
       }
 
-      this.orcamentoService.excluir(orcamento.id).subscribe({
+      this.orcamentoService.cancelar(orcamento.id).subscribe({
         next: () => {
-          this.toastr.success('Orçamento excluído com sucesso.');
+          this.toastr.success('Orçamento cancelado com sucesso.');
           this.carregarResumoIndicadores();
           this.carregarOrcamentos();
         },
-        error: () => this.toastr.error('Não foi possível excluir o orçamento.'),
+        error: () => this.toastr.error('Não foi possível cancelar o orçamento.'),
       });
     });
   }
@@ -407,12 +413,14 @@ export class ListarOrcamentosComponent implements OnInit {
 
   origemLabel(origem: string | null | undefined): string {
     const labels: Record<string, string> = {
-      SITE_PUBLICO: 'Site Público',
-      SITE: 'Site Público',
+      SITE_PUBLICO: 'Site',
+      SITE: 'Site',
+      BALCAO: 'Balcão',
       SMARTCALC: 'SmartCalc',
-      CADASTRO_MANUAL: 'Cadastro Manual',
-      MANUAL: 'Cadastro Manual',
-      ADMIN: 'Cadastro Manual',
+      API: 'API',
+      CADASTRO_MANUAL: 'Balcão',
+      MANUAL: 'Balcão',
+      ADMIN: 'Balcão',
       INTEGRACAO: 'Integração',
       WHATSAPP: 'WhatsApp',
       OUTRO: 'Outro',
@@ -500,6 +508,7 @@ export class ListarOrcamentosComponent implements OnInit {
       page: this.pagina,
       size: this.tamanhoPagina,
       sort: this.sortFiltro(),
+      textoPesquisa: this.termoPesquisa.trim() || undefined,
       status: this.statusSelecionado || undefined,
       origem: this.origemSelecionada || undefined,
       dataInicio: periodo.dataInicio,

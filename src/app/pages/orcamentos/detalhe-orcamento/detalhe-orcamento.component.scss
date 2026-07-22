@@ -86,6 +86,16 @@
   white-space: pre-line;
 }
 
+.detail-item-desc {
+  display: grid;
+  gap: 2px;
+}
+
+.detail-item-desc span {
+  color: #64748b;
+  font-size: 0.8rem;
+}
+
 .detail-total {
   color: #0f172a;
   font-weight: 800;

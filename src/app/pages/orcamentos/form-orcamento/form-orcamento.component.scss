@@ -1,0 +1,143 @@
+.contato-grid,
+.item-form {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  align-items: start;
+}
+
+.contato-grid__wide,
+.item-form__wide {
+  grid-column: 1 / -1;
+}
+
+.orcamento-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  gap: 16px;
+  align-items: start;
+}
+
+.item-mode,
+.item-form__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.item-mode button.active {
+  background: rgba(25, 118, 210, 0.08);
+}
+
+.produto-option {
+  display: grid;
+  gap: 2px;
+  line-height: 1.25;
+}
+
+.produto-option span,
+.produto-selecionado span,
+.item-desc span {
+  color: #64748b;
+  font-size: 0.8rem;
+}
+
+.produto-selecionado {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  padding: 10px 12px;
+  border: 1px solid #dbeafe;
+  border-radius: 8px;
+  background: #f8fbff;
+}
+
+.produto-selecionado__image {
+  width: 56px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background-color: #e2e8f0;
+  background-position: center;
+  background-size: cover;
+  color: #64748b;
+}
+
+.item-desc {
+  display: grid;
+  gap: 2px;
+}
+
+.orcamento-state {
+  display: grid;
+  place-items: center;
+  padding: 22px 12px;
+  color: #64748b;
+  text-align: center;
+}
+
+.orcamento-state--empty {
+  border: 1px dashed rgba(191, 219, 254, 0.9);
+  border-radius: 8px;
+}
+
+.orcamento-total {
+  position: sticky;
+  top: 88px;
+}
+
+.orcamento-total dl {
+  display: grid;
+  gap: 12px;
+  margin: 0 0 16px;
+}
+
+.orcamento-total dl div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.orcamento-total dt {
+  color: #64748b;
+  font-weight: 600;
+}
+
+.orcamento-total dd {
+  margin: 0;
+  color: #0f172a;
+  font-weight: 700;
+}
+
+.orcamento-total .total {
+  padding-top: 12px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.orcamento-total .total dd {
+  font-size: 1.1rem;
+}
+
+.mat-mdc-table .mat-mdc-row .mat-mdc-cell {
+  white-space: normal;
+}
+
+@media (max-width: 1100px) {
+  .orcamento-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .orcamento-total {
+    position: static;
+  }
+}
+
+@media (max-width: 768px) {
+  .contato-grid,
+  .item-form {
+    grid-template-columns: 1fr;
+  }
+}

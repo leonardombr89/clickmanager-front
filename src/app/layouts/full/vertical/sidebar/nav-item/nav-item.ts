@@ -18,4 +18,5 @@ export interface NavItem {
     requiredPermission?: string[];
     allowedEmpresaTipos?: TipoEmpresa[];
     catalogoModo?: 'LEGADO_DEPOSITO' | 'CATALOGO_NOVO';
+    proprietarioOnly?: boolean;
 }

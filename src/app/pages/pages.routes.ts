@@ -42,7 +42,9 @@ import { FormItemDepositoComponent } from './deposito/itens/form-item-deposito/f
 import { DepositoDashboardPageComponent } from './deposito/dashboard/deposito-dashboard-page.component';
 import { ListarOrcamentosComponent } from './orcamentos/listar-orcamentos/listar-orcamentos.component';
 import { DetalheOrcamentoComponent } from './orcamentos/detalhe-orcamento/detalhe-orcamento.component';
+import { FormOrcamentoComponent } from './orcamentos/form-orcamento/form-orcamento.component';
 import { DEPOSITO_ROUTE_DATA, GRAFICA_ROUTE_DATA, SHARED_ROUTE_DATA } from '../guards/empresa-tipo-route-data';
+import { TipoEmpresa } from '../models/empresa/tipo-empresa.enum';
 import { ListarBannersComponent } from './site/banners/listar-banners/listar-banners.component';
 import { FormBannerComponent } from './site/banners/form-banner/form-banner.component';
 import { ListarPaginasComponent } from './site/paginas/listar-paginas/listar-paginas.component';
@@ -62,7 +64,7 @@ export const PagesRoutes: Routes = [
   {
     path: 'empresa',
     component: EmpresaFormComponent,
-    canActivate: [depositoLegadoGuard, permissionGuard],
+    canActivate: [permissionGuard],
     data: {
       ...SHARED_ROUTE_DATA,
       requiredPermission: ['DADOS_EMPRESA'],
@@ -76,7 +78,7 @@ export const PagesRoutes: Routes = [
   {
     path: 'perfil',
     component: GerenciarPerfilComponent,
-    canActivate: [depositoLegadoGuard, permissionGuard],
+    canActivate: [permissionGuard],
     data: {
       ...SHARED_ROUTE_DATA,
       requiredPermission: ['PERFIS_PERMISSOES_VER'],
@@ -296,7 +298,7 @@ export const PagesRoutes: Routes = [
       requiredPermission: ['STORAGE_DASHBOARD_VER', 'STORAGE_ARQUIVOS_VER', 'STORAGE_LIXEIRA_VER', 'STORAGE_VIDEOS_VER'],
       title: 'Armazenamento',
       urls: [
-        { title: 'Meu Site', url: '/page/site/banners' },
+        { title: 'Configurações', url: '/page/site/armazenamento' },
         { title: 'Armazenamento' }
       ]
     }
@@ -310,6 +312,7 @@ export const PagesRoutes: Routes = [
       requiredPermission: ['STORAGE_ARQUIVOS_VER'],
       title: 'Arquivos do Storage',
       urls: [
+        { title: 'Configurações', url: '/page/site/armazenamento' },
         { title: 'Armazenamento', url: '/page/site/armazenamento' },
         { title: 'Arquivos' }
       ]
@@ -324,6 +327,7 @@ export const PagesRoutes: Routes = [
       requiredPermission: ['STORAGE_LIXEIRA_VER'],
       title: 'Lixeira do Storage',
       urls: [
+        { title: 'Configurações', url: '/page/site/armazenamento' },
         { title: 'Armazenamento', url: '/page/site/armazenamento' },
         { title: 'Lixeira' }
       ]
@@ -338,6 +342,7 @@ export const PagesRoutes: Routes = [
       requiredPermission: ['STORAGE_VIDEOS_VER'],
       title: 'Vídeos do Storage',
       urls: [
+        { title: 'Configurações', url: '/page/site/armazenamento' },
         { title: 'Armazenamento', url: '/page/site/armazenamento' },
         { title: 'Vídeos' }
       ]
@@ -352,6 +357,7 @@ export const PagesRoutes: Routes = [
       requiredPermission: ['STORAGE_RECONCILIAR'],
       title: 'Reconciliação do Storage',
       urls: [
+        { title: 'Configurações', url: '/page/site/armazenamento' },
         { title: 'Armazenamento', url: '/page/site/armazenamento' },
         { title: 'Reconciliação' }
       ]
@@ -859,10 +865,24 @@ export const PagesRoutes: Routes = [
     canActivate: [permissionGuard],
     data: {
       ...SHARED_ROUTE_DATA,
-      requiredPermission: ['DEPOSITO_ORCAMENTOS_VER'],
+      requiredPermission: ['ORCAMENTOS_VER'],
       title: 'Orçamentos',
       urls: [
         { title: 'Orçamentos' }
+      ]
+    }
+  },
+  {
+    path: 'orcamentos/novo',
+    component: FormOrcamentoComponent,
+    canActivate: [permissionGuard],
+    data: {
+      ...SHARED_ROUTE_DATA,
+      requiredPermission: ['ORCAMENTOS_CRIAR'],
+      title: 'Novo Orçamento',
+      urls: [
+        { title: 'Orçamentos', url: '/page/orcamentos' },
+        { title: 'Novo Orçamento' }
       ]
     }
   },
@@ -872,7 +892,7 @@ export const PagesRoutes: Routes = [
     canActivate: [permissionGuard],
     data: {
       ...SHARED_ROUTE_DATA,
-      requiredPermission: ['DEPOSITO_ORCAMENTOS_VER'],
+      requiredPermission: ['ORCAMENTOS_VER'],
       title: 'Detalhes do Orçamento',
       urls: [
         { title: 'Orçamentos', url: '/page/orcamentos' },
@@ -989,6 +1009,24 @@ export const PagesRoutes: Routes = [
       urls: [
         { title: 'Lista de Configurações', url: '/page/calculadora/config' },
         { title: 'Editar Configuração' }
+      ]
+    }
+  },
+  {
+    path: 'config/aplicativos-atalhos',
+    loadComponent: () =>
+      import('./config/aplicativos-atalhos/aplicativos-atalhos.component').then(
+        (m) => m.AplicativosAtalhosComponent
+      ),
+    canActivate: [permissionGuard],
+    data: {
+      ...DEPOSITO_ROUTE_DATA,
+      allowedEmpresaTipos: [TipoEmpresa.GRAFICA, TipoEmpresa.DEPOSITO],
+      requiredPermission: ['CONFIGURACOES_APLICATIVOS_ATALHOS_VER', 'CONFIGURACOES_APLICATIVOS_ATALHOS_EDITAR'],
+      title: 'Aplicativos e atalhos',
+      urls: [
+        { title: 'Configurações', url: '/page/config/aplicativos-atalhos' },
+        { title: 'Aplicativos e atalhos' }
       ]
     }
   },

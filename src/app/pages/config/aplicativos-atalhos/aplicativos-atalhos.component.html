@@ -1,0 +1,96 @@
+<app-page-card
+  titulo="Aplicativos e atalhos"
+  subtitulo="Configure o menu de aplicativos e os links de trabalho.">
+  @if (carregando) {
+  <div class="links-state">
+    <mat-spinner diameter="32"></mat-spinner>
+    <span>Carregando aplicativos e atalhos...</span>
+  </div>
+  } @else {
+  <form [formGroup]="form" (ngSubmit)="salvar()" class="links-form">
+    @if (!podeEditar) {
+    <div class="links-alert">
+      <mat-icon>lock</mat-icon>
+      <span>Você pode visualizar estas configurações, mas não possui permissão para editar.</span>
+    </div>
+    }
+
+    <app-section-card titulo="Aplicativos" subtitulo="Itens exibidos no menu Aplicativos.">
+      <div formArrayName="aplicativos">
+      @for (app of aplicativosCatalogo; track app.aplicativo; let i = $index) {
+      <div class="app-row" [formGroupName]="i">
+        <div class="app-row__icon">
+          <i-tabler [name]="app.icone" class="icon-22 d-flex"></i-tabler>
+        </div>
+        <div class="app-row__content">
+          <strong>{{ app.nome }}</strong>
+          <span>{{ app.descricao }}</span>
+        </div>
+        <mat-slide-toggle
+          formControlName="ativo"
+          color="primary"
+          [aria-label]="'Exibir ' + app.nome">
+        </mat-slide-toggle>
+      </div>
+      }
+      </div>
+    </app-section-card>
+
+    <app-section-card titulo="Atalhos" subtitulo="Links externos usados pela operação.">
+      <button actions mat-stroked-button color="primary" type="button" [disabled]="!podeEditar || salvando" (click)="adicionarAtalho()">
+        <mat-icon>add</mat-icon>
+        Adicionar
+      </button>
+
+      <div formArrayName="atalhos" class="quicklinks-list">
+        @for (atalho of atalhos.controls; track atalho; let i = $index) {
+        <div class="quicklink-row" [formGroupName]="i">
+          <mat-form-field appearance="outline">
+            <mat-label>Nome</mat-label>
+            <input matInput formControlName="nome" placeholder="Ex: Portal do fornecedor" />
+            @if (atalho.controls.nome.hasError('required')) {
+            <mat-error>Informe o nome do atalho.</mat-error>
+            } @else if (atalho.controls.nome.hasError('maxlength')) {
+            <mat-error>Use no máximo 60 caracteres.</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>URL</mat-label>
+            <input matInput formControlName="url" placeholder="https://..." />
+            @if (atalho.controls.url.hasError('required')) {
+            <mat-error>Informe a URL do atalho.</mat-error>
+            } @else if (atalho.controls.url.hasError('pattern')) {
+            <mat-error>Informe uma URL começando com http:// ou https://.</mat-error>
+            } @else if (atalho.controls.url.hasError('maxlength')) {
+            <mat-error>Use no máximo 240 caracteres.</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-slide-toggle formControlName="novaAba" color="primary" class="quicklink-row__toggle">
+            Nova aba
+          </mat-slide-toggle>
+
+          <button mat-icon-button color="warn" type="button" matTooltip="Remover atalho" [disabled]="!podeEditar || salvando" (click)="removerAtalho(i)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+        }
+
+        @if (!atalhos.length) {
+        <div class="empty-state">Nenhum atalho cadastrado.</div>
+        }
+      </div>
+    </app-section-card>
+
+    <div class="links-actions">
+      <button mat-flat-button color="primary" type="submit" [disabled]="!podeSalvar">
+        @if (salvando) {
+        <mat-spinner diameter="18"></mat-spinner>
+        }
+        {{ salvando ? 'Salvando...' : 'Salvar' }}
+      </button>
+    </div>
+  </form>
+  }
+</app-page-card>

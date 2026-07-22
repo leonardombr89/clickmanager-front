@@ -1,4 +1,5 @@
 import { CommonModule, DatePipe } from '@angular/common';
+import { HttpResponse } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -18,7 +19,7 @@ import { CardHeaderComponent } from 'src/app/components/card-header/card-header.
 import { ConfirmDialogComponent } from 'src/app/components/dialog/confirm-dialog/confirm-dialog.component';
 import { SectionCardComponent } from 'src/app/components/section-card/section-card.component';
 import { StatusBadgeComponent } from 'src/app/components/status-badge/status-badge.component';
-import { Orcamento, OrcamentoItem, OrcamentoStatus } from 'src/app/models/orcamento/orcamento.model';
+import { FormatoImpressaoOrcamento, Orcamento, OrcamentoItem, OrcamentoStatus } from 'src/app/models/orcamento/orcamento.model';
 import { TelefonePipe } from 'src/app/pipe/telefone.pipe';
 import { AuthService } from 'src/app/services/auth.service';
 import { OrcamentoService } from 'src/app/services/orcamento.service';
@@ -27,6 +28,8 @@ type StatusOption = {
   value: OrcamentoStatus;
   label: string;
 };
+
+type AcaoImpressaoOrcamento = 'A4' | 'TERMICA_80MM' | 'DOWNLOAD_A4';
 
 @Component({
   selector: 'app-detalhe-orcamento',
@@ -60,7 +63,9 @@ export class DetalheOrcamentoComponent implements OnInit {
   carregando = false;
   salvandoObservacao = false;
   atualizandoStatus = false;
-  readonly colunasItens = ['produto', 'quantidade', 'precoUnitario', 'subtotal', 'observacao'];
+  cancelando = false;
+  gerandoImpressao: AcaoImpressaoOrcamento | null = null;
+  readonly colunasItens = ['tipo', 'produto', 'unidade', 'quantidade', 'precoUnitario', 'desconto', 'subtotal', 'observacao', 'acoes'];
   readonly statusOptions: StatusOption[] = [
     { value: 'NOVO', label: 'Novo' },
     { value: 'EM_ATENDIMENTO', label: 'Em atendimento' },
@@ -89,19 +94,31 @@ export class DetalheOrcamentoComponent implements OnInit {
   }
 
   get podeEditar(): boolean {
-    return this.authService.temPermissao('DEPOSITO_ORCAMENTOS_EDITAR');
+    return this.authService.temPermissao('ORCAMENTOS_EDITAR');
+  }
+
+  get podeCancelar(): boolean {
+    return this.authService.temPermissao('ORCAMENTOS_CANCELAR');
+  }
+
+  get podeImprimir(): boolean {
+    return this.authService.temPermissao('ORCAMENTOS_IMPRIMIR');
   }
 
   get telefone(): string | null {
-    return this.orcamento?.telefoneCliente || this.orcamento?.telefone || null;
+    return this.orcamento?.telefoneContato || this.orcamento?.telefoneCliente || this.orcamento?.telefone || null;
   }
 
   get email(): string | null {
-    return this.orcamento?.emailCliente || this.orcamento?.email || null;
+    return this.orcamento?.emailContato || this.orcamento?.emailCliente || this.orcamento?.email || null;
   }
 
   get nomeCliente(): string {
-    return this.orcamento?.nomeCliente || this.orcamento?.nome || 'Não informado';
+    return this.orcamento?.nomeContato || this.orcamento?.nomeCliente || this.orcamento?.nome || 'Não informado';
+  }
+
+  get responsavel(): string {
+    return this.orcamento?.responsavelNome || this.orcamento?.usuarioResponsavelNome || 'Usuário autenticado';
   }
 
   carregarOrcamento(id: number): void {
@@ -168,6 +185,41 @@ export class DetalheOrcamentoComponent implements OnInit {
       });
   }
 
+  cancelarOrcamento(): void {
+    if (!this.orcamento?.id || !this.podeCancelar || this.cancelando) {
+      return;
+    }
+
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '420px',
+      data: {
+        title: 'Cancelar orçamento',
+        message: 'Deseja cancelar este orçamento?',
+        confirmText: 'Cancelar orçamento',
+        confirmColor: 'warn',
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((confirmou) => {
+      if (!confirmou || !this.orcamento?.id) {
+        return;
+      }
+
+      this.cancelando = true;
+      this.orcamentoService.cancelar(this.orcamento.id).subscribe({
+        next: (response) => {
+          this.orcamento = response;
+          this.cancelando = false;
+          this.toastr.success('Orçamento cancelado com sucesso.');
+        },
+        error: () => {
+          this.cancelando = false;
+          this.toastr.error('Não foi possível cancelar o orçamento.');
+        },
+      });
+    });
+  }
+
   copiarTexto(valor: string | null | undefined, label: string): void {
     if (!valor) {
       return;
@@ -188,6 +240,36 @@ export class DetalheOrcamentoComponent implements OnInit {
     window.open(`https://wa.me/${telefone}`, '_blank', 'noopener,noreferrer');
   }
 
+  imprimirA4(): void {
+    this.abrirImpressao('A4', 'A4');
+  }
+
+  imprimirTermica80mm(): void {
+    this.abrirImpressao('TERMICA_80MM', 'TERMICA_80MM');
+  }
+
+  baixarPdfA4(): void {
+    if (!this.orcamento?.id || !this.podeImprimir || this.gerandoImpressao) {
+      return;
+    }
+
+    this.gerandoImpressao = 'DOWNLOAD_A4';
+    this.orcamentoService.baixarImpressao(this.orcamento.id, 'A4').subscribe({
+      next: (response) => {
+        this.baixarBlob(response, `orcamento-${this.orcamento?.id || 'documento'}.pdf`);
+        this.gerandoImpressao = null;
+      },
+      error: () => {
+        this.gerandoImpressao = null;
+        this.toastr.error('Não foi possível gerar o orçamento para impressão.');
+      },
+    });
+  }
+
+  impressaoEmAndamento(acao: AcaoImpressaoOrcamento): boolean {
+    return this.gerandoImpressao === acao;
+  }
+
   itensLabel(): string {
     const quantidade = this.orcamento?.quantidadeItens ?? this.orcamento?.itens?.length ?? 0;
     return quantidade === 1 ? '1 item' : `${quantidade} itens`;
@@ -195,14 +277,30 @@ export class DetalheOrcamentoComponent implements OnInit {
 
   quantidadeLabel(item: OrcamentoItem): string {
     const quantidade = item.quantidade ?? 0;
-    return `${quantidade} ${this.formatarUnidadeVenda(item.unidadeVenda)}`;
+    return `${quantidade}`;
   }
 
   valorUnitario(item: OrcamentoItem): number | null {
-    return item.precoPromocional ?? item.precoUnitario ?? null;
+    return item.valorUnitario ?? item.precoPromocional ?? item.precoUnitario ?? null;
   }
 
-  statusLabel(status: OrcamentoStatus | null | undefined): string {
+  itemDescricao(item: OrcamentoItem): string {
+    return item.descricao || item.produtoNome || 'Item não informado';
+  }
+
+  itemTipoLabel(item: OrcamentoItem): string {
+    return item.tipoItem === 'LIVRE' ? 'Item livre' : 'Catálogo';
+  }
+
+  itemUnidadeLabel(item: OrcamentoItem): string {
+    return this.formatarUnidadeVenda(item.unidade || item.unidadeVenda);
+  }
+
+  itemSubtotal(item: OrcamentoItem): number | null {
+    return item.subtotal ?? item.subtotalEstimado ?? null;
+  }
+
+  statusLabel(status: OrcamentoStatus | string | null | undefined): string {
     const option = this.statusOptions.find((item) => item.value === status);
     return option?.label || 'Sem status';
   }
@@ -213,13 +311,15 @@ export class DetalheOrcamentoComponent implements OnInit {
 
   origemLabel(origem: string | null | undefined): string {
     const labels: Record<string, string> = {
-      SITE_PUBLICO: 'Site Público',
-      SITE: 'Site Público',
+      SITE_PUBLICO: 'Site',
+      SITE: 'Site',
+      BALCAO: 'Balcão',
       SMARTCALC: 'SmartCalc',
-      CADASTRO_MANUAL: 'Cadastro Manual',
-      MANUAL: 'Cadastro Manual',
+      API: 'API',
+      CADASTRO_MANUAL: 'Balcão',
+      MANUAL: 'Balcão',
       WHATSAPP: 'WhatsApp',
-      ADMIN: 'Cadastro Manual',
+      ADMIN: 'Balcão',
       INTEGRACAO: 'Integração',
       OUTRO: 'Outro',
     };
@@ -236,7 +336,7 @@ export class DetalheOrcamentoComponent implements OnInit {
   }
 
   totalEstimado(): number | null {
-    return this.orcamento?.totalEstimado ?? null;
+    return this.orcamento?.total ?? this.orcamento?.totalEstimado ?? null;
   }
 
   tempoRelativo(iso: string | null | undefined, prefixo: string): string {
@@ -304,6 +404,66 @@ export class DetalheOrcamentoComponent implements OnInit {
     });
   }
 
+  private abrirImpressao(formato: FormatoImpressaoOrcamento, acao: AcaoImpressaoOrcamento): void {
+    if (!this.orcamento?.id || !this.podeImprimir || this.gerandoImpressao) {
+      return;
+    }
+
+    this.gerandoImpressao = acao;
+    this.orcamentoService.abrirImpressao(this.orcamento.id, formato).subscribe({
+      next: (response) => {
+        this.abrirBlobEmNovaJanela(response.body);
+        this.gerandoImpressao = null;
+      },
+      error: () => {
+        this.gerandoImpressao = null;
+        this.toastr.error('Não foi possível gerar o orçamento para impressão.');
+      },
+    });
+  }
+
+  private abrirBlobEmNovaJanela(blob: Blob | null): void {
+    if (!blob) {
+      this.toastr.error('Não foi possível gerar o orçamento para impressão.');
+      return;
+    }
+
+    const url = URL.createObjectURL(blob);
+    const popup = window.open(url, '_blank', 'noopener,noreferrer');
+    if (!popup) {
+      this.toastr.warning('O PDF foi gerado, mas o navegador bloqueou a nova janela. Permita pop-ups para este site ou utilize “Baixar PDF”.');
+      window.setTimeout(() => URL.revokeObjectURL(url), 60000);
+      return;
+    }
+
+    window.setTimeout(() => URL.revokeObjectURL(url), 60000);
+  }
+
+  private baixarBlob(response: HttpResponse<Blob>, fallbackName: string): void {
+    const blob = response.body;
+    if (!blob) {
+      this.toastr.error('Não foi possível gerar o orçamento para impressão.');
+      return;
+    }
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = this.extrairNomeArquivo(response) || fallbackName;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 0);
+  }
+
+  private extrairNomeArquivo(response: HttpResponse<Blob>): string | null {
+    const disposition = response.headers.get('Content-Disposition') || response.headers.get('content-disposition');
+    const match = disposition?.match(/filename\*=UTF-8''([^;]+)|filename="?([^"]+)"?/i);
+    const fileName = match?.[1] || match?.[2];
+
+    return fileName ? decodeURIComponent(fileName.trim()) : null;
+  }
+
   private telefoneNormalizado(): string | null {
     const telefone = this.telefone?.replace(/\D/g, '') || '';
     if (!telefone) {
@@ -318,11 +478,17 @@ export class DetalheOrcamentoComponent implements OnInit {
       UNIDADE: 'un.',
       METRO: 'm',
       METRO_QUADRADO: 'm2',
+      METRO_CUBICO: 'm3',
       CAIXA: 'caixa',
       PACOTE: 'pacote',
       SACO: 'saco',
       LITRO: 'L',
-      KG: 'kg',
+      MILILITRO: 'ml',
+      QUILOGRAMA: 'kg',
+      GRAMA: 'g',
+      PAR: 'par',
+      JOGO: 'jogo',
+      ROLO: 'rolo',
     };
 
     return valor ? labels[valor] || valor.toLowerCase() : 'un.';

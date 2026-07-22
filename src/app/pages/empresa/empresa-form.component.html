@@ -96,9 +96,7 @@
         <div class="empresa-onboarding-logo__preview">
           <img
             [src]="imagemPreview || IMAGEM_PADRAO"
-            [style.width.px]="340"
-            [style.height.px]="216"
-            class="img-fluid object-fit-contain"
+            class="empresa-logo-img"
             alt="Logo da empresa"
           />
         </div>
@@ -252,11 +250,9 @@
                         </mat-card-subtitle>
 
                         <div class="text-center m-t-24">
-                          <div class="d-inline-block text-center p-2 bg-light rounded border"
-                            style="width: 340px; height: 216px;">
+                          <div class="empresa-logo-frame">
 
-                            <img [src]="imagemPreview || IMAGEM_PADRAO" [style.width.px]="340"
-                              [style.height.px]="216" class="img-fluid object-fit-contain" alt="Logo da empresa" />
+                            <img [src]="imagemPreview || IMAGEM_PADRAO" class="empresa-logo-img" alt="Logo da empresa" />
                           </div>
 
                           <div class="m-t-16">

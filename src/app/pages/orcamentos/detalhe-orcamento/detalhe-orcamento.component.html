@@ -26,6 +26,21 @@
           <mat-icon>sync_alt</mat-icon>
           Alterar status
         </button>
+        <button
+          mat-flat-button
+          color="primary"
+          type="button"
+          [matMenuTriggerFor]="impressaoMenu"
+          [disabled]="!!gerandoImpressao"
+          *ngIf="podeImprimir">
+          <mat-spinner *ngIf="gerandoImpressao" diameter="18"></mat-spinner>
+          <mat-icon *ngIf="!gerandoImpressao">print</mat-icon>
+          <span>{{ gerandoImpressao ? 'Gerando PDF...' : 'Imprimir orçamento' }}</span>
+        </button>
+        <button mat-stroked-button color="warn" type="button" (click)="cancelarOrcamento()" [disabled]="cancelando" *ngIf="podeCancelar">
+          <mat-icon>block</mat-icon>
+          Cancelar
+        </button>
         <button mat-stroked-button type="button" (click)="abrirWhatsApp()" *ngIf="telefone">
           <mat-icon>chat</mat-icon>
           WhatsApp
@@ -55,6 +70,33 @@
         </button>
       </mat-menu>
 
+      <mat-menu #impressaoMenu="matMenu">
+        <button mat-menu-item type="button" (click)="imprimirA4()" [disabled]="!!gerandoImpressao">
+          @if (impressaoEmAndamento('A4')) {
+          <mat-spinner diameter="18"></mat-spinner>
+          } @else {
+          <mat-icon>picture_as_pdf</mat-icon>
+          }
+          <span>Impressão A4</span>
+        </button>
+        <button mat-menu-item type="button" (click)="imprimirTermica80mm()" [disabled]="!!gerandoImpressao">
+          @if (impressaoEmAndamento('TERMICA_80MM')) {
+          <mat-spinner diameter="18"></mat-spinner>
+          } @else {
+          <mat-icon>receipt_long</mat-icon>
+          }
+          <span>Impressora térmica 80 mm</span>
+        </button>
+        <button mat-menu-item type="button" (click)="baixarPdfA4()" [disabled]="!!gerandoImpressao">
+          @if (impressaoEmAndamento('DOWNLOAD_A4')) {
+          <mat-spinner diameter="18"></mat-spinner>
+          } @else {
+          <mat-icon>download</mat-icon>
+          }
+          <span>Baixar PDF</span>
+        </button>
+      </mat-menu>
+
       <div class="detail-summary-grid">
         <div>
           <span>Protocolo</span>
@@ -80,11 +122,19 @@
           <span>Total estimado</span>
           <strong>{{ totalEstimado() !== null ? (totalEstimado() | currency:'BRL':'symbol':'1.2-2') : 'Sob consulta' }}</strong>
         </div>
+        <div>
+          <span>Origem</span>
+          <strong>{{ origemLabel(orcamento.origem) }}</strong>
+        </div>
+        <div>
+          <span>Responsável</span>
+          <strong>{{ responsavel }}</strong>
+        </div>
       </div>
     </app-section-card>
 
     <div class="detail-grid m-t-20">
-      <app-section-card titulo="Dados do cliente" [divider]="true">
+      <app-section-card titulo="Contato" [divider]="true">
         <dl class="detail-list">
           <div>
             <dt>Nome</dt>
@@ -101,6 +151,10 @@
           <div>
             <dt>Origem da solicitação</dt>
             <dd>{{ origemLabel(orcamento.origem) }}</dd>
+          </div>
+          <div>
+            <dt>Responsável</dt>
+            <dd>{{ responsavel }}</dd>
           </div>
         </dl>
 
@@ -120,8 +174,8 @@
         </div>
       </app-section-card>
 
-      <app-section-card titulo="Mensagem do cliente" [divider]="true">
-        <p class="detail-message">{{ orcamento.mensagem || 'O cliente não adicionou uma mensagem.' }}</p>
+      <app-section-card titulo="Observação geral" [divider]="true">
+        <p class="detail-message">{{ orcamento.observacaoGeral || orcamento.mensagem || 'Nenhuma observação informada.' }}</p>
       </app-section-card>
     </div>
 
@@ -136,8 +190,23 @@
       <div class="table-responsive">
         <table mat-table [dataSource]="orcamento.itens || []" class="mat-elevation-z1 no-wrap m-t-0 v-middle w-100">
           <ng-container matColumnDef="produto">
-            <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">Produto</th>
-            <td mat-cell *matCellDef="let item" class="f-s-14">{{ item.produtoNome || 'Produto não informado' }}</td>
+            <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">Descrição/produto</th>
+            <td mat-cell *matCellDef="let item" class="f-s-14">
+              <div class="detail-item-desc">
+                <strong>{{ itemDescricao(item) }}</strong>
+                <span *ngIf="item.produtoNome && item.descricao">{{ item.produtoNome }}</span>
+              </div>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="tipo">
+            <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">Tipo</th>
+            <td mat-cell *matCellDef="let item" class="f-s-14">{{ itemTipoLabel(item) }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="unidade">
+            <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">Unidade</th>
+            <td mat-cell *matCellDef="let item" class="f-s-14">{{ itemUnidadeLabel(item) }}</td>
           </ng-container>
 
           <ng-container matColumnDef="quantidade">
@@ -155,13 +224,32 @@
           <ng-container matColumnDef="subtotal">
             <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">Subtotal</th>
             <td mat-cell *matCellDef="let item" class="f-s-14">
-              {{ item.subtotalEstimado !== null && item.subtotalEstimado !== undefined ? (item.subtotalEstimado | currency:'BRL':'symbol':'1.2-2') : '-' }}
+              {{ itemSubtotal(item) !== null && itemSubtotal(item) !== undefined ? (itemSubtotal(item) | currency:'BRL':'symbol':'1.2-2') : '-' }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="desconto">
+            <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">Desconto</th>
+            <td mat-cell *matCellDef="let item" class="f-s-14">
+              {{ (item.desconto || 0) | currency:'BRL':'symbol':'1.2-2' }}
             </td>
           </ng-container>
 
           <ng-container matColumnDef="observacao">
             <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">Observação</th>
             <td mat-cell *matCellDef="let item" class="f-s-14">{{ item.observacao || 'Nenhuma observação' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="acoes">
+            <th mat-header-cell *matHeaderCellDef class="f-s-16 f-w-600">Ações</th>
+            <td mat-cell *matCellDef="let item" class="f-s-14">
+              <button mat-icon-button type="button" disabled matTooltip="Edição de item será liberada conforme contrato do backend" *ngIf="podeEditar">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button type="button" disabled matTooltip="Remoção de item será liberada conforme contrato do backend" *ngIf="podeEditar">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </td>
           </ng-container>
 
           <tr mat-header-row *matHeaderRowDef="colunasItens"></tr>
@@ -193,6 +281,10 @@
 
       <app-section-card titulo="Acompanhamento" [divider]="true">
         <div class="detail-timeline">
+          <div *ngFor="let evento of orcamento.historico || []">
+            <strong>{{ evento.descricao || evento.observacao || statusLabel(evento.statusNovo) }}</strong>
+            <span>{{ (evento.data || evento.criadoEm || evento.createdAt) | date:'dd/MM/yyyy HH:mm' }}{{ evento.usuarioNome ? ' • ' + evento.usuarioNome : '' }}</span>
+          </div>
           <div>
             <strong>Solicitação recebida</strong>
             <span>{{ dataCriacao() | date:'dd/MM/yyyy HH:mm' }}</span>

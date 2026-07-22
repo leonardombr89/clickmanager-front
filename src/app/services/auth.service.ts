@@ -190,7 +190,7 @@ export class AuthService {
       return '/page/deposito/categorias';
     }
 
-    if (this.temPermissaoDisponivel('DEPOSITO_ORCAMENTOS_VER', usuario)) {
+    if (this.temPermissaoDisponivel('ORCAMENTOS_VER', usuario)) {
       return '/page/orcamentos';
     }
 

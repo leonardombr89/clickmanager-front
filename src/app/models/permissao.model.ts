@@ -11,6 +11,11 @@ export interface Permissao {
   selecionada?: boolean;
 }
 
+export enum PermissaoChave {
+  CONFIGURACOES_APLICATIVOS_ATALHOS_VER = 'CONFIGURACOES_APLICATIVOS_ATALHOS_VER',
+  CONFIGURACOES_APLICATIVOS_ATALHOS_EDITAR = 'CONFIGURACOES_APLICATIVOS_ATALHOS_EDITAR',
+}
+
 export interface ModuloPermissao {
   codigo: string;
   titulo: string;
