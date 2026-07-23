@@ -48,6 +48,7 @@ export class AppNotificacoesComponent implements OnInit, OnChanges {
     private readonly authService: AuthService,
     private readonly dialog: MatDialog
   ) {}
+  
 
   ngOnInit(): void {
     this.authService.usuario$.subscribe(() => {
