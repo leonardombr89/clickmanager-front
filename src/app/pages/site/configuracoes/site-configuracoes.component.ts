@@ -10,9 +10,15 @@ import { InputTextoRestritoComponent } from 'src/app/components/inputs/input-tex
 import { TemPermissaoDirective } from 'src/app/diretivas/tem-permissao.directive';
 import { MaterialModule } from 'src/app/material.module';
 import { AuthService } from 'src/app/services/auth.service';
-import { environment } from 'src/environments/environment';
 import { SiteConfigResponse, SiteConfigUpdateRequest, SiteWhatsappExibicao } from '../models/site-config.models';
 import { SiteConfigService } from '../services/site-config.service';
+import {
+  getUrlClickManager,
+  getUrlDominioProprio,
+  getUrlPublicaPrincipal,
+  normalizarDominioProprio,
+  normalizarSlugPublico,
+} from '../utils/site-public-url.util';
 
 @Component({
   selector: 'app-site-configuracoes',
@@ -48,6 +54,7 @@ export class SiteConfiguracoesComponent implements OnInit {
   faviconErro = '';
   private faviconSelecionado: File | null = null;
   private readonly faviconFallbackUrl = 'favicon.ico';
+  private configAtual: SiteConfigResponse | null = null;
 
   constructor(
     private readonly fb: FormBuilder,
@@ -120,9 +127,20 @@ export class SiteConfiguracoesComponent implements OnInit {
     return this.form.get('whatsappMensagemInicial') as FormControl;
   }
 
-  get enderecoProvisorio(): string {
-    const slug = this.normalizarTexto(this.slugPublicoControl.value);
-    return slug ? `/loja/${slug}` : '/loja/nome-da-empresa';
+  get enderecoClickManager(): string {
+    return getUrlClickManager(this.slugPublicoControl.value);
+  }
+
+  get enderecoPublicoPrincipal(): string {
+    return getUrlPublicaPrincipal(this.configParaUrlAtual());
+  }
+
+  get siteInativo(): boolean {
+    return this.siteAtivoControl.value !== true;
+  }
+
+  get mensagemSiteInativo(): string {
+    return this.siteInativo ? 'Site desativado. Ative o site para abrir este endereço.' : '';
   }
 
   get faviconPreview(): string {
@@ -173,25 +191,38 @@ export class SiteConfiguracoesComponent implements OnInit {
     });
   }
 
-  abrirSiteProvisorio(): void {
-    const slug = this.normalizarTexto(this.slugPublicoControl.value);
-    if (!slug) {
-      this.toastr.warning('Informe o slug público para abrir o site provisório.');
+  abrirSite(): void {
+    if (this.siteInativo) {
+      this.toastr.warning('O site está desativado. Ative o site para abrir o endereço público.');
       return;
     }
 
-    window.open(`${this.publicSiteBaseUrl()}/loja/${slug}`, '_blank', 'noopener,noreferrer');
+    window.open(this.enderecoPublicoPrincipal, '_blank', 'noopener,noreferrer');
+  }
+
+  abrirEnderecoClickManager(): void {
+    const slug = normalizarSlugPublico(this.slugPublicoControl.value);
+    if (!slug) {
+      this.toastr.warning('Informe o slug público para abrir o endereço ClickManager.');
+      return;
+    }
+
+    if (this.siteInativo) {
+      this.toastr.warning('O site está desativado. Ative o site para abrir o endereço ClickManager.');
+      return;
+    }
+
+    window.open(this.enderecoClickManager, '_blank', 'noopener,noreferrer');
   }
 
   testarDominioCustom(): void {
-    const dominio = this.normalizarTexto(this.dominioCustomControl.value);
+    const dominio = normalizarDominioProprio(this.dominioCustomControl.value);
     if (!dominio) {
       this.toastr.warning('Informe o domínio próprio para testar.');
       return;
     }
 
-    const url = /^https?:\/\//i.test(dominio) ? dominio : `https://${dominio}`;
-    window.open(url, '_blank', 'noopener,noreferrer');
+    window.open(getUrlDominioProprio(dominio), '_blank', 'noopener,noreferrer');
   }
 
   onFaviconSelecionado(event: Event): void {
@@ -265,6 +296,7 @@ export class SiteConfiguracoesComponent implements OnInit {
   }
 
   private preencherFormulario(config: SiteConfigResponse): void {
+    this.configAtual = config;
     this.faviconUrl = config.faviconUrl || '';
     this.faviconPreviewUrl = '';
     this.form.patchValue({
@@ -305,16 +337,41 @@ export class SiteConfiguracoesComponent implements OnInit {
     return String(value || '').trim();
   }
 
+  private configParaUrlAtual(): SiteConfigResponse {
+    const dominioAtual = this.normalizarNulo(this.dominioCustomControl.value);
+    const dominioOriginal = normalizarDominioProprio(this.configAtual?.dominioCustom);
+    const dominioMesmoDoBackend = normalizarDominioProprio(dominioAtual) === dominioOriginal;
+    const statusDominio = dominioMesmoDoBackend
+      ? {
+        dominioCustomAtivo: this.configAtual?.dominioCustomAtivo,
+        dominioVerificado: this.configAtual?.dominioVerificado,
+        statusDominio: this.configAtual?.statusDominio,
+      }
+      : {
+        dominioCustomAtivo: false,
+        dominioVerificado: false,
+        statusDominio: null,
+      };
+
+    return {
+      ...(this.configAtual || {
+        orcamentoAtivo: true,
+        whatsappAtivo: true,
+        whatsappExibicao: 'ICONE_TEXTO' as SiteWhatsappExibicao,
+      }),
+      ...statusDominio,
+      siteAtivo: this.siteAtivoControl.value === true,
+      slugPublico: normalizarSlugPublico(this.slugPublicoControl.value),
+      dominioCustom: dominioAtual,
+    };
+  }
+
   private normalizarTelefoneParaFormulario(value?: string | null): string {
     const telefone = String(value || '').replace(/\D/g, '');
     if ((telefone.length === 12 || telefone.length === 13) && telefone.startsWith('55')) {
       return telefone.slice(2);
     }
     return telefone;
-  }
-
-  private publicSiteBaseUrl(): string {
-    return (environment.publicSiteBaseUrl || window.location.origin).replace(/\/$/, '');
   }
 
   private validarFavicon(file: File): boolean {

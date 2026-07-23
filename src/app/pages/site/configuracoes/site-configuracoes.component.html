@@ -23,10 +23,10 @@
       <div class="site-config-summary">
         <div>
           <span class="site-config-summary__label">Endereço público</span>
-          <strong>{{ enderecoProvisorio }}</strong>
+          <strong>{{ enderecoPublicoPrincipal }}</strong>
         </div>
 
-        <button mat-stroked-button color="primary" type="button" (click)="abrirSiteProvisorio()">
+        <button mat-stroked-button color="primary" type="button" (click)="abrirSite()" [disabled]="siteInativo" [matTooltip]="mensagemSiteInativo">
           <mat-icon>open_in_new</mat-icon>
           Abrir site
         </button>
@@ -37,7 +37,7 @@
           <mat-icon>public</mat-icon>
           <div>
             <h3>Publicação</h3>
-            <p>Controle a disponibilidade do site e o endereço provisório usado pelos clientes.</p>
+            <p>Controle a disponibilidade do site e o endereço ClickManager usado pelos clientes.</p>
           </div>
 
           <mat-slide-toggle color="primary" [formControl]="siteAtivoControl">
@@ -47,8 +47,8 @@
 
         <div class="site-config-grid site-config-grid--two">
           <div class="site-config-readonly-field">
-            <span>Endereço provisório</span>
-            <strong>{{ enderecoProvisorio }}</strong>
+            <span>Endereço ClickManager</span>
+            <strong>{{ enderecoClickManager }}</strong>
           </div>
 
           <app-input-texto-restrito
@@ -60,9 +60,9 @@
         </div>
 
         <div class="site-config-actions">
-          <button mat-stroked-button color="primary" type="button" (click)="abrirSiteProvisorio()">
+          <button mat-stroked-button color="primary" type="button" (click)="abrirEnderecoClickManager()" [disabled]="siteInativo" [matTooltip]="mensagemSiteInativo">
             <mat-icon>open_in_new</mat-icon>
-            Abrir site provisório
+            Abrir endereço ClickManager
           </button>
         </div>
       </section>
