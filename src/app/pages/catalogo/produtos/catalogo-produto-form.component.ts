@@ -3,9 +3,12 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { forkJoin } from 'rxjs';
+import { MatDialog } from '@angular/material/dialog';
 import { ToastrService } from 'ngx-toastr';
+import { ConfirmDialogComponent } from 'src/app/components/dialog/confirm-dialog/confirm-dialog.component';
 import { DepositoImagemGaleriaComponent } from 'src/app/pages/deposito/components/deposito-imagem-galeria/deposito-imagem-galeria.component';
 import { PageCardComponent } from 'src/app/components/page-card/page-card.component';
+import { RichTextEditorComponent } from 'src/app/components/rich-text-editor/rich-text-editor.component';
 import { SectionCardComponent } from 'src/app/components/section-card/section-card.component';
 import { MaterialModule } from 'src/app/material.module';
 import {
@@ -28,7 +31,7 @@ import { InputTextoRestritoComponent } from 'src/app/components/inputs/input-tex
 @Component({
   selector: 'app-catalogo-produto-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule, MaterialModule, PageCardComponent, SectionCardComponent, DepositoImagemGaleriaComponent, CatalogoProdutoCaracteristicasComponent, InputMoedaComponent, InputNumericoComponent, InputTextareaComponent, InputTextoRestritoComponent],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, MaterialModule, PageCardComponent, SectionCardComponent, RichTextEditorComponent, DepositoImagemGaleriaComponent, CatalogoProdutoCaracteristicasComponent, InputMoedaComponent, InputNumericoComponent, InputTextareaComponent, InputTextoRestritoComponent],
   template: `
     <app-page-card [titulo]="isEdit ? 'Editar produto' : 'Novo produto'" subtitulo="Produto do novo catalogo administrativo">
       <form [formGroup]="form" (ngSubmit)="salvar()">
@@ -45,7 +48,16 @@ import { InputTextoRestritoComponent } from 'src/app/components/inputs/input-tex
                 <app-input-numerico [control]="ordemExibicaoControl" label="Ordem de exibicao"></app-input-numerico>
               </div>
               <app-input-textarea [control]="descricaoCurtaControl" label="Descricao curta" [rows]="2" [maxlength]="500"></app-input-textarea>
-              <app-input-textarea [control]="descricaoCompletaControl" label="Descricao completa" [rows]="5" [maxlength]="10000"></app-input-textarea>
+              <div class="rich-field">
+                <label>Descricao completa</label>
+                <p>Use esta area para textos comerciais, instrucoes e informacoes detalhadas. As especificacoes tecnicas devem ser cadastradas nos campos da categoria.</p>
+                <app-rich-text-editor formControlName="descricaoCompleta" placeholder="Digite a descricao completa do produto" [minHeight]="180" [maxLength]="10000"></app-rich-text-editor>
+                <button mat-stroked-button type="button" class="preview-button" (click)="visualizarDescricao = !visualizarDescricao">
+                  <mat-icon>visibility</mat-icon>
+                  Visualizar descricao
+                </button>
+                <div class="preview" *ngIf="visualizarDescricao" [innerHTML]="form.value.descricaoCompleta || '<p>Nenhuma descricao informada.</p>'"></div>
+              </div>
               <div class="toggles"><mat-slide-toggle formControlName="destaque">Destaque</mat-slide-toggle><mat-slide-toggle formControlName="ativo">Ativo</mat-slide-toggle></div>
             </app-section-card>
           </mat-tab>
@@ -68,7 +80,8 @@ import { InputTextoRestritoComponent } from 'src/app/components/inputs/input-tex
 
           <mat-tab label="Caracteristicas">
             <app-section-card titulo="Caracteristicas dinamicas" subtitulo="Campos definidos pela categoria selecionada">
-              <app-catalogo-produto-caracteristicas #caracteristicasEditor [definicoes]="definicoes" [valores]="produtoAtual?.caracteristicas || []"></app-catalogo-produto-caracteristicas>
+              <div class="loading" *ngIf="carregandoEstrutura"><mat-spinner diameter="24"></mat-spinner><span>Carregando caracteristicas...</span></div>
+              <app-catalogo-produto-caracteristicas #caracteristicasEditor [definicoes]="definicoes" [valores]="valoresCaracteristicas"></app-catalogo-produto-caracteristicas>
             </app-section-card>
           </mat-tab>
         </mat-tab-group>
@@ -76,7 +89,7 @@ import { InputTextoRestritoComponent } from 'src/app/components/inputs/input-tex
       </form>
     </app-page-card>
   `,
-  styles: [`.grid{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px}.comercial{grid-template-columns:repeat(2,minmax(0,220px))}.toggles,.actions{display:flex; gap:16px; justify-content:flex-end; margin-top:16px}mat-tab-group{margin-top:8px}@media(max-width:900px){.grid,.comercial{grid-template-columns:1fr}.actions{flex-direction:column}}`],
+  styles: [`.grid{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px}.comercial{grid-template-columns:repeat(2,minmax(0,220px))}.toggles,.actions{display:flex; gap:16px; justify-content:flex-end; margin-top:16px}mat-tab-group{margin-top:8px}.rich-field{margin-top:8px}.rich-field label{display:block;font-weight:600;margin-bottom:4px}.rich-field p{color:#6b7280;margin:0 0 8px}.preview-button{margin-top:10px}.preview{border:1px solid #e5eaef;border-radius:8px;padding:12px;margin-top:10px;background:#f8fafc}.loading{display:flex;align-items:center;gap:10px;color:#6b7280;margin-bottom:12px}@media(max-width:900px){.grid,.comercial{grid-template-columns:1fr}.actions{flex-direction:column}}`],
 })
 export class CatalogoProdutoFormComponent implements OnInit, CanDeactivateWithPendingChanges {
   @ViewChild('caracteristicasEditor') caracteristicasEditor?: CatalogoProdutoCaracteristicasComponent;
@@ -112,6 +125,7 @@ export class CatalogoProdutoFormComponent implements OnInit, CanDeactivateWithPe
   marcas: CatalogoMarcaOption[] = [];
   unidades = CATALOGO_UNIDADES_VENDA;
   definicoes: CatalogoCaracteristica[] = [];
+  valoresCaracteristicas: NonNullable<CatalogoProduto['caracteristicas']> = [];
   produtoAtual?: CatalogoProduto;
   imagemPrincipal: any = null;
   galeria: any[] = [];
@@ -121,8 +135,11 @@ export class CatalogoProdutoFormComponent implements OnInit, CanDeactivateWithPe
   uploading = false;
   salvo = false;
   slugManual = false;
+  visualizarDescricao = false;
+  carregandoEstrutura = false;
+  private categoriaAnteriorId: number | null = null;
 
-  constructor(private readonly fb: FormBuilder, private readonly produtoService: CatalogoProdutoService, private readonly categoriaService: CatalogoCategoriaService, private readonly marcaService: CatalogoMarcaService, private readonly route: ActivatedRoute, private readonly router: Router, private readonly toastr: ToastrService) {}
+  constructor(private readonly fb: FormBuilder, private readonly produtoService: CatalogoProdutoService, private readonly categoriaService: CatalogoCategoriaService, private readonly marcaService: CatalogoMarcaService, private readonly route: ActivatedRoute, private readonly router: Router, private readonly toastr: ToastrService, private readonly dialog: MatDialog) {}
 
   ngOnInit(): void {
     forkJoin({ categorias: this.categoriaService.options(true), marcas: this.marcaService.options(true) }).subscribe({ next: ({ categorias, marcas }) => { this.categorias = categorias || []; this.marcas = marcas || []; } });
@@ -143,14 +160,38 @@ export class CatalogoProdutoFormComponent implements OnInit, CanDeactivateWithPe
   onCategoriaChange(categoriaId: number | null): void {
     if (!categoriaId) {
       this.definicoes = [];
+      this.valoresCaracteristicas = [];
+      this.categoriaAnteriorId = null;
       return;
     }
-    if (this.definicoes.length && !window.confirm('Alterar a categoria pode invalidar caracteristicas preenchidas. Deseja continuar?')) {
-      this.form.controls.categoriaId.setValue(this.produtoAtual?.categoria?.id || null, { emitEvent: false });
+    const precisaConfirmar = this.categoriaAnteriorId && this.categoriaAnteriorId !== categoriaId && this.caracteristicasEditor?.hasAnyValue();
+    if (!precisaConfirmar) {
+      this.valoresCaracteristicas = this.caracteristicasEditor?.currentValues() || this.valoresCaracteristicas || [];
+      this.carregarEstrutura(categoriaId, this.valoresCaracteristicas || []);
+      this.categoriaAnteriorId = categoriaId;
+      this.markDirty();
       return;
     }
-    this.carregarEstrutura(categoriaId);
-    this.markDirty();
+    const ref = this.dialog.open(ConfirmDialogComponent, {
+      width: '460px',
+      data: {
+        title: 'Alterar categoria',
+        message: 'Alterar a categoria pode remover caracteristicas tecnicas que nao existem na nova categoria. Deseja continuar?',
+        cancelText: 'Cancelar',
+        confirmText: 'Alterar categoria',
+        confirmColor: 'primary',
+      },
+    });
+    ref.afterClosed().subscribe((ok) => {
+      if (!ok) {
+        this.form.controls.categoriaId.setValue(this.categoriaAnteriorId, { emitEvent: false });
+        return;
+      }
+      const valoresAtuais = this.caracteristicasEditor?.currentValues() || [];
+      this.carregarEstrutura(categoriaId, valoresAtuais);
+      this.categoriaAnteriorId = categoriaId;
+      this.markDirty();
+    });
   }
 
   salvar(): void {
@@ -208,13 +249,24 @@ export class CatalogoProdutoFormComponent implements OnInit, CanDeactivateWithPe
     this.imagemPrincipal = imagens.find((img) => img.principal && img.ativo !== false)?.arquivo || null;
     this.galeria = imagens.filter((img) => !img.principal && img.ativo !== false).map((img) => img.arquivo).filter(Boolean);
     if (produto.categoria?.id) this.carregarEstrutura(produto.categoria.id);
+    this.valoresCaracteristicas = produto.caracteristicas || [];
+    this.categoriaAnteriorId = produto.categoria?.id || null;
     this.form.markAsPristine();
   }
 
-  private carregarEstrutura(categoriaId: number): void {
+  private carregarEstrutura(categoriaId: number, valoresParaPreservar?: CatalogoProduto['caracteristicas']): void {
+    this.carregandoEstrutura = true;
     this.categoriaService.estruturaProduto(categoriaId).subscribe({
-      next: (estrutura) => (this.definicoes = estrutura.caracteristicas || []),
-      error: (error) => this.toastr.error(catalogoErrorMessage(error, 'Nao foi possivel carregar a estrutura da categoria.')),
+      next: (estrutura) => {
+        this.definicoes = (estrutura.caracteristicas || []).sort((a, b) => (a.ordemExibicao ?? 0) - (b.ordemExibicao ?? 0));
+        const ids = new Set(this.definicoes.map((item) => item.id));
+        this.valoresCaracteristicas = (valoresParaPreservar || this.produtoAtual?.caracteristicas || []).filter((valor) => ids.has(valor.caracteristicaId));
+        this.carregandoEstrutura = false;
+      },
+      error: (error) => {
+        this.carregandoEstrutura = false;
+        this.toastr.error(catalogoErrorMessage(error, 'Nao foi possivel carregar a estrutura da categoria.'));
+      },
     });
   }
 
