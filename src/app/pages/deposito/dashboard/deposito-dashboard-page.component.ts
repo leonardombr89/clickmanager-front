@@ -26,6 +26,7 @@ import {
   CatalogoProdutoService,
 } from '../../catalogo/shared/services/catalogo.service';
 import { forkJoin } from 'rxjs';
+import { getUrlClickManager } from '../../site/utils/site-public-url.util';
 
 interface DashboardMetric {
   label: string;
@@ -384,7 +385,7 @@ export class DepositoDashboardPageComponent implements OnInit {
   abrirMeuSite(): void {
     const slug = this.authService.getUsuario()?.empresa?.slug?.trim();
     if (slug) {
-      window.open(`${window.location.origin}/loja/${slug}`, '_blank', 'noopener,noreferrer');
+      window.open(getUrlClickManager(slug), '_blank', 'noopener,noreferrer');
       return;
     }
 
