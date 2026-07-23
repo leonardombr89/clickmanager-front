@@ -1,7 +1,7 @@
 # Stage 1: build Angular
 FROM node:20-alpine AS build
 
-WORKDIR /app
+WORKDIR /workspace
 
 # copiar package.json e package-lock.json
 COPY package*.json ./
@@ -21,8 +21,8 @@ FROM nginx:alpine
 # remove qualquer arquivo padrão do nginx
 RUN rm -rf /usr/share/nginx/html/*
 
-# copie o build para /app dentro do Nginx (baseHref/deployUrl = /app/)
-COPY --from=build /app/dist/Spike/browser /usr/share/nginx/html/app
+# copia o build para a raiz servida pelo Nginx
+COPY --from=build /workspace/dist/Spike/browser /usr/share/nginx/html/
 
 # Copia config SPA customizada
 COPY nginx.conf /etc/nginx/conf.d/default.conf

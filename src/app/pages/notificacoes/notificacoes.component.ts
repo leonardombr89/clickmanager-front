@@ -235,12 +235,6 @@ export class AppNotificacoesComponent implements OnInit, OnChanges {
 
   private normalizarRotaInterna(destino: string): string | null {
     if (!destino.startsWith('/')) return null;
-    if (destino.startsWith('/app/')) {
-      return destino.substring('/app'.length);
-    }
-    if (destino === '/app') {
-      return '/';
-    }
     return destino;
   }
 
