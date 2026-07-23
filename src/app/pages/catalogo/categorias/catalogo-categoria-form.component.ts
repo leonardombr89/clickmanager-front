@@ -4,17 +4,19 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { PageCardComponent } from 'src/app/components/page-card/page-card.component';
+import { RichTextEditorComponent } from 'src/app/components/rich-text-editor/rich-text-editor.component';
 import { SectionCardComponent } from 'src/app/components/section-card/section-card.component';
 import { MaterialModule } from 'src/app/material.module';
 import { CatalogoCategoriaOption, CatalogoCategoriaRequest } from '../shared/models/catalogo.models';
 import { CatalogoCategoriaService } from '../shared/services/catalogo.service';
 import { catalogoErrorMessage, catalogoSlugify } from '../shared/utils/catalogo-utils';
 import { CanDeactivateWithPendingChanges } from '../shared/guards/pending-changes.guard';
+import { CatalogoCategoriaCaracteristicasComponent } from './catalogo-categoria-caracteristicas.component';
 
 @Component({
   selector: 'app-catalogo-categoria-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule, MaterialModule, PageCardComponent, SectionCardComponent],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, MaterialModule, PageCardComponent, SectionCardComponent, RichTextEditorComponent, CatalogoCategoriaCaracteristicasComponent],
   template: `
     <app-page-card [titulo]="isEdit ? 'Editar categoria' : 'Nova categoria'" subtitulo="Cadastro administrativo do novo catalogo">
       <form [formGroup]="form" (ngSubmit)="salvar()">
@@ -27,9 +29,19 @@ import { CanDeactivateWithPendingChanges } from '../shared/guards/pending-change
             <mat-form-field appearance="outline"><mat-label>Ordem de exibicao</mat-label><input matInput type="number" min="0" formControlName="ordemExibicao" /></mat-form-field>
           </div>
           <mat-form-field appearance="outline" class="w-100"><mat-label>Descricao curta</mat-label><textarea matInput rows="2" maxlength="500" formControlName="descricaoCurta"></textarea></mat-form-field>
-          <mat-form-field appearance="outline" class="w-100"><mat-label>Descricao completa</mat-label><textarea matInput rows="5" formControlName="descricaoCompleta"></textarea></mat-form-field>
+          <div class="rich-field">
+            <label>Descricao completa</label>
+            <p>Use esta area para textos comerciais, instrucoes e informacoes detalhadas. As especificacoes tecnicas devem ser cadastradas nos campos da categoria.</p>
+            <app-rich-text-editor formControlName="descricaoCompleta" placeholder="Digite a descricao completa da categoria" [minHeight]="180"></app-rich-text-editor>
+            <button mat-stroked-button type="button" class="preview-button" (click)="visualizarDescricao = !visualizarDescricao">
+              <mat-icon>visibility</mat-icon>
+              Visualizar descricao
+            </button>
+            <div class="preview" *ngIf="visualizarDescricao" [innerHTML]="form.value.descricaoCompleta || '<p>Nenhuma descricao informada.</p>'"></div>
+          </div>
           <div class="toggles"><mat-slide-toggle formControlName="destaque">Destaque</mat-slide-toggle><mat-slide-toggle formControlName="ativo">Ativo</mat-slide-toggle></div>
         </app-section-card>
+        <app-catalogo-categoria-caracteristicas [categoriaId]="categoriaId"></app-catalogo-categoria-caracteristicas>
         <div class="actions">
           <button mat-stroked-button type="button" (click)="voltar()">Voltar</button>
           <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || salvando">{{ salvando ? 'Salvando...' : 'Salvar' }}</button>
@@ -37,7 +49,7 @@ import { CanDeactivateWithPendingChanges } from '../shared/guards/pending-change
       </form>
     </app-page-card>
   `,
-  styles: [`.grid { display:grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; } .toggles,.actions { display:flex; gap:16px; justify-content:flex-end; margin-top:16px; } @media(max-width:768px){.grid{grid-template-columns:1fr}.actions{justify-content:stretch; flex-direction:column}}`],
+  styles: [`.grid { display:grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; } .toggles,.actions { display:flex; gap:16px; justify-content:flex-end; margin-top:16px; } .rich-field{margin-top:8px}.rich-field label{display:block;font-weight:600;margin-bottom:4px}.rich-field p{color:#6b7280;margin:0 0 8px}.preview-button{margin-top:10px}.preview{border:1px solid #e5eaef;border-radius:8px;padding:12px;margin-top:10px;background:#f8fafc}@media(max-width:768px){.grid{grid-template-columns:1fr}.actions{justify-content:stretch; flex-direction:column}}`],
 })
 export class CatalogoCategoriaFormComponent implements OnInit, CanDeactivateWithPendingChanges {
   form = this.fb.group({
@@ -57,6 +69,7 @@ export class CatalogoCategoriaFormComponent implements OnInit, CanDeactivateWith
   salvando = false;
   salvo = false;
   slugManual = false;
+  visualizarDescricao = false;
 
   constructor(private readonly fb: FormBuilder, private readonly service: CatalogoCategoriaService, private readonly route: ActivatedRoute, private readonly router: Router, private readonly toastr: ToastrService) {}
 
@@ -97,7 +110,11 @@ export class CatalogoCategoriaFormComponent implements OnInit, CanDeactivateWith
         this.salvo = true;
         this.form.markAsPristine();
         this.toastr.success(this.isEdit ? 'Categoria atualizada.' : 'Categoria criada.');
-        if (!this.isEdit) this.router.navigate(['/page/catalogo/categorias', item.id, 'editar']);
+        if (!this.isEdit) {
+          this.isEdit = true;
+          this.categoriaId = item.id;
+          this.router.navigate(['/page/catalogo/categorias', item.id, 'editar'], { replaceUrl: true });
+        }
       },
       error: (error) => {
         this.salvando = false;
