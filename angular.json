@@ -46,8 +46,7 @@
           },
           "configurations": {
             "production": {
-              "baseHref": "/app/",
-              "deployUrl": "/app/",
+              "baseHref": "/",
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.ts",
